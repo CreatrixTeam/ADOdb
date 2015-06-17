@@ -1159,7 +1159,7 @@ if (!defined('_ADODB_LAYER')) {
 	}
 
 	function _Execute($sql,$inputarr=false) {
-		$sql = $this->adodb_strip_count_keyword( $sql );
+		//$sql = $this->adodb_strip_count_keyword( $sql );
 		if ($this->debug) {
 			global $ADODB_INCLUDED_LIB;
 			if (empty($ADODB_INCLUDED_LIB)) {
@@ -3750,7 +3750,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 					$key = $o->name;
 					break;
 			}
-			$val = $this->fetchMode == ADODB_FETCH_ASSOC ? $o->name : $i;
+			$val = (!$this->IsCurrentRowNumeric() ? $o->name : $i);
 			$this->bind[$key] = $val;
 		}
 	}
