@@ -3826,24 +3826,33 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @param int $upper Case for the array keys, defaults to uppercase
 	 *                   (see ADODB_ASSOC_CASE_xxx constants)
 	 */
-	function GetAssocKeys($upper=ADODB_ASSOC_CASE_UPPER) {
+	function GetAssocKeys($upper = ADODB_ASSOC_CASE) {
+		if ($this->bind) {
+			return;
+		}
 		$this->bind = array();
+
+		// Define case conversion function for ASSOC fetch mode
+		$fn_change_case = $this->AssocCaseConvertFunction($upper);
+
+		// Build the bind array
 		for ($i=0; $i < $this->_numOfFields; $i++) {
 			$o = $this->FetchField($i);
-			switch($upper) {
-				case ADODB_ASSOC_CASE_LOWER:
-					$key = strtolower($o->name);
-					break;
-				case ADODB_ASSOC_CASE_UPPER:
-					$key = strtoupper($o->name);
-					break;
-				case ADODB_ASSOC_CASE_NATIVE:
-				default:
-					$key = $o->name;
-					break;
+
+			// Set the array's key
+			if(is_numeric($o->name)) {
+				// Just use the field ID
+				$key = $i;
 			}
-			$val = (!$this->IsCurrentRowNumeric() ? $o->name : $i);
-			$this->bind[$key] = $val;
+			elseif( $fn_change_case ) {
+				// Convert the key's case
+				$key = $fn_change_case($o->name);
+			}
+			else {
+				$key = $o->name;
+			}
+
+			$this->bind[$key] = $i;
 		}
 	}
 
