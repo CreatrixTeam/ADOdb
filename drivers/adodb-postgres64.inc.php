@@ -491,13 +491,16 @@ class ADODB_postgres64 extends ADOConnection{
 	// for schema support, pass in the $table param "$schema.$tabname".
 	// converts field names to lowercase, $upper is ignored
 	// see http://phplens.com/lens/lensforum/msgs.php?id=14018 for more info
-	function MetaColumns($table,$normalize=true)
+	function MetaColumns($pTableName,$pIsToNormalize=null)
 	{
 		global $ADODB_FETCH_MODE;
 
-		$schema = false;
 		$false = false;
-		$this->_findschema($table,$schema);
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = $vParsedTableName['table']['name'];
+		$normalize = $vParsedTableName['table']['isToNormalize'];
+		$schema = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'] : false);
 
 		if ($normalize) $table = strtolower($table);
 

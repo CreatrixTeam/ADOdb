@@ -744,10 +744,15 @@ class ADODB_mssqlnative extends ADOConnection {
 		}
 		return $ret;
 	}
-	function MetaColumns($table, $upper=true, $schema=false){
+	function MetaColumns($pTableName, $pIsToNormalize=null, $schema=false){
 
 		# start adg
 		static $cached_columns = array();
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
+		$schema = (!$schema ? @$vParsedTableName['schema']['name']: $schema);
 		if ($this->cachedSchemaFlush)
 			$cached_columns = array();
 
@@ -759,7 +764,7 @@ class ADODB_mssqlnative extends ADOConnection {
 		if (!$this->mssql_version)
 			$this->ServerVersion();
 
-		$this->_findschema($table,$schema);
+		$table = $tParsedTableName['table']['name'];
 		if ($schema) {
 			$dbName = $this->database;
 			$this->SelectDB($schema);

@@ -321,12 +321,14 @@ class ADODB_odbtp extends ADOConnection{
 		return $arr2;
 	}
 
-	function MetaColumns($table,$upper=true)
+	function MetaColumns($pTableName,$pIsToNormalize=null)
 	{
 	global $ADODB_FETCH_MODE;
 
-		$schema = false;
-		$this->_findschema($table,$schema);
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = $vParsedTableName['table']['name'];
+		$upper = $vParsedTableName['table']['isToNormalize'];
+		$schema = @$vParsedTableName['schema']['name'];
 		if ($upper) $table = strtoupper($table);
 
 		$savem = $ADODB_FETCH_MODE;

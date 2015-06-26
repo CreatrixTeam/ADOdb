@@ -81,12 +81,16 @@ class ADODB_sqlite3 extends ADOConnection {
 	}
 
 	// mark newnham
-	function MetaColumns($table, $normalize=true)
+	function MetaColumns($pTableName, $pIsToNormalize=null)
 	{
 		global $ADODB_FETCH_MODE;
 		$false = false;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
 		if ($this->fetchMode !== false) {
 			$savem = $this->SetFetchMode(false);
 		}
@@ -310,6 +314,9 @@ class ADODB_sqlite3 extends ADOConnection {
 			if ($primary && preg_match("/primary/i",$row[1]) == 0) {
 				continue;
 			}
+			//IGNORE AUTOMATICALLY CREATED INDICES
+			if (empty($row[1]))
+				{continue;}
 			if (!isset($indexes[$row[0]])) {
 				$indexes[$row[0]] = array(
 					'unique' => preg_match("/unique/i",$row[1]),

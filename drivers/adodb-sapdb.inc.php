@@ -92,11 +92,13 @@ class ADODB_SAPDB extends ADODB_odbc {
         return $indexes;
 	}
 
- 	function MetaColumns ($table)
+ 	function MetaColumns ($pTableName)
 	{
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
         $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$tParsedTableName = $this->ParseTableName($pTableName);
+		$table = $tParsedTableName['table']['name'];
         if ($this->fetchMode !== FALSE) {
         	$savem = $this->SetFetchMode(FALSE);
         }

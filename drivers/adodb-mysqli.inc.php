@@ -611,13 +611,18 @@ class ADODB_mysqli extends ADOConnection {
 		return $foreign_keys;
 	}
 
-	function MetaColumns($table, $normalize=true)
+	function MetaColumns($pTableName, $pIsToNormalize=null)
 	{
 		$false = false;
 		if (!$this->metaColumnsSQL)
 			return $false;
 
 		global $ADODB_FETCH_MODE;
+		$tParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = (array_key_exists('schema', $tParsedTableName) ? 
+				$tParsedTableName['schema']['name'].".".$tParsedTableName['table']['name'] :
+				$tParsedTableName['table']['name']);
+		$normalize = $tParsedTableName['table']['isToNormalize'];
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		if ($this->fetchMode !== false)

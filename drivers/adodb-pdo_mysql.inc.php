@@ -94,9 +94,11 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		$this->Execute('SET SESSION TRANSACTION ' . $transaction_mode);
 	}
 
-	function MetaColumns($table, $normalize=true)
+	function MetaColumns($pTableName, $pIsToNormalize=null)
 	{
-		$this->_findschema($table, $schema);
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = $vParsedTableName['table']['name'];
+		$schema = @$vParsedTableName['schema']['name'];
 		if ($schema) {
 			$dbName = $this->database;
 			$this->SelectDB($schema);

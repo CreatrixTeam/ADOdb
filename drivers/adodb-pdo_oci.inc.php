@@ -47,13 +47,17 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 		return $ret;
 	}
 
-	function MetaColumns($table,$normalize=true)
+	function MetaColumns($pTableName,$pIsToNormalize=null)
 	{
 	global $ADODB_FETCH_MODE;
 
 		$false = false;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
 		if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
 
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));

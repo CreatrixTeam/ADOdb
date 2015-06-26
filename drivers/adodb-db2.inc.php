@@ -514,14 +514,15 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		}
 	}
 
-	function MetaColumns($table, $normalize=true)
+	function MetaColumns($pTableName, $pIsToNormalize=null)
 	{
 	global $ADODB_FETCH_MODE;
 
 		$false = false;
-		if ($this->uCaseTables) $table = strtoupper($table);
-		$schema = '';
-		$this->_findschema($table,$schema);
+		if ($this->uCaseTables) $pTableName = strtoupper($pTableName);
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = $vParsedTableName['table']['name'];
+		$schema = @$vParsedTableName['schema']['name'];
 
 		$savem = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;

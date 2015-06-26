@@ -486,9 +486,11 @@ class ADODB_mysql extends ADOConnection {
 		return $this->_connect($argHostname, $argUsername, $argPassword, $argDatabasename);
 	}
 
-	function MetaColumns($table, $normalize=true)
+	function MetaColumns($pTableName, $pIsToNormalize=null)
 	{
-		$this->_findschema($table,$schema);
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = $vParsedTableName['table']['name'];
+		$schema = @$vParsedTableName['schema']['name'];
 		if ($schema) {
 			$dbName = $this->database;
 			$this->SelectDB($schema);

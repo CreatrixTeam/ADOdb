@@ -2527,12 +2527,14 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *
 	 * @return  array of ADOFieldObjects for current table.
 	 */
-	function MetaColumns($table,$normalize=true) {
+	function MetaColumns($pTableName,$pIsToNormalize=null) {
 		global $ADODB_FETCH_MODE;
 
 		if (!empty($this->metaColumnsSQL)) {
-			$schema = false;
-			$this->_findschema($table,$schema);
+			$tParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+			$table = $tParsedTableName['table']['name'];
+			$normalize = $tParsedTableName['table']['isToNormalize'];
+			$schema = @$tParsedTableName['schema']['name'];
 
 			$save = $ADODB_FETCH_MODE;
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
@@ -2957,6 +2959,96 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		return $rs;
 	}
 
+	/**
+	* Will parse identifier name formatted using ADODB standardize identifier name format.
+	* If identifier name is identifierName, the following can be passed:
+	* 	FORM 1: identifierName = To keep default old behavior.
+	* 	FORM 2: `identifierName` = To quote identifierName with identifier or string quotation.
+	*			Normalization is still done based on default behavior.
+	*	FORM 3: <identifierName> = To keep identifier name without normalization. Some drivers will
+	*			normalize regardless.
+	*	FORM 4: `<identifierName>` = To quote identifierName with identifier or string quotation and 
+	*			keep identifier name without normalization. Some drivers will normalize 
+	*			regardless.
+	* The parameter pPassedIsToNormalizeParameter is used for backward compatibility. Some 
+	*		functions in ADODB already had support for normalization using a normalization 
+	*		boolean parameter, which we shall call isToNormalize, with default value 'true'. All
+	*		such functions default values have been, or will be changed from their legace 
+	*		true/false to null. isToNormalize parameter will be passed as 
+	*		pPassedIsToNormalizeParameter. If pPassedIsToNormalizeParameter is:
+	*		- NULL: This means legacy code did not set isToNormalize, and would also have only
+	*			used FORM 1. Hence, if FORM 1 or FROM 2, default normlization behavior is 
+	*			used (true).
+	*		- true/false: This means legacy code explicitly set isToNormalize. and would also 
+	*			have only used FORM 1. Hence, if FORM 1 or FORM 2, normlization is done based 
+	*			on the value of pPassedIsToNormalizeParameter
+	*		- -1: This means the ADODB function calling ParseIdentifierName did not have a
+	*			isToNormalize parameter.
+	*		pPassedIsToNormalizeParameter must only be used by legacy ADODB functions (pre 25/jun/215)
+	*
+	* @param pIdentifierName					Identifier name
+	* @param pPassedIsToNormalizeParameter		This is used for backward compatibility Possible values are '-1', 'null', 'true', 'false'
+	*/
+	function ParseIdentifierName($pIdentifierName,  $pPassedIsToNormalizeParameter = -1)
+	{
+		$vIdentifierName = trim($pIdentifierName);
+		$vMatches = NULL;
+		$vReturn = array
+		(
+			"isToQuote" => false,
+			"isToNormalize" => false,
+			"name" => $vIdentifierName
+		);
+
+		if(preg_match('/^`(.+)`$/', $vIdentifierName, $vMatches))
+		{
+			$vReturn["isToQuote"] = true;
+			$vReturn["name"] = $vMatches[1];
+			
+			if(preg_match('/^\<(.+)\>$/', $vMatches[1], $vMatches))
+			{
+				$vReturn["isToNormalize"] = true;
+				$vReturn["name"] = $vMatches[1];
+				
+			}
+		}
+		elseif(preg_match('/^\<(.+)\>$/', $vIdentifierName, $vMatches))
+		{
+			$vReturn["isToNormalize"] = true;
+			$vReturn["name"] = $vMatches[1];
+		}
+
+		if(!$vReturn["isToNormalize"])
+		{
+			if(($pPassedIsToNormalizeParameter === true) ||
+				($pPassedIsToNormalizeParameter === NULL))
+			{
+				$vReturn["isToNormalize"] = true;
+			}
+		}
+
+		return $vReturn;
+	}
+
+	function ParseTableName($pTableName, $pPassedIsToNormalizeParameter = -1)
+	{
+		$vReturn = array();
+
+		if(preg_match('/^(.+)\.(.+)$/', $pTableName, $vMatches))
+		{
+			$vReturn['schema'] = $this->ParseIdentifierName($vMatches[1],
+					$pPassedIsToNormalizeParameter);
+			$vReturn['table'] = $this->ParseIdentifierName($vMatches[2],
+					$pPassedIsToNormalizeParameter);
+		}
+		else
+		{
+			$vReturn['table'] = $this->ParseIdentifierName($pTableName,
+					$pPassedIsToNormalizeParameter);
+		}
+
+		return $vReturn;
+	}
 } // end class ADOConnection
 
 

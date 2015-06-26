@@ -198,10 +198,10 @@ class ADODB_DataDict {
 	}
 
 	//NOTE: THIS FUNCTION PROMISES TO QUOTE THE TABLE NAME, BUT THE PROMISE IS KEPT BY THE CORE ADODB
-	function MetaColumns($tab, $upper=true, $schema=false)
+	function MetaColumns($tab, $upper=null, $schema=false)
 	{
 		if (!$this->connection->IsConnected()) return array();
-		return $this->connection->MetaColumns($this->TableNameWithNoNameQuote($tab), $upper, $schema);
+		return $this->connection->MetaColumns($tab, $upper, $schema);
 	}
 
 	//NOTE: THIS FUNCTION PROMISES TO QUOTE THE TABLE NAME, BUT THE PROMISE IS KEPT BY THE CORE ADODB

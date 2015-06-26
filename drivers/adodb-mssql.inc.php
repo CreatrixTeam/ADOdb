@@ -374,12 +374,14 @@ class ADODB_mssql extends ADOConnection {
 	}
 
 
-	function MetaColumns($table, $normalize=true)
+	function MetaColumns($pTableName, $pIsToNormalize=null)
 	{
 //		$arr = ADOConnection::MetaColumns($table);
 //		return $arr;
 
-		$this->_findschema($table,$schema);
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = $vParsedTableName['table']['name'];
+		$schema = @$vParsedTableName['schema']['name'];
 		if ($schema) {
 			$dbName = $this->database;
 			$this->SelectDB($schema);

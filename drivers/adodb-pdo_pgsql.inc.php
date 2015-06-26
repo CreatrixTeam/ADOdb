@@ -112,12 +112,14 @@ select viewname,'V' from pg_views where viewname like $mask";
 		return $ret;
 	}
 
-	function MetaColumns($table,$normalize=true)
+	function MetaColumns($pTableName,$pIsToNormalize=null)
 	{
 	global $ADODB_FETCH_MODE;
 
-		$schema = false;
-		$this->_findschema($table,$schema);
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = $vParsedTableName['table']['name'];
+		$normalize = $vParsedTableName['table']['isToNormalize'];
+		$schema = @$vParsedTableName['schema']['name'];
 
 		if ($normalize) $table = strtolower($table);
 

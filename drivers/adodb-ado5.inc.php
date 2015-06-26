@@ -194,10 +194,14 @@ class ADODB_ado extends ADOConnection {
 		return $arr;
 	}
 
-	function MetaColumns($table, $normalize=true)
+	function MetaColumns($pTableName, $normalize=true)
 	{
-		$table = strtoupper($table);
-		$arr= array();
+		$pTableName = strtoupper($pTableName);
+		$vParsedTableName = $this->ParseTableName($pTableName);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
+		$arr = array();
 		$dbc = $this->_connectionID;
 
 		$adors=@$dbc->OpenSchema(4);//tables

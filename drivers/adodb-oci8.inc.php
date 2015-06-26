@@ -110,12 +110,13 @@ END;
 	}
 
 	/*  function MetaColumns($table, $normalize=true) added by smondino@users.sourceforge.net*/
-	function MetaColumns($table, $normalize=true)
+	function MetaColumns($pTableName, $normalize=true)
 	{
 	global $ADODB_FETCH_MODE;
-
-		$schema = '';
-		$this->_findschema($table, $schema);
+		
+		$vParsedTableName = $this->ParseTableName($pTableName);
+		$table = $vParsedTableName['table']['name'];
+		$schema = @$vParsedTableName['schema']['name'];
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;

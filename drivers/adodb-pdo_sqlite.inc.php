@@ -144,7 +144,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 
 
     // mark newnham
-	function MetaColumns($tab,$normalize=true)
+	function MetaColumns($pTableName,$pIsToNormalize=null)
 	{
 	  global $ADODB_FETCH_MODE;
 
@@ -152,6 +152,10 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	  $false = false;
 	  $save = $ADODB_FETCH_MODE;
 	  $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+	  $vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+	  $tab = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
 	  if ($parent->fetchMode !== false) $savem = $parent->SetFetchMode(false);
 	  $rs = $parent->Execute("PRAGMA table_info('$tab')");
 	  if (isset($savem)) $parent->SetFetchMode($savem);
@@ -226,6 +230,9 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 			if ($primary && preg_match("/primary/i",$row[1]) == 0) {
 				continue;
 			}
+			//IGNORE AUTOMATICALLY CREATED INDICES
+			if (empty($row[1]))
+				{continue;}
 			if (!isset($indexes[$row[0]])) {
 				$indexes[$row[0]] = array(
 					'unique' => preg_match("/unique/i",$row[1]),

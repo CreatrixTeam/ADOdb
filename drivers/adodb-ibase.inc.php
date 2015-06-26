@@ -505,13 +505,17 @@ class ADODB_ibase extends ADOConnection {
 	//OPN STUFF end
 
 	// returns array of ADOFieldObjects for current table
-	function MetaColumns($table, $normalize=true)
+	function MetaColumns($pTableName, $pIsToNormalize=null)
 	{
 	global $ADODB_FETCH_MODE;
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+					$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+					$vParsedTableName['table']['name']);
+		
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
 
 		$ADODB_FETCH_MODE = $save;

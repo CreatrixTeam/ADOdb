@@ -135,10 +135,12 @@ order by constraint_name, referenced_table_name, keyno";
 		return $ret;
 	}
 
-	function MetaColumns($table, $normalize=true)
+	function MetaColumns($pTableName, $pIsToNormalize=null)
 	{
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = $vParsedTableName['table']['name'];
+		$schema = @$vParsedTableName['schema']['name'];
 
-		$this->_findschema($table,$schema);
 		if ($schema) {
 			$dbName = $this->database;
 			$this->SelectDB($schema);
