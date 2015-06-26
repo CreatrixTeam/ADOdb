@@ -1159,7 +1159,7 @@ if (!defined('_ADODB_LAYER')) {
 	}
 
 	function _Execute($sql,$inputarr=false) {
-		//$sql = $this->adodb_strip_count_keyword( $sql );
+		$sql = $this->adodb_strip_count_keyword( $sql );
 		if ($this->debug) {
 			global $ADODB_INCLUDED_LIB;
 			if (empty($ADODB_INCLUDED_LIB)) {
