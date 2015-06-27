@@ -3821,6 +3821,23 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 	/**
+	 * Defines the function to use for table fields case conversion
+	 * depending on ADODB_ASSOC_CASE
+	 * @return string strtolower/strtoupper or false if no conversion needed
+	 */
+	protected function AssocCaseConvertFunction($case = ADODB_ASSOC_CASE) {
+		switch($case) {
+			case ADODB_ASSOC_CASE_UPPER:
+				return 'strtoupper';
+			case ADODB_ASSOC_CASE_LOWER:
+				return 'strtolower';
+			case ADODB_ASSOC_CASE_NATIVE:
+			default:
+				return false;
+		}
+	}
+
+	/**
 	 * Builds the bind array associating keys to recordset fields
 	 *
 	 * @param int $upper Case for the array keys, defaults to uppercase
@@ -3863,11 +3880,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @param int $upper Case for the array keys, defaults to uppercase
 	 *                   (see ADODB_ASSOC_CASE_xxx constants)
 	 */
-	function GetRowAssoc($upper=ADODB_ASSOC_CASE_UPPER) {
+	function GetRowAssoc($upper = ADODB_ASSOC_CASE) {
 		$record = array();
-		if (!$this->bind) {
-			$this->GetAssocKeys($upper);
-		}
+		$this->GetAssocKeys($upper);
+
 		foreach($this->bind as $k => $v) {
 			if( array_key_exists( $v, $this->fields ) ) {
 				$record[$k] = $this->fields[$v];
@@ -4269,6 +4285,34 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 	}
 
+	/**
+	 * Convert case of field names associative array, if needed
+	 * @return void
+	 */
+	protected function _updatefields()
+	{
+		if( empty($this->fields)) {
+			return;
+		}
+
+		// Determine case conversion function
+		$fn_change_case = $this->AssocCaseConvertFunction();
+		if(!$fn_change_case) {
+			// No conversion needed
+			return;
+		}
+
+		$arr = array();
+
+		// Change the case
+		foreach($this->fields as $k => $v) {
+			if (!is_integer($k)) {
+				$k = $fn_change_case($k);
+			}
+			$arr[$k] = $v;
+		}
+		$this->fields = $arr;
+	}
 
 	function _close() {}
 
