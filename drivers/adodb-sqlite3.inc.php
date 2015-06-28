@@ -289,13 +289,17 @@ class ADODB_sqlite3 extends ADOConnection {
 		return $this->_connectionID->close();
 	}
 
-	function MetaIndexes($table, $primary = FALSE, $owner=false, $owner = false)
+	function MetaIndexes($pTableName, $primary = FALSE, $owner=false, $owner = false)
 	{
 		$false = false;
 		// save old fetch mode
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$vParsedTableName = $this->ParseTableName($pTableName);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
 		if ($this->fetchMode !== FALSE) {
 			$savem = $this->SetFetchMode(FALSE);
 		}

@@ -595,7 +595,7 @@ class ADODB_postgres64 extends ADOConnection{
 			}
 
 			if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM) $retarr[] = $fld;
-			else $retarr[($normalize) ? strtoupper($fld->name) : $fld->name] = $fld;
+			else $retarr[strtoupper($fld->name)] = $fld;
 
 			$rs->MoveNext();
 		}
@@ -618,12 +618,13 @@ class ADODB_postgres64 extends ADOConnection{
 		return '$'.$this->_pnum;
 	}
 
-	function MetaIndexes ($table, $primary = FALSE, $owner = false)
+	function MetaIndexes ($pTableName, $primary = FALSE, $owner = false)
 	{
 		global $ADODB_FETCH_MODE;
 
-		$schema = false;
-		$this->_findschema($table,$schema);
+		$vParsedTableName = $this->ParseTableName($pTableName);
+		$table = $vParsedTableName['table']['name'];
+		$schema = @$vParsedTableName['schema']['name'];
 
 		if ($schema) { // requires pgsql 7.3+ - pg_namespace used.
 			$sql = '
@@ -666,7 +667,7 @@ class ADODB_postgres64 extends ADOConnection{
 			return $false;
 		}
 
-		$col_names = $this->MetaColumnNames($table,true,true);
+		$col_names = $this->MetaColumnNames($pTableName,true,true);
 		//3rd param is use attnum,
 		// see http://sourceforge.net/tracker/index.php?func=detail&aid=1451245&group_id=42718&atid=433976
 		$indexes = array();

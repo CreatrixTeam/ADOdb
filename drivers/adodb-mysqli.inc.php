@@ -325,7 +325,7 @@ class ADODB_mysqli extends ADOConnection {
 	}
 
 
-	function MetaIndexes ($table, $primary = FALSE, $owner = false)
+	function MetaIndexes ($pTableName, $primary = FALSE, $owner = false)
 	{
 		// save old fetch mode
 		global $ADODB_FETCH_MODE;
@@ -333,6 +333,10 @@ class ADODB_mysqli extends ADOConnection {
 		$false = false;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$vParsedTableName = $this->ParseTableName($pTableName);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
 		if ($this->fetchMode !== FALSE) {
 			$savem = $this->SetFetchMode(FALSE);
 		}
@@ -618,11 +622,11 @@ class ADODB_mysqli extends ADOConnection {
 			return $false;
 
 		global $ADODB_FETCH_MODE;
-		$tParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-		$table = (array_key_exists('schema', $tParsedTableName) ? 
-				$tParsedTableName['schema']['name'].".".$tParsedTableName['table']['name'] :
-				$tParsedTableName['table']['name']);
-		$normalize = $tParsedTableName['table']['isToNormalize'];
+		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
+		$normalize = $vParsedTableName['table']['isToNormalize'];
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		if ($this->fetchMode !== false)

@@ -205,13 +205,17 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
    }
 
     //Verbatim copy from "adodb-sqlite.inc.php"/"adodb-sqlite3.inc.php"
-	function MetaIndexes($table, $primary = FALSE, $owner=false, $owner = false)
+	function MetaIndexes($pTableName, $primary = FALSE, $owner=false, $owner = false)
 	{
 		$false = false;
 		// save old fetch mode
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$vParsedTableName = $this->ParseTableName($pTableName);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
 		if ($this->fetchMode !== FALSE) {
 			$savem = $this->SetFetchMode(FALSE);
 		}

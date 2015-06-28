@@ -179,7 +179,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	}
 
 	//Verbatim copy from "adodb-mysql.inc.php"
-	function MetaIndexes ($table, $primary = FALSE, $owner=false)
+	function MetaIndexes ($pTableName, $primary = FALSE, $owner=false)
 	{
 		// save old fetch mode
 		global $ADODB_FETCH_MODE;
@@ -187,6 +187,10 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		$false = false;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$vParsedTableName = $this->ParseTableName($pTableName);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
 		if ($this->fetchMode !== FALSE) {
 			$savem = $this->SetFetchMode(FALSE);
 		}

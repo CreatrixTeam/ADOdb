@@ -434,8 +434,12 @@ class ADODB_mssql extends ADOConnection {
 	}
 
 
-	function MetaIndexes($table,$primary=false, $owner=false)
+	function MetaIndexes($pTableName,$primary=false, $owner=false)
 	{
+		$vParsedTableName = $this->ParseTableName($pTableName);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
 		$table = $this->qstr($table);
 
 		$sql = "SELECT i.name AS ind_name, C.name AS col_name, USER_NAME(O.uid) AS Owner, c.colid, k.Keyno,

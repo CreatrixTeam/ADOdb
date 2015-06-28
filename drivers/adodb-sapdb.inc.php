@@ -53,8 +53,12 @@ class ADODB_SAPDB extends ADODB_odbc {
 		return $this->GetCol("SELECT columnname FROM COLUMNS WHERE tablename=$table AND mode='KEY' ORDER BY pos");
 	}
 
- 	function MetaIndexes ($table, $primary = FALSE, $owner = false)
+ 	function MetaIndexes ($pTableName, $primary = FALSE, $owner = false)
 	{
+		$vParsedTableName = $this->ParseTableName($pTableName);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
 		$table = $this->Quote(strtoupper($table));
 
 		$sql = "SELECT INDEXNAME,TYPE,COLUMNNAME FROM INDEXCOLUMNS ".
@@ -142,8 +146,13 @@ class ADODB_SAPDB extends ADODB_odbc {
 		return $retarr;
 	}
 
-	function MetaColumnNames($table)
+	function MetaColumnNames($pTableName)
 	{
+		$vParsedTableName = $this->ParseTableName($pTableName);
+		$table = (array_key_exists('schema', $vParsedTableName) ? 
+				$vParsedTableName['schema']['name'].".".
+				$vParsedTableName['table']['name'] :
+				$vParsedTableName['table']['name']);
 		$table = $this->Quote(strtoupper($table));
 
 		return $this->GetCol("SELECT columnname FROM COLUMNS WHERE tablename=$table ORDER BY pos");

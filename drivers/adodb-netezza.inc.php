@@ -122,7 +122,7 @@ class ADODB_netezza extends ADODB_postgres64 {
 			}
 
 			if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM) $retarr[] = $fld;
-			else $retarr[($upper) ? strtoupper($fld->name) : $fld->name] = $fld;
+			else $retarr[strtoupper($fld->name)] = $fld;
 
 			$rs->MoveNext();
 		}

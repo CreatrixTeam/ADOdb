@@ -215,7 +215,7 @@ class ADODB_DataDict {
 	function MetaIndexes($table, $primary = false, $owner = false)
 	{
 		if (!$this->connection->IsConnected()) return array();
-		return $this->connection->MetaIndexes($this->TableNameWithNoNameQuote($table), $primary, $owner);
+		return $this->connection->MetaIndexes($table, $primary, $owner);
 	}
 
 	function MetaType($t,$len=-1,$fieldobj=false)

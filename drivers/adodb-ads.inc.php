@@ -487,8 +487,14 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
   }
 
         // Returns an array of columns names for a given table
-        function &MetaColumnNames($table)
+        function &MetaColumnNames($pTableName)
         {
+				$vParsedTableName = $this->ParseTableName($pTableName);
+				$table = (array_key_exists('schema', $vParsedTableName) ? 
+						$vParsedTableName['schema']['name'].".".
+						$vParsedTableName['table']['name'] :
+						$vParsedTableName['table']['name']);
+
                 $recordSet = $this->Execute("select name from system.columns where parent='$table'");
                 if(!$recordSet){
                         print $this->ErrorMsg();
