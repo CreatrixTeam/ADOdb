@@ -415,13 +415,13 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 		} */
 
 		switch ($this->databaseType) {
-		case 'access':
-		case 'vfp':
+		case 'odbc_access':
+		case 'odbc_vfp':
 			$qid = odbc_columns($this->_connectionID);#,'%','',strtoupper($table),'%');
 			break;
 
 
-		case 'db2':
+		case 'odbc_db2':
             $colname = "%";
             $qid = odbc_columns($this->_connectionID, "", $schema, $table, $colname);
             break;
@@ -467,7 +467,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 				// ref: http://msdn.microsoft.com/library/default.asp?url=/archive/en-us/dnaraccgen/html/msdn_odk.asp
 				// access uses precision to store length for char/varchar
 				if ($fld->type == 'C' or $fld->type == 'X') {
-					if ($this->databaseType == 'access')
+					if ($this->databaseType == 'odbc_access')
 						$fld->max_length = $rs->fields[6];
 					else if ($rs->fields[4] <= -95) // UNICODE
 						$fld->max_length = $rs->fields[7]/2;

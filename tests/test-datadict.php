@@ -13,7 +13,7 @@
 error_reporting(E_ALL);
 include_once('../adodb.inc.php');
 
-foreach(array('sapdb','sybase','mysql','access','oci8po','odbc_mssql','odbc','db2','firebird','postgres','informix') as $dbType) {
+foreach(array('odbc_sapdb','sybase','mysql','odbc_access','oci8po','odbc_mssql','odbc','db2','firebird','postgres','informix') as $dbType) {
 	echo "<h3>$dbType</h3><p>";
 	$db = NewADOConnection($dbType);
 	$dict = NewDataDictionary($db);

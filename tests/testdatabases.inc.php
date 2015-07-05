@@ -64,7 +64,7 @@ if (sizeof($_GET) || !isset($_SERVER['HTTP_HOST'])) {
 	ADOLoadCode2('mysqli');
 	if (defined('ODBC_BINMODE_RETURN')) {
 		ADOLoadCode2("sqlanywhere");
-		ADOLoadCode2("access");
+		ADOLoadCode2("odbc_access");
 	}
 	ADOLoadCode2("mysql");
 	ADOLoadCode2("oci8");
@@ -220,7 +220,7 @@ if (!empty($testpdoora)) {
 
 // REQUIRES ODBC DSN CALLED nwind
 if (!empty($testaccess)) {
-	$db = ADONewConnection('access');
+	$db = ADONewConnection('odbc_access');
 	print "<h1>Connecting $db->databaseType...</h1>";
 	$access = 'd:\inetpub\wwwroot\php\NWIND.MDB';
 	$dsn = "nwind";
@@ -251,7 +251,7 @@ if (!empty($testaccess) && !empty($testado)) { // ADO ACCESS
 }
 
 if (!empty($testvfp)) { // ODBC
-	$db = ADONewConnection('vfp');
+	$db = ADONewConnection('odbc_vfp');
 	print "<h1>Connecting $db->databaseType...</h1>";flush();
 
 	if ( $db->PConnect("vfp-adoxyz")) {

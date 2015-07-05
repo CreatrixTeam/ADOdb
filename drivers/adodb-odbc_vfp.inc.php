@@ -19,8 +19,8 @@ if (!defined('_ADODB_ODBC_LAYER')) {
 }
 if (!defined('ADODB_VFP')){
 define('ADODB_VFP',1);
-class ADODB_vfp extends ADODB_odbc {
-	var $databaseType = "vfp";
+class ADODB_odbc_vfp extends ADODB_odbc {
+	var $databaseType = "odbc_vfp";
 	var $fmtDate = "{^Y-m-d}";
 	var $fmtTimeStamp = "{^Y-m-d, h:i:sA}";
 	var $replaceQuote = "'+chr(39)+'" ;
@@ -34,7 +34,7 @@ class ADODB_vfp extends ADODB_odbc {
 	var $hasTransactions = false;
 	var $curmode = false ; // See sqlext.h, SQL_CUR_DEFAULT == SQL_CUR_USE_DRIVER == 2L
 
-	function ADODB_vfp()
+	function ADODB_odbc_vfp()
 	{
 		$this->ADODB_odbc();
 	}
@@ -67,12 +67,12 @@ class ADODB_vfp extends ADODB_odbc {
 };
 
 
-class  ADORecordSet_vfp extends ADORecordSet_odbc {
+class  ADORecordSet_odbc_vfp extends ADORecordSet_odbc {
 
-	var $databaseType = "vfp";
+	var $databaseType = "odbc_vfp";
 
 
-	function ADORecordSet_vfp($id,$mode=false)
+	function ADORecordSet_odbc_vfp($id,$mode=false)
 	{
 		return $this->ADORecordSet_odbc($id,$mode);
 	}

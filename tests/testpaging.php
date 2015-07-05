@@ -26,7 +26,7 @@ if ($driver == 'postgres') {
 }
 
 if ($driver == 'access') {
-	$db = NewADOConnection('access');
+	$db = NewADOConnection('odbc_access');
 	$db->PConnect("nwind", "", "", "");
 }
 
@@ -49,7 +49,7 @@ $sql = "select * from (select  ID, firstname as \"First Name\", lastname as \"La
 }
 
 if ($driver == 'access') {
-	$db = NewADOConnection('access');
+	$db = NewADOConnection('odbc_access');
 	$db->Connect('nwind');
 }
 

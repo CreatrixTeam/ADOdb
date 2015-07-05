@@ -10,6 +10,7 @@ V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights res
 */
 
 class ADODB_pdo_pgsql extends ADODB_pdo {
+	var $databaseType = "pdo_pgsql";
 	var $metaDatabasesSQL = "select datname from pg_database where datname not in ('template0','template1') order by 1";
     var $metaTablesSQL = "select tablename,'T' from pg_tables where tablename not like 'pg\_%'
 	and tablename not in ('sql_features', 'sql_implementation_info', 'sql_languages',
@@ -293,5 +294,15 @@ select viewname,'V' from pg_views where viewname like $mask";
 			);
 		}
 		return $indexes;
+	}
+}
+
+class  ADORecordSet_pdo_pgsql extends ADORecordSet_pdo {
+
+	var $databaseType = 'pdo_pgsql';
+
+	function ADORecordSet_pdo_pgsql($id,$mode=false)
+	{
+		return $this->ADORecordSet_pdo($id,$mode);
 	}
 }

@@ -181,7 +181,7 @@ FROM `nuke_stories` `t1`, `nuke_authors` `t2`, `nuke_stories_cat` `t3`, `nuke_to
 	if($rs === false) $create = true;
 	else $rs->Close();
 
-	//if ($db->databaseType !='vfp') $db->Execute("drop table ADOXYZ");
+	//if ($db->databaseType !='odbc_vfp') $db->Execute("drop table ADOXYZ");
 
 	if ($create) {
 		if (false && $db->databaseType == 'ibase') {
@@ -336,7 +336,7 @@ FROM `nuke_stories` `t1`, `nuke_authors` `t2`, `nuke_stories_cat` `t3`, `nuke_to
 
 
 	switch ($db->databaseType) {
-	case 'vfp':
+	case 'odbc_vfp':
 
 		if (0) {
 			// memo test
@@ -1723,10 +1723,10 @@ if (@$_SERVER['COMPUTERNAME'] == 'TIGRESS') {
 	CheckWS('ado_access');
 	CheckWS('mssql');
 
-	CheckWS('vfp');
+	CheckWS('odbc_vfp');
 	CheckWS('sqlanywhere');
 	CheckWS('db2');
-	CheckWS('access');
+	CheckWS('odbc_access');
 	CheckWS('odbc_mssql');
 	CheckWS('firebird15');
 	//

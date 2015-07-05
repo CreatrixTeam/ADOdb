@@ -158,7 +158,7 @@ function adodb_log_sql(&$connx,$sql,$inputarr)
 			if ($dbT == 'informix') $isql = str_replace(chr(10),' ',$isql);
 			$arr = false;
 		} else {
-			if ($dbT == 'db2') $arr['f'] = (float) $arr['f'];
+			if ($dbT == 'db2' || $dbT == 'odbc_db2') $arr['f'] = (float) $arr['f'];
 			$isql = "insert into $perf_table (created,sql0,sql1,params,tracer,timer) values( $d,?,?,?,?,?)";
 		}
 

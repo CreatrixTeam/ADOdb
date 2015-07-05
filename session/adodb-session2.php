@@ -775,7 +775,7 @@ class ADODB_Session {
 		}  else {
 			// bug in access driver (could be odbc?) means that info is not committed
 			// properly unless select statement executed in Win2000
-			if ($conn->databaseType == 'access') {
+			if ($conn->databaseType == 'odbc_access') {
 				$sql = "SELECT sesskey FROM $table WHERE $binary sesskey = $qkey";
 				$rs = $conn->Execute($sql);
 				ADODB_Session::_dumprs($rs);

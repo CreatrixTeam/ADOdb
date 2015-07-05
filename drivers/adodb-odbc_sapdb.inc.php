@@ -21,8 +21,8 @@ if (!defined('_ADODB_ODBC_LAYER')) {
 if (!defined('ADODB_SAPDB')){
 define('ADODB_SAPDB',1);
 
-class ADODB_SAPDB extends ADODB_odbc {
-	var $databaseType = "sapdb";
+class ADODB_odbc_sapdb extends ADODB_odbc {
+	var $databaseType = "odbc_sapdb";
 	var $concat_operator = '||';
 	var $sysDate = 'DATE';
 	var $sysTimeStamp = 'TIMESTAMP';
@@ -31,7 +31,7 @@ class ADODB_SAPDB extends ADODB_odbc {
 	var $hasInsertId = true;
 	var $_bindInputArray = true;
 
-	function ADODB_SAPDB()
+	function ADODB_odbc_sapdb()
 	{
 		//if (strncmp(PHP_OS,'WIN',3) === 0) $this->curmode = SQL_CUR_USE_ODBC;
 		$this->ADODB_odbc();
@@ -181,11 +181,11 @@ class ADODB_SAPDB extends ADODB_odbc {
 };
 
 
-class  ADORecordSet_sapdb extends ADORecordSet_odbc {
+class  ADORecordSet_odbc_sapdb extends ADORecordSet_odbc {
 
-	var $databaseType = "sapdb";
+	var $databaseType = "odbc_sapdb";
 
-	function ADORecordSet_sapdb($id,$mode=false)
+	function ADORecordSet_odbc_sapdb($id,$mode=false)
 	{
 		$this->ADORecordSet_odbc($id,$mode);
 	}

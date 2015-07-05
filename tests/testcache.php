@@ -15,7 +15,7 @@ $ADODB_CACHE_DIR = dirname(tempnam('/tmp',''));
 include("../adodb.inc.php");
 
 if (isset($access)) {
-	$db=ADONewConnection('access');
+	$db=ADONewConnection('odbc_access');
 	$db->PConnect('nwind');
 } else {
 	$db = ADONewConnection('mysql');

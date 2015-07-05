@@ -6,6 +6,7 @@
 class ADODB_pdo_sqlsrv extends ADODB_pdo
 {
 
+	var $databaseType = 'pdo_sqlsrv';
 	var $hasTop = 'top';
 	var $sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
 	var $sysTimeStamp = 'GetDate()';
@@ -89,5 +90,15 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 			$indexes[$row[0]]['columns'][] = $row[1];
 		}
 		return $indexes;
+	}
+}
+
+class  ADORecordSet_pdo_sqlsrv extends ADORecordSet_pdo {
+
+	var $databaseType = 'pdo_sqlsrv';
+
+	function ADORecordSet_pdo_sqlsrv($id,$mode=false)
+	{
+		return $this->ADORecordSet_pdo($id,$mode);
 	}
 }

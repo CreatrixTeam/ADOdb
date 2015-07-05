@@ -12,6 +12,7 @@ V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights res
 
 class ADODB_pdo_oci extends ADODB_pdo_base {
 
+	var $databaseType = "pdo_oci";
 	var $concat_operator='||';
 	var $sysDate = "TRUNC(SYSDATE)";
 	var $sysTimeStamp = 'SYSDATE';
@@ -174,5 +175,15 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 			$ADODB_FETCH_MODE = $save;
 		}
 		return $indexes;
+	}
+}
+
+class  ADORecordSet_pdo_oci extends ADORecordSet_pdo {
+
+	var $databaseType = 'pdo_oci';
+
+	function ADORecordSet_pdo_oci($id,$mode=false)
+	{
+		return $this->ADORecordSet_pdo($id,$mode);
 	}
 }

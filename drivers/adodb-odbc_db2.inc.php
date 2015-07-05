@@ -95,8 +95,8 @@ if (!defined('_ADODB_ODBC_LAYER')) {
 if (!defined('ADODB_ODBC_DB2')){
 define('ADODB_ODBC_DB2',1);
 
-class ADODB_ODBC_DB2 extends ADODB_odbc {
-	var $databaseType = "db2";
+class ADODB_odbc_db2 extends ADODB_odbc {
+	var $databaseType = "odbc_db2";
 	var $concat_operator = '||';
 	var $sysTime = 'CURRENT TIME';
 	var $sysDate = 'CURRENT DATE';
@@ -110,7 +110,7 @@ class ADODB_ODBC_DB2 extends ADODB_odbc {
 	 var $hasInsertID = true;
 	var $rsPrefix = 'ADORecordset_odbc_';
 
-	function ADODB_DB2()
+	function ADODB_odbc_db2()
 	{
 		if (strncmp(PHP_OS,'WIN',3) === 0) $this->curmode = SQL_CUR_USE_ODBC;
 		$this->ADODB_odbc();
@@ -306,9 +306,9 @@ class ADODB_ODBC_DB2 extends ADODB_odbc {
 
 class  ADORecordSet_odbc_db2 extends ADORecordSet_odbc {
 
-	var $databaseType = "db2";
+	var $databaseType = "odbc_db2";
 
-	function ADORecordSet_db2($id,$mode=false)
+	function ADORecordSet_odbc_db2($id,$mode=false)
 	{
 		$this->ADORecordSet_odbc($id,$mode);
 	}
