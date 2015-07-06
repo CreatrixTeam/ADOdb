@@ -162,7 +162,7 @@ function Lens_ParseArgs($args,$endstmtchar=',',$tokenchars='_.-')
 
 
 class ADODB_DataDict {
-	var $connection;
+	var $connection = null;
 	var $debug = false;
 	var $dropTable = 'DROP TABLE %s';
 	var $renameTable = 'RENAME TABLE %s TO %s';
@@ -174,12 +174,15 @@ class ADODB_DataDict {
 	var $nameRegex = '\w';
 	var $nameRegexBrackets = 'a-zA-Z0-9_\(\)';
 	var $schema = false;
-	var $serverInfo = array();
+	var $serverInfo = array();//DEPRECATED; Use GetServerInfo() instead;
 	var $autoIncrement = false;
-	var $dataProvider;
+	var $dataProvider = null;
+	var $databaseType = null;
 	var $invalidResizeTypes4 = array('CLOB','BLOB','TEXT','DATE','TIME'); // for changetablesql
 	var $blobSize = 100; 	/// any varchar/char field this size or greater is treated as a blob
 							/// in other words, we use a text area for editting.
+	//PRIVATES
+	var $_serverInfoArray = null;
 
 	function GetCommentSQL($table,$col)
 	{
@@ -1052,5 +1055,51 @@ class ADODB_DataDict {
 					$sql[] = $alter . $this->dropCol . ' ' . $v->name;
 		}
 		return $sql;
+	}
+
+	/**
+	*	ACCESS: FINAL PROTECTED
+	*	Towards full integration between ADODB and ADODB Data Dictionary: This function is 
+	*		intended to build the server info data dynamicaly when needed. This 
+	*		avoids having to do the same in each of ADODB's driver's connect functions. However
+	*		functionality should be moved there eventually.
+	*/	
+	function _BuildServerInfo($pIsToForceReBuild = false)
+	{
+		if(($this->_serverInfoArray === null) || $pIsToForceReBuild)
+		{
+			if(($this->connection !== null) && !empty($this->connection->_connectionID))
+				{$this->_serverInfoArray = $this->connection->ServerInfo();}
+			$this->serverInfo = $this->_serverInfoArray; //for backward compatibility at the moment.
+		}
+	}
+
+	/**
+	*	ACCESS: FINAL PUBLIC
+	*	This function is intended to retrieve relevant server info data. Please refer to
+	*		ADOConnection::ServerInfo(). Current possible values for $pKey are 'description' and 
+	*		'version'.
+	*/	
+	function GetServerInfo($pKey)
+	{
+		$this->_BuildServerInfo();
+		return @$this->_serverInfoArray($pKey);
+	}
+	
+	/**
+	*	ACCESS: FINAL PUBLIC
+	*	This function is intended to dynamicaly set the connection, and is intended for use
+	*		by ADODB's functions only. Outside use is discouraged. If used ensure that the
+	*		connection used is indeed relevant to the ADODB_DataDict instance.(Refer to 
+	*		NewDataDictionary())
+	*/
+	function SetConnection($pADOConnection)
+	{
+		$this->connection = $pADOConnection;
+		$this->dataProvider = $pADOConnection->dataProvider;
+		$this->databaseType = $pADOConnection->databaseType;
+		$this->quote = $pADOConnection->nameQuote;
+		
+		$this->_BuildServerInfo(true);
 	}
 } // class

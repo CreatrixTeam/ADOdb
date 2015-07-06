@@ -100,6 +100,9 @@ class ADODB_pdo extends ADOConnection {
 		$this->random = $d->random;
 		$this->concat_operator = $d->concat_operator;
 		$this->nameQuote = $d->nameQuote;
+		$this->databaseType = $d->databaseType;
+		$this->_driver->_dataDict = NewDataDictionary($d);
+		$this->_dataDict = $d->_dataDict;
 
 		$this->hasGenID = $d->hasGenID;
 		$this->_genIDSQL = $d->_genIDSQL;

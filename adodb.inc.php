@@ -503,6 +503,7 @@ if (!defined('_ADODB_LAYER')) {
 	var $_affected = false;
 	var $_logsql = false;
 	var $_transmode = ''; // transaction mode
+	var $_dataDict = '';  //ADODB_DataDict instance. Is to be used to eventually remove all SQL statement generation, but not execution, from the drivers.
 
 
 	static function Version() {
@@ -4889,6 +4890,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				}
 			}
 		}
+
+		$obj->_dataDict = NewDataDictionary($obj);
 		return $obj;
 	}
 
@@ -4909,6 +4912,26 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				if (strncmp('ado_',$drivername,4)==0) {
 					return substr($drivername,4);
 				}
+			case 'pdo' :
+				if (strncmp('pdo_',$drivername,4)==0)
+				{
+					$tTemp = substr($drivername,4);
+
+					switch($tTemp)
+					{
+						case "pgsql":
+							return "postgres";
+						case "oci":
+							return "oci8";
+						case "sqlsrv":
+							return "mssql";
+						case "sqlite":
+						case "mysql":
+						case "mssql":
+							return $tTemp;
+					}
+				}
+				return "generic";
 			case 'native':
 				break;
 			default:
@@ -4982,13 +5005,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		include_once($path);
 		$class = "ADODB2_$drivername";
 		$dict = new $class();
-		$dict->dataProvider = $conn->dataProvider;
-		$dict->connection = $conn;
+		$dict->SetConnection($conn);
 		$dict->upperName = strtoupper($drivername);
-		$dict->quote = $conn->nameQuote;
-		if (!empty($conn->_connectionID)) {
-			$dict->serverInfo = $conn->ServerInfo();
-		}
 
 		return $dict;
 	}

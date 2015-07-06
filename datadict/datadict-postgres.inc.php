@@ -183,7 +183,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 	function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		// Check if alter single column datatype available - works with 8.0+
-		$has_alter_column = 8.0 <= (float) @$this->serverInfo['version'];
+		$has_alter_column = 8.0 <= (float) $this->GetServerInfo('version');
 
 		if ($has_alter_column) {
 			$tabname = $this->TableName($tabname);
@@ -282,7 +282,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 	 */
 	function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
-		$has_drop_column = 7.3 <= (float) @$this->serverInfo['version'];
+		$has_drop_column = 7.3 <= (float) $this->GetServerInfo('version');
 		if (!$has_drop_column && !$tableflds) {
 			if ($this->debug) ADOConnection::outp("DropColumnSQL needs complete table-definiton for PostgreSQL < 7.3");
 		return array();
@@ -488,7 +488,7 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 		$vRaiseErrorFn = NULL;
 		$vCurrentTableFields = NULL;
 
-		if(((float)@$this->serverInfo['version']) < 8.0)
+		if(((float)$this->GetServerInfo('version')) < 8.0)
 		{
 			if($this->debug)
 			{
