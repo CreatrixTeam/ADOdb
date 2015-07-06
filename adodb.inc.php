@@ -4922,6 +4922,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				break;
 			case 'postgres7':
 			case 'postgres8':
+			case 'postgres9':
 				$drivername = 'postgres';
 				break;
 			case 'firebird15':
@@ -4934,6 +4935,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				if ($perf) {
 					$drivername = '';
 				}
+				break;
+			case 'sqlite2':
+			case 'sqlite3':
+				$drivername = 'sqlite';
 				break;
 			case 'db2'   :
 			case 'sapdb' :
