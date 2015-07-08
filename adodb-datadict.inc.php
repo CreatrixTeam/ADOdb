@@ -1083,7 +1083,7 @@ class ADODB_DataDict {
 	function GetServerInfo($pKey)
 	{
 		$this->_BuildServerInfo();
-		return @$this->_serverInfoArray($pKey);
+		return @$this->_serverInfoArray[$pKey];
 	}
 	
 	/**
