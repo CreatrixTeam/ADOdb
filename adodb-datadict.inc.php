@@ -1101,5 +1101,15 @@ class ADODB_DataDict {
 		$this->quote = $pADOConnection->nameQuote;
 		
 		$this->_BuildServerInfo(true);
+
+		$this->event_connectionSet();
 	}
+	
+	/**
+	*	ACCESS: PROTECTED
+	*	Fired when SetConnection() is called and finished execution. Usefull if data dicionaries
+	*		need to set up variable differently based on ADODB Driver and Database version.
+	*/
+	function event_connectionSet()
+		{}
 } // class

@@ -52,6 +52,11 @@ class ADODB2_mssql extends ADODB_DataDict {
 
 	//var $alterCol = ' ALTER COLUMN ';
 
+	function event_connectionSet()
+	{
+		if($this->dataProvider === "mssqlnative")
+			{$this->dropIndex = 'DROP INDEX %1$s ON %2$s';}
+	}
 	function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
@@ -60,51 +65,126 @@ class ADODB2_mssql extends ADODB_DataDict {
 			$len = $fieldobj->max_length;
 		}
 
-		$len = -1; // mysql max_length is not accurate
-		switch (strtoupper($t)) {
-		case 'R':
-		case 'INT':
-		case 'INTEGER': return  'I';
-		case 'BIT':
-		case 'TINYINT': return  'I1';
-		case 'SMALLINT': return 'I2';
-		case 'BIGINT':  return  'I8';
-		case 'SMALLDATETIME': return 'T';
-		case 'REAL':
-		case 'FLOAT': return 'F';
-		default: return parent::MetaType($t,$len,$fieldobj);
+		if($this->dataProvider !== "mssqlnative")
+		{
+			$len = -1; // mysql max_length is not accurate
+			switch (strtoupper($t)) {
+				case 'R':
+				case 'INT':
+				case 'INTEGER': return  'I';
+				case 'BIT':
+				case 'TINYINT': return  'I1';
+				case 'SMALLINT': return 'I2';
+				case 'BIGINT':  return  'I8';
+				case 'SMALLDATETIME': return 'T';
+				case 'REAL':
+				case 'FLOAT': return 'F';
+				default: return parent::MetaType($t,$len,$fieldobj);
+			}
+		}
+		else
+		{//WARNING: THIS IMPLEMENTATION DOES NOT APPEAR TO HOLD TO APPARANT SPECIFICATION.
+			$_typeConversion = array(
+				-155 => 'D',
+				  93 => 'D',
+				-154 => 'D',
+				  -2 => 'D',
+				  91 => 'D',
+
+				  12 => 'C',
+				   1 => 'C',
+				  -9 => 'C',
+				  -8 => 'C',
+
+				  -7 => 'L',
+				  -6 => 'I2',
+				  -5 => 'I8',
+				 -11 => 'I',
+				   4 => 'I',
+				   5 => 'I4',
+
+				  -1 => 'X',
+				 -10 => 'X',
+
+				   2 => 'N',
+				   3 => 'N',
+				   6 => 'N',
+				   7 => 'N',
+
+				-152 => 'X',
+				-151 => 'X',
+				  -4 => 'X',
+				  -3 => 'X'
+				);
+
+			return $_typeConversion($t);
 		}
 	}
 
 	function ActualType($meta)
 	{
-		switch(strtoupper($meta)) {
+		if($this->dataProvider !== "mssqlnative")
+		{
+			switch(strtoupper($meta)) {
 
-		case 'C': return 'VARCHAR';
-		case 'XL': return (isset($this)) ? $this->typeXL : 'TEXT';
-		case 'X': return (isset($this)) ? $this->typeX : 'TEXT'; ## could be varchar(8000), but we want compat with oracle
-		case 'C2': return 'NVARCHAR';
-		case 'X2': return 'NTEXT';
+				case 'C': return 'VARCHAR';
+				case 'XL': return (isset($this)) ? $this->typeXL : 'TEXT';
+				case 'X': return (isset($this)) ? $this->typeX : 'TEXT'; ## could be varchar(8000), but we want compat with oracle
+				case 'C2': return 'NVARCHAR';
+				case 'X2': return 'NTEXT';
 
-		case 'B': return 'IMAGE';
+				case 'B': return 'IMAGE';
 
-		case 'D': return 'DATETIME';
+				case 'D': return 'DATETIME';
 
-		case 'TS':
-		case 'T': return 'DATETIME';
-		case 'L': return 'BIT';
+				case 'TS':
+				case 'T': return 'DATETIME';
+				case 'L': return 'BIT';
 
-		case 'R':
-		case 'I': return 'INT';
-		case 'I1': return 'TINYINT';
-		case 'I2': return 'SMALLINT';
-		case 'I4': return 'INT';
-		case 'I8': return 'BIGINT';
+				case 'R':
+				case 'I': return 'INT';
+				case 'I1': return 'TINYINT';
+				case 'I2': return 'SMALLINT';
+				case 'I4': return 'INT';
+				case 'I8': return 'BIGINT';
 
-		case 'F': return 'REAL';
-		case 'N': return 'NUMERIC';
-		default:
-			return $meta;
+				case 'F': return 'REAL';
+				case 'N': return 'NUMERIC';
+				default:
+					return $meta;
+			}
+		}
+		else
+		{
+			$DATE_TYPE = 'DATETIME';
+
+			switch(strtoupper($meta)) {
+
+				case 'C': return 'VARCHAR';
+				case 'XL': return (isset($this)) ? $this->typeXL : 'TEXT';
+				case 'X': return (isset($this)) ? $this->typeX : 'TEXT'; ## could be varchar(8000), but we want compat with oracle
+				case 'C2': return 'NVARCHAR';
+				case 'X2': return 'NTEXT';
+
+				case 'B': return 'IMAGE';
+
+				case 'D': return $DATE_TYPE;
+				case 'T': return 'TIME';
+				case 'L': return 'BIT';
+
+				case 'R':
+				case 'I': return 'INT';
+				case 'I1': return 'TINYINT';
+				case 'I2': return 'SMALLINT';
+				case 'I4': return 'INT';
+				case 'I8': return 'BIGINT';
+
+				case 'F': return 'REAL';
+				case 'N': return 'NUMERIC';
+				default:
+					print "RETURN $meta";
+					return $meta;
+			}	
 		}
 	}
 
@@ -137,19 +217,47 @@ class ADODB2_mssql extends ADODB_DataDict {
 	}
 	*/
 
+	/**
+	 * Drop a column, syntax is ALTER TABLE table DROP COLUMN column,column
+	 *
+	 * @param string   $tabname      Table Name
+	 * @param string[] $flds         One, or an array of Fields To Drop
+	 * @param string   $tableflds    Throwaway value to make the function match the parent
+	 * @param string   $tableoptions Throway value to make the function match the parent
+	 *
+	 * @return string  The SQL necessary to drop the column
+	 */
 	function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
-		$tabname = $this->TableName ($tabname);
-		if (!is_array($flds))
-			$flds = explode(',',$flds);
-		$f = array();
-		$s = 'ALTER TABLE ' . $tabname;
-		foreach($flds as $v) {
-			$f[] = "\n$this->dropCol ".$this->NameQuote($v);
+		if($this->dataProvider !== "mssqlnative")
+		{
+			$tabname = $this->TableName ($tabname);
+			if (!is_array($flds))
+				$flds = explode(',',$flds);
+			$f = array();
+			$s = 'ALTER TABLE ' . $tabname;
+			foreach($flds as $v) {
+				$f[] = "\n$this->dropCol ".$this->NameQuote($v);
+			}
+			$s .= implode(', ',$f);
+			$sql[] = $s;
+			return $sql;
 		}
-		$s .= implode(', ',$f);
-		$sql[] = $s;
-		return $sql;
+		else
+		{
+			$tabname = $this->TableName ($tabname);
+			if (!is_array($flds))
+				$flds = explode(',',$flds);
+			$f = array();
+			$s = 'ALTER TABLE ' . $tabname . ' DROP COLUMN ';
+			foreach($flds as $v) {
+				//$f[] = "\n$this->dropCol ".$this->NameQuote($v);
+				$f[] = $this->NameQuote($v);
+			}
+			$s .= implode(', ',$f);
+			$sql[] = $s;
+			return $sql;
+		}
 	}
 
 	// return string must begin with space

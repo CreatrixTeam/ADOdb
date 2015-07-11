@@ -4936,6 +4936,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 					}
 				}
 				return "generic";
+			case 'mssqlnative':
+				return 'mssql';
 			case 'native':
 				break;
 			default:
