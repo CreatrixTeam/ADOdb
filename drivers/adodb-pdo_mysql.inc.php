@@ -8,9 +8,15 @@ V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights res
 
 */
 
+// security - hide paths
+if (!defined('ADODB_DIR')) die();
+
+include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
+
 class ADODB_pdo_mysql extends ADODB_pdo {
 
 	var $databaseType = "pdo_mysql";
+	var $dsnType = 'mysql';
 	var $metaTablesSQL = "SELECT
 			TABLE_NAME,
 			CASE WHEN TABLE_TYPE = 'VIEW' THEN 'V' ELSE 'T' END
@@ -24,13 +30,13 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	var $_dropSeqSQL = "drop table %s";
 	var $fmtTimeStamp = "'Y-m-d, H:i:s'";
 	var $nameQuote = '`';
+	var $hasTransactions = false;
+	#var $_bindInputArray = false;
+	var $hasInsertID = true;
 
-	function _init($parentDriver)
+	function event_pdoConnectionEstablished()
 	{
-		$parentDriver->hasTransactions = false;
-		#$parentDriver->_bindInputArray = false;
-		$parentDriver->hasInsertID = true;
-		$parentDriver->_connectionID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+		$this->_connectionID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
 	}
 
 	// dayFraction is a day in floating point

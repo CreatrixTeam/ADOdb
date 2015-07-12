@@ -10,9 +10,15 @@ V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights res
 
 */
 
+// security - hide paths
+if (!defined('ADODB_DIR')) die();
+
+include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
+
 class ADODB_pdo_oci extends ADODB_pdo_base {
 
 	var $databaseType = "pdo_oci";
+	var $dsnType = 'oci';
 	var $concat_operator='||';
 	var $sysDate = "TRUNC(SYSDATE)";
 	var $sysTimeStamp = 'SYSDATE';
@@ -20,17 +26,26 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 	var $random = "abs(mod(DBMS_RANDOM.RANDOM,10000001)/10000000)";
 	var $metaTablesSQL = "select table_name,table_type from cat where table_type in ('TABLE','VIEW')";
 	var $metaColumnsSQL = "select cname,coltype,width, SCALE, PRECISION, NULLS, DEFAULTVAL from col where tname='%s' order by colno";
+	var $_bindInputArray = true;
+	var $_nestedSQL = true;
 
  	var $_initdate = true;
-	var $_hasdual = true;
 
-	function _init($parentDriver)
+	function event_pdoConnectionEstablished()
 	{
-		$parentDriver->_bindInputArray = true;
-		$parentDriver->_nestedSQL = true;
 		if ($this->_initdate) {
-			$parentDriver->Execute("ALTER SESSION SET NLS_DATE_FORMAT='".$this->NLS_DATE_FORMAT."'");
+			$this->Execute("ALTER SESSION SET NLS_DATE_FORMAT='".$this->NLS_DATE_FORMAT."'");
 		}
+	}
+
+	function Time()
+	{
+		$rs = $this->_Execute("select $this->sysTimeStamp from dual");
+		if ($rs && !$rs->EOF) {
+			return $this->UnixTimeStamp(reset($rs->fields));
+		}
+
+		return false;
 	}
 
 	function MetaTables($ttype=false,$showSchema=false,$mask=false)

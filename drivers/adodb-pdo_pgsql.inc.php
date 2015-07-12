@@ -9,8 +9,14 @@ V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights res
 
 */
 
+// security - hide paths
+if (!defined('ADODB_DIR')) die();
+
+include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
+
 class ADODB_pdo_pgsql extends ADODB_pdo {
 	var $databaseType = "pdo_pgsql";
+	var $dsnType = 'pgsql';
 	var $metaDatabasesSQL = "select datname from pg_database where datname not in ('template0','template1') order by 1";
     var $metaTablesSQL = "select tablename,'T' from pg_tables where tablename not like 'pg\_%'
 	and tablename not in ('sql_features', 'sql_implementation_info', 'sql_languages',
@@ -54,14 +60,10 @@ WHERE relkind in ('r','v') AND (c.relname='%s' or c.relname = lower('%s'))
 	var $metaDefaultsSQL = "SELECT d.adnum as num, d.adsrc as def from pg_attrdef d, pg_class c where d.adrelid=c.oid and c.relname='%s' order by d.adnum";
 	var $random = 'random()';		/// random function
 	var $concat_operator='||';
+	var $hasTransactions = false; ## <<< BUG IN PDO pgsql driver
+	var $hasInsertID = true;
+	var $_nestedSQL = true;
 
-	function _init($parentDriver)
-	{
-
-		$parentDriver->hasTransactions = false; ## <<< BUG IN PDO pgsql driver
-		$parentDriver->hasInsertID = true;
-		$parentDriver->_nestedSQL = true;
-	}
 
 	function ServerInfo()
 	{

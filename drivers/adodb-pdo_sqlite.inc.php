@@ -13,8 +13,14 @@
 	And also Sid Dunayer [sdunayer#interserv.com] for extensive fixes.
 */
 
+// security - hide paths
+if (!defined('ADODB_DIR')) die();
+
+include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
+
 class ADODB_pdo_sqlite extends ADODB_pdo {
 	var $databaseType    = "pdo_sqlite";
+	var $dsnType 		 = 'sqlite'; 
 	var $metaTablesSQL   = "SELECT name FROM sqlite_master WHERE type='table'";
 	var $sysDate         = 'current_date';
 	var $sysTimeStamp    = 'current_timestamp';
@@ -27,22 +33,15 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	var $_genSeq2SQL     = 'INSERT INTO %s VALUES(%s)';
 	var $_dropSeqSQL     = 'DROP TABLE %s';
 	var $concat_operator = '||';
-    var $pdoDriver       = false;
 	var $random='abs(random())';
-
-	function _init($parentDriver)
-	{
-		$this->pdoDriver = $parentDriver;
-		$parentDriver->_bindInputArray = true;
-		$parentDriver->hasTransactions = false; // // should be set to false because of PDO SQLite driver not supporting changing autocommit mode
-		$parentDriver->hasInsertID = true;
-	}
+	var $_bindInputArray = true;
+	var $hasTransactions = false; // // should be set to false because of PDO SQLite driver not supporting changing autocommit mode
+	var $hasInsertID = true;
 
 	function ServerInfo()
 	{
-		$parent = $this->pdoDriver;
-		@($ver = array_pop($parent->GetCol("SELECT sqlite_version()")));
-		@($enc = array_pop($parent->GetCol("PRAGMA encoding")));
+		@($ver = array_pop($this->GetCol("SELECT sqlite_version()")));
+		@($enc = array_pop($this->GetCol("PRAGMA encoding")));
 
 		$arr['version']     = $ver;
 		$arr['description'] = 'SQLite ';
@@ -53,93 +52,86 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 
 	function SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false,$secs2cache=0)
 	{
-		$parent = $this->pdoDriver;
 		$offsetStr = ($offset >= 0) ? " OFFSET $offset" : '';
 		$limitStr  = ($nrows >= 0)  ? " LIMIT $nrows" : ($offset >= 0 ? ' LIMIT 999999999' : '');
 	  	if ($secs2cache)
-	   		$rs = $parent->CacheExecute($secs2cache,$sql."$limitStr$offsetStr",$inputarr);
+	   		$rs = $this->CacheExecute($secs2cache,$sql."$limitStr$offsetStr",$inputarr);
 	  	else
-	   		$rs = $parent->Execute($sql."$limitStr$offsetStr",$inputarr);
+	   		$rs = $this->Execute($sql."$limitStr$offsetStr",$inputarr);
 
 		return $rs;
 	}
 
 	function GenID($seq='adodbseq',$start=1)
 	{
-		$parent = $this->pdoDriver;
 		// if you have to modify the parameter below, your database is overloaded,
 		// or you need to implement generation of id's yourself!
 		$MAXLOOPS = 100;
 		while (--$MAXLOOPS>=0) {
-			@($num = array_pop($parent->GetCol("SELECT id FROM {$seq}")));
+			@($num = array_pop($this->GetCol("SELECT id FROM {$seq}")));
 			if ($num === false || !is_numeric($num)) {
-				@$parent->Execute(sprintf($this->_genSeqSQL ,$seq));
+				@$this->Execute(sprintf($this->_genSeqSQL ,$seq));
 				$start -= 1;
 				$num = '0';
-				$cnt = $parent->GetOne(sprintf($this->_genSeqCountSQL,$seq));
+				$cnt = $this->GetOne(sprintf($this->_genSeqCountSQL,$seq));
 				if (!$cnt) {
-					$ok = $parent->Execute(sprintf($this->_genSeq2SQL,$seq,$start));
+					$ok = $this->Execute(sprintf($this->_genSeq2SQL,$seq,$start));
 				}
 				if (!$ok) return false;
 			}
-			$parent->Execute(sprintf($this->_genIDSQL,$seq,$num));
+			$this->Execute(sprintf($this->_genIDSQL,$seq,$num));
 
-			if ($parent->affected_rows() > 0) {
+			if ($this->affected_rows() > 0) {
                 	        $num += 1;
-                		$parent->genID = intval($num);
+                		$this->genID = intval($num);
                 		return intval($num);
 			}
 		}
-		if ($fn = $parent->raiseErrorFn) {
-			$fn($parent->databaseType,'GENID',-32000,"Unable to generate unique id after $MAXLOOPS attempts",$seq,$num);
+		if ($fn = $this->raiseErrorFn) {
+			$fn($this->databaseType,'GENID',-32000,"Unable to generate unique id after $MAXLOOPS attempts",$seq,$num);
 		}
 		return false;
 	}
 
 	function CreateSequence($seqname='adodbseq',$start=1)
 	{
-		$parent = $this->pdoDriver;
-		$ok = $parent->Execute(sprintf($this->_genSeqSQL,$seqname));
+		$ok = $this->Execute(sprintf($this->_genSeqSQL,$seqname));
 		if (!$ok) return false;
 		$start -= 1;
-		return $parent->Execute("insert into $seqname values($start)");
+		return $this->Execute("insert into $seqname values($start)");
 	}
 
 	function SetTransactionMode($transaction_mode)
 	{
-		$parent = $this->pdoDriver;
-		$parent->_transmode = strtoupper($transaction_mode);
+		$this->_transmode = strtoupper($transaction_mode);
 	}
 
 	function BeginTrans()
 	{
-		$parent = $this->pdoDriver;
-		if ($parent->transOff) return true;
-		$parent->transCnt += 1;
-		$parent->_autocommit = false;
-		return $parent->Execute("BEGIN {$parent->_transmode}");
+		if ($this->transOff) return true;
+		$this->transCnt += 1;
+		$this->_autocommit = false;
+		return $this->Execute("BEGIN {$this->_transmode}");
 	}
 
 	function CommitTrans($ok=true)
 	{
-		$parent = $this->pdoDriver;
-		if ($parent->transOff) return true;
-		if (!$ok) return $parent->RollbackTrans();
-		if ($parent->transCnt) $parent->transCnt -= 1;
-		$parent->_autocommit = true;
+		if ($this->transOff) return true;
+		if (!$ok) return $this->RollbackTrans();
+		if ($this->transCnt) $this->transCnt -= 1;
+		$this->_autocommit = true;
 
-		$ret = $parent->Execute('COMMIT');
+		$ret = $this->Execute('COMMIT');
 		return $ret;
 	}
 
 	function RollbackTrans()
 	{
-		$parent = $this->pdoDriver;
-		if ($parent->transOff) return true;
-		if ($parent->transCnt) $parent->transCnt -= 1;
-		$parent->_autocommit = true;
+		if ($this->transOff) return true;
+		if ($this->transCnt) $this->transCnt -= 1;
+		$this->_autocommit = true;
 
-		$ret = $parent->Execute('ROLLBACK');
+		$ret = $this->Execute('ROLLBACK');
 		return $ret;
 	}
 
@@ -149,7 +141,6 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	{
 	  global $ADODB_FETCH_MODE;
 
-	  $parent = $this->pdoDriver;
 	  $false = false;
 	  $save = $ADODB_FETCH_MODE;
 	  $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
@@ -157,9 +148,9 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	  $tab = (array_key_exists('schema', $vParsedTableName) ? 
 				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
 				$vParsedTableName['table']['name']);
-	  if ($parent->fetchMode !== false) $savem = $parent->SetFetchMode(false);
-	  $rs = $parent->Execute("PRAGMA table_info('$tab')");
-	  if (isset($savem)) $parent->SetFetchMode($savem);
+	  if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
+	  $rs = $this->Execute("PRAGMA table_info('$tab')");
+	  if (isset($savem)) $this->SetFetchMode($savem);
 	  if (!$rs) {
 	    $ADODB_FETCH_MODE = $save;
 	    return $false;
@@ -189,7 +180,6 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 
 	function MetaTables($ttype=false,$showSchema=false,$mask=false)
 	{
-		$parent = $this->pdoDriver;
 
 		if ($mask) {
 			$save = $this->metaTablesSQL;
@@ -197,7 +187,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 			$this->metaTablesSQL .= " AND name LIKE $mask";
 		}
 
-		$ret = $parent->GetCol($this->metaTablesSQL);
+		$ret = $this->GetCol($this->metaTablesSQL);
 
 		if ($mask) {
 			$this->metaTablesSQL = $save;

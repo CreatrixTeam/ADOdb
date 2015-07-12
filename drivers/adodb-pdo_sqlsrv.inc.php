@@ -3,22 +3,25 @@
 /**
  * Provided by Ned Andre to support sqlsrv library
  */
+ 
+ // security - hide paths
+if (!defined('ADODB_DIR')) die();
+
+include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
+
 class ADODB_pdo_sqlsrv extends ADODB_pdo
 {
 
 	var $databaseType = 'pdo_sqlsrv';
+	var $dsnType = 'sqlsrv';
 	var $hasTop = 'top';
 	var $sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
 	var $sysTimeStamp = 'GetDate()';
-
-	function _init(ADODB_pdo $parentDriver)
-	{
-		$parentDriver->hasTransactions = true;
-		$parentDriver->_bindInputArray = true;
-		$parentDriver->hasInsertID = true;
-		$parentDriver->fmtTimeStamp = "'Y-m-d H:i:s'";
-		$parentDriver->fmtDate = "'Y-m-d'";
-	}
+	var $hasTransactions = true;
+	var $_bindInputArray = true;
+	var $hasInsertID = true;
+	var $fmtTimeStamp = "'Y-m-d H:i:s'";
+	var $fmtDate = "'Y-m-d'";
 
 	function BeginTrans()
 	{

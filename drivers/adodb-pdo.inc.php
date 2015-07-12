@@ -83,57 +83,22 @@ class ADODB_pdo extends ADOConnection {
 
 	var $dsnType = '';
 	var $stmt = false;
-	var $_driver;
 
 	function ADODB_pdo()
 	{
-	}
-
-	function _UpdatePDO()
-	{
-		$d = $this->_driver;
-		$this->fmtDate = $d->fmtDate;
-		$this->fmtTimeStamp = $d->fmtTimeStamp;
-		$this->replaceQuote = $d->replaceQuote;
-		$this->sysDate = $d->sysDate;
-		$this->sysTimeStamp = $d->sysTimeStamp;
-		$this->random = $d->random;
-		$this->concat_operator = $d->concat_operator;
-		$this->nameQuote = $d->nameQuote;
-		$this->databaseType = $d->databaseType;
-		$this->_driver->_dataDict = NewDataDictionary($d);
-		$this->_dataDict = $d->_dataDict;
-
-		$this->hasGenID = $d->hasGenID;
-		$this->_genIDSQL = $d->_genIDSQL;
-		$this->_genSeqSQL = $d->_genSeqSQL;
-		$this->_dropSeqSQL = $d->_dropSeqSQL;
-
-		$d->_init($this);
-	}
-
-	function Time()
-	{
-		if (!empty($this->_driver->_hasdual)) {
-			$sql = "select $this->sysTimeStamp from dual";
-		}
-		else {
-			$sql = "select $this->sysTimeStamp";
-		}
-
-		$rs = $this->_Execute($sql);
-		if ($rs && !$rs->EOF) {
-			return $this->UnixTimeStamp(reset($rs->fields));
-		}
-
-		return false;
 	}
 
 	// returns true or false
 	function _connect($argDSN, $argUsername, $argPassword, $argDatabasename, $persist=false)
 	{
 		$at = strpos($argDSN,':');
-		$this->dsnType = substr($argDSN,0,$at);
+		$vDsnType = substr($argDSN,0,$at);
+		
+		if($this->dsnType !== $vDsnType){
+			$this->_errormsg = 'Connection attempt failed: DSN mismatch. Driver expects '.
+					$this->dsnType.'. '.$vDsnType." provided.";
+			return false;
+		}
 
 		if ($argDatabasename) {
 			switch($this->dsnType){
@@ -176,39 +141,24 @@ class ADODB_pdo extends ADOConnection {
 			//$this->_connectionID->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_SILENT );
 			$this->_connectionID->setAttribute(PDO::ATTR_CASE,$m);
 
-			$class = 'ADODB_pdo_'.$this->dsnType;
 			//$this->_connectionID->setAttribute(PDO::ATTR_AUTOCOMMIT,true);
-			switch($this->dsnType) {
-				case 'mssql':
-				case 'mysql':
-				case 'oci':
-				case 'pgsql':
-				case 'sqlite':
-				case 'sqlsrv':
-					include_once(ADODB_DIR.'/drivers/adodb-pdo_'.$this->dsnType.'.inc.php');
-					break;
-			}
-			if (class_exists($class)) {
-				$this->_driver = new $class();
-			}
-			else {
-				$this->_driver = new ADODB_pdo_base();
-			}
-
-			$this->_driver->_connectionID = $this->_connectionID;
-			$this->_UpdatePDO();
+			
+			$this->event_pdoConnectionEstablished();
 			return true;
 		}
-		$this->_driver = new ADODB_pdo_base();
 		return false;
 	}
+
+	/**
+	*	ACCESS: PROTECTED
+	*	Called when a successful PDO connection is established.
+	*/
+	function event_pdoConnectionEstablished()
+		{}
 
 	function Concat()
 	{
 		$args = func_get_args();
-		if(method_exists($this->_driver, 'Concat')) {
-			return call_user_func_array(array($this->_driver, 'Concat'), $args);
-		}
 
 		if (PHP_VERSION >= 5.3) {
 			return call_user_func_array('parent::Concat', $args);
@@ -227,35 +177,14 @@ class ADODB_pdo extends ADOConnection {
 
 	function SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false,$secs2cache=0)
 	{
-		$save = $this->_driver->fetchMode;
-		$this->_driver->fetchMode = $this->fetchMode;
-		$this->_driver->debug = $this->debug;
-		$ret = $this->_driver->SelectLimit($sql,$nrows,$offset,$inputarr,$secs2cache);
-		$this->_driver->fetchMode = $save;
+		$save = (($this->fetchMode !== false) ? $this->SetFetchMode(false) : false);
+		$ret = $this->SelectLimit($sql,$nrows,$offset,$inputarr,$secs2cache);
+
+		$this->SetFetchMode($save);
+
 		return $ret;
 	}
 
-
-	function ServerInfo()
-	{
-		return $this->_driver->ServerInfo();
-	}
-
-	function MetaTables($ttype=false,$showSchema=false,$mask=false)
-	{
-		return $this->_driver->MetaTables($ttype,$showSchema,$mask);
-	}
-
-	function MetaColumns($table,$normalize=true)
-	{
-		return $this->_driver->MetaColumns($table,$normalize);
-	}
-
-	function MetaIndexes($table, $primary = false, $owner = false)
-	{
-		return $this->_driver->MetaIndexes($table, $primary, $owner);
-	}
-	
 	function InParameter(&$stmt,&$var,$name,$maxLen=4000,$type=false)
 	{
 		$obj = $stmt[1];
@@ -267,10 +196,6 @@ class ADODB_pdo extends ADOConnection {
 		}
 	}
 
-	function OffsetDate($dayFraction,$date=false)
-	{
-		return $this->_driver->OffsetDate($dayFraction,$date);
-	}
 
 	function ErrorMsg()
 	{
@@ -330,21 +255,8 @@ class ADODB_pdo extends ADOConnection {
 		return $err;
 	}
 
-	function SetTransactionMode($transaction_mode)
-	{
-		if(method_exists($this->_driver, 'SetTransactionMode')) {
-			return $this->_driver->SetTransactionMode($transaction_mode);
-		}
-
-		return parent::SetTransactionMode($seqname);
-	}
-
 	function BeginTrans()
 	{
-		if(method_exists($this->_driver, 'BeginTrans')) {
-			return $this->_driver->BeginTrans();
-		}
-
 		if (!$this->hasTransactions) {
 			return false;
 		}
@@ -360,10 +272,6 @@ class ADODB_pdo extends ADOConnection {
 
 	function CommitTrans($ok=true)
 	{
-		if(method_exists($this->_driver, 'CommitTrans')) {
-			return $this->_driver->CommitTrans($ok);
-		}
-
 		if (!$this->hasTransactions) {
 			return false;
 		}
@@ -385,10 +293,6 @@ class ADODB_pdo extends ADOConnection {
 
 	function RollbackTrans()
 	{
-		if(method_exists($this->_driver, 'RollbackTrans')) {
-			return $this->_driver->RollbackTrans();
-		}
-
 		if (!$this->hasTransactions) {
 			return false;
 		}
@@ -425,34 +329,6 @@ class ADODB_pdo extends ADOConnection {
 		return $obj;
 	}
 
-	function CreateSequence($seqname='adodbseq',$startID=1)
-	{
-		if(method_exists($this->_driver, 'CreateSequence')) {
-			return $this->_driver->CreateSequence($seqname, $startID);
-		}
-
-		return parent::CreateSequence($seqname, $startID);
-	}
-
-	function DropSequence($seqname='adodbseq')
-	{
-		if(method_exists($this->_driver, 'DropSequence')) {
-			return $this->_driver->DropSequence($seqname);
-		}
-
-		return parent::DropSequence($seqname);
-	}
-
-	function GenID($seqname='adodbseq',$startID=1)
-	{
-		if(method_exists($this->_driver, 'GenID')) {
-			return $this->_driver->GenID($seqname, $startID);
-		}
-
-		return parent::GenID($seqname, $startID);
-	}
-
-
 	/* returns queryID or false */
 	function _query($sql,$inputarr=false)
 	{
@@ -464,7 +340,6 @@ class ADODB_pdo extends ADOConnection {
 		#adodb_backtrace();
 		#var_dump($this->_bindInputArray);
 		if ($stmt) {
-			$this->_driver->debug = $this->debug;
 			if ($inputarr) {
 				$ok = $stmt->execute($inputarr);
 			}
@@ -515,15 +390,16 @@ class ADODB_pdo extends ADOConnection {
 	}
 }
 
+//THE FOLLOWING CLASS IS NO LONGER USED. HOWEVER, KEEP IT FOR THE TIME BEING.
 class ADODB_pdo_base extends ADODB_pdo {
 
 	var $sysDate = "'?'";
 	var $sysTimeStamp = "'?'";
+	var $_bindInputArray = true;
 
 
-	function _init($parentDriver)
-	{
-		$parentDriver->_bindInputArray = true;
+	function event_pdoConnectionEstablished()
+	{		
 		#$parentDriver->_connectionID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY,true);
 	}
 

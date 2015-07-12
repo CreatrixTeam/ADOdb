@@ -10,21 +10,21 @@ V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights res
 
 */
 
+// security - hide paths
+if (!defined('ADODB_DIR')) die();
+
+include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
+
 class ADODB_pdo_mssql extends ADODB_pdo {
 
 	var $databaseType = "pdo_mssql";
+	var $dsnType = 'mssql';
 	var $hasTop = 'top';
 	var $sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
 	var $sysTimeStamp = 'GetDate()';
-
-
-	function _init($parentDriver)
-	{
-
-		$parentDriver->hasTransactions = false; ## <<< BUG IN PDO mssql driver
-		$parentDriver->_bindInputArray = false;
-		$parentDriver->hasInsertID = true;
-	}
+	var $hasTransactions = false; ## <<< BUG IN PDO mssql driver	
+	var $hasInsertID = true;
+	var $_bindInputArray = false;
 
 	function ServerInfo()
 	{

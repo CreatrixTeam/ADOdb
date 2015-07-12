@@ -131,12 +131,6 @@ class ADODB_sqlite3 extends ADOConnection {
 		return $arr;
 	}
 
-	function _init($parentDriver)
-	{
-		$parentDriver->hasTransactions = false;
-		$parentDriver->hasInsertID = true;
-	}
-
 	function _insertid()
 	{
 		return $this->_connectionID->lastInsertRowID();
