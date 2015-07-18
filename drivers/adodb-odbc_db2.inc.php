@@ -97,10 +97,7 @@ define('ADODB_ODBC_DB2',1);
 
 class ADODB_odbc_db2 extends ADODB_odbc {
 	var $databaseType = "odbc_db2";
-	var $concat_operator = '||';
-	var $sysTime = 'CURRENT TIME';
-	var $sysDate = 'CURRENT DATE';
-	var $sysTimeStamp = 'CURRENT TIMESTAMP';
+	var $sysTime = 'CURRENT TIME'; //Note: This variable is not used any where in the entirety of this library.
 	// The complete string representation of a timestamp has the form
 	// yyyy-mm-dd-hh.mm.ss.nnnnnn.
 	var $fmtTimeStamp = "'Y-m-d-H.i.s'";
@@ -226,61 +223,6 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 		}
         return $indexes;
 	}
-
-	// Format date column in sql string given an input format that understands Y M D
-	function SQLDate($fmt, $col=false)
-	{
-	// use right() and replace() ?
-		if (!$col) $col = $this->sysDate;
-		$s = '';
-
-		$len = strlen($fmt);
-		for ($i=0; $i < $len; $i++) {
-			if ($s) $s .= '||';
-			$ch = $fmt[$i];
-			switch($ch) {
-			case 'Y':
-			case 'y':
-				$s .= "char(year($col))";
-				break;
-			case 'M':
-				$s .= "substr(monthname($col),1,3)";
-				break;
-			case 'm':
-				$s .= "right(digits(month($col)),2)";
-				break;
-			case 'D':
-			case 'd':
-				$s .= "right(digits(day($col)),2)";
-				break;
-			case 'H':
-			case 'h':
-				if ($col != $this->sysDate) $s .= "right(digits(hour($col)),2)";
-				else $s .= "''";
-				break;
-			case 'i':
-			case 'I':
-				if ($col != $this->sysDate)
-					$s .= "right(digits(minute($col)),2)";
-					else $s .= "''";
-				break;
-			case 'S':
-			case 's':
-				if ($col != $this->sysDate)
-					$s .= "right(digits(second($col)),2)";
-				else $s .= "''";
-				break;
-			default:
-				if ($ch == '\\') {
-					$i++;
-					$ch = substr($fmt,$i,1);
-				}
-				$s .= $this->qstr($ch);
-			}
-		}
-		return $s;
-	}
-
 
 	function SelectLimit($sql,$nrows=-1,$offset=-1,$inputArr=false)
 	{

@@ -206,8 +206,6 @@ class ADODB_odbtp extends ADOConnection{
 				$this->databaseType = 'odbtp_mssql';
 				$this->fmtDate = "'Y-m-d'";
 				$this->fmtTimeStamp = "'Y-m-d h:i:sA'";
-				$this->sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
-				$this->sysTimeStamp = 'GetDate()';
 				$this->ansiOuter = true;
 				$this->leftOuter = '*=';
 				$this->rightOuter = '=*';
@@ -226,8 +224,6 @@ class ADODB_odbtp extends ADOConnection{
 				$this->databaseType = 'odbtp_access';
 				$this->fmtDate = "#Y-m-d#";
 				$this->fmtTimeStamp = "#Y-m-d h:i:sA#";
-				$this->sysDate = "FORMAT(NOW,'yyyy-mm-dd')";
-				$this->sysTimeStamp = 'NOW';
                 $this->hasTop = 'top';
 				$this->hasTransactions = false;
 				$this->_canPrepareSP = true;  // For MS Access only.
@@ -236,8 +232,6 @@ class ADODB_odbtp extends ADOConnection{
 				$this->databaseType = 'odbtp_vfp';
 				$this->fmtDate = "{^Y-m-d}";
 				$this->fmtTimeStamp = "{^Y-m-d, h:i:sA}";
-				$this->sysDate = 'date()';
-				$this->sysTimeStamp = 'datetime()';
 				$this->ansiOuter = true;
                 $this->hasTop = 'top';
 				$this->hasTransactions = false;
@@ -250,18 +244,13 @@ class ADODB_odbtp extends ADOConnection{
 				$this->databaseType = 'odbtp_oci8';
 				$this->fmtDate = "'Y-m-d 00:00:00'";
 				$this->fmtTimeStamp = "'Y-m-d h:i:sA'";
-				$this->sysDate = 'TRUNC(SYSDATE)';
-				$this->sysTimeStamp = 'SYSDATE';
 				$this->hasTransactions = true;
 				$this->_bindInputArray = true;
-				$this->concat_operator = '||';
 				break;
 			case 'sybase':
 				$this->databaseType = 'odbtp_sybase';
 				$this->fmtDate = "'Y-m-d'";
 				$this->fmtTimeStamp = "'Y-m-d H:i:s'";
-				$this->sysDate = 'GetDate()';
-				$this->sysTimeStamp = 'GetDate()';
 				$this->leftOuter = '*=';
 				$this->rightOuter = '=*';
 				$this->hasInsertID = true;
@@ -279,6 +268,8 @@ class ADODB_odbtp extends ADOConnection{
 
 		if ($this->_useUnicodeSQL )
 			@odbtp_set_attr(ODB_ATTR_UNICODESQL, TRUE, $this->_connectionID);
+
+		$this->_dataDict = NewDataDictionary($this);
 
         return true;
 	}

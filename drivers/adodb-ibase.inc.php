@@ -35,7 +35,6 @@ class ADODB_ibase extends ADOConnection {
 	var $ibase_timestampfmt = "%Y-%m-%d %H:%M:%S";
 	var $ibase_timefmt = "%H:%M:%S";
 	var $fmtTimeStamp = "'Y-m-d, H:i:s'";
-	var $concat_operator='||';
 	var $_transactionID;
 	var $metaTablesSQL = "select rdb\$relation_name from rdb\$relations where rdb\$relation_name not like 'RDB\$%'";
 	//OPN STUFF start
@@ -46,8 +45,6 @@ class ADODB_ibase extends ADOConnection {
 	var $_bindInputArray = true;
 	var $buffers = 0;
 	var $dialect = 1;
-	var $sysDate = "cast('TODAY' as timestamp)";
-	var $sysTimeStamp = "CURRENT_TIMESTAMP"; //"cast('NOW' as timestamp)";
 	var $ansiOuter = true;
 	var $hasAffectedRows = false;
 	var $poorAffectedRows = true;
@@ -701,59 +698,6 @@ class ADODB_ibase extends ADOConnection {
 		return $this->Execute("UPDATE $table SET $column=(?) WHERE $where",array($blob_id_str)) != false;
 	}
 
-	// Format date column in sql string given an input format that understands Y M D
-	// Only since Interbase 6.0 - uses EXTRACT
-	// problem - does not zero-fill the day and month yet
-	function SQLDate($fmt, $col=false)
-	{
-		if (!$col) $col = $this->sysDate;
-		$s = '';
-
-		$len = strlen($fmt);
-		for ($i=0; $i < $len; $i++) {
-			if ($s) $s .= '||';
-			$ch = $fmt[$i];
-			switch($ch) {
-			case 'Y':
-			case 'y':
-				$s .= "extract(year from $col)";
-				break;
-			case 'M':
-			case 'm':
-				$s .= "extract(month from $col)";
-				break;
-			case 'Q':
-			case 'q':
-				$s .= "cast(((extract(month from $col)+2) / 3) as integer)";
-				break;
-			case 'D':
-			case 'd':
-				$s .= "(extract(day from $col))";
-				break;
-			case 'H':
-			case 'h':
-				$s .= "(extract(hour from $col))";
-				break;
-			case 'I':
-			case 'i':
-				$s .= "(extract(minute from $col))";
-				break;
-			case 'S':
-			case 's':
-				$s .= "CAST((extract(second from $col)) AS INTEGER)";
-				break;
-
-			default:
-				if ($ch == '\\') {
-					$i++;
-					$ch = substr($fmt,$i,1);
-				}
-				$s .= $this->qstr($ch);
-				break;
-			}
-		}
-		return $s;
-	}
 }
 
 /*--------------------------------------------------------------------------------------

@@ -23,9 +23,6 @@ define('ADODB_SAPDB',1);
 
 class ADODB_odbc_sapdb extends ADODB_odbc {
 	var $databaseType = "odbc_sapdb";
-	var $concat_operator = '||';
-	var $sysDate = 'DATE';
-	var $sysTimeStamp = 'TIMESTAMP';
 	var $fmtDate = "'Y-m-d'";	/// used by DBDate() as the default date format used by the database
 	var $fmtTimeStamp = "'Y-m-d H:i:s'"; /// used by DBTimeStamp as the default timestamp fmt.
 	var $hasInsertId = true;

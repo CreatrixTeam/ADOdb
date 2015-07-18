@@ -16,6 +16,9 @@ class ADODB2_db2 extends ADODB_DataDict {
 
 	var $databaseType = 'db2';
 	var $seqField = false;
+	var $sql_concatenateOperator = '||';
+	var $sql_sysDate = 'CURRENT DATE';
+	var $sql_sysTimeStamp = 'CURRENT TIMESTAMP';
 
  	function ActualType($meta)
 	{
@@ -138,4 +141,123 @@ class ADODB2_db2 extends ADODB_DataDict {
 		return $sql;
 	}
 
+	function FormatDateSQL($fmt, $col=false)
+	{
+		if($this->databaseType !== "odbc_db2")
+		{
+			// use right() and replace() ?
+			if (!$col) $col = $this->sql_sysDate;
+
+			/* use TO_CHAR() if $fmt is TO_CHAR() allowed fmt */
+			if ($fmt== 'Y-m-d H:i:s')
+				return 'TO_CHAR('.$col.", 'YYYY-MM-DD HH24:MI:SS')";
+
+			$s = '';
+
+			$len = strlen($fmt);
+			for ($i=0; $i < $len; $i++) {
+				if ($s) $s .= $this->sql_concatenateOperator;
+				$ch = $fmt[$i];
+				switch($ch) {
+				case 'Y':
+				case 'y':
+					if ($len==1) return "year($col)";
+					$s .= "char(year($col))";
+					break;
+				case 'M':
+					if ($len==1) return "monthname($col)";
+					$s .= "substr(monthname($col),1,3)";
+					break;
+				case 'm':
+					if ($len==1) return "month($col)";
+					$s .= "right(digits(month($col)),2)";
+					break;
+				case 'D':
+				case 'd':
+					if ($len==1) return "day($col)";
+					$s .= "right(digits(day($col)),2)";
+					break;
+				case 'H':
+				case 'h':
+					if ($len==1) return "hour($col)";
+					if ($col != $this->sql_sysDate) $s .= "right(digits(hour($col)),2)";
+					else $s .= "''";
+					break;
+				case 'i':
+				case 'I':
+					if ($len==1) return "minute($col)";
+					if ($col != $this->sql_sysDate)
+						$s .= "right(digits(minute($col)),2)";
+						else $s .= "''";
+					break;
+				case 'S':
+				case 's':
+					if ($len==1) return "second($col)";
+					if ($col != $this->sql_sysDate)
+						$s .= "right(digits(second($col)),2)";
+					else $s .= "''";
+					break;
+				default:
+					if ($ch == '\\') {
+						$i++;
+						$ch = substr($fmt,$i,1);
+					}
+					$s .= $this->connection->qstr($ch);
+				}
+			}
+			return $s;
+		}
+		else
+		{
+		// use right() and replace() ?
+			if (!$col) $col = $this->sql_sysDate;
+			$s = '';
+
+			$len = strlen($fmt);
+			for ($i=0; $i < $len; $i++) {
+				if ($s) $s .= '||';
+				$ch = $fmt[$i];
+				switch($ch) {
+				case 'Y':
+				case 'y':
+					$s .= "char(year($col))";
+					break;
+				case 'M':
+					$s .= "substr(monthname($col),1,3)";
+					break;
+				case 'm':
+					$s .= "right(digits(month($col)),2)";
+					break;
+				case 'D':
+				case 'd':
+					$s .= "right(digits(day($col)),2)";
+					break;
+				case 'H':
+				case 'h':
+					if ($col != $this->sql_sysDate) $s .= "right(digits(hour($col)),2)";
+					else $s .= "''";
+					break;
+				case 'i':
+				case 'I':
+					if ($col != $this->sql_sysDate)
+						$s .= "right(digits(minute($col)),2)";
+						else $s .= "''";
+					break;
+				case 'S':
+				case 's':
+					if ($col != $this->sql_sysDate)
+						$s .= "right(digits(second($col)),2)";
+					else $s .= "''";
+					break;
+				default:
+					if ($ch == '\\') {
+						$i++;
+						$ch = substr($fmt,$i,1);
+					}
+					$s .= $this->connection->qstr($ch);
+				}
+			}
+			return $s;
+		}
+	}	
 }

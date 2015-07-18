@@ -55,9 +55,6 @@ class ADODB_oci8 extends ADOConnection {
 	var $databaseType = 'oci8';
 	var $dataProvider = 'oci8';
 	var $replaceQuote = "''"; // string to use to replace quotes
-	var $concat_operator='||';
-	var $sysDate = "TRUNC(SYSDATE)";
-	var $sysTimeStamp = 'SYSDATE'; // requires oracle 9 or later, otherwise use SYSDATE
 	var $metaDatabasesSQL = "SELECT USERNAME FROM ALL_USERS WHERE USERNAME NOT IN ('SYS','SYSTEM','DBSNMP','OUTLN') ORDER BY 1";
 	var $_stmt;
 	var $_commit = OCI_COMMIT_ON_SUCCESS;
@@ -596,92 +593,6 @@ END;
 		$this->_errorCode = $arr['code'];
 
 		return $arr['code'];
-	}
-
-	/**
-	 * Format date column in sql string given an input format that understands Y M D
-	 */
-	function SQLDate($fmt, $col=false)
-	{
-		if (!$col) {
-			$col = $this->sysTimeStamp;
-		}
-		$s = 'TO_CHAR('.$col.",'";
-
-		$len = strlen($fmt);
-		for ($i=0; $i < $len; $i++) {
-			$ch = $fmt[$i];
-			switch($ch) {
-			case 'Y':
-			case 'y':
-				$s .= 'YYYY';
-				break;
-			case 'Q':
-			case 'q':
-				$s .= 'Q';
-				break;
-
-			case 'M':
-				$s .= 'Mon';
-				break;
-
-			case 'm':
-				$s .= 'MM';
-				break;
-			case 'D':
-			case 'd':
-				$s .= 'DD';
-				break;
-
-			case 'H':
-				$s.= 'HH24';
-				break;
-
-			case 'h':
-				$s .= 'HH';
-				break;
-
-			case 'i':
-				$s .= 'MI';
-				break;
-
-			case 's':
-				$s .= 'SS';
-				break;
-
-			case 'a':
-			case 'A':
-				$s .= 'AM';
-				break;
-
-			case 'w':
-				$s .= 'D';
-				break;
-
-			case 'l':
-				$s .= 'DAY';
-				break;
-
-			case 'W':
-				$s .= 'WW';
-				break;
-
-			default:
-				// handle escape characters...
-				if ($ch == '\\') {
-					$i++;
-					$ch = substr($fmt,$i,1);
-				}
-				if (strpos('-/.:;, ',$ch) !== false) {
-					$s .= $ch;
-				}
-				else {
-					$s .= '"'.$ch.'"';
-				}
-
-			}
-		}
-		return $s. "')";
 	}
 
 	function GetRandRow($sql, $arr = false)

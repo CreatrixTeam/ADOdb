@@ -13,8 +13,7 @@
 // security - hide paths
 if (!defined('ADODB_DIR')) die();
 
-class ADODB2_vfp extends ADODB_DataDict {
-	var $databaseType = 'vfp';
-	var $sql_sysDate = 'date()';
-	var $sql_sysTimeStamp = 'datetime()';
+class ADODB2_ads extends ADODB_DataDict {
+	var $databaseType = "ads";
+	var $sql_concatenateOperator = '';
 }

@@ -19,9 +19,6 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 
 	var $databaseType = "pdo_oci";
 	var $dsnType = 'oci';
-	var $concat_operator='||';
-	var $sysDate = "TRUNC(SYSDATE)";
-	var $sysTimeStamp = 'SYSDATE';
 	var $NLS_DATE_FORMAT = 'YYYY-MM-DD';  // To include time, use 'RRRR-MM-DD HH24:MI:SS'
 	var $random = "abs(mod(DBMS_RANDOM.RANDOM,10000001)/10000000)";
 	var $metaTablesSQL = "select table_name,table_type from cat where table_type in ('TABLE','VIEW')";

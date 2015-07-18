@@ -26,7 +26,6 @@ include_once(ADODB_DIR.'/drivers/adodb-mssql.inc.php');
 
 class ADODB_mssqlpo extends ADODB_mssql {
 	var $databaseType = "mssqlpo";
-	var $concat_operator = '||';
 
 	function ADODB_mssqlpo()
 	{

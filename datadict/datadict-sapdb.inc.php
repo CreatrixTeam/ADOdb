@@ -19,6 +19,9 @@ class ADODB2_sapdb extends ADODB_DataDict {
 	var $databaseType = 'sapdb';
 	var $seqField = false;
 	var $renameColumn = 'RENAME COLUMN %s.%s TO %s';
+	var $sql_concatenateOperator = '||';
+	var $sql_sysDate = 'DATE';
+	var $sql_sysTimeStamp = 'TIMESTAMP';
 
  	function ActualType($meta)
 	{

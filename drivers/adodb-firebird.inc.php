@@ -19,7 +19,6 @@ class ADODB_firebird extends ADODB_ibase {
 	var $databaseType = "firebird";
 	var $dialect = 3;
 
-	var $sysTimeStamp = "CURRENT_TIMESTAMP"; //"cast('NOW' as timestamp)";
 
 	function ADODB_firebird()
 	{

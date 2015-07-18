@@ -43,15 +43,11 @@ class ADODB_informix72 extends ADOConnection {
 		and s.tabid=t.tabid and s.constrtype='P'
 		and i.idxname=s.idxname";
 
-	var $concat_operator = '||';
-
 	var $lastQuery = false;
 	var $has_insertid = true;
 
 	var $_autocommit = true;
 	var $_bindInputArray = true;  // set to true if ADOConnection.Execute() permits binding of array parameters.
-	var $sysDate = 'TODAY';
-	var $sysTimeStamp = 'CURRENT';
 	var $cursorType = IFX_SCROLL; // IFX_SCROLL or IFX_HOLD or 0
 
 	function ADODB_informix72()

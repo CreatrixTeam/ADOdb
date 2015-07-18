@@ -154,8 +154,6 @@ function _colonparser($sql,$arr)
 
 class ADODB_db2oci extends ADODB_db2 {
 	var $databaseType = "db2oci";
-	var $sysTimeStamp = 'sysdate';
-	var $sysDate = 'trunc(sysdate)';
 	var $_bindInputArray = true;
 
 	function ADODB_db2oci()

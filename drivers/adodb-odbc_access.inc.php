@@ -24,8 +24,6 @@ class  ADODB_odbc_access extends ADODB_odbc {
 	var $fmtDate = "#Y-m-d#";
 	var $fmtTimeStamp = "#Y-m-d h:i:sA#"; // note not comma
 	var $_bindInputArray = false; // strangely enough, setting to true does not work reliably
-	var $sysDate = "FORMAT(NOW,'yyyy-mm-dd')";
-	var $sysTimeStamp = 'NOW';
 	var $hasTransactions = false;
 	var $upperCase = 'ucase';
 

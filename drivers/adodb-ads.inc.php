@@ -48,7 +48,6 @@ class ADODB_ads extends ADOConnection {
   var $databaseType = "ads";
   var $fmt = "'m-d-Y'";
   var $fmtTimeStamp = "'Y-m-d H:i:s'";
-        var $concat_operator = '';
   var $replaceQuote = "''"; // string to use to replace quotes
   var $dataProvider = "ads";
   var $hasAffectedRows = true;

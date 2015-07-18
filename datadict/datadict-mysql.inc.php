@@ -21,6 +21,8 @@ class ADODB2_mysql extends ADODB_DataDict {
 
 	var $dropIndex = 'DROP INDEX %s ON %s';
 	var $renameColumn = 'ALTER TABLE %s CHANGE COLUMN %s %s %s';	// needs column-definition!
+	var $sql_sysDate = 'CURDATE()';
+	var $sql_sysTimeStamp = 'NOW()';
 
 	function MetaType($t,$len=-1,$fieldobj=false)
 	{
@@ -177,5 +179,178 @@ class ADODB2_mysql extends ADODB_DataDict {
 		$sql[] = $s;
 
 		return $sql;
+	}
+
+	function FormatDateSQL($fmt, $col=false)
+	{
+		if($this->databaseType !== "mysqli")
+		{
+			if (!$col) {
+				$col = $this->sql_sysTimeStamp;
+			}
+			$s = 'DATE_FORMAT(' . $col . ",'";
+			$concat = false;
+			$len = strlen($fmt);
+			for ($i=0; $i < $len; $i++) {
+				$ch = $fmt[$i];
+				switch($ch) {
+
+					default:
+						if ($ch == '\\') {
+							$i++;
+							$ch = substr($fmt, $i, 1);
+						}
+						// FALL THROUGH
+					case '-':
+					case '/':
+						$s .= $ch;
+						break;
+
+					case 'Y':
+					case 'y':
+						$s .= '%Y';
+						break;
+
+					case 'M':
+						$s .= '%b';
+						break;
+
+					case 'm':
+						$s .= '%m';
+						break;
+
+					case 'D':
+					case 'd':
+						$s .= '%d';
+						break;
+
+					case 'Q':
+					case 'q':
+						$s .= "'),Quarter($col)";
+
+						if ($len > $i+1) {
+							$s .= ",DATE_FORMAT($col,'";
+						} else {
+							$s .= ",('";
+						}
+						$concat = true;
+						break;
+
+					case 'H':
+						$s .= '%H';
+						break;
+
+					case 'h':
+						$s .= '%I';
+						break;
+
+					case 'i':
+						$s .= '%i';
+						break;
+
+					case 's':
+						$s .= '%s';
+						break;
+
+					case 'a':
+					case 'A':
+						$s .= '%p';
+						break;
+
+					case 'w':
+						$s .= '%w';
+						break;
+
+					case 'W':
+						$s .= '%U';
+						break;
+
+					case 'l':
+						$s .= '%W';
+						break;
+				}
+			}
+			$s .= "')";
+			if ($concat) {
+				$s = "CONCAT($s)";
+			}
+			return $s;
+		}
+		else
+		{
+			if (!$col) $col = $this->sql_sysTimeStamp;
+			$s = 'DATE_FORMAT('.$col.",'";
+			$concat = false;
+			$len = strlen($fmt);
+			for ($i=0; $i < $len; $i++) {
+				$ch = $fmt[$i];
+				switch($ch) {
+				case 'Y':
+				case 'y':
+					$s .= '%Y';
+					break;
+				case 'Q':
+				case 'q':
+					$s .= "'),Quarter($col)";
+
+					if ($len > $i+1) $s .= ",DATE_FORMAT($col,'";
+					else $s .= ",('";
+					$concat = true;
+					break;
+				case 'M':
+					$s .= '%b';
+					break;
+
+				case 'm':
+					$s .= '%m';
+					break;
+				case 'D':
+				case 'd':
+					$s .= '%d';
+					break;
+
+				case 'H':
+					$s .= '%H';
+					break;
+
+				case 'h':
+					$s .= '%I';
+					break;
+
+				case 'i':
+					$s .= '%i';
+					break;
+
+				case 's':
+					$s .= '%s';
+					break;
+
+				case 'a':
+				case 'A':
+					$s .= '%p';
+					break;
+
+				case 'w':
+					$s .= '%w';
+					break;
+
+				case 'l':
+					$s .= '%W';
+					break;
+
+				default:
+
+					if ($ch == '\\') {
+						$i++;
+						$ch = substr($fmt,$i,1);
+					}
+					$s .= $ch;
+					break;
+				}
+			}
+			$s.="')";
+			if ($concat) $s = "CONCAT($s)";
+			return $s;
+		}
 	}
 }

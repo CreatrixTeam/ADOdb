@@ -15,8 +15,6 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 	var $databaseType = 'pdo_sqlsrv';
 	var $dsnType = 'sqlsrv';
 	var $hasTop = 'top';
-	var $sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
-	var $sysTimeStamp = 'GetDate()';
 	var $hasTransactions = true;
 	var $_bindInputArray = true;
 	var $hasInsertID = true;

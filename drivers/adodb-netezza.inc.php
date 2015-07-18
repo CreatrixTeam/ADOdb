@@ -24,13 +24,10 @@ class ADODB_netezza extends ADODB_postgres64 {
 	var $dataProvider = 'netezza';
 	var $hasInsertID = false;
 	var $_resultid = false;
-  	var $concat_operator='||';
   	var $random = 'random';
 	var $metaDatabasesSQL = "select objname from _v_object_data where objtype='database' order by 1";
     var $metaTablesSQL = "select objname from _v_object_data where objtype='table' order by 1";
 	var $isoDates = true; // accepts dates in ISO format
-	var $sysDate = "CURRENT_DATE";
-	var $sysTimeStamp = "CURRENT_TIMESTAMP";
 	var $blobEncodeType = 'C';
 	var $metaColumnsSQL = "SELECT attname, atttype FROM _v_relation_column_def WHERE name = '%s' AND attnum > 0 ORDER BY attnum";
 	var $metaColumnsSQL1 = "SELECT attname, atttype FROM _v_relation_column_def WHERE name = '%s' AND attnum > 0 ORDER BY attnum";

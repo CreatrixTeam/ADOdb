@@ -33,8 +33,6 @@ class  ADODB_odbc_mssql extends ADODB_odbc {
 		(case when c.xusertype=61 then 0 else c.xscale end)
 		from syscolumns c join systypes t on t.xusertype=c.xusertype join sysobjects o on o.id=c.id where o.name='%s'";
 	var $hasTop = 'top';		// support mssql/interbase SELECT TOP 10 * FROM TABLE
-	var $sysDate = 'GetDate()';
-	var $sysTimeStamp = 'GetDate()';
 	var $leftOuter = '*=';
 	var $rightOuter = '=*';
 	var $substr = 'substring';
@@ -292,66 +290,6 @@ order by constraint_name, referenced_table_name, keyno";
 			$rs = ADOConnection::SelectLimit($sql,$nrows,$offset,$inputarr,$secs2cache);
 
 		return $rs;
-	}
-
-	// Format date column in sql string given an input format that understands Y M D
-	function SQLDate($fmt, $col=false)
-	{
-		if (!$col) $col = $this->sysTimeStamp;
-		$s = '';
-
-		$len = strlen($fmt);
-		for ($i=0; $i < $len; $i++) {
-			if ($s) $s .= '+';
-			$ch = $fmt[$i];
-			switch($ch) {
-			case 'Y':
-			case 'y':
-				$s .= "datename(yyyy,$col)";
-				break;
-			case 'M':
-				$s .= "convert(char(3),$col,0)";
-				break;
-			case 'm':
-				$s .= "replace(str(month($col),2),' ','0')";
-				break;
-			case 'Q':
-			case 'q':
-				$s .= "datename(quarter,$col)";
-				break;
-			case 'D':
-			case 'd':
-				$s .= "replace(str(day($col),2),' ','0')";
-				break;
-			case 'h':
-				$s .= "substring(convert(char(14),$col,0),13,2)";
-				break;
-
-			case 'H':
-				$s .= "replace(str(datepart(hh,$col),2),' ','0')";
-				break;
-
-			case 'i':
-				$s .= "replace(str(datepart(mi,$col),2),' ','0')";
-				break;
-			case 's':
-				$s .= "replace(str(datepart(ss,$col),2),' ','0')";
-				break;
-			case 'a':
-			case 'A':
-				$s .= "substring(convert(char(19),$col,0),18,2)";
-				break;
-
-			default:
-				if ($ch == '\\') {
-					$i++;
-					$ch = substr($fmt,$i,1);
-				}
-				$s .= $this->qstr($ch);
-				break;
-			}
-		}
-		return $s;
 	}
 
 }

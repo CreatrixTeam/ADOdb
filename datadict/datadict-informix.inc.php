@@ -17,6 +17,9 @@ class ADODB2_informix extends ADODB_DataDict {
 
 	var $databaseType = 'informix';
 	var $seqField = false;
+	var $sql_concatenateOperator = '||';
+	var $sql_sysDate = 'TODAY';
+	var $sql_sysTimeStamp = 'CURRENT';
 
 
 	function ActualType($meta)

@@ -25,8 +25,6 @@ class ADODB_pdo_pgsql extends ADODB_pdo {
         select viewname,'V' from pg_views where viewname not like 'pg\_%'";
 	//"select tablename from pg_tables where tablename not like 'pg_%' order by 1";
 	var $isoDates = true; // accepts dates in ISO format
-	var $sysDate = "CURRENT_DATE";
-	var $sysTimeStamp = "CURRENT_TIMESTAMP";
 	var $blobEncodeType = 'C';
 	var $metaColumnsSQL = "SELECT a.attname,t.typname,a.attlen,a.atttypmod,a.attnotnull,a.atthasdef,a.attnum
 		FROM pg_class c, pg_attribute a,pg_type t
@@ -59,7 +57,6 @@ WHERE relkind in ('r','v') AND (c.relname='%s' or c.relname = lower('%s'))
 	var $_dropSeqSQL = "DROP SEQUENCE %s";
 	var $metaDefaultsSQL = "SELECT d.adnum as num, d.adsrc as def from pg_attrdef d, pg_class c where d.adrelid=c.oid and c.relname='%s' order by d.adnum";
 	var $random = 'random()';		/// random function
-	var $concat_operator='||';
 	var $hasTransactions = false; ## <<< BUG IN PDO pgsql driver
 	var $hasInsertID = true;
 	var $_nestedSQL = true;
@@ -189,6 +186,8 @@ select viewname,'V' from pg_views where viewname like $mask";
 			$fld->name = $rs->fields[0];
 			$fld->type = $rs->fields[1];
 			$fld->max_length = $rs->fields[2];
+			$fld->attnum = $rs->fields[6];
+
 			if ($fld->max_length <= 0) $fld->max_length = $rs->fields[3]-4;
 			if ($fld->max_length <= 0) $fld->max_length = -1;
 			if ($fld->type == 'numeric') {

@@ -49,8 +49,6 @@ global $_COLONARR,$_COLONSZ;
 
 class ADODB_db2oci extends ADODB_db2 {
 	var $databaseType = "db2oci";
-	var $sysTimeStamp = 'sysdate';
-	var $sysDate = 'trunc(sysdate)';
 
 	function ADODB_db2oci()
 	{

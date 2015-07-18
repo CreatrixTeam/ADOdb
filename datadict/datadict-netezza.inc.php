@@ -13,8 +13,11 @@
 // security - hide paths
 if (!defined('ADODB_DIR')) die();
 
-class ADODB2_vfp extends ADODB_DataDict {
-	var $databaseType = 'vfp';
-	var $sql_sysDate = 'date()';
-	var $sql_sysTimeStamp = 'datetime()';
+include_once(ADODB_DIR.'/datadict/datadict-postgres.inc.php');
+
+class ADODB2_netezza extends ADODB2_postgres {
+	var $databaseType = 'netezza';
+	var $sql_concatenateOperator = '||';
+	var $sql_sysDate = "CURRENT_DATE";
+	var $sql_sysTimeStamp = "CURRENT_TIMESTAMP";
 }

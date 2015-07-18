@@ -42,8 +42,6 @@ class ADODB_mysqli extends ADOConnection {
 	var $hasMoveFirst = true;
 	var $hasGenID = true;
 	var $isoDates = true; // accepts dates in ISO format
-	var $sysDate = 'CURDATE()';
-	var $sysTimeStamp = 'NOW()';
 	var $hasTransactions = true;
 	var $forceNewConnect = false;
 	var $poorAffectedRows = true;
@@ -379,85 +377,6 @@ class ADODB_mysqli extends ADOConnection {
 		}
 
 		return $indexes;
-	}
-
-
-	// Format date column in sql string given an input format that understands Y M D
-	function SQLDate($fmt, $col=false)
-	{
-		if (!$col) $col = $this->sysTimeStamp;
-		$s = 'DATE_FORMAT('.$col.",'";
-		$concat = false;
-		$len = strlen($fmt);
-		for ($i=0; $i < $len; $i++) {
-			$ch = $fmt[$i];
-			switch($ch) {
-			case 'Y':
-			case 'y':
-				$s .= '%Y';
-				break;
-			case 'Q':
-			case 'q':
-				$s .= "'),Quarter($col)";
-
-				if ($len > $i+1) $s .= ",DATE_FORMAT($col,'";
-				else $s .= ",('";
-				$concat = true;
-				break;
-			case 'M':
-				$s .= '%b';
-				break;
-
-			case 'm':
-				$s .= '%m';
-				break;
-			case 'D':
-			case 'd':
-				$s .= '%d';
-				break;
-
-			case 'H':
-				$s .= '%H';
-				break;
-
-			case 'h':
-				$s .= '%I';
-				break;
-
-			case 'i':
-				$s .= '%i';
-				break;
-
-			case 's':
-				$s .= '%s';
-				break;
-
-			case 'a':
-			case 'A':
-				$s .= '%p';
-				break;
-
-			case 'w':
-				$s .= '%w';
-				break;
-
-			case 'l':
-				$s .= '%W';
-				break;
-
-			default:
-
-				if ($ch == '\\') {
-					$i++;
-					$ch = substr($fmt,$i,1);
-				}
-				$s .= $ch;
-				break;
-			}
-		}
-		$s.="')";
-		if ($concat) $s = "CONCAT($s)";
-		return $s;
 	}
 
 	// returns concatenated string

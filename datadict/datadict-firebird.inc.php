@@ -16,6 +16,7 @@ class ADODB2_firebird extends ADODB_DataDict {
 	var $seqField = false;
 	var $seqPrefix = 'gen_';
 	var $blobSize = 40000;
+	var $sql_sysTimeStamp = "CURRENT_TIMESTAMP"; //"cast('NOW' as timestamp)";
 
  	function ActualType($meta)
 	{

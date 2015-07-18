@@ -23,7 +23,18 @@ class ADODB2_oci8 extends ADODB_DataDict {
 	var $alterCol = ' MODIFY ';
 	var $typeX = 'VARCHAR(4000)';
 	var $typeXL = 'CLOB';
+	var $sql_concatenateOperator='||';
+	var $sql_sysDate = "TRUNC(SYSDATE)";
+	var $sql_sysTimeStamp = 'SYSDATE'; // requires oracle 9 or later, otherwise use SYSDATE
 
+	function _event_connectionSet($pADOConnection)
+	{
+		if($this->databaseType === "oracle")
+		{
+			$this->sql_sysDate = "TO_DATE(TO_CHAR(SYSDATE,'YYYY-MM-DD'),'YYYY-MM-DD')";
+			$pADOConnection->sysDate = $this->sql_sysDate;
+		}
+	}
 	function MetaType($t, $len=-1, $fieldobj=false)
 	{
 		if (is_object($t)) {
@@ -295,4 +306,89 @@ end;
 		$cmt = $this->connection->qstr($cmt);
 		return  "COMMENT ON COLUMN $table.$col IS $cmt";
 	}
+	
+	//WARNING: requires oracle 9 or later due to dependency on 'SYSDATE'. See $this->sql_sysTimeStamp
+	function FormatDateSQL($fmt, $col=false)
+	{
+		if (!$col) {
+			$col = $this->sql_sysTimeStamp;
+		}
+		$s = 'TO_CHAR('.$col.",'";
+
+		$len = strlen($fmt);
+		for ($i=0; $i < $len; $i++) {
+			$ch = $fmt[$i];
+			switch($ch) {
+			case 'Y':
+			case 'y':
+				$s .= 'YYYY';
+				break;
+			case 'Q':
+			case 'q':
+				$s .= 'Q';
+				break;
+
+			case 'M':
+				$s .= 'Mon';
+				break;
+
+			case 'm':
+				$s .= 'MM';
+				break;
+			case 'D':
+			case 'd':
+				$s .= 'DD';
+				break;
+
+			case 'H':
+				$s.= 'HH24';
+				break;
+
+			case 'h':
+				$s .= 'HH';
+				break;
+
+			case 'i':
+				$s .= 'MI';
+				break;
+
+			case 's':
+				$s .= 'SS';
+				break;
+
+			case 'a':
+			case 'A':
+				$s .= 'AM';
+				break;
+
+			case 'w':
+				$s .= 'D';
+				break;
+
+			case 'l':
+				$s .= 'DAY';
+				break;
+
+			case 'W':
+				$s .= 'WW';
+				break;
+
+			default:
+				// handle escape characters...
+				if ($ch == '\\') {
+					$i++;
+					$ch = substr($fmt,$i,1);
+				}
+				if (strpos('-/.:;, ',$ch) !== false) {
+					$s .= $ch;
+				}
+				else {
+					$s .= '"'.$ch.'"';
+				}
+
+			}
+		}
+		return $s. "')";
+	}
+
 }

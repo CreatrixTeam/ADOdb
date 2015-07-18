@@ -59,7 +59,6 @@ class ADODB_postgres64 extends ADOConnection{
 	var $dataProvider = 'postgres';
 	var $hasInsertID = true;
 	var $_resultid = false;
-	var $concat_operator='||';
 	var $metaDatabasesSQL = "select datname from pg_database where datname not in ('template0','template1') order by 1";
 	var $metaTablesSQL = "select tablename,'T' from pg_tables where tablename not like 'pg\_%'
 		and tablename not in ('sql_features', 'sql_implementation_info', 'sql_languages',
@@ -68,8 +67,6 @@ class ADODB_postgres64 extends ADOConnection{
 		select viewname,'V' from pg_views where viewname not like 'pg\_%'";
 	//"select tablename from pg_tables where tablename not like 'pg_%' order by 1";
 	var $isoDates = true; // accepts dates in ISO format
-	var $sysDate = "CURRENT_DATE";
-	var $sysTimeStamp = "CURRENT_TIMESTAMP";
 	var $blobEncodeType = 'C';
 	var $metaColumnsSQL = "SELECT a.attname,t.typname,a.attlen,a.atttypmod,a.attnotnull,a.atthasdef,a.attnum
 		FROM pg_class c, pg_attribute a,pg_type t
@@ -263,88 +260,6 @@ class ADODB_postgres64 extends ADOConnection{
 		$s = str_replace('\\"','"',$s);
 		return "'$s'";
 	}
-
-
-
-	// Format date column in sql string given an input format that understands Y M D
-	function SQLDate($fmt, $col=false)
-	{
-		if (!$col) $col = $this->sysTimeStamp;
-		$s = 'TO_CHAR('.$col.",'";
-
-		$len = strlen($fmt);
-		for ($i=0; $i < $len; $i++) {
-			$ch = $fmt[$i];
-			switch($ch) {
-			case 'Y':
-			case 'y':
-				$s .= 'YYYY';
-				break;
-			case 'Q':
-			case 'q':
-				$s .= 'Q';
-				break;
-
-			case 'M':
-				$s .= 'Mon';
-				break;
-
-			case 'm':
-				$s .= 'MM';
-				break;
-			case 'D':
-			case 'd':
-				$s .= 'DD';
-				break;
-
-			case 'H':
-				$s.= 'HH24';
-				break;
-
-			case 'h':
-				$s .= 'HH';
-				break;
-
-			case 'i':
-				$s .= 'MI';
-				break;
-
-			case 's':
-				$s .= 'SS';
-				break;
-
-			case 'a':
-			case 'A':
-				$s .= 'AM';
-				break;
-
-			case 'w':
-				$s .= 'D';
-				break;
-
-			case 'l':
-				$s .= 'DAY';
-				break;
-
-			case 'W':
-				$s .= 'WW';
-				break;
-
-			default:
-			// handle escape characters...
-				if ($ch == '\\') {
-					$i++;
-					$ch = substr($fmt,$i,1);
-				}
-				if (strpos('-/.:;, ',$ch) !== false) $s .= $ch;
-				else $s .= '"'.$ch.'"';
-
-			}
-		}
-		return $s. "')";
-	}
-
-
 
 	/*
 	* Load a Large Object from a file

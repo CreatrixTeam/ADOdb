@@ -20,8 +20,6 @@ class ADODB_pdo_mssql extends ADODB_pdo {
 	var $databaseType = "pdo_mssql";
 	var $dsnType = 'mssql';
 	var $hasTop = 'top';
-	var $sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
-	var $sysTimeStamp = 'GetDate()';
 	var $hasTransactions = false; ## <<< BUG IN PDO mssql driver	
 	var $hasInsertID = true;
 	var $_bindInputArray = false;

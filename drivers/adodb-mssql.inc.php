@@ -90,8 +90,6 @@ class ADODB_mssql extends ADOConnection {
 	from syscolumns c join systypes t on t.xusertype=c.xusertype join sysobjects o on o.id=c.id where o.name='%s'";
 	var $hasTop = 'top';		// support mssql SELECT TOP 10 * FROM TABLE
 	var $hasGenID = true;
-	var $sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
-	var $sysTimeStamp = 'GetDate()';
 	var $_has_mssql_init;
 	var $maxParameterLen = 4000;
 	var $arrayClass = 'ADORecordSet_array_mssql';
@@ -256,68 +254,6 @@ class ADODB_mssql extends ADOConnection {
 
 		return $rs;
 	}
-
-
-	// Format date column in sql string given an input format that understands Y M D
-	function SQLDate($fmt, $col=false)
-	{
-		if (!$col) $col = $this->sysTimeStamp;
-		$s = '';
-
-		$len = strlen($fmt);
-		for ($i=0; $i < $len; $i++) {
-			if ($s) $s .= '+';
-			$ch = $fmt[$i];
-			switch($ch) {
-			case 'Y':
-			case 'y':
-				$s .= "datename(yyyy,$col)";
-				break;
-			case 'M':
-				$s .= "convert(char(3),$col,0)";
-				break;
-			case 'm':
-				$s .= "replace(str(month($col),2),' ','0')";
-				break;
-			case 'Q':
-			case 'q':
-				$s .= "datename(quarter,$col)";
-				break;
-			case 'D':
-			case 'd':
-				$s .= "replace(str(day($col),2),' ','0')";
-				break;
-			case 'h':
-				$s .= "substring(convert(char(14),$col,0),13,2)";
-				break;
-
-			case 'H':
-				$s .= "replace(str(datepart(hh,$col),2),' ','0')";
-				break;
-
-			case 'i':
-				$s .= "replace(str(datepart(mi,$col),2),' ','0')";
-				break;
-			case 's':
-				$s .= "replace(str(datepart(ss,$col),2),' ','0')";
-				break;
-			case 'a':
-			case 'A':
-				$s .= "substring(convert(char(19),$col,0),18,2)";
-				break;
-
-			default:
-				if ($ch == '\\') {
-					$i++;
-					$ch = substr($fmt,$i,1);
-				}
-				$s .= $this->qstr($ch);
-				break;
-			}
-		}
-		return $s;
-	}
-
 
 	function BeginTrans()
 	{

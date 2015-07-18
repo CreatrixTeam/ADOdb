@@ -17,6 +17,8 @@ class ADODB2_access extends ADODB_DataDict {
 
 	var $databaseType = 'access';
 	var $seqField = false;
+	var $sql_sysDate = "FORMAT(NOW,'yyyy-mm-dd')";
+	var $sql_sysTimeStamp = 'NOW';
 
 
  	function ActualType($meta)

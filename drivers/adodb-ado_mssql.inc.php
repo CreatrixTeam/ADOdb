@@ -28,8 +28,6 @@ class  ADODB_ado_mssql extends ADODB_ado {
 	var $databaseType = 'ado_mssql';
 	var $hasTop = 'top';
 	var $hasInsertID = true;
-	var $sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
-	var $sysTimeStamp = 'GetDate()';
 	var $leftOuter = '*=';
 	var $rightOuter = '=*';
 	var $ansiOuter = true; // for mssql7 or later

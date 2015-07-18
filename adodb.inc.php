@@ -418,7 +418,7 @@ if (!defined('_ADODB_LAYER')) {
 	var $password = '';			/// Password for the username. For security, we no longer store it.
 	var $debug = false;			/// if set to true will output sql statements
 	var $maxblobsize = 262144;	/// maximum size of blobs or large text fields (262144 = 256K)-- some db's die otherwise like foxpro
-	var $concat_operator = '+'; /// default concat operator -- change to || for Oracle/Interbase
+	var $concat_operator = '+'; /// default concat operator -- change to || for Oracle/Interbase. NOTE: Copied from ADODB_DataDict::$sql_concatenateOperator during set up of data dictionary.
 	var $substr = 'substr';		/// substring operator
 	var $length = 'length';		/// string length ofperator
 	var $random = 'rand()';		/// random function
@@ -457,9 +457,8 @@ if (!defined('_ADODB_LAYER')) {
 	var $memCachePort = 11211; /// memCache port
 	var $memCacheCompress = false; /// Use 'true' to store the item compressed (uses zlib)
 
-	var $sysDate = false; /// name of function that returns the current date
-	var $sysTimeStamp = false; /// name of function that returns the current timestamp
-	var $sysUTimeStamp = false; // name of function that returns the current timestamp accurate to the microsecond or nearest fraction
+	var $sysDate = false; /// name of function that returns the current date. NOTE: Copied from ADODB_DataDict::$sql_sysDate during set up of data dictionary.
+	var $sysTimeStamp = false; /// name of function that returns the current timestamp. NOTE: Copied from ADODB_DataDict::$sql_sysTimeStamp during set up of data dictionary.
 	var $arrayClass = 'ADORecordSet_array'; /// name of class used to generate array recordsets, which are pre-downloaded recordsets
 
 	var $noNullStrings = false; /// oracle specific stuff - if true ensures that '' is converted to ' '
@@ -745,10 +744,7 @@ if (!defined('_ADODB_LAYER')) {
 
 	// Format date column in sql string given an input format that understands Y M D
 	function SQLDate($fmt, $col=false) {
-		if (!$col) {
-			$col = $this->sysDate;
-		}
-		return $col; // child class implement
+		return $this->_dataDict->FormatDateSQL($fmt, $col);
 	}
 
 	/**
@@ -4936,6 +4932,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 					}
 				}
 				return "generic";
+			case 'db2' :
+				if($drivername === "db2oci")
+					{return 'oci8';}
+				break;
 			case 'mssqlnative':
 				return 'mssql';
 			case 'native':
@@ -4971,6 +4971,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				break;
 			case 'db2'   :
 			case 'sapdb' :
+				break;
+			case 'borland_ibase':
+				$drivername = 'ibase';
 				break;
 			default:
 				$drivername = 'generic';

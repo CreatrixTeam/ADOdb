@@ -181,6 +181,9 @@ class ADODB_DataDict {
 	var $invalidResizeTypes4 = array('CLOB','BLOB','TEXT','DATE','TIME'); // for changetablesql
 	var $blobSize = 100; 	/// any varchar/char field this size or greater is treated as a blob
 							/// in other words, we use a text area for editting.
+	var $sql_concatenateOperator = '+'; /// default concat operator -- change to || for Oracle/Interbase
+	var $sql_sysDate = false; /// name of function that returns the current date
+	var $sql_sysTimeStamp = false; /// name of function that returns the current timestamp
 	//PRIVATES
 	var $_serverInfoArray = null;
 
@@ -1099,17 +1102,34 @@ class ADODB_DataDict {
 		$this->dataProvider = $pADOConnection->dataProvider;
 		$this->databaseType = $pADOConnection->databaseType;
 		$this->quote = $pADOConnection->nameQuote;
+
+		$pADOConnection->concat_operator = $this->sql_concatenateOperator;
+		$pADOConnection->sysDate = $this->sql_sysDate;
+		$pADOConnection->sysTimeStamp = $this->sql_sysTimeStamp;
 		
 		$this->_BuildServerInfo(true);
 
-		$this->event_connectionSet();
+		$this->_event_connectionSet($pADOConnection);
 	}
 	
 	/**
 	*	ACCESS: PROTECTED
 	*	Fired when SetConnection() is called and finished execution. Usefull if data dicionaries
-	*		need to set up variable differently based on ADODB Driver and Database version.
+	*		need to set up variables differently based on ADODB Driver and Database version.
 	*/
-	function event_connectionSet()
+	function _event_connectionSet($pADOConnection)
 		{}
+
+	/**
+	*	ACCESS: PUBLIC
+	*		Format date column in sql string given an input format that understands Y M D. Refer
+	*		to ADOConnection::SQLDate()
+	*/
+	function FormatDateSQL($pFormat, $pColumnName = false)
+	{
+		if (!$pColumnName) {
+			$pColumnName = $this->sql_sysDate;
+		}
+		return $pColumnName; // child class implement
+	}
 } // class

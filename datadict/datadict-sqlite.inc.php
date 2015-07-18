@@ -22,6 +22,7 @@ class ADODB2_sqlite extends ADODB_DataDict {
 	var $dropTable = 'DROP TABLE IF EXISTS %s';
 	var $dropIndex = 'DROP INDEX IF EXISTS %s';
 	var $renameTable = 'ALTER TABLE %s RENAME TO %s';
+	var $sql_concatenateOperator = '||';
 
 
 

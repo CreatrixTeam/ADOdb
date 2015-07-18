@@ -46,16 +46,28 @@ class ADODB2_mssql extends ADODB_DataDict {
 	var $dropIndex = 'DROP INDEX %2$s.%1$s';
 	var $renameTable = "EXEC sp_rename '%s','%s'";
 	var $renameColumn = "EXEC sp_rename '%s.%s','%s'";
+	var $sql_sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
+	var $sql_sysTimeStamp = 'GetDate()';
 
 	var $typeX = 'TEXT';  ## Alternatively, set it to VARCHAR(4000)
 	var $typeXL = 'TEXT';
 
 	//var $alterCol = ' ALTER COLUMN ';
 
-	function event_connectionSet()
+	function _event_connectionSet($pADOConnection)
 	{
 		if($this->dataProvider === "mssqlnative")
 			{$this->dropIndex = 'DROP INDEX %1$s ON %2$s';}
+		if($this->databaseType === "odbc_mssql")
+		{
+			$this->sql_sysDate = 'GetDate()';			
+			$pADOConnection->sysDate = $this->sql_sysDate;
+		}
+		if($this->databaseType === "mssqlpo")
+		{
+			$this->sql_concatenateOperator = '||';
+			$pADOConnection->concat_operator = $this->sql_concatenateOperator;
+		}
 	}
 	function MetaType($t,$len=-1,$fieldobj=false)
 	{
@@ -388,4 +400,64 @@ CREATE TABLE
     	return parent::_GetSize($ftype, $ty, $fsize, $fprec);
 
 	}
+
+	function FormatDateSQL($fmt, $col=false)
+	{
+		if (!$col) $col = $this->sql_sysTimeStamp;
+		$s = '';
+
+		$len = strlen($fmt);
+		for ($i=0; $i < $len; $i++) {
+			if ($s) $s .= '+';
+			$ch = $fmt[$i];
+			switch($ch) {
+			case 'Y':
+			case 'y':
+				$s .= "datename(yyyy,$col)";
+				break;
+			case 'M':
+				$s .= "convert(char(3),$col,0)";
+				break;
+			case 'm':
+				$s .= "replace(str(month($col),2),' ','0')";
+				break;
+			case 'Q':
+			case 'q':
+				$s .= "datename(quarter,$col)";
+				break;
+			case 'D':
+			case 'd':
+				$s .= "replace(str(day($col),2),' ','0')";
+				break;
+			case 'h':
+				$s .= "substring(convert(char(14),$col,0),13,2)";
+				break;
+
+			case 'H':
+				$s .= "replace(str(datepart(hh,$col),2),' ','0')";
+				break;
+
+			case 'i':
+				$s .= "replace(str(datepart(mi,$col),2),' ','0')";
+				break;
+			case 's':
+				$s .= "replace(str(datepart(ss,$col),2),' ','0')";
+				break;
+			case 'a':
+			case 'A':
+				$s .= "substring(convert(char(19),$col,0),18,2)";
+				break;
+
+			default:
+				if ($ch == '\\') {
+					$i++;
+					$ch = substr($fmt,$i,1);
+				}
+				$s .= $this->connection->qstr($ch);
+				break;
+			}
+		}
+		return $s;
+	}
+	
 }

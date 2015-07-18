@@ -18,13 +18,10 @@ if (!defined('ADODB_DIR')) die();
 class ADODB_oracle extends ADOConnection {
 	var $databaseType = "oracle";
 	var $replaceQuote = "''"; // string to use to replace quotes
-	var $concat_operator='||';
 	var $_curs;
 	var $_initdate = true; // init date to YYYY-MM-DD
 	var $metaTablesSQL = 'select table_name from cat';
 	var $metaColumnsSQL = "select cname,coltype,width from col where tname='%s' order by colno";
-	var $sysDate = "TO_DATE(TO_CHAR(SYSDATE,'YYYY-MM-DD'),'YYYY-MM-DD')";
-	var $sysTimeStamp = 'SYSDATE';
 	var $connectSID = true;
 
 	function ADODB_oracle()
