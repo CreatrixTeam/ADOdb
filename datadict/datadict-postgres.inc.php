@@ -557,8 +557,13 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 	}
 
 	// Format date column in sql string given an input format that understands Y M D
-	function FormatDateSQL($fmt, $col=false)
+	function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
+		$col = false;
+
+		if($pParsedColumnName)
+			{$col = $pParsedColumnName['name'];}
+
 		if (!$col) $col = $this->sql_sysTimeStamp;
 		$s = 'TO_CHAR('.$col.",'";
 
