@@ -232,8 +232,13 @@ CREATE TABLE
 	# Used ASA SQL Reference Manual -- http://sybooks.sybase.com/onlinebooks/group-aw/awg0800e/dbrfen8/@ebt-link;pt=16756?target=%25N%15_12018_START_RESTART_N%25
 	# to convert similar Microsoft SQL*Server (mssql) API into Sybase compatible version
 	// Format date column in sql string given an input format that understands Y M D
-	function FormatDateSQL($fmt, $col=false)
+	function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
+		$col = false;
+
+		if($pParsedColumnName)
+			{$col = $pParsedColumnName['name'];}
+
 		if (!$col) $col = $this->sql_sysTimeStamp;
 		$s = '';
 

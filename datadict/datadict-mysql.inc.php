@@ -181,8 +181,13 @@ class ADODB2_mysql extends ADODB_DataDict {
 		return $sql;
 	}
 
-	function FormatDateSQL($fmt, $col=false)
+	function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
+		$col = false;
+
+		if($pParsedColumnName)
+			{$col = $pParsedColumnName['name'];}
+
 		if($this->databaseType !== "mysqli")
 		{
 			if (!$col) {

@@ -68,8 +68,13 @@ class ADODB2_ibase extends ADODB_DataDict {
 	// Format date column in sql string given an input format that understands Y M D
 	// Only since Interbase 6.0 - uses EXTRACT
 	// problem - does not zero-fill the day and month yet
-	function FormatDateSQL($fmt, $col=false)
+	function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
+		$col = false;
+
+		if($pParsedColumnName)
+			{$col = $pParsedColumnName['name'];}
+
 		if (!$col) $col = $this->sql_sysDate;
 		$s = '';
 

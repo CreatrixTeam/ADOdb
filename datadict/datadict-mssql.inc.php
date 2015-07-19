@@ -401,8 +401,13 @@ CREATE TABLE
 
 	}
 
-	function FormatDateSQL($fmt, $col=false)
+	function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
+		$col = false;
+
+		if($pParsedColumnName)
+			{$col = $pParsedColumnName['name'];}
+
 		if (!$col) $col = $this->sql_sysTimeStamp;
 		$s = '';
 

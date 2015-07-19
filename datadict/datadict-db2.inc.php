@@ -141,8 +141,13 @@ class ADODB2_db2 extends ADODB_DataDict {
 		return $sql;
 	}
 
-	function FormatDateSQL($fmt, $col=false)
+	function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
+		$col = false;
+
+		if($pParsedColumnName)
+			{$col = $pParsedColumnName['name'];}
+
 		if($this->databaseType !== "odbc_db2")
 		{
 			// use right() and replace() ?

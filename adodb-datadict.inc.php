@@ -1121,15 +1121,127 @@ class ADODB_DataDict {
 		{}
 
 	/**
-	*	ACCESS: PUBLIC
-	*		Format date column in sql string given an input format that understands Y M D. Refer
-	*		to ADOConnection::SQLDate()
+	*	ACCESS: FINAL PUBLIC
+	*	Format date column in sql string given an input format that understands Y M D. Refer
+	*			to ADOConnection::SQLDate() for specification. The parameter $pColumnName
+	*			accepts a formated name per the ADODB_DataDict::ParseIdentifierName specification.
 	*/
 	function FormatDateSQL($pFormat, $pColumnName = false)
 	{
-		if (!$pColumnName) {
-			$pColumnName = $this->sql_sysDate;
+		if(!$pColumnName) 
+			{return $this->_FormatDateSQL($pFormat, false);}
+
+		return $this->_FormatDateSQL($pFormat, 
+				$this->ParseIdentifierName($pColumnName));
+	}
+
+	/**
+	*	ACCESS: PROTECTED
+	*	Format date column in sql string given an input format that understands Y M D. Refer
+	*			to ADOConnection::SQLDate() for specification
+	*	@param $pFormat	Refer to ADOConnection::SQLDate()
+	*	@param $pParsedColumnName The parsed info of identifier name. Refer to ADODB_DataDict::ParseIdentifierName for full specification of the return.
+	*/
+	function _FormatDateSQL($pFormat, $pParsedColumnName = false)
+	{
+		if (!$pParsedColumnName) {
+			return $this->sql_sysDate;
 		}
-		return $pColumnName; // child class implement
+		return $pParsedColumnName["name"]; // child class implement
+	}
+	
+	/**
+	*	ACCESS: PUBLIC
+	*
+	* Will parse identifier name formatted using ADODB standardize identifier name format.
+	* If identifier name is identifierName, the following can be passed:
+	* 	FORM 1: identifierName = To keep default old behavior. (pre 25/jun/215)
+	* 	FORM 2: `identifierName` = To quote identifierName with identifier or string quotation,
+	*			and keep identifier name without case normalization. Some drivers will normalize 
+	*			regardless at the moment.
+	*	FORM 3: (identifierName) = To case normalize identifierName.
+	*	FORM 4: `(identifierName)` = To quote identifierName with identifier or string quotation 
+	*			and case normalize identifierName.
+	* The parameter pPassedIsToNormalizeParameter is used for backward compatibility. Some 
+	*		functions in ADODB already had support for normalization using a normalization 
+	*		boolean parameter, which we shall call isToNormalize, with default value 'true'. All
+	*		such functions default values have been, or will be changed from their legacy 
+	*		true/false to null. isToNormalize parameter will be passed as 
+	*		pPassedIsToNormalizeParameter. If pPassedIsToNormalizeParameter is:
+	*		- NULL: This means legacy code did not set isToNormalize, and would also have only
+	*			used FORM 1. Hence, if FORM 1, default normlization behavior is 
+	*			used (true).
+	*		- true/false: This means legacy code explicitly set isToNormalize. and would also 
+	*			have only used FORM 1. Hence, if FORM 1, normlization is done based 
+	*			on the value of pPassedIsToNormalizeParameter
+	*		- -1: This means the ADODB function calling ParseIdentifierName did not have a
+	*			isToNormalize parameter.
+	*		pPassedIsToNormalizeParameter must only be used by legacy ADODB functions (pre 25/jun/215)
+	*
+	* @param pIdentifierName					Identifier name
+	* @param pPassedIsToNormalizeParameter		This is used for backward compatibility Possible values are '-1', 'null', 'true', 'false'
+	*/
+	function ParseIdentifierName($pIdentifierName,  $pPassedIsToNormalizeParameter = -1)
+	{
+		$vIdentifierName = trim($pIdentifierName);
+		$vMatches = NULL;
+		$vReturn = array
+		(
+			"isToQuote" => false,
+			"isToNormalize" => false,
+			"name" => $vIdentifierName
+		);
+
+		if(preg_match('/^`(.+)`$/', $vIdentifierName, $vMatches))
+		{
+			$vReturn["isToQuote"] = true;
+			$vReturn["name"] = $vMatches[1];
+			
+			if(preg_match('/^\((.+)\)$/', $vMatches[1], $vMatches))
+			{
+				$vReturn["isToNormalize"] = true;
+				$vReturn["name"] = $vMatches[1];
+				
+			}
+		}
+		elseif(preg_match('/^\((.+)\)$/', $vIdentifierName, $vMatches))
+		{
+			$vReturn["isToNormalize"] = true;
+			$vReturn["name"] = $vMatches[1];
+		}
+
+		if(!$vReturn["isToQuote"] && !$vReturn["isToNormalize"])
+		{
+			if(($pPassedIsToNormalizeParameter === true) ||
+				($pPassedIsToNormalizeParameter === NULL))
+			{
+				$vReturn["isToNormalize"] = true;
+			}
+		}
+
+		return $vReturn;
+	}
+	
+	/**
+	*	ACCESS: PUBLIC
+	*/
+	function ParseTableName($pTableName, $pPassedIsToNormalizeParameter = -1)
+	{
+		$vReturn = array();
+
+		if(preg_match('/^(.+)\.(.+)$/', $pTableName, $vMatches))
+		{
+			$vReturn['schema'] = $this->ParseIdentifierName($vMatches[1],
+					$pPassedIsToNormalizeParameter);
+			$vReturn['table'] = $this->ParseIdentifierName($vMatches[2],
+					$pPassedIsToNormalizeParameter);
+		}
+		else
+		{
+			$vReturn['table'] = $this->ParseIdentifierName($pTableName,
+					$pPassedIsToNormalizeParameter);
+		}
+
+		return $vReturn;
 	}
 } // class

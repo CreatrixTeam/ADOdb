@@ -308,8 +308,13 @@ end;
 	}
 	
 	//WARNING: requires oracle 9 or later due to dependency on 'SYSDATE'. See $this->sql_sysTimeStamp
-	function FormatDateSQL($fmt, $col=false)
+	function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
+		$col = false;
+
+		if($pParsedColumnName)
+			{$col = $pParsedColumnName['name'];}
+
 		if (!$col) {
 			$col = $this->sql_sysTimeStamp;
 		}
