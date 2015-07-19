@@ -387,7 +387,8 @@ END;
 		if ($this->autoCommit) {
 			$this->BeginTrans();
 		}
-		return $this->GetOne("select $col from $tables where $where for update");
+		$vSQL = $this->_dataDict->RowLockSQL($tables,$where,$col);
+		return $this->GetOne($vSQL[0]);
 	}
 
 	function MetaTables($ttype=false,$showSchema=false,$mask=false)

@@ -155,7 +155,7 @@ class ADODB2_db2 extends ADODB_DataDict {
 
 			/* use TO_CHAR() if $fmt is TO_CHAR() allowed fmt */
 			if ($fmt== 'Y-m-d H:i:s')
-				return 'TO_CHAR('.$col.", 'YYYY-MM-DD HH24:MI:SS')";
+				return array('TO_CHAR('.$col.", 'YYYY-MM-DD HH24:MI:SS')");
 
 			$s = '';
 
@@ -166,38 +166,38 @@ class ADODB2_db2 extends ADODB_DataDict {
 				switch($ch) {
 				case 'Y':
 				case 'y':
-					if ($len==1) return "year($col)";
+					if ($len==1) return array("year($col)");
 					$s .= "char(year($col))";
 					break;
 				case 'M':
-					if ($len==1) return "monthname($col)";
+					if ($len==1) return array("monthname($col)");
 					$s .= "substr(monthname($col),1,3)";
 					break;
 				case 'm':
-					if ($len==1) return "month($col)";
+					if ($len==1) return array("month($col)");
 					$s .= "right(digits(month($col)),2)";
 					break;
 				case 'D':
 				case 'd':
-					if ($len==1) return "day($col)";
+					if ($len==1) return array("day($col)");
 					$s .= "right(digits(day($col)),2)";
 					break;
 				case 'H':
 				case 'h':
-					if ($len==1) return "hour($col)";
+					if ($len==1) return array("hour($col)");
 					if ($col != $this->sql_sysDate) $s .= "right(digits(hour($col)),2)";
 					else $s .= "''";
 					break;
 				case 'i':
 				case 'I':
-					if ($len==1) return "minute($col)";
+					if ($len==1) return array("minute($col)");
 					if ($col != $this->sql_sysDate)
 						$s .= "right(digits(minute($col)),2)";
 						else $s .= "''";
 					break;
 				case 'S':
 				case 's':
-					if ($len==1) return "second($col)";
+					if ($len==1) return array("second($col)");
 					if ($col != $this->sql_sysDate)
 						$s .= "right(digits(second($col)),2)";
 					else $s .= "''";
@@ -210,7 +210,7 @@ class ADODB2_db2 extends ADODB_DataDict {
 					$s .= $this->connection->qstr($ch);
 				}
 			}
-			return $s;
+			return (empty($s) ? array() : array($s));
 		}
 		else
 		{
@@ -262,7 +262,10 @@ class ADODB2_db2 extends ADODB_DataDict {
 					$s .= $this->connection->qstr($ch);
 				}
 			}
-			return $s;
+			return (empty($s) ? array() : array($s));
 		}
 	}	
+
+	function RowLockSQL($tables,$where,$col='1 as adodbignore')
+		{return array("select $col from $tables where $where for update");}
 }

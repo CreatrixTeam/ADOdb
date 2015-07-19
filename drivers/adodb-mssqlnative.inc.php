@@ -367,11 +367,7 @@ class ADODB_mssqlnative extends ADOConnection {
 		See http://www.swynk.com/friends/achigrik/SQL70Locks.asp
 	*/
 	function RowLock($tables,$where,$col='1 as adodbignore')
-	{
-		if ($col == '1 as adodbignore') $col = 'top 1 null as ignore';
-		if (!$this->transCnt) $this->BeginTrans();
-		return $this->GetOne("select $col from $tables with (ROWLOCK,HOLDLOCK) where $where");
-	}
+		{return ADOConnection::RowLock($tables,$where,$col);}
 
 	function SelectDB($dbName)
 	{

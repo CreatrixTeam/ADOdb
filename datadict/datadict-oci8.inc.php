@@ -393,7 +393,9 @@ end;
 
 			}
 		}
-		return $s. "')";
+		return array($s. "')");
 	}
 
+	function RowLockSQL($tables,$where,$col='1 as adodbignore')
+		{return array("select $col from $tables where $where for update");}
 }

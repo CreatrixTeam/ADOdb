@@ -1145,9 +1145,9 @@ class ADODB_DataDict {
 	function _FormatDateSQL($pFormat, $pParsedColumnName = false)
 	{
 		if (!$pParsedColumnName) {
-			return $this->sql_sysDate;
+			return array($this->sql_sysDate);
 		}
-		return $pParsedColumnName["name"]; // child class implement
+		return array($pParsedColumnName["name"]); // child class implement
 	}
 	
 	/**
@@ -1244,4 +1244,12 @@ class ADODB_DataDict {
 
 		return $vReturn;
 	}
+
+	/**
+	*	ACCESS: PUBLIC
+	*	Returns the sql required for locking a row. Refer to ADOConnection::RowLock() for 
+	*		specification
+	*/	
+	function RowLockSQL($pTableNamesSqlSegment, $pWhereSqlSegment, $col='1 as adodbignore')
+		{return array();}
 } // class

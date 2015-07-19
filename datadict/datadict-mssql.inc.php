@@ -462,7 +462,13 @@ CREATE TABLE
 				break;
 			}
 		}
-		return $s;
+		return (empty($s) ? array() : array($s));
 	}
 	
+	function RowLockSQL($tables,$where,$col='1 as adodbignore')
+	{
+		if ($col == '1 as adodbignore') $col = 'top 1 null as ignore';
+
+		return array("select $col from $tables with (ROWLOCK,HOLDLOCK) where $where");
+	}
 }

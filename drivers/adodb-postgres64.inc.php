@@ -182,12 +182,6 @@ class ADODB_postgres64 extends ADOConnection{
 		return pg_query($this->_connectionID, 'begin '.$this->_transmode);
 	}
 
-	function RowLock($tables,$where,$col='1 as adodbignore')
-	{
-		if (!$this->transCnt) $this->BeginTrans();
-		return $this->GetOne("select $col from $tables where $where for update");
-	}
-
 	// returns true/false.
 	function CommitTrans($ok=true)
 	{

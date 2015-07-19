@@ -134,7 +134,8 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 	function RowLock($tables,$where,$col='1 as adodbignore')
 	{
 		if ($this->_autocommit) $this->BeginTrans();
-		return $this->GetOne("select $col from $tables where $where for update");
+		$vSQL = $this->_dataDict->RowLockSQL($tables,$where,$col);
+		return $this->GetOne($vSQL[0]);
 	}
 
 	function MetaTables($ttype=false,$showSchema=false, $qtable="%", $qschema="%")

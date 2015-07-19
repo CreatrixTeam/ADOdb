@@ -203,14 +203,6 @@ class ADODB_mysqli extends ADOConnection {
 		return true;
 	}
 
-	function RowLock($tables,$where='',$col='1 as adodbignore')
-	{
-		if ($this->transCnt==0) $this->BeginTrans();
-		if ($where) $where = ' where '.$where;
-		$rs = $this->Execute("select $col from $tables $where for update");
-		return !empty($rs);
-	}
-
 	/**
 	 * Quotes a string to be sent to the database
 	 * When there is no active connection,

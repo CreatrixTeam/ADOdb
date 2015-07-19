@@ -79,4 +79,7 @@ class ADODB2_informix extends ADODB_DataDict {
 		return $suffix;
 	}
 
+	function RowLockSQL($tables,$where,$col='1 as adodbignore')
+		{return array("select $col from $tables where $where for update");}
+	
 }

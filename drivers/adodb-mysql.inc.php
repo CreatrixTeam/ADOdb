@@ -269,6 +269,7 @@ class ADODB_mysql extends ADOConnection {
 	function BeginTrans()
 	{
 		if ($this->debug) ADOConnection::outp("Transactions not supported in 'mysql' driver. Use 'mysqlt' or 'mysqli' driver");
+		return false;
 	}
 
 	function _affectedrows()

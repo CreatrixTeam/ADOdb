@@ -293,6 +293,17 @@ CREATE TABLE
 				break;
 			}
 		}
-		return $s;
+		return (empty($s) ? array() : array($s));
 	}
+
+	// http://www.isug.com/Sybase_FAQ/ASE/section6.1.html#6.1.4
+	function RowLockSQL($tables,$where,$col='1 as adodbignore')
+	{
+		if($col == "1 as adodbignore")
+			{$col = "top 1 null as ignore";}
+		$tables = str_replace(',',' HOLDLOCK,',$tables);
+
+		return array("select $col from $tables HOLDLOCK where $where");
+	}
+
 }

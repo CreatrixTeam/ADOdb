@@ -264,7 +264,8 @@ class ADODB_ibase extends ADOConnection {
 		if ($this->autoCommit) {
 			$this->BeginTrans();
 		}
-		$this->Execute("UPDATE $table SET $col=$col WHERE $where "); // is this correct - jlim?
+		$vSQL = $this->_dataDict->RowLockSQL($tables,$where,$col);
+		$this->Execute($vSQL[0]);
 		return 1;
 	}
 

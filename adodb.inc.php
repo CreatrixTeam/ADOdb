@@ -744,7 +744,8 @@ if (!defined('_ADODB_LAYER')) {
 
 	// Format date column in sql string given an input format that understands Y M D
 	function SQLDate($fmt, $col=false) {
-		return $this->_dataDict->FormatDateSQL($fmt, $col);
+		$vReturn = $this->_dataDict->FormatDateSQL($fmt, $col);
+		return (empty($vReturn) ? "" : $vReturn[0]);
 	}
 
 	/**
@@ -828,6 +829,22 @@ if (!defined('_ADODB_LAYER')) {
 	 * @param $where	where clause to use, eg: "WHERE row=12". If left empty, will escalate to table lock
 	 */
 	function RowLock($table,$where,$col='1 as adodbignore') {
+		if($this->hasTransactions)
+		{
+			$tADORecordSet = null;
+			$tSQL = "";
+
+			if($this->transCnt==0) 
+			{
+				if(!$this->BeginTrans())
+					{return false;}
+			}
+
+			$tSQL = $this->_dataDict->RowLockSQL($table,$where,$col);
+			$tADORecordSet = $this->Execute($tSQL[0]);
+
+			return !empty($tADORecordSet);
+		}
 		return false;
 	}
 

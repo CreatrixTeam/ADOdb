@@ -121,6 +121,11 @@ class ADODB2_ibase extends ADODB_DataDict {
 				break;
 			}
 		}
-		return $s;
+		return (empty($s) ? array() : array($s));
+	}
+
+	function RowLockSQL($table,$where,$col=false)
+	{
+		return array("UPDATE $table SET $col=$col WHERE $where "); // is this correct - jlim?
 	}
 }

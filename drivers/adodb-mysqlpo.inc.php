@@ -59,14 +59,6 @@ class ADODB_mysqlt extends ADODB_mysql {
 		return true;
 	}
 
-	function RowLock($tables,$where='',$col='1 as adodbignore')
-	{
-		if ($this->transCnt==0) $this->BeginTrans();
-		if ($where) $where = ' where '.$where;
-		$rs = $this->Execute("select $col from $tables $where for update");
-		return !empty($rs);
-	}
-
 }
 
 class ADORecordSet_mysqlt extends ADORecordSet_mysql{

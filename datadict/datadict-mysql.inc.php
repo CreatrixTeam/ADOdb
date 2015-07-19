@@ -279,7 +279,7 @@ class ADODB2_mysql extends ADODB_DataDict {
 			if ($concat) {
 				$s = "CONCAT($s)";
 			}
-			return $s;
+			return array($s);
 		}
 		else
 		{
@@ -355,7 +355,15 @@ class ADODB2_mysql extends ADODB_DataDict {
 			}
 			$s.="')";
 			if ($concat) $s = "CONCAT($s)";
-			return $s;
+			return array($s);
 		}
 	}
+
+	function RowLockSQL($tables,$where='',$col='1 as adodbignore')
+	{
+		if ($where) $where = ' where '.$where;
+
+		return array("select $col from $tables $where for update");
+	}
+
 }

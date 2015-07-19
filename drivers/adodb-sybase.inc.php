@@ -85,15 +85,6 @@ class ADODB_sybase extends ADOConnection {
 		return true;
 	}
 
-	// http://www.isug.com/Sybase_FAQ/ASE/section6.1.html#6.1.4
-	function RowLock($tables,$where,$col='top 1 null as ignore')
-	{
-		if (!$this->_hastrans) $this->BeginTrans();
-		$tables = str_replace(',',' HOLDLOCK,',$tables);
-		return $this->GetOne("select $col from $tables HOLDLOCK where $where");
-
-	}
-
 	function SelectDB($dbName)
 	{
 		$this->database = $dbName;
