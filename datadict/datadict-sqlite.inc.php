@@ -86,4 +86,12 @@ class ADODB2_sqlite extends ADODB_DataDict {
 		return array();
 	}
 
+	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	{
+		return array
+		(
+			sprintf("CREATE TABLE %s (id integer)", $pParsedSequenceName['name']),
+			"insert into $pParsedSequenceName[name] values($pStartID)"
+		);
+	}
 }

@@ -272,9 +272,10 @@ class ADODB_ibase extends ADOConnection {
 
 	function CreateSequence($seqname,$startID=1)
 	{
-		$ok = $this->Execute(("INSERT INTO RDB\$GENERATORS (RDB\$GENERATOR_NAME) VALUES (UPPER('$seqname'))" ));
+		$vSQL = $this->_dataDict->CreateSequenceSQL($seqname,$startID);
+		$ok = $this->Execute($vSQL[0]);
 		if (!$ok) return false;
-		return $this->Execute("SET GENERATOR $seqname TO ".($startID-1).';');
+		return !(!$this->Execute($vSQL[1]));
 	}
 
 	function DropSequence($seqname)
@@ -288,8 +289,7 @@ class ADODB_ibase extends ADOConnection {
 		$getnext = ("SELECT Gen_ID($seqname,1) FROM RDB\$DATABASE");
 		$rs = @$this->Execute($getnext);
 		if (!$rs) {
-			$this->Execute(("INSERT INTO RDB\$GENERATORS (RDB\$GENERATOR_NAME) VALUES (UPPER('$seqname'))" ));
-			$this->Execute("SET GENERATOR $seqname TO ".($startID-1).';');
+			$this->CreateSequence($seqname, $startID);
 			$rs = $this->Execute($getnext);
 		}
 		if ($rs && !$rs->EOF) {

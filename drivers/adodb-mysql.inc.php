@@ -280,21 +280,16 @@ class ADODB_mysql extends ADOConnection {
 	 // See http://www.mysql.com/doc/M/i/Miscellaneous_functions.html
 	// Reference on Last_Insert_ID on the recommended way to simulate sequences
 	var $_genIDSQL = "update %s set id=LAST_INSERT_ID(id+1);";
-	var $_genSeqSQL = "create table if not exists %s (id int not null)";
 	var $_genSeqCountSQL = "select count(*) from %s";
-	var $_genSeq2SQL = "insert into %s values (%s)";
 	var $_dropSeqSQL = "drop table if exists %s";
 
 	function CreateSequence($seqname='adodbseq',$startID=1)
 	{
-		if (empty($this->_genSeqSQL)) return false;
-		$u = strtoupper($seqname);
-
-		$ok = $this->Execute(sprintf($this->_genSeqSQL,$seqname));
+		$vSQL = $this->_dataDict->CreateSequenceSQL($seqname,$startID);
+		$ok = $this->Execute($vSQL[0]);
 		if (!$ok) return false;
-		return $this->Execute(sprintf($this->_genSeq2SQL,$seqname,$startID-1));
+		return $this->Execute($vSQL[1]);
 	}
-
 
 	function GenID($seqname='adodbseq',$startID=1)
 	{
@@ -308,10 +303,11 @@ class ADODB_mysql extends ADOConnection {
 		$rs = @$this->Execute($getnext);
 		if (!$rs) {
 			if ($holdtransOK) $this->_transOK = true; //if the status was ok before reset
-			$u = strtoupper($seqname);
-			$this->Execute(sprintf($this->_genSeqSQL,$seqname));
+			
+			$tSQL = $this->_dataDict->CreateSequenceSQL($seqname,$startID);
+			$this->Execute($tSQL[0]);
 			$cnt = $this->GetOne(sprintf($this->_genSeqCountSQL,$seqname));
-			if (!$cnt) $this->Execute(sprintf($this->_genSeq2SQL,$seqname,$startID-1));
+			if (!$cnt) $this->Execute($tSQL[1]);
 			$rs = $this->Execute($getnext);
 		}
 

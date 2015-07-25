@@ -1235,7 +1235,7 @@ if (!defined('_ADODB_LAYER')) {
 		if (empty($this->_genSeqSQL)) {
 			return false;
 		}
-		return $this->Execute(sprintf($this->_genSeqSQL,$seqname,$startID));
+		return !(!$this->Execute(sprintf($this->_genSeqSQL,$seqname,$startID)));
 	}
 
 	function DropSequence($seqname='adodbseq') {

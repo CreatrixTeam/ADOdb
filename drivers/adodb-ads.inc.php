@@ -137,7 +137,8 @@ class ADODB_ads extends ADOConnection {
         // returns true or false
         function CreateSequence( $seqname,$start=1)
   {
-                $res =  $this->Execute("CREATE TABLE $seqname ( ID autoinc( 1 ) ) IN DATABASE");
+				$vSQL = $this->_dataDict->CreateSequenceSQL($seqname,$start);
+                $res =  $this->Execute($vSQL[0]);
                 if(!$res){
                         print $this->ErrorMsg();
                         return false;
@@ -167,11 +168,9 @@ class ADODB_ads extends ADOConnection {
         {
                 $go = $this->Execute("select * from $seqname");
                 if (!$go){
-                        $res = $this->Execute("CREATE TABLE $seqname ( ID autoinc( 1 ) ) IN DATABASE");
-                        if(!res){
-                                print $this->ErrorMsg();
-                                return false;
-                        }
+                        if($this->CreateSequence($seqname,$start) === false){
+							return false;
+						}
                 }
                 $res = $this->Execute("INSERT INTO $seqname VALUES( DEFAULT )");
                 if(!$res){

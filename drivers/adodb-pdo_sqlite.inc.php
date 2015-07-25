@@ -28,9 +28,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	var $replaceQuote    = "''";
 	var $hasGenID        = true;
 	var $_genIDSQL       = "UPDATE %s SET id=id+1 WHERE id=%s";
-	var $_genSeqSQL      = "CREATE TABLE %s (id integer)";
 	var $_genSeqCountSQL = 'SELECT COUNT(*) FROM %s';
-	var $_genSeq2SQL     = 'INSERT INTO %s VALUES(%s)';
 	var $_dropSeqSQL     = 'DROP TABLE %s';
 	var $random='abs(random())';
 	var $_bindInputArray = true;
@@ -69,12 +67,13 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		while (--$MAXLOOPS>=0) {
 			@($num = array_pop($this->GetCol("SELECT id FROM {$seq}")));
 			if ($num === false || !is_numeric($num)) {
-				@$this->Execute(sprintf($this->_genSeqSQL ,$seq));
+				$tSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
+				@$this->Execute($tSQL[0]);
 				$start -= 1;
 				$num = '0';
 				$cnt = $this->GetOne(sprintf($this->_genSeqCountSQL,$seq));
 				if (!$cnt) {
-					$ok = $this->Execute(sprintf($this->_genSeq2SQL,$seq,$start));
+					$ok = $this->Execute($tSQL[1]);
 				}
 				if (!$ok) return false;
 			}
@@ -94,10 +93,13 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 
 	function CreateSequence($seqname='adodbseq',$start=1)
 	{
-		$ok = $this->Execute(sprintf($this->_genSeqSQL,$seqname));
-		if (!$ok) return false;
+		$vSQL = $this->_dataDict->CreateSequenceSQL($seqname,$start);
+		$ok = $this->Execute($vSQL[0]);
+		if (!$ok) {
+			return false;
+		}
 		$start -= 1;
-		return $this->Execute("insert into $seqname values($start)");
+		return $this->Execute($vSQL[1]);
 	}
 
 	function SetTransactionMode($transaction_mode)

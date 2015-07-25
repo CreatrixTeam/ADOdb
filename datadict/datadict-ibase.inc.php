@@ -128,4 +128,13 @@ class ADODB2_ibase extends ADODB_DataDict {
 	{
 		return array("UPDATE $table SET $col=$col WHERE $where "); // is this correct - jlim?
 	}
+	
+	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	{
+		return array
+		(
+			"INSERT INTO RDB\$GENERATORS (RDB\$GENERATOR_NAME) VALUES (UPPER('$pParsedSequenceName[name]'))",
+			"SET GENERATOR $pParsedSequenceName[name] TO ".($pStartID-1).';'
+		);
+	}
 }

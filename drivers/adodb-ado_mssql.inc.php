@@ -42,6 +42,30 @@ class  ADODB_ado_mssql extends ADODB_ado {
 	        $this->ADODB_ado();
 	}
 
+	function ServerInfo()
+	{
+	global $ADODB_FETCH_MODE;
+
+
+		if ($this->fetchMode === false) {
+			$savem = $ADODB_FETCH_MODE;
+			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		} else
+			$savem = $this->SetFetchMode(ADODB_FETCH_NUM);
+
+		$row = $this->GetRow("execute sp_server_info 2");
+
+
+		if ($this->fetchMode === false) {
+			$ADODB_FETCH_MODE = $savem;
+		} else
+			$this->SetFetchMode($savem);
+
+		$arr['description'] = $row[2];
+		$arr['version'] = ADOConnection::_findvers($arr['description']);
+		return $arr;
+	}
+	
 	function _insertid()
 	{
 	        return $this->GetOne('select SCOPE_IDENTITY()');
@@ -106,16 +130,20 @@ class  ADODB_ado_mssql extends ADODB_ado {
 
 	function CreateSequence($seq='adodbseq',$start=1)
 	{
-
-		$this->Execute('BEGIN TRANSACTION adodbseq');
-		$start -= 1;
-		$this->Execute("create table $seq (id float(53))");
-		$ok = $this->Execute("insert into $seq with (tablock,holdlock) values($start)");
+		
+		$vWasTransactionStartSuccessful = $this->BeginTrans();
+		$vSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
+		$this->Execute($vSQL[0]);
+		$ok = $this->Execute($vSQL[1]);
 		if (!$ok) {
-				$this->Execute('ROLLBACK TRANSACTION adodbseq');
-				return false;
+			if($vWasTransactionStartSuccessful) {
+				$this->RollbackTrans();
+			}
+			return false;
 		}
-		$this->Execute('COMMIT TRANSACTION adodbseq');
+		if($vWasTransactionStartSuccessful) {
+			$this->CommitTrans();
+		}
 		return true;
 	}
 
@@ -125,12 +153,10 @@ class  ADODB_ado_mssql extends ADODB_ado {
 		$this->Execute('BEGIN TRANSACTION adodbseq');
 		$ok = $this->Execute("update $seq with (tablock,holdlock) set id = id + 1");
 		if (!$ok) {
-			$this->Execute("create table $seq (id float(53))");
-			$ok = $this->Execute("insert into $seq with (tablock,holdlock) values($start)");
-			if (!$ok) {
+			if($this->CreateSequence($seq, $start + 1) === false) {
 				$this->Execute('ROLLBACK TRANSACTION adodbseq');
 				return false;
-			}
+			}	
 			$this->Execute('COMMIT TRANSACTION adodbseq');
 			return $start;
 		}

@@ -119,13 +119,6 @@ class ADODB_mssql extends ADOConnection {
 		} else
 			$savem = $this->SetFetchMode(ADODB_FETCH_NUM);
 
-		if (0) {
-			$stmt = $this->PrepareSP('sp_server_info');
-			$val = 2;
-			$this->Parameter($stmt,$val,'attribute_id');
-			$row = $this->GetRow($stmt);
-		}
-
 		$row = $this->GetRow("execute sp_server_info 2");
 
 
@@ -202,16 +195,20 @@ class ADODB_mssql extends ADOConnection {
 
 	function CreateSequence($seq='adodbseq',$start=1)
 	{
-
-		$this->Execute('BEGIN TRANSACTION adodbseq');
-		$start -= 1;
-		$this->Execute("create table $seq (id float(53))");
-		$ok = $this->Execute("insert into $seq with (tablock,holdlock) values($start)");
+		
+		$vWasTransactionStartSuccessful = $this->BeginTrans();
+		$vSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
+		$this->Execute($vSQL[0]);
+		$ok = $this->Execute($vSQL[1]);
 		if (!$ok) {
-				$this->Execute('ROLLBACK TRANSACTION adodbseq');
-				return false;
+			if($vWasTransactionStartSuccessful) {
+				$this->RollbackTrans();
+			}
+			return false;
 		}
-		$this->Execute('COMMIT TRANSACTION adodbseq');
+		if($vWasTransactionStartSuccessful) {
+			$this->CommitTrans();
+		}
 		return true;
 	}
 
@@ -221,12 +218,10 @@ class ADODB_mssql extends ADOConnection {
 		$this->Execute('BEGIN TRANSACTION adodbseq');
 		$ok = $this->Execute("update $seq with (tablock,holdlock) set id = id + 1");
 		if (!$ok) {
-			$this->Execute("create table $seq (id float(53))");
-			$ok = $this->Execute("insert into $seq with (tablock,holdlock) values($start)");
-			if (!$ok) {
+			if($this->CreateSequence($seq, $start + 1) === false) {
 				$this->Execute('ROLLBACK TRANSACTION adodbseq');
 				return false;
-			}
+			}	
 			$this->Execute('COMMIT TRANSACTION adodbseq');
 			return $start;
 		}

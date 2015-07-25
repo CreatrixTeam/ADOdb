@@ -16,4 +16,9 @@ if (!defined('ADODB_DIR')) die();
 class ADODB2_ads extends ADODB_DataDict {
 	var $databaseType = "ads";
 	var $sql_concatenateOperator = '';
+
+	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	{
+		return array("CREATE TABLE $pParsedSequenceName[name] ( ID autoinc( 1 ) ) IN DATABASE");
+	}
 }

@@ -238,21 +238,20 @@ class ADODB_sqlite extends ADOConnection {
 
 		Will return false if unable to generate an ID after $MAXLOOPS attempts.
 	*/
-	var $_genSeqSQL = "create table %s (id integer)";
 
 	function GenID($seq='adodbseq',$start=1)
 	{
 		// if you have to modify the parameter below, your database is overloaded,
 		// or you need to implement generation of id's yourself!
 		$MAXLOOPS = 100;
-		//$this->debug=1;
 		while (--$MAXLOOPS>=0) {
 			@($num = $this->GetOne("select id from $seq"));
 			if ($num === false) {
-				$this->Execute(sprintf($this->_genSeqSQL ,$seq));
+				$tSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
+				$this->Execute($tSQL[0]);
 				$start -= 1;
 				$num = '0';
-				$ok = $this->Execute("insert into $seq values($start)");
+				$ok = $this->Execute($tSQL[1]);
 				if (!$ok) {
 					return false;
 				}
@@ -273,15 +272,13 @@ class ADODB_sqlite extends ADOConnection {
 
 	function CreateSequence($seqname='adodbseq',$start=1)
 	{
-		if (empty($this->_genSeqSQL)) {
-			return false;
-		}
-		$ok = $this->Execute(sprintf($this->_genSeqSQL,$seqname));
+		$vSQL = $this->_dataDict->CreateSequenceSQL($seqname,$start);
+		$ok = $this->Execute($vSQL[0]);
 		if (!$ok) {
 			return false;
 		}
 		$start -= 1;
-		return $this->Execute("insert into $seqname values($start)");
+		return $this->Execute($vSQL[1]);
 	}
 
 	var $_dropSeqSQL = 'drop table %s';

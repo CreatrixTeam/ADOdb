@@ -155,14 +155,6 @@ class ADODB_db2 extends ADOConnection {
 		return $info;
 	}
 
-	function CreateSequence($seqname='adodbseq',$start=1)
-	{
-		if (empty($this->_genSeqSQL)) return false;
-		$ok = $this->Execute(sprintf($this->_genSeqSQL,$seqname,$start));
-		if (!$ok) return false;
-		return true;
-	}
-
 	function DropSequence($seqname)
 	{
 		if (empty($this->_dropSeqSQL)) return false;

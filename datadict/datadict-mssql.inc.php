@@ -471,4 +471,34 @@ CREATE TABLE
 
 		return array("select $col from $tables with (ROWLOCK,HOLDLOCK) where $where");
 	}
+
+	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	{
+		$vVersion = @intval($this->_serverInfoArray['version']);
+
+		if($vVersion < 9)
+		{
+			$tStartID = $pStartID - 1;
+
+			return array
+			(
+				"create table $pParsedSequenceName[name] (id float(53))",
+				"insert into $pParsedSequenceName[name] with (tablock,holdlock) values($tStartID)"
+			);
+		}
+		elseif($vVersion < 11)
+		{
+			$tStartID = $pStartID - 1;
+
+			return array
+			(
+				"create table $pParsedSequenceName[name] (id int)", //was float(53)
+				"insert into $pParsedSequenceName[name] with (tablock,holdlock) values($tStartID)"
+			);
+		}
+		else
+		{
+			return array("CREATE SEQUENCE $pParsedSequenceName[name] START WITH $pStartID INCREMENT BY 1");
+		}
+	}
 }

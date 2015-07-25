@@ -239,9 +239,9 @@ class ADODB_mssqlnative extends ADOConnection {
 	{
 		if($this->debug) ADOConnection::outp("<hr>CreateSequence($seq,$start)");
 		sqlsrv_begin_transaction($this->_connectionID);
-		$start -= 1;
-		$this->Execute("create table $seq (id int)");//was float(53)
-		$ok = $this->Execute("insert into $seq with (tablock,holdlock) values($start)");
+		$vSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
+		$this->Execute($vSQL[0]);
+		$ok = $this->Execute($vSQL[1]);
 		if (!$ok) {
 			if($this->debug) ADOConnection::outp("<hr>Error: ROLLBACK");
 			sqlsrv_rollback($this->_connectionID);
@@ -259,7 +259,8 @@ class ADODB_mssqlnative extends ADOConnection {
 			$sql = "SELECT name FROM sys.sequences";
 			$this->sequences = $this->GetCol($sql);
 		}
-		$ok = $this->Execute("CREATE SEQUENCE $seq START WITH $start INCREMENT BY 1");
+		$vSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
+		$ok = $this->Execute($vSQL[0]);
 		if (!$ok)
 			die("CANNOT CREATE SEQUENCE" . print_r(sqlsrv_errors(),true));
 		$this->sequences[] = $seq;
@@ -274,10 +275,7 @@ class ADODB_mssqlnative extends ADOConnection {
 		sqlsrv_begin_transaction($this->_connectionID);
 		$ok = $this->Execute("update $seq with (tablock,holdlock) set id = id + 1");
 		if (!$ok) {
-			$start -= 1;
-			$this->Execute("create table $seq (id int)");//was float(53)
-			$ok = $this->Execute("insert into $seq with (tablock,holdlock) values($start)");
-			if (!$ok) {
+			if ($this->CreateSequence2008($seq, $start + 1) === false) {
 				if($this->debug) ADOConnection::outp("<hr>Error: ROLLBACK");
 				sqlsrv_rollback($this->_connectionID);
 				return false;

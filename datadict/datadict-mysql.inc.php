@@ -366,4 +366,13 @@ class ADODB2_mysql extends ADODB_DataDict {
 		return array("select $col from $tables $where for update");
 	}
 
+	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	{
+		return array
+		(
+			sprintf("create table if not exists %s (id int not null)", 
+					$pParsedSequenceName['name']),
+			sprintf("insert into %s values (%s)", $pParsedSequenceName['name'], $pStartID - 1)
+		);
+	}
 }

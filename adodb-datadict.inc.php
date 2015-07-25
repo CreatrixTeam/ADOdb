@@ -1252,4 +1252,29 @@ class ADODB_DataDict {
 	*/	
 	function RowLockSQL($pTableNamesSqlSegment, $pWhereSqlSegment, $col='1 as adodbignore')
 		{return array();}
+		
+	/**
+	*	ACCESS: FINAL PUBLIC
+	*	Creates the SQL required by ADOConnection::CreateSequence(). Refer to that function for
+	*		specification. The parameter $pSequenceName accepts a formated name per the 
+	*		ADODB_DataDict::ParseIdentifierName specification.
+	*/
+	function CreateSequenceSQL($pSequenceName, $pStartID = 1)
+	{
+		$vParsedSequenceName = $this->ParseIdentifierName($pSequenceName);
+
+		return $this->_CreateSequenceSQL($vParsedSequenceName, $pStartID);
+	}
+	
+	/**
+	*	ACCESS: PROTECTED
+	*	Creates the SQL required by ADOConnection::CreateSequence(). Refer to that function for
+	*		specification. The parameter $pParsedSequenceName is the parsed info of an identifier 
+	*		name. Refer to ADODB_DataDict::ParseIdentifierName for full specification of the 
+	*		return.
+	*/
+	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	{
+		return array();
+	}
 } // class
