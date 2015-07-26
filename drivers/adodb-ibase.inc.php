@@ -269,16 +269,7 @@ class ADODB_ibase extends ADOConnection {
 		return 1;
 	}
 
-
-	function CreateSequence($seqname,$startID=1)
-	{
-		$vSQL = $this->_dataDict->CreateSequenceSQL($seqname,$startID);
-		$ok = $this->Execute($vSQL[0]);
-		if (!$ok) return false;
-		return !(!$this->Execute($vSQL[1]));
-	}
-
-	function DropSequence($seqname)
+	function DropSequence($seqname='adodbseq')
 	{
 		$seqname = strtoupper($seqname);
 		$this->Execute("delete from RDB\$GENERATORS where RDB\$GENERATOR_NAME='$seqname'");

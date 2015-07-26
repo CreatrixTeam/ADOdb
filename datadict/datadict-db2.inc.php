@@ -268,4 +268,13 @@ class ADODB2_db2 extends ADODB_DataDict {
 
 	function RowLockSQL($tables,$where,$col='1 as adodbignore')
 		{return array("select $col from $tables where $where for update");}
+
+	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	{
+		return array
+		(
+			sprintf("CREATE SEQUENCE %s START WITH %s NO MAXVALUE NO CYCLE", 
+					$pParsedSequenceName['name'], $pStartID)
+		);
+	}
 }

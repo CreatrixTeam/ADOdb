@@ -69,13 +69,6 @@ class ADODB_oci8 extends ADOConnection {
 	var $_bindInputArray = true;
 	var $hasGenID = true;
 	var $_genIDSQL = "SELECT (%s.nextval) FROM DUAL";
-	var $_genSeqSQL = "
-DECLARE
-	PRAGMA AUTONOMOUS_TRANSACTION;
-BEGIN
-	execute immediate 'CREATE SEQUENCE %s START WITH %s';
-END;
-";
 
 	var $_dropSeqSQL = "DROP SEQUENCE %s";
 	var $hasAffectedRows = true;

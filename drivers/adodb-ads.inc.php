@@ -57,7 +57,6 @@ class ADODB_ads extends ADOConnection {
   //var $longreadlen = 8000; // default number of chars to return for a Blob/Long field
   var $_bindInputArray = false;
   var $curmode = SQL_CUR_USE_DRIVER; // See sqlext.h, SQL_CUR_DEFAULT == SQL_CUR_USE_DRIVER == 2L
-  var $_genSeqSQL = "create table %s (id integer)";
   var $_autocommit = true;
   var $_haserrorfunctions = true;
   var $_has_stupid_odbc_fetch_api_change = true;
@@ -133,23 +132,8 @@ class ADODB_ads extends ADOConnection {
     }
   }
 
-
         // returns true or false
-        function CreateSequence( $seqname,$start=1)
-  {
-				$vSQL = $this->_dataDict->CreateSequenceSQL($seqname,$start);
-                $res =  $this->Execute($vSQL[0]);
-                if(!$res){
-                        print $this->ErrorMsg();
-                        return false;
-                }
-                else
-                        return true;
-
-        }
-
-        // returns true or false
-        function DropSequence($seqname)
+        function DropSequence($seqname='adodbseq')
   {
                 $res = $this->Execute("DROP TABLE $seqname");
                 if(!$res){

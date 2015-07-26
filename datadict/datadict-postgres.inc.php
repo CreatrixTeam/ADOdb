@@ -641,5 +641,13 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 
 	function RowLockSQL($tables,$where,$col='1 as adodbignore')
 		{return array("select $col from $tables where $where for update");}
+
+	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	{
+		return array
+		(
+			sprintf("CREATE SEQUENCE %s START %s", $pParsedSequenceName['name'], $pStartID)
+		);
+	}
 	
 }

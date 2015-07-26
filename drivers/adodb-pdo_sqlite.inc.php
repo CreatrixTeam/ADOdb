@@ -69,7 +69,6 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 			if ($num === false || !is_numeric($num)) {
 				$tSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
 				@$this->Execute($tSQL[0]);
-				$start -= 1;
 				$num = '0';
 				$cnt = $this->GetOne(sprintf($this->_genSeqCountSQL,$seq));
 				if (!$cnt) {
@@ -89,17 +88,6 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 			$fn($this->databaseType,'GENID',-32000,"Unable to generate unique id after $MAXLOOPS attempts",$seq,$num);
 		}
 		return false;
-	}
-
-	function CreateSequence($seqname='adodbseq',$start=1)
-	{
-		$vSQL = $this->_dataDict->CreateSequenceSQL($seqname,$start);
-		$ok = $this->Execute($vSQL[0]);
-		if (!$ok) {
-			return false;
-		}
-		$start -= 1;
-		return $this->Execute($vSQL[1]);
 	}
 
 	function SetTransactionMode($transaction_mode)

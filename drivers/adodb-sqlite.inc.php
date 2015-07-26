@@ -249,7 +249,6 @@ class ADODB_sqlite extends ADOConnection {
 			if ($num === false) {
 				$tSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
 				$this->Execute($tSQL[0]);
-				$start -= 1;
 				$num = '0';
 				$ok = $this->Execute($tSQL[1]);
 				if (!$ok) {
@@ -270,19 +269,8 @@ class ADODB_sqlite extends ADOConnection {
 		return false;
 	}
 
-	function CreateSequence($seqname='adodbseq',$start=1)
-	{
-		$vSQL = $this->_dataDict->CreateSequenceSQL($seqname,$start);
-		$ok = $this->Execute($vSQL[0]);
-		if (!$ok) {
-			return false;
-		}
-		$start -= 1;
-		return $this->Execute($vSQL[1]);
-	}
-
 	var $_dropSeqSQL = 'drop table %s';
-	function DropSequence($seqname)
+	function DropSequence($seqname='adodbseq')
 	{
 		if (empty($this->_dropSeqSQL)) {
 			return false;

@@ -398,4 +398,20 @@ end;
 
 	function RowLockSQL($tables,$where,$col='1 as adodbignore')
 		{return array("select $col from $tables where $where for update");}
+
+	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	{
+		return array
+		(
+			sprintf
+			(
+				"DECLARE\n".
+					"PRAGMA AUTONOMOUS_TRANSACTION;\n".
+				"BEGIN\n".
+					"execute immediate 'CREATE SEQUENCE %s START WITH %s';\n".
+				"END;\n", 
+				$pParsedSequenceName['name'], $pStartID
+			)
+		);
+	}
 }

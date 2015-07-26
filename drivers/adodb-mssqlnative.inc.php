@@ -238,17 +238,7 @@ class ADODB_mssqlnative extends ADOConnection {
 	function CreateSequence2008($seq='adodbseq',$start=1)
 	{
 		if($this->debug) ADOConnection::outp("<hr>CreateSequence($seq,$start)");
-		sqlsrv_begin_transaction($this->_connectionID);
-		$vSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
-		$this->Execute($vSQL[0]);
-		$ok = $this->Execute($vSQL[1]);
-		if (!$ok) {
-			if($this->debug) ADOConnection::outp("<hr>Error: ROLLBACK");
-			sqlsrv_rollback($this->_connectionID);
-			return false;
-		}
-		sqlsrv_commit($this->_connectionID);
-		return true;
+		return ADOConnection::CreateSequence($seq, $start);
 	}
 
 	/**

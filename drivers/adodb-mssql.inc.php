@@ -193,25 +193,6 @@ class ADODB_mssql extends ADOConnection {
 
 	var $_dropSeqSQL = "drop table %s";
 
-	function CreateSequence($seq='adodbseq',$start=1)
-	{
-		
-		$vWasTransactionStartSuccessful = $this->BeginTrans();
-		$vSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
-		$this->Execute($vSQL[0]);
-		$ok = $this->Execute($vSQL[1]);
-		if (!$ok) {
-			if($vWasTransactionStartSuccessful) {
-				$this->RollbackTrans();
-			}
-			return false;
-		}
-		if($vWasTransactionStartSuccessful) {
-			$this->CommitTrans();
-		}
-		return true;
-	}
-
 	function GenID($seq='adodbseq',$start=1)
 	{
 		//$this->debug=1;

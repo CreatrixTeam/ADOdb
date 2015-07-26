@@ -283,14 +283,6 @@ class ADODB_mysql extends ADOConnection {
 	var $_genSeqCountSQL = "select count(*) from %s";
 	var $_dropSeqSQL = "drop table if exists %s";
 
-	function CreateSequence($seqname='adodbseq',$startID=1)
-	{
-		$vSQL = $this->_dataDict->CreateSequenceSQL($seqname,$startID);
-		$ok = $this->Execute($vSQL[0]);
-		if (!$ok) return false;
-		return $this->Execute($vSQL[1]);
-	}
-
 	function GenID($seqname='adodbseq',$startID=1)
 	{
 		// post-nuke sets hasGenID to false
