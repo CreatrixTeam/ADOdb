@@ -269,12 +269,6 @@ class ADODB_ibase extends ADOConnection {
 		return 1;
 	}
 
-	function DropSequence($seqname='adodbseq')
-	{
-		$seqname = strtoupper($seqname);
-		$this->Execute("delete from RDB\$GENERATORS where RDB\$GENERATOR_NAME='$seqname'");
-	}
-
 	function GenID($seqname='adodbseq',$startID=1)
 	{
 		$getnext = ("SELECT Gen_ID($seqname,1) FROM RDB\$DATABASE");

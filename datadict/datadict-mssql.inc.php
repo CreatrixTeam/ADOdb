@@ -501,4 +501,15 @@ CREATE TABLE
 			return array("CREATE SEQUENCE $pParsedSequenceName[name] START WITH $pStartID INCREMENT BY 1");
 		}
 	}
+
+	function _DropSequenceSQL($pParsedSequenceName)
+	{
+		$vVersion = @intval($this->_serverInfoArray['version']);
+		
+		if($vVersion < 11)
+			{return array(sprintf("drop table %s", $pParsedSequenceName['name']));}
+		else
+			{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
+	}
+
 }

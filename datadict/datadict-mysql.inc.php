@@ -375,4 +375,8 @@ class ADODB2_mysql extends ADODB_DataDict {
 			sprintf("insert into %s values (%s)", $pParsedSequenceName['name'], $pStartID - 1)
 		);
 	}
+	
+	function _DropSequenceSQL($pParsedSequenceName)
+		{return array(sprintf("drop table if exists %s", $pParsedSequenceName['name']));}
+
 }

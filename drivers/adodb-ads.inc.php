@@ -132,19 +132,6 @@ class ADODB_ads extends ADOConnection {
     }
   }
 
-        // returns true or false
-        function DropSequence($seqname='adodbseq')
-  {
-                $res = $this->Execute("DROP TABLE $seqname");
-                if(!$res){
-                        print $this->ErrorMsg();
-                        return false;
-                }
-                else
-                        return true;
-        }
-
-
   // returns the generated ID or false
         // checks if the table already exists, else creates the table and inserts a record into the table
         // and gets the ID number of the last inserted record.

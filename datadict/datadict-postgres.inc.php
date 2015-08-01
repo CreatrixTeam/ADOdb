@@ -649,5 +649,8 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 			sprintf("CREATE SEQUENCE %s START %s", $pParsedSequenceName['name'], $pStartID)
 		);
 	}
-	
+
+	function _DropSequenceSQL($pParsedSequenceName)
+		{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
+		
 }

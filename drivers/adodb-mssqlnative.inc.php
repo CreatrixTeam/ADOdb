@@ -119,7 +119,6 @@ class ADODB_mssqlnative extends ADOConnection {
 	var $identitySQL = 'select SCOPE_IDENTITY()'; // 'select SCOPE_IDENTITY'; # for mssql 2000
 	var $uniqueOrderBy = true;
 	var $_bindInputArray = true;
-	var $_dropSeqSQL = "drop table %s";
 	var $connectionInfo = array();
 	var $sequences = false;
 	var $mssql_version = '';
@@ -238,7 +237,15 @@ class ADODB_mssqlnative extends ADOConnection {
 	function CreateSequence2008($seq='adodbseq',$start=1)
 	{
 		if($this->debug) ADOConnection::outp("<hr>CreateSequence($seq,$start)");
-		return ADOConnection::CreateSequence($seq, $start);
+		sqlsrv_begin_transaction($this->_connectionID);
+		$ok = ADOConnection::CreateSequence($seq, $start);
+		if (!$ok) {
+			if($this->debug) ADOConnection::outp("<hr>Error: ROLLBACK");
+			sqlsrv_rollback($this->_connectionID);
+			return false;
+		}
+		sqlsrv_commit($this->_connectionID);
+		return true;
 	}
 
 	/**
@@ -265,7 +272,7 @@ class ADODB_mssqlnative extends ADOConnection {
 		sqlsrv_begin_transaction($this->_connectionID);
 		$ok = $this->Execute("update $seq with (tablock,holdlock) set id = id + 1");
 		if (!$ok) {
-			if ($this->CreateSequence2008($seq, $start + 1) === false) {
+			if (ADOConnection::CreateSequence($seq, $start + 1) === false) {
 				if($this->debug) ADOConnection::outp("<hr>Error: ROLLBACK");
 				sqlsrv_rollback($this->_connectionID);
 				return false;

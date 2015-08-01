@@ -29,7 +29,6 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	var $hasGenID        = true;
 	var $_genIDSQL       = "UPDATE %s SET id=id+1 WHERE id=%s";
 	var $_genSeqCountSQL = 'SELECT COUNT(*) FROM %s';
-	var $_dropSeqSQL     = 'DROP TABLE %s';
 	var $random='abs(random())';
 	var $_bindInputArray = true;
 	var $hasTransactions = false; // // should be set to false because of PDO SQLite driver not supporting changing autocommit mode

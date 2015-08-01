@@ -1237,51 +1237,24 @@ if (!defined('_ADODB_LAYER')) {
 		if(empty($vSQL))
 			{return false;}
 		
-		if(count($vSQL) == 1)
-			{return !(!$this->Execute($vSQL[0]));}
-		else
+		for($tI = 0; $tI < count($vSQL); $tI++)
 		{
-			$tWasTransactionStartSuccessful = $this->BeginTrans();			
-
-			if($tWasTransactionStartSuccessful)
-			{
-				$tDBReturn = null;
-
-				for($tI = 0; $tI < count($vSQL); $tI++)
-				{
-					$tDBReturn = $this->Execute($vSQL[$tI]);
-					
-					if(!$tDBReturn)
-					{
-						$this->RollbackTrans();
-						return false;
-					}
-				}
-
-				$this->CommitTrans();
-				return true;
-			}
-			else 
-			{
-				for($tI = 0; $tI < count($vSQL); $tI++)
-				{
-					$tDBReturn = $this->Execute($vSQL[$tI]);
-					
-					if(!$tDBReturn)
-						{return false;}
-				}
-				return true;
-			}
+			$tDBReturn = $this->Execute($vSQL[$tI]);
+			
+			if(!$tDBReturn)
+				{return false;}
 		}
 
-		return false;
+		return true;
 	}
 
 	function DropSequence($seqname='adodbseq') {
-		if (empty($this->_dropSeqSQL)) {
-			return false;
-		}
-		return $this->Execute(sprintf($this->_dropSeqSQL,$seqname));
+		$vSQL = $this->_dataDict->DropSequenceSQL($seqname);
+
+		if(empty($vSQL))
+			{return false;}
+		
+		return !(!$this->Execute($vSQL[0]));
 	}
 
 	/**

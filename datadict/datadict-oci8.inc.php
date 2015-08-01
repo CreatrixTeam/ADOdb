@@ -414,4 +414,8 @@ end;
 			)
 		);
 	}
+	
+	function _DropSequenceSQL($pParsedSequenceName)
+		{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
+	
 }

@@ -277,4 +277,8 @@ class ADODB2_db2 extends ADODB_DataDict {
 					$pParsedSequenceName['name'], $pStartID)
 		);
 	}
+	
+	function _DropSequenceSQL($pParsedSequenceName)
+		{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
+
 }

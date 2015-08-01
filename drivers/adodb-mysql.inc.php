@@ -281,7 +281,6 @@ class ADODB_mysql extends ADOConnection {
 	// Reference on Last_Insert_ID on the recommended way to simulate sequences
 	var $_genIDSQL = "update %s set id=LAST_INSERT_ID(id+1);";
 	var $_genSeqCountSQL = "select count(*) from %s";
-	var $_dropSeqSQL = "drop table if exists %s";
 
 	function GenID($seqname='adodbseq',$startID=1)
 	{

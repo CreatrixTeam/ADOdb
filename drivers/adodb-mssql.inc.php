@@ -191,7 +191,18 @@ class ADODB_mssql extends ADOConnection {
 		return $this->GetOne('select @@rowcount');
 	}
 
-	var $_dropSeqSQL = "drop table %s";
+	function CreateSequence($seq='adodbseq',$start=1)
+	{
+
+		$this->Execute('BEGIN TRANSACTION adodbseq');
+		$ok = ADOConnection::CreateSequence($seq,$start);
+		if (!$ok) {
+				$this->Execute('ROLLBACK TRANSACTION adodbseq');
+				return false;
+		}
+		$this->Execute('COMMIT TRANSACTION adodbseq');
+		return true;
+	}
 
 	function GenID($seq='adodbseq',$start=1)
 	{

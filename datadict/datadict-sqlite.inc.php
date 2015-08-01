@@ -96,4 +96,8 @@ class ADODB2_sqlite extends ADODB_DataDict {
 			"insert into $pParsedSequenceName[name] values($vStartID)"
 		);
 	}
+	
+	function _DropSequenceSQL($pParsedSequenceName)
+		{return array(sprintf('drop table %s', $pParsedSequenceName['name']));}
+
 }

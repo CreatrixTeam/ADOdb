@@ -269,15 +269,6 @@ class ADODB_sqlite extends ADOConnection {
 		return false;
 	}
 
-	var $_dropSeqSQL = 'drop table %s';
-	function DropSequence($seqname='adodbseq')
-	{
-		if (empty($this->_dropSeqSQL)) {
-			return false;
-		}
-		return $this->Execute(sprintf($this->_dropSeqSQL,$seqname));
-	}
-
 	// returns true or false
 	function _close()
 	{

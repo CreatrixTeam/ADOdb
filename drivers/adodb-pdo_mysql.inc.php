@@ -25,7 +25,6 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	var $metaColumnsSQL = "SHOW COLUMNS FROM `%s`";
 	var $hasGenID = true;
 	var $_genIDSQL = "update %s set id=LAST_INSERT_ID(id+1);";
-	var $_dropSeqSQL = "drop table %s";
 	var $fmtTimeStamp = "'Y-m-d, H:i:s'";
 	var $nameQuote = '`';
 	var $hasTransactions = false;

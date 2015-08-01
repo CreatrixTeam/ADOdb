@@ -21,4 +21,7 @@ class ADODB2_ads extends ADODB_DataDict {
 	{
 		return array("CREATE TABLE $pParsedSequenceName[name] ( ID autoinc( 1 ) ) IN DATABASE");
 	}
+	
+	function _DropSequenceSQL($pParsedSequenceName)
+		{return array("DROP TABLE $pParsedSequenceName[name]");}
 }

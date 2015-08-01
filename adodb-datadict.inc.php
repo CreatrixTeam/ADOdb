@@ -1274,7 +1274,29 @@ class ADODB_DataDict {
 	*		return.
 	*/
 	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+		{return array();}
+
+	/**
+	*	ACCESS: FINAL PUBLIC
+	*	Creates the SQL required by ADOConnection::DropSequence(). Refer to that function for
+	*		specification. The parameter $pSequenceName accepts a formated name per the 
+	*		ADODB_DataDict::ParseIdentifierName specification.
+	*/
+	function DropSequenceSQL($pSequenceName)
 	{
-		return array();
+		$vParsedSequenceName = $this->ParseIdentifierName($pSequenceName);
+
+		return $this->_DropSequenceSQL($vParsedSequenceName);
 	}
+	
+	/**
+	*	ACCESS: PROTECTED
+	*	Creates the SQL required by ADOConnection::DropSequence(). Refer to that function for
+	*		specification. The parameter $pParsedSequenceName is the parsed info of an identifier 
+	*		name. Refer to ADODB_DataDict::ParseIdentifierName for full specification of the 
+	*		return.
+	*/
+	function _DropSequenceSQL($pParsedSequenceName)
+		{return array();}
+
 } // class

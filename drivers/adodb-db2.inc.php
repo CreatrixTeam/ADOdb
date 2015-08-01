@@ -44,7 +44,6 @@ class ADODB_db2 extends ADOConnection {
 								// breaking backward-compat
 	var $_bindInputArray = false;
 	var $_genIDSQL = "VALUES NEXTVAL FOR %s";
-	var $_dropSeqSQL = "DROP SEQUENCE %s";
 	var $_autocommit = true;
 	var $_haserrorfunctions = true;
 	var $_lastAffectedRows = 0;
@@ -152,12 +151,6 @@ class ADODB_db2 extends ADOConnection {
 		}
 
 		return $info;
-	}
-
-	function DropSequence($seqname='adodbseq')
-	{
-		if (empty($this->_dropSeqSQL)) return false;
-		return $this->Execute(sprintf($this->_dropSeqSQL,$seqname));
 	}
 
 	function SelectLimit($sql,$nrows=-1,$offset=-1,$inputArr=false)

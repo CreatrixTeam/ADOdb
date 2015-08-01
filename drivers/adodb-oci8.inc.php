@@ -70,7 +70,6 @@ class ADODB_oci8 extends ADOConnection {
 	var $hasGenID = true;
 	var $_genIDSQL = "SELECT (%s.nextval) FROM DUAL";
 
-	var $_dropSeqSQL = "DROP SEQUENCE %s";
 	var $hasAffectedRows = true;
 	var $random = "abs(mod(DBMS_RANDOM.RANDOM,10000001)/10000000)";
 	var $noNullStrings = false;
