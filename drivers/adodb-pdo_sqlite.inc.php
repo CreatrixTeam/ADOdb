@@ -27,8 +27,6 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	var $nameQuote       = '`';
 	var $replaceQuote    = "''";
 	var $hasGenID        = true;
-	var $_genIDSQL       = "UPDATE %s SET id=id+1 WHERE id=%s";
-	var $_genSeqCountSQL = 'SELECT COUNT(*) FROM %s';
 	var $random='abs(random())';
 	var $_bindInputArray = true;
 	var $hasTransactions = false; // // should be set to false because of PDO SQLite driver not supporting changing autocommit mode
@@ -66,16 +64,12 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		while (--$MAXLOOPS>=0) {
 			@($num = array_pop($this->GetCol("SELECT id FROM {$seq}")));
 			if ($num === false || !is_numeric($num)) {
-				$tSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
-				@$this->Execute($tSQL[0]);
-				$num = '0';
-				$cnt = $this->GetOne(sprintf($this->_genSeqCountSQL,$seq));
-				if (!$cnt) {
-					$ok = $this->Execute($tSQL[1]);
-				}
+				$this->DropSequence($seq);
+				$ok = $this->CreateSequence($seq,$start);
+				$num = '0';			
 				if (!$ok) return false;
 			}
-			$this->Execute(sprintf($this->_genIDSQL,$seq,$num));
+			$this->Execute(sprintf("UPDATE %s SET id=id+1 WHERE id=%s",$seq,$num));
 
 			if ($this->affected_rows() > 0) {
                 	        $num += 1;

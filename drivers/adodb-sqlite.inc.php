@@ -247,10 +247,9 @@ class ADODB_sqlite extends ADOConnection {
 		while (--$MAXLOOPS>=0) {
 			@($num = $this->GetOne("select id from $seq"));
 			if ($num === false) {
-				$tSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
-				$this->Execute($tSQL[0]);
+				$this->DropSequence($seq);
+				$ok = $this->CreateSequence($seq,$start);
 				$num = '0';
-				$ok = $this->Execute($tSQL[1]);
 				if (!$ok) {
 					return false;
 				}

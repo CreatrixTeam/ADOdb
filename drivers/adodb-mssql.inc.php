@@ -210,7 +210,7 @@ class ADODB_mssql extends ADOConnection {
 		$this->Execute('BEGIN TRANSACTION adodbseq');
 		$ok = $this->Execute("update $seq with (tablock,holdlock) set id = id + 1");
 		if (!$ok) {
-			if($this->CreateSequence($seq, $start + 1) === false) {
+			if(ADOConnection::CreateSequence($seq, $start + 1) === false) {
 				$this->Execute('ROLLBACK TRANSACTION adodbseq');
 				return false;
 			}	

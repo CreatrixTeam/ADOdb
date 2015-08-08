@@ -279,8 +279,6 @@ class ADODB_mysql extends ADOConnection {
 
 	 // See http://www.mysql.com/doc/M/i/Miscellaneous_functions.html
 	// Reference on Last_Insert_ID on the recommended way to simulate sequences
-	var $_genIDSQL = "update %s set id=LAST_INSERT_ID(id+1);";
-	var $_genSeqCountSQL = "select count(*) from %s";
 
 	function GenID($seqname='adodbseq',$startID=1)
 	{
@@ -289,16 +287,17 @@ class ADODB_mysql extends ADOConnection {
 
 		$savelog = $this->_logsql;
 		$this->_logsql = false;
-		$getnext = sprintf($this->_genIDSQL,$seqname);
+		$getnext = sprintf("update %s set id=LAST_INSERT_ID(id+1);",$seqname);
 		$holdtransOK = $this->_transOK; // save the current status
 		$rs = @$this->Execute($getnext);
 		if (!$rs) {
 			if ($holdtransOK) $this->_transOK = true; //if the status was ok before reset
 			
-			$tSQL = $this->_dataDict->CreateSequenceSQL($seqname,$startID);
-			$this->Execute($tSQL[0]);
-			$cnt = $this->GetOne(sprintf($this->_genSeqCountSQL,$seqname));
-			if (!$cnt) $this->Execute($tSQL[1]);
+			$this->DropSequence($seqname);
+			$ok = $this->CreateSequence($seqname,$startID);
+			if(!$ok) {
+				return false;
+			}
 			$rs = $this->Execute($getnext);
 		}
 
