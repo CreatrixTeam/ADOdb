@@ -379,4 +379,33 @@ class ADODB2_mysql extends ADODB_DataDict {
 	function _DropSequenceSQL($pParsedSequenceName)
 		{return array(sprintf("drop table if exists %s", $pParsedSequenceName['name']));}
 
+	// See http://www.mysql.com/doc/M/i/Miscellaneous_functions.html
+	// Reference on Last_Insert_ID on the recommended way to simulate sequences
+	function _GenIDSQL($pParsedSequenceName)
+	{
+		return array(sprintf("update %s set id=LAST_INSERT_ID(id+1);",
+				$pParsedSequenceName['name']));
+	}
+
+	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	{
+		if($pADORecordSet)
+		{
+			if(($this->databaseType === 'mysql') || ($this->databaseType === 'mysqli'))
+			{
+				$tInsertID = $this->connection->Insert_ID();
+				
+				if($tInsertID > 0)
+					{$this->connection->genID = $tInsertID;}
+			}
+			else
+			{
+				$tADORecordSet = $this->connection->Execute("SELECT LAST_INSERT_ID();");
+			
+				if($tADORecordSet && !$tADORecordSet->EOF)
+					{$this->connection->genID = (integer) reset($tADORecordSet->fields);}
+			}
+		}
+	}
+	
 }

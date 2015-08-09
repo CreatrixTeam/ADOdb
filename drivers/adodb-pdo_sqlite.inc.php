@@ -56,26 +56,19 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		return $rs;
 	}
 
+	//VERBATIM copy in adodb-pdo_sqlite.inc.php, adodb-sqlite.inc.php and adodb-sqlite3.inc.php
 	function GenID($seq='adodbseq',$start=1)
 	{
+		if (!$this->hasGenID) {
+			return 0; // formerly returns false pre 1.60
+		}
+
 		// if you have to modify the parameter below, your database is overloaded,
 		// or you need to implement generation of id's yourself!
 		$MAXLOOPS = 100;
 		while (--$MAXLOOPS>=0) {
-			@($num = array_pop($this->GetCol("SELECT id FROM {$seq}")));
-			if ($num === false || !is_numeric($num)) {
-				$this->DropSequence($seq);
-				$ok = $this->CreateSequence($seq,$start);
-				$num = '0';			
-				if (!$ok) return false;
-			}
-			$this->Execute(sprintf("UPDATE %s SET id=id+1 WHERE id=%s",$seq,$num));
-
-			if ($this->affected_rows() > 0) {
-                	        $num += 1;
-                		$this->genID = intval($num);
-                		return intval($num);
-			}
+			if(ADOConnection::GenID($seq, $start) > 0)
+				{return $this->genID;}
 		}
 		if ($fn = $this->raiseErrorFn) {
 			$fn($this->databaseType,'GENID',-32000,"Unable to generate unique id after $MAXLOOPS attempts",$seq,$num);

@@ -25,6 +25,7 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 	var $metaColumnsSQL = "select cname,coltype,width, SCALE, PRECISION, NULLS, DEFAULTVAL from col where tname='%s' order by colno";
 	var $_bindInputArray = true;
 	var $_nestedSQL = true;
+	var $hasGenID = true;
 
  	var $_initdate = true;
 

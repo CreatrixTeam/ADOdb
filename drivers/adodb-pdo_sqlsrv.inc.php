@@ -20,6 +20,7 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 	var $hasInsertID = true;
 	var $fmtTimeStamp = "'Y-m-d H:i:s'";
 	var $fmtDate = "'Y-m-d'";
+	var $hasGenID = true;
 
 	function BeginTrans()
 	{

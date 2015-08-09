@@ -42,6 +42,7 @@ class  ADODB_odbc_mssql extends ADODB_odbc {
 	var $hasInsertID = true;
 	var $connectStmt = 'SET CONCAT_NULL_YIELDS_NULL OFF'; # When SET CONCAT_NULL_YIELDS_NULL is ON,
 														  # concatenating a null value with a string yields a NULL result
+	var $hasGenID = true;
 
 	function ADODB_odbc_mssql()
 	{

@@ -1270,25 +1270,28 @@ if (!defined('_ADODB_LAYER')) {
 			return 0; // formerly returns false pre 1.60
 		}
 
-		$getnext = sprintf($this->_genIDSQL,$seqname);
+		$vSQL = $this->_dataDict->GenIDSQL($seqname);
 
 		$holdtransOK = $this->_transOK;
 
 		$save_handler = $this->raiseErrorFn;
 		$this->raiseErrorFn = '';
-		@($rs = $this->Execute($getnext));
+		@($rs = $this->Execute($vSQL[0]));
 		$this->raiseErrorFn = $save_handler;
 
 		if (!$rs) {
 			$this->_transOK = $holdtransOK; //if the status was ok before reset
-			$createseq = $this->CreateSequence($seqname,$startID);
-			$rs = $this->Execute($getnext);
+			$this->DropSequence($seqname);
+			if(!$this->CreateSequence($seqname,$startID))
+			{
+				$this->genID = 0;
+				return 0;
+			}
+			$rs = $this->Execute($vSQL[0]);
 		}
-		if ($rs && !$rs->EOF) {
-			$this->genID = reset($rs->fields);
-		} else {
-			$this->genID = 0; // false
-		}
+		
+		$this->genID = 0; // false
+		$this->_dataDict->event_GenID_calculateAndSetGenID($seqname, $rs);
 
 		if ($rs) {
 			$rs->Close();

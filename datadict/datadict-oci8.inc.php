@@ -401,21 +401,69 @@ end;
 
 	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
-		return array
-		(
-			sprintf
+		if($this->databaseType !== "odbc_oracle")
+		{
+			return array
 			(
-				"DECLARE\n".
-					"PRAGMA AUTONOMOUS_TRANSACTION;\n".
-				"BEGIN\n".
-					"execute immediate 'CREATE SEQUENCE %s START WITH %s';\n".
-				"END;\n", 
-				$pParsedSequenceName['name'], $pStartID
-			)
-		);
+				sprintf
+				(
+					"DECLARE\n".
+						"PRAGMA AUTONOMOUS_TRANSACTION;\n".
+					"BEGIN\n".
+						"execute immediate 'CREATE SEQUENCE %s START WITH %s';\n".
+					"END;\n", 
+					$pParsedSequenceName['name'], $pStartID
+				)
+			);
+		}
+		else
+		{
+			$tStartID = $pStartID - 1;
+
+			return array
+			(
+				sprintf("create table %s (id integer)", $pParsedSequenceName['name']),
+				"insert into $pParsedSequenceName[name] values($tStartID)"
+			);
+		}
 	}
 	
 	function _DropSequenceSQL($pParsedSequenceName)
-		{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
+	{
+		if($this->databaseType !== "odbc_oracle")
+			{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
+		else
+			{return array(sprintf('drop table %s', $pParsedSequenceName['name']));}
+	}
+
+	function _GenIDSQL($pParsedSequenceName)
+	{
+		if($this->databaseType !== "odbc_oracle")
+			{return array(sprintf("SELECT (%s.nextval) FROM DUAL", $pParsedSequenceName['name']));}
+		else
+			{return array("select id from $pParsedSequenceName[name]");}
+	}
+	
+	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	{
+		if($this->databaseType !== "odbc_oracle")
+		{
+			ADODB_DataDict::_event_GenID_calculateAndSetGenID($pParsedSequenceName, 
+					$pADORecordSet);
+		}
+		else
+		{
+			$tNumber = (integer)(($pADORecordSet && !$pADORecordSet->EOF) ? 
+					reset($pADORecordSet->fields) : 0);
+			$tGenID = 0;
+			
+			$this->connection->Execute(
+					"update $pParsedSequenceName[name] set id=id+1 where id=$tNumber");
+			$tGenID = $this->connection->GetOne("select id from $pParsedSequenceName[name]");
+
+			if($tGenID == ($tNumber + 1))
+				{$this->connection->genID = $tNumber + 1;}
+		}
+	}
 	
 }

@@ -43,7 +43,6 @@ class ADODB_db2 extends ADOConnection {
 	var $useFetchArray = false; // setting this to true will make array elements in FETCH_ASSOC mode case-sensitive
 								// breaking backward-compat
 	var $_bindInputArray = false;
-	var $_genIDSQL = "VALUES NEXTVAL FOR %s";
 	var $_autocommit = true;
 	var $_haserrorfunctions = true;
 	var $_lastAffectedRows = 0;
@@ -171,21 +170,6 @@ class ADODB_db2 extends ADOConnection {
 
 		return $rs;
 	}
-
-	/*
-		This algorithm is not very efficient, but works even if table locking
-		is not available.
-
-		Will return false if unable to generate an ID after $MAXLOOPS attempts.
-	*/
-	function GenID($seq='adodbseq',$start=1)
-	{
-		// if you have to modify the parameter below, your database is overloaded,
-		// or you need to implement generation of id's yourself!
-				$num = $this->GetOne("VALUES NEXTVAL FOR $seq");
-				return $num;
-	}
-
 
 	function ErrorMsg()
 	{

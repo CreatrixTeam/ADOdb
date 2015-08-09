@@ -24,7 +24,6 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		WHERE TABLE_SCHEMA=";
 	var $metaColumnsSQL = "SHOW COLUMNS FROM `%s`";
 	var $hasGenID = true;
-	var $_genIDSQL = "update %s set id=LAST_INSERT_ID(id+1);";
 	var $fmtTimeStamp = "'Y-m-d, H:i:s'";
 	var $nameQuote = '`';
 	var $hasTransactions = false;
@@ -32,9 +31,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	var $hasInsertID = true;
 
 	function event_pdoConnectionEstablished()
-	{
-		$this->_connectionID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
-	}
+		{$this->_connectionID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);}
 
 	// dayFraction is a day in floating point
 	function OffsetDate($dayFraction, $date=false)

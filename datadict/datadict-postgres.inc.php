@@ -652,5 +652,8 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 
 	function _DropSequenceSQL($pParsedSequenceName)
 		{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
+
+	function _GenIDSQL($pParsedSequenceName)
+		{return array(sprintf("SELECT NEXTVAL('%s')", $pParsedSequenceName['name']));}
 		
 }

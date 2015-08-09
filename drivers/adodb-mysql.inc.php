@@ -282,30 +282,10 @@ class ADODB_mysql extends ADOConnection {
 
 	function GenID($seqname='adodbseq',$startID=1)
 	{
-		// post-nuke sets hasGenID to false
-		if (!$this->hasGenID) return false;
-
 		$savelog = $this->_logsql;
 		$this->_logsql = false;
-		$getnext = sprintf("update %s set id=LAST_INSERT_ID(id+1);",$seqname);
-		$holdtransOK = $this->_transOK; // save the current status
-		$rs = @$this->Execute($getnext);
-		if (!$rs) {
-			if ($holdtransOK) $this->_transOK = true; //if the status was ok before reset
-			
-			$this->DropSequence($seqname);
-			$ok = $this->CreateSequence($seqname,$startID);
-			if(!$ok) {
-				return false;
-			}
-			$rs = $this->Execute($getnext);
-		}
 
-		if ($rs) {
-			$this->genID = mysql_insert_id($this->_connectionID);
-			$rs->Close();
-		} else
-			$this->genID = 0;
+		ADOConnection::GenID($seqname, $startID);
 
 		$this->_logsql = $savelog;
 		return $this->genID;

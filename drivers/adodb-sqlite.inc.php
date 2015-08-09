@@ -25,6 +25,7 @@ class ADODB_sqlite extends ADOConnection {
 	var $hasLimit = true;
 	var $hasInsertID = true; 		/// supports autoincrement ID?
 	var $hasAffectedRows = true; 	/// supports affected rows for update/delete?
+	var $hasGenID = true;
 	var $metaTablesSQL = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name";
 	var $sysDate = "adodb_date('Y-m-d')";
 	var $sysTimeStamp = "adodb_date('Y-m-d H:i:s')";
@@ -239,28 +240,19 @@ class ADODB_sqlite extends ADOConnection {
 		Will return false if unable to generate an ID after $MAXLOOPS attempts.
 	*/
 
+	//VERBATIM copy in adodb-pdo_sqlite.inc.php, adodb-sqlite.inc.php and adodb-sqlite3.inc.php
 	function GenID($seq='adodbseq',$start=1)
 	{
+		if (!$this->hasGenID) {
+			return 0; // formerly returns false pre 1.60
+		}
+
 		// if you have to modify the parameter below, your database is overloaded,
 		// or you need to implement generation of id's yourself!
 		$MAXLOOPS = 100;
 		while (--$MAXLOOPS>=0) {
-			@($num = $this->GetOne("select id from $seq"));
-			if ($num === false) {
-				$this->DropSequence($seq);
-				$ok = $this->CreateSequence($seq,$start);
-				$num = '0';
-				if (!$ok) {
-					return false;
-				}
-			}
-			$this->Execute("update $seq set id=id+1 where id=$num");
-
-			if ($this->affected_rows() > 0) {
-				$num += 1;
-				$this->genID = $num;
-				return $num;
-			}
+			if(ADOConnection::GenID($seq, $start) > 0)
+				{return $this->genID;}
 		}
 		if ($fn = $this->raiseErrorFn) {
 			$fn($this->databaseType,'GENID',-32000,"Unable to generate unique id after $MAXLOOPS attempts",$seq,$num);

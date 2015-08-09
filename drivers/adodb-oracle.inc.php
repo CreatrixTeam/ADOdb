@@ -23,6 +23,7 @@ class ADODB_oracle extends ADOConnection {
 	var $metaTablesSQL = 'select table_name from cat';
 	var $metaColumnsSQL = "select cname,coltype,width from col where tname='%s' order by colno";
 	var $connectSID = true;
+	var $hasGenID = true;
 
 	function ADODB_oracle()
 	{

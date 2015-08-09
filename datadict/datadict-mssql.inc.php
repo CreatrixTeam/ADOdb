@@ -512,4 +512,18 @@ CREATE TABLE
 			{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
 	}
 
+	function _GenIDSQL($pParsedSequenceName)
+		{return array("select id from $pParsedSequenceName[name]");}
+		
+	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	{
+		$vNumber = (($pADORecordSet && !$pADORecordSet->EOF) ? reset($pADORecordSet->fields) :
+				0);
+		$vADORecordSet = $this->connection->Execute(
+				"update $pParsedSequenceName[name] set id=id+1 where id=$vNumber");
+		
+		if($this->connection->affected_rows() > 0)
+			{$this->connection->genID = $vNumber + 1;}
+	}
+
 }

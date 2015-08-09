@@ -1298,5 +1298,61 @@ class ADODB_DataDict {
 	*/
 	function _DropSequenceSQL($pParsedSequenceName)
 		{return array();}
+		
+	/**
+	*	ACCESS: FINAL PUBLIC
+	*	Creates the SQL required by ADOConnection::GenID(). Refer to that function for
+	*		specification. The parameter $pSequenceName accepts a formated name per the 
+	*		ADODB_DataDict::ParseIdentifierName specification.
+	*/
+	function GenIDSQL($pSequenceName, $pStartID = 1)
+	{
+		$vParsedSequenceName = $this->ParseIdentifierName($pSequenceName);
 
+		return $this->_GenIDSQL($vParsedSequenceName, $pStartID);
+	}
+	
+	/**
+	*	ACCESS: PROCTECTED
+	*	Creates the SQL required by ADOConnection::GenID(). Refer to that function for
+	*		specification. The parameter $pParsedSequenceName is the parsed info of an identifier 
+	*		name. Refer to ADODB_DataDict::ParseIdentifierName for full specification of the 
+	*		return.
+	*/
+	function _GenIDSQL($pParsedSequenceName)
+		{return array();}
+
+	/**
+	*	ACCESS: FINAL PUBLIC
+	*	Fired by ADOConnection::GenID() before returning. The function must set the
+	*		ADOConnection::$genID class variable. The parameter $pSequenceName accepts a 
+	*		formated name per the ADODB_DataDict::ParseIdentifierName specification. The
+	*		parameter $pADORecordSet is the returned record set of the last sql statement
+	*		that ADOConnection::GenID() executed. The statement is provided by GenIDSQL()
+	*	Note: If ADOConnection::$genID is set to 0, it indicates a false.
+	*/	
+	function event_GenID_calculateAndSetGenID($pSequenceName, $pADORecordSet)
+	{
+		$vParsedSequenceName = $this->ParseIdentifierName($pSequenceName);
+		
+		$this->_event_GenID_calculateAndSetGenID($vParsedSequenceName, $pADORecordSet);
+	}
+
+	/**
+	*	ACCESS: PROTECTED
+	*	Fired by ADOConnection::GenID() before returning. The function must set the
+	*		ADOConnection::$genID class variable. TThe parameter $pParsedSequenceName is the 
+	*		parsed info of an identifier name. Refer to ADODB_DataDict::ParseIdentifierName 
+	*		for full specification of the return. The parameter $pADORecordSet is the returned 
+	*		record set of the last sql statement that ADOConnection::GenID() executed. The 
+	*		statement is provided by GenIDSQL()
+	*	Note: If ADOConnection::$genID is set to 0, it indicates a false. 
+	*	Note: ADOConnection::$genID is already set to 0 before entering this function. Hence
+	*		not explicitly setting it is the same as setting it to 0;
+	*/	
+	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	{
+		if($pADORecordSet && !$pADORecordSet->EOF)
+			{$this->connection->genID = (integer) reset($pADORecordSet->fields);}
+	}
 } // class

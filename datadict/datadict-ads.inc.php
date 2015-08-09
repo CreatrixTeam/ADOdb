@@ -24,4 +24,23 @@ class ADODB2_ads extends ADODB_DataDict {
 	
 	function _DropSequenceSQL($pParsedSequenceName)
 		{return array("DROP TABLE $pParsedSequenceName[name]");}
+
+	function _GenIDSQL($pParsedSequenceName)
+		{return array("select * from $pParsedSequenceName[name]");}
+		
+	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	{
+		if($pADORecordSet)
+		{
+			$tADORecordSet = $this->connection->Execute(
+					"INSERT INTO $pParsedSequenceName[name] VALUES( DEFAULT )");
+
+			if($tADORecordSet)
+			{
+				$tADORecordSet = $this->connection->Execute(
+						"SELECT LastAutoInc( STATEMENT ) FROM system.iota");
+				$this->connection->genID = $tADORecordSet->fields[0];
+			}
+		}
+	}
 }

@@ -25,6 +25,7 @@ class  ADODB_odbc_oracle extends ADODB_odbc {
 	var $fmtTimeStamp = "'Y-m-d h:i:sA'";
 	var $metaTablesSQL = 'select table_name from cat';
 	var $metaColumnsSQL = "select cname,coltype,width from col where tname='%s' order by colno";
+	var $hasGenID = true;
 
 	//var $_bindInputArray = false;
 

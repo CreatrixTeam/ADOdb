@@ -23,6 +23,7 @@ class ADODB_pdo_mssql extends ADODB_pdo {
 	var $hasTransactions = false; ## <<< BUG IN PDO mssql driver	
 	var $hasInsertID = true;
 	var $_bindInputArray = false;
+	var $hasGenID = true;
 
 	function ServerInfo()
 	{

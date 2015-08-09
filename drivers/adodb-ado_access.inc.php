@@ -25,6 +25,7 @@ class  ADODB_ado_access extends ADODB_ado {
 	var $fmtDate = "#Y-m-d#";
 	var $fmtTimeStamp = "#Y-m-d h:i:sA#";// note no comma
 	var $upperCase = 'ucase';
+	var $hasGenID = true;
 
 	function ADODB_ado_access()
 	{

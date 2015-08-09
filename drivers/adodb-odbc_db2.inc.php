@@ -106,6 +106,7 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 	var $_bindInputArray = true;
 	 var $hasInsertID = true;
 	var $rsPrefix = 'ADORecordset_odbc_';
+	var $hasGenID = true;
 
 	function ADODB_odbc_db2()
 	{

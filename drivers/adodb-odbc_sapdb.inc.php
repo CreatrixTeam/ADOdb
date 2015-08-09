@@ -27,6 +27,7 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 	var $fmtTimeStamp = "'Y-m-d H:i:s'"; /// used by DBTimeStamp as the default timestamp fmt.
 	var $hasInsertId = true;
 	var $_bindInputArray = true;
+	var $hasGenID = true;
 
 	function ADODB_odbc_sapdb()
 	{

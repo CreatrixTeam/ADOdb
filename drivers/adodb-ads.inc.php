@@ -132,33 +132,6 @@ class ADODB_ads extends ADOConnection {
     }
   }
 
-  // returns the generated ID or false
-        // checks if the table already exists, else creates the table and inserts a record into the table
-        // and gets the ID number of the last inserted record.
-        function GenID($seqname,$start=1)
-        {
-                $go = $this->Execute("select * from $seqname");
-                if (!$go){
-                        if($this->CreateSequence($seqname,$start) === false){
-							return false;
-						}
-                }
-                $res = $this->Execute("INSERT INTO $seqname VALUES( DEFAULT )");
-                if(!$res){
-                        print $this->ErrorMsg();
-                        return false;
-                }
-                else{
-                        $gen = $this->Execute("SELECT LastAutoInc( STATEMENT ) FROM system.iota");
-                        $ret = $gen->fields[0];
-                        return $ret;
-                }
-
-        }
-
-
-
-
   function ErrorMsg()
   {
     if ($this->_haserrorfunctions) {

@@ -254,37 +254,6 @@ class ADODB_mysqli extends ADOConnection {
 		return $result;
 	}
 
-	// See http://www.mysql.com/doc/M/i/Miscellaneous_functions.html
-	// Reference on Last_Insert_ID on the recommended way to simulate sequences
-
-	function GenID($seqname='adodbseq',$startID=1)
-	{
-		// post-nuke sets hasGenID to false
-		if (!$this->hasGenID) return false;
-
-		$getnext = sprintf("update %s set id=LAST_INSERT_ID(id+1);",$seqname);
-		$holdtransOK = $this->_transOK; // save the current status
-		$rs = @$this->Execute($getnext);
-		if (!$rs) {
-			if ($holdtransOK) $this->_transOK = true; //if the status was ok before reset
-
-			$this->DropSequence($seqname);
-			$ok = $this->CreateSequence($seqname,$startID);
-			if(!$ok) {
-				return false;
-			}
-			$rs = $this->Execute($getnext);
-		}
-
-		if ($rs) {
-			$this->genID = mysqli_insert_id($this->_connectionID);
-			$rs->Close();
-		} else
-			$this->genID = 0;
-
-		return $this->genID;
-	}
-
 	function MetaDatabases()
 	{
 		$query = "SHOW DATABASES";

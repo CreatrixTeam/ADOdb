@@ -269,28 +269,6 @@ class ADODB_ibase extends ADOConnection {
 		return 1;
 	}
 
-	function GenID($seqname='adodbseq',$startID=1)
-	{
-		$getnext = ("SELECT Gen_ID($seqname,1) FROM RDB\$DATABASE");
-		$rs = @$this->Execute($getnext);
-		if (!$rs) {
-			$this->CreateSequence($seqname, $startID);
-			$rs = $this->Execute($getnext);
-		}
-		if ($rs && !$rs->EOF) {
-			$this->genID = (integer) reset($rs->fields);
-		}
-		else {
-			$this->genID = 0; // false
-		}
-
-		if ($rs) {
-			$rs->Close();
-		}
-
-		return $this->genID;
-	}
-
 	function SelectDB($dbName)
 	{
 		return false;

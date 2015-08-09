@@ -17,4 +17,36 @@ class ADODB2_vfp extends ADODB_DataDict {
 	var $databaseType = 'vfp';
 	var $sql_sysDate = 'date()';
 	var $sql_sysTimeStamp = 'datetime()';
+	
+	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	{
+		$vStartID = $pStartID - 1;
+
+		return array
+		(
+			sprintf("create table %s (id integer)", $pParsedSequenceName['name']),
+			"insert into $pParsedSequenceName[name] values($vStartID)"
+		);
+	}
+
+	function _DropSequenceSQL($pParsedSequenceName)
+		{return array(sprintf('drop table %s', $pParsedSequenceName['name']));}
+
+	function _GenIDSQL($pParsedSequenceName)
+		{return array("select id from $pParsedSequenceName[name]");}
+		
+	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	{
+		$vNumber = (integer)(($pADORecordSet && !$pADORecordSet->EOF) ? 
+				reset($pADORecordSet->fields) : 0);
+		$vGenID = 0;
+
+		$this->connection->Execute(
+				"update $pParsedSequenceName[name] set id=id+1 where id=$vNumber");
+		$vGenID = $this->connection->GetOne("select id from $pParsedSequenceName[name]");
+
+		if($vGenID == ($vNumber + 1))
+			{$this->connection->genID = $vNumber + 1;}
+	}
+
 }

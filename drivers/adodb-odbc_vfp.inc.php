@@ -31,6 +31,7 @@ class ADODB_odbc_vfp extends ADODB_odbc {
 	var $ansiOuter = true;
 	var $hasTransactions = false;
 	var $curmode = false ; // See sqlext.h, SQL_CUR_DEFAULT == SQL_CUR_USE_DRIVER == 2L
+	var $hasGenID = true;
 
 	function ADODB_odbc_vfp()
 	{

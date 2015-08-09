@@ -32,7 +32,6 @@ class ADODB_odbc extends ADOConnection {
 	//var $longreadlen = 8000; // default number of chars to return for a Blob/Long field
 	var $_bindInputArray = false;
 	var $curmode = SQL_CUR_USE_DRIVER; // See sqlext.h, SQL_CUR_DEFAULT == SQL_CUR_USE_DRIVER == 2L
-	var $_genSeqSQL = "create table %s (id integer)";
 	var $_autocommit = true;
 	var $_haserrorfunctions = true;
 	var $_has_stupid_odbc_fetch_api_change = true;
@@ -122,22 +121,6 @@ class ADODB_odbc extends ADOConnection {
 	}
 
 
-	function CreateSequence($seqname='adodbseq',$start=1)
-	{
-		if (empty($this->_genSeqSQL)) return false;
-		$ok = $this->Execute(sprintf($this->_genSeqSQL,$seqname));
-		if (!$ok) return false;
-		$start -= 1;
-		return $this->Execute("insert into $seqname values($start)");
-	}
-
-	var $_dropSeqSQL = 'drop table %s';
-	function DropSequence($seqname='adodbseq')
-	{
-		if (empty($this->_dropSeqSQL)) return false;
-		return $this->Execute(sprintf($this->_dropSeqSQL,$seqname));
-	}
-
 	/*
 		This algorithm is not very efficient, but works even if table locking
 		is not available.
@@ -146,39 +129,23 @@ class ADODB_odbc extends ADOConnection {
 	*/
 	function GenID($seq='adodbseq',$start=1)
 	{
+		if (!$this->hasGenID) {
+			return 0; // formerly returns false pre 1.60
+		}
+
 		// if you have to modify the parameter below, your database is overloaded,
 		// or you need to implement generation of id's yourself!
 		$MAXLOOPS = 100;
 		//$this->debug=1;
 		while (--$MAXLOOPS>=0) {
-			$num = $this->GetOne("select id from $seq");
-			if ($num === false) {
-				$this->Execute(sprintf($this->_genSeqSQL ,$seq));
-				$start -= 1;
-				$num = '0';
-				$ok = $this->Execute("insert into $seq values($start)");
-				if (!$ok) return false;
-			}
-			$this->Execute("update $seq set id=id+1 where id=$num");
-
-			if ($this->affected_rows() > 0) {
-				$num += 1;
-				$this->genID = $num;
-				return $num;
-			} elseif ($this->affected_rows() == 0) {
-				// some drivers do not return a valid value => try with another method
-				$value = $this->GetOne("select id from $seq");
-				if ($value == $num + 1) {
-					return $value;
-				}
-			}
+			if(ADOConnection::GenID($seq, $start) > 0)
+				{return $this->genID;}
 		}
 		if ($fn = $this->raiseErrorFn) {
 			$fn($this->databaseType,'GENID',-32000,"Unable to generate unique id after $MAXLOOPS attempts",$seq,$num);
 		}
 		return false;
 	}
-
 
 	function ErrorMsg()
 	{

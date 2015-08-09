@@ -141,6 +141,9 @@ class ADODB2_ibase extends ADODB_DataDict {
 	function _DropSequenceSQL($pParsedSequenceName)
 	{
 		return array("delete from RDB\$GENERATORS where RDB\$GENERATOR_NAME='".
-				strtoupper($pParsedSequenceName[name])."'");
+				strtoupper($pParsedSequenceName['name'])."'");
 	}
+	
+	function _GenIDSQL($pParsedSequenceName)
+		{return array ("SELECT Gen_ID($pParsedSequenceName[name],1) FROM RDB\$DATABASE");}
 }

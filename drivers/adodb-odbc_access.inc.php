@@ -26,6 +26,7 @@ class  ADODB_odbc_access extends ADODB_odbc {
 	var $_bindInputArray = false; // strangely enough, setting to true does not work reliably
 	var $hasTransactions = false;
 	var $upperCase = 'ucase';
+	var $hasGenID = true;
 
 	function ADODB_odbc_access()
 	{
