@@ -266,7 +266,7 @@ class ADODB_sqlite extends ADOConnection {
 		return @sqlite_close($this->_connectionID);
 	}
 
-	function MetaIndexes($pTableName, $primary = FALSE, $owner=false, $owner = false)
+	function MetaIndexes($pTableName, $primary = FALSE, $owner=false)
 	{
 		$false = false;
 		// save old fetch mode

@@ -196,7 +196,7 @@ class ADODB_ads extends ADOConnection {
 
   // Returns tables,Views or both on succesfull execution. Returns
         // tables by default on succesfull execustion.
-  function &MetaTables($ttype)
+  function &MetaTables($ttype = false, $showSchema = false, $mask = false)
   {
           $recordSet1 = $this->Execute("select * from system.tables");
                 if(!$recordSet1){
@@ -236,7 +236,7 @@ class ADODB_ads extends ADOConnection {
 
   }
 
-        function &MetaPrimaryKeys($table)
+        function &MetaPrimaryKeys($table, $owner = false)
   {
           $recordSet = $this->Execute("select table_primary_key from system.tables where name='$table'");
                 if(!$recordSet){
@@ -320,7 +320,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
     }
   }
 
-  function &MetaColumns($pTableName)
+  function &MetaColumns($pTableName, $normalize = true)
   {
   global $ADODB_FETCH_MODE;
 

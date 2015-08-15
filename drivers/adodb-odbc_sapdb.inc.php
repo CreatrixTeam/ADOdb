@@ -44,7 +44,7 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		return $info;
 	}
 
-	function MetaPrimaryKeys($table)
+	function MetaPrimaryKeys($table, $owner = false)
 	{
 		$table = $this->Quote(strtoupper($table));
 
@@ -94,7 +94,7 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
         return $indexes;
 	}
 
- 	function MetaColumns ($pTableName)
+ 	function MetaColumns ($pTableName, $normalize = true)
 	{
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
@@ -144,7 +144,7 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		return $retarr;
 	}
 
-	function MetaColumnNames($pTableName)
+	function MetaColumnNames($pTableName, $numIndexes = false, $useattnum = false))
 	{
 		$vParsedTableName = $this->ParseTableName($pTableName);
 		$table = (array_key_exists('schema', $vParsedTableName) ? 

@@ -226,7 +226,7 @@ class ADODB_odbc_db2 extends ADODB_odbc {
         return $indexes;
 	}
 
-	function SelectLimit($sql,$nrows=-1,$offset=-1,$inputArr=false)
+	function SelectLimit($sql, $nrows = -1, $offset = -1, $inputArr = false, $secs2cache = 0)
 	{
 		$nrows = (integer) $nrows;
 		if ($offset <= 0) {
