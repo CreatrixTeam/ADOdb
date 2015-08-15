@@ -756,21 +756,7 @@ class ADORecordSet_mysql extends ADORecordSet{
 class ADORecordSet_ext_mysql extends ADORecordSet_mysql {
 	function ADORecordSet_ext_mysql($queryID,$mode=false)
 	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-		switch ($mode)
-		{
-		case ADODB_FETCH_NUM: $this->fetchMode = MYSQL_NUM; break;
-		case ADODB_FETCH_ASSOC:$this->fetchMode = MYSQL_ASSOC; break;
-		case ADODB_FETCH_DEFAULT:
-		case ADODB_FETCH_BOTH:
-		default:
-		$this->fetchMode = MYSQL_BOTH; break;
-		}
-		$this->adodbFetchMode = $mode;
-		$this->ADORecordSet($queryID);
+		$this->ADORecordSet_mysql($queryID,$mode)
 	}
 
 	function MoveNext()
