@@ -156,11 +156,6 @@ class ADODB_db2oci extends ADODB_db2 {
 	var $databaseType = "db2oci";
 	var $_bindInputArray = true;
 
-	function ADODB_db2oci()
-	{
-		parent::ADODB_db2();
-	}
-
 	function Param($name,$type='C')
 	{
 		return ':'.$name;
@@ -218,9 +213,9 @@ class  ADORecordSet_db2oci extends ADORecordSet_db2 {
 
 	var $databaseType = "db2oci";
 
-	function ADORecordSet_db2oci($id,$mode=false)
+	function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_db2($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }
 

@@ -23,7 +23,7 @@ class ADODB_fbsql extends ADOConnection {
 	var $fmtTimeStamp = "'Y-m-d H:i:s'";
 	var $hasLimit = false;
 
-	function ADODB_fbsql()
+	function __construct()
 	{
 	}
 
@@ -166,7 +166,7 @@ class ADORecordSet_fbsql extends ADORecordSet{
 	var $databaseType = "fbsql";
 	var $canSeek = true;
 
-	function ADORecordSet_fbsql($queryID,$mode=false)
+	function __construct($queryID,$mode=false)
 	{
 		if (!$mode) {
 			global $ADODB_FETCH_MODE;
@@ -179,7 +179,7 @@ class ADORecordSet_fbsql extends ADORecordSet{
 		default:
 		$this->fetchMode = FBSQL_BOTH; break;
 		}
-		return $this->ADORecordSet($queryID);
+		return parent::__construct($queryID);
 	}
 
 	function _initrs()

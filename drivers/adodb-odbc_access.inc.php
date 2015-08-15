@@ -28,12 +28,12 @@ class  ADODB_odbc_access extends ADODB_odbc {
 	var $upperCase = 'ucase';
 	var $hasGenID = true;
 
-	function ADODB_odbc_access()
+	function __construct()
 	{
 	global $ADODB_EXTENSION;
 
 		$ADODB_EXTENSION = false;
-		$this->ADODB_odbc();
+		parent::__construct();
 	}
 
 	function Time()
@@ -77,9 +77,9 @@ class  ADORecordSet_odbc_access extends ADORecordSet_odbc {
 
 	var $databaseType = "odbc_access";
 
-	function ADORecordSet_odbc_access($id,$mode=false)
+	function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_odbc($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }// class
 }

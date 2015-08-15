@@ -38,7 +38,7 @@ class ADODB_odbc extends ADOConnection {
 	var $_lastAffectedRows = 0;
 	var $uCaseTables = true; // for meta* functions, uppercase table names
 
-	function ADODB_odbc()
+	function __construct()
 	{
 		$this->_haserrorfunctions = ADODB_PHPVER >= 0x4050;
 		$this->_has_stupid_odbc_fetch_api_change = ADODB_PHPVER >= 0x4200;
@@ -574,7 +574,7 @@ class ADORecordSet_odbc extends ADORecordSet {
 	var $useFetchArray;
 	var $_has_stupid_odbc_fetch_api_change;
 
-	function ADORecordSet_odbc($id,$mode=false)
+	function __construct($id,$mode=false)
 	{
 		if ($mode === false) {
 			global $ADODB_FETCH_MODE;
@@ -587,7 +587,7 @@ class ADORecordSet_odbc extends ADORecordSet {
 		// the following is required for mysql odbc driver in 4.3.1 -- why?
 		$this->EOF = false;
 		$this->_currentRow = -1;
-		//$this->ADORecordSet($id);
+		//parent::__construct($id);
 	}
 
 
