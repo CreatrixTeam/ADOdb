@@ -71,9 +71,9 @@ class  ADORecordSet_odbc_vfp extends ADORecordSet_odbc {
 	var $databaseType = "odbc_vfp";
 
 
-	function __construct($id,$mode=false)
+	function ADORecordSet_odbc_vfp($id,$mode=false)
 	{
-		return parent::__construct($id,$mode);
+		return $this->ADORecordSet_odbc($id,$mode);
 	}
 
 	function MetaType($t, $len = -1, $fieldobj = false)

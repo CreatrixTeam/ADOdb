@@ -25,7 +25,7 @@ class ADODB_oracle extends ADOConnection {
 	var $connectSID = true;
 	var $hasGenID = true;
 
-	function __construct()
+	function ADODB_oracle()
 	{
 	}
 
@@ -217,7 +217,7 @@ class ADORecordset_oracle extends ADORecordSet {
 	var $databaseType = "oracle";
 	var $bind = false;
 
-	function __construct($queryID,$mode=false)
+	function ADORecordset_oracle($queryID,$mode=false)
 	{
 
 		if ($mode === false) {

@@ -27,6 +27,11 @@ include_once(ADODB_DIR.'/drivers/adodb-mssql.inc.php');
 class ADODB_mssqlpo extends ADODB_mssql {
 	var $databaseType = "mssqlpo";
 
+	function ADODB_mssqlpo()
+	{
+		ADODB_mssql::ADODB_mssql();
+	}
+
 	function PrepareSP($sql, $param = true)
 	{
 		if (!$this->_has_mssql_init) {
@@ -48,8 +53,8 @@ class ADODB_mssqlpo extends ADODB_mssql {
 
 class ADORecordset_mssqlpo extends ADORecordset_mssql {
 	var $databaseType = "mssqlpo";
-	function __construct($id,$mode=false)
+	function ADORecordset_mssqlpo($id,$mode=false)
 	{
-		parent::__construct($id,$mode);
+		$this->ADORecordset_mssql($id,$mode);
 	}
 }

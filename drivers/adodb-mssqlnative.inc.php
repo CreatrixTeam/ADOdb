@@ -123,7 +123,7 @@ class ADODB_mssqlnative extends ADOConnection {
 	var $sequences = false;
 	var $mssql_version = '';
 
-	function __construct()
+	function ADODB_mssqlnative()
 	{
 		if ($this->debug) {
 			ADOConnection::outp("<pre>");
@@ -775,7 +775,7 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 	var $fieldOffset = 0;
 	// _mths works only in non-localised system
 
-	function __construct($id,$mode=false)
+	function ADORecordset_mssqlnative($id,$mode=false)
 	{
 		if ($mode === false) {
 			global $ADODB_FETCH_MODE;
@@ -783,7 +783,7 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 
 		}
 		$this->fetchMode = $mode;
-		return parent::__construct($id,$mode);
+		return $this->ADORecordSet($id,$mode);
 	}
 
 
@@ -1024,9 +1024,9 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 
 
 class ADORecordSet_array_mssqlnative extends ADORecordSet_array {
-	function __construct($id=-1,$mode=false)
+	function ADORecordSet_array_mssqlnative($id=-1,$mode=false)
 	{
-		parent::__construct($id,$mode);
+		$this->ADORecordSet_array($id,$mode);
 	}
 
 		// mssql uses a default date like Dec 30 2000 12:00AM

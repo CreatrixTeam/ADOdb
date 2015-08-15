@@ -20,6 +20,11 @@ class ADODB_firebird extends ADODB_ibase {
 	var $dialect = 3;
 
 
+	function ADODB_firebird()
+	{
+		$this->ADODB_ibase();
+	}
+
 	function ServerInfo()
 	{
 		$arr['dialect'] = $this->dialect;
@@ -63,8 +68,8 @@ class  ADORecordSet_firebird extends ADORecordSet_ibase {
 
 	var $databaseType = "firebird";
 
-	function __construct($id,$mode=false)
+	function ADORecordSet_firebird($id,$mode=false)
 	{
-		parent::__construct($id,$mode);
+		$this->ADORecordSet_ibase($id,$mode);
 	}
 }

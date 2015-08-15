@@ -50,6 +50,12 @@ global $_COLONARR,$_COLONSZ;
 class ADODB_db2oci extends ADODB_db2 {
 	var $databaseType = "db2oci";
 
+	function ADODB_db2oci()
+	{
+		$this->ADODB_db2();
+	}
+
+
 	function _Execute($sql, $inputarr = false)
 	{
 		if ($inputarr) list($sql,$inputarr) = _colonscope($sql, $inputarr);
@@ -62,9 +68,9 @@ class  ADORecordSet_db2oci extends ADORecordSet_odbc {
 
 	var $databaseType = "db2oci";
 
-	function __construct($id,$mode=false)
+	function ADORecordSet_db2oci($id,$mode=false)
 	{
-		return parent::__construct($id,$mode);
+		return $this->ADORecordSet_db2($id,$mode);
 	}
 }
 
