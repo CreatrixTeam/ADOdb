@@ -120,7 +120,6 @@ class ADODB_mssqlnative extends ADOConnection {
 	var $uniqueOrderBy = true;
 	var $_bindInputArray = true;
 	var $connectionInfo = array();
-	var $sequences = false;
 	var $mssql_version = '';
 
 	function ADODB_mssqlnative()
@@ -206,10 +205,10 @@ class ADODB_mssqlnative extends ADOConnection {
 		switch($this->mssql_version){
 		case 9:
 		case 10:
-			return $this->GenID2008();
+			return $this->GenID2008($seq, $start);
 			break;
 		case 11:
-			return $this->GenID2012();
+			return ADOConnection::GenID($seq, $start);
 			break;
 		}
 	}
@@ -222,10 +221,11 @@ class ADODB_mssqlnative extends ADOConnection {
 		switch($this->mssql_version){
 		case 9:
 		case 10:
-			return $this->CreateSequence2008();
+			return $this->CreateSequence2008($seq, $start);
 			break;
 		case 11:
-			return $this->CreateSequence2012();
+			// Proper Sequences Only available to Server 2012 and up
+			return  ADOConnection::CreateSequence($seq, $start)
 			break;
 		}
 
@@ -249,65 +249,20 @@ class ADODB_mssqlnative extends ADOConnection {
 	}
 
 	/**
-	 * Proper Sequences Only available to Server 2012 and up
-	 */
-	function CreateSequence2012($seq='adodb',$start=1){
-		if (!$this->sequences){
-			$sql = "SELECT name FROM sys.sequences";
-			$this->sequences = $this->GetCol($sql);
-		}
-		$vSQL = $this->_dataDict->CreateSequenceSQL($seq,$start);
-		$ok = $this->Execute($vSQL[0]);
-		if (!$ok)
-			die("CANNOT CREATE SEQUENCE" . print_r(sqlsrv_errors(),true));
-		$this->sequences[] = $seq;
-	}
-
-	/**
 	 * For Server 2005,2008, duplicate a sequence with an identity table
 	 */
 	function GenID2008($seq='adodbseq',$start=1)
 	{
 		if($this->debug) ADOConnection::outp("<hr>CreateSequence($seq,$start)");
 		sqlsrv_begin_transaction($this->_connectionID);
-		$ok = $this->Execute("update $seq with (tablock,holdlock) set id = id + 1");
-		if (!$ok) {
-			if (ADOConnection::CreateSequence($seq, $start + 1) === false) {
-				if($this->debug) ADOConnection::outp("<hr>Error: ROLLBACK");
-				sqlsrv_rollback($this->_connectionID);
-				return false;
-			}
+		$num = ADOConnection::GenID($seq, $start);
+		if ($num == 0) {
+			if($this->debug) ADOConnection::outp("<hr>Error: ROLLBACK");
+			sqlsrv_rollback($this->_connectionID);
+			return 0;
 		}
-		$num = $this->GetOne("select id from $seq");
+
 		sqlsrv_commit($this->_connectionID);
-		return true;
-	}
-	/**
-	 * Only available to Server 2012 and up
-	 * Cannot do this the normal adodb way by trapping an error if the
-	 * sequence does not exist because sql server will auto create a
-	 * sequence with the starting number of -9223372036854775808
-	 */
-	function GenID2012($seq='adodbseq',$start=1)
-	{
-
-		/*
-		 * First time in create an array of sequence names that we
-		 * can use in later requests to see if the sequence exists
-		 * the overhead is creating a list of sequences every time
-		 * we need access to at least 1. If we really care about
-		 * performance, we could maybe flag a 'nocheck' class variable
-		 */
-		if (!$this->sequences){
-			$sql = "SELECT name FROM sys.sequences";
-			$this->sequences = $this->GetCol($sql);
-		}
-		if (!is_array($this->sequences)
-		|| is_array($this->sequences) && !in_array($seq,$this->sequences)){
-			$this->CreateSequence2012($seq='adodbseq',$start=1);
-
-		}
-		$num = $this->GetOne("SELECT NEXT VALUE FOR $seq");
 		return $num;
 	}
 

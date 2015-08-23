@@ -144,16 +144,12 @@ class  ADODB_ado_mssql extends ADODB_ado {
 	{
 		//$this->debug=1;
 		$this->Execute('BEGIN TRANSACTION adodbseq');
-		$ok = $this->Execute("update $seq with (tablock,holdlock) set id = id + 1");
-		if (!$ok) {
-			if(ADOConnection::CreateSequence($seq, $start + 1) === false) {
-				$this->Execute('ROLLBACK TRANSACTION adodbseq');
-				return false;
-			}	
-			$this->Execute('COMMIT TRANSACTION adodbseq');
-			return $start;
-		}
-		$num = $this->GetOne("select id from $seq");
+		$num = ADOConnection::GenID($seq, $start);
+		if ($num == 0) {
+			$this->Execute('ROLLBACK TRANSACTION adodbseq');
+			return 0;
+		}	
+
 		$this->Execute('COMMIT TRANSACTION adodbseq');
 		return $num;
 
