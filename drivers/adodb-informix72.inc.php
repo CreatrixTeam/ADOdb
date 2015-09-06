@@ -189,16 +189,15 @@ class ADODB_informix72 extends ADOConnection {
         return $procedures;
     }
 
-    function MetaColumns($pTableName, $normalize=true)
+    function _MetaColumns($pParsedTableName)
 	{
 	global $ADODB_FETCH_MODE;
 
 		$false = false;
 		if (!empty($this->metaColumnsSQL)) {
-			$tParsedTableName = $this->ParseTableName($pTableName);
-			$table = (array_key_exists('schema', $tParsedTableName) ? 
-					$tParsedTableName['schema']['name'].".".$tParsedTableName['table']['name'] :
-					$tParsedTableName['table']['name']);
+			$table = (array_key_exists('schema', $pParsedTableName) ? 
+					$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+					$pParsedTableName['table']['name']);
 			
 			$save = $ADODB_FETCH_MODE;
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;

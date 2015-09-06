@@ -80,13 +80,12 @@ class ADODB_fbsql extends ADOConnection {
 		return true;
 	}
 
- 	function MetaColumns($pTableName, $pIsToNormalize=null)
+ 	function _MetaColumns($pParsedTableName)
 	{
 		if ($this->metaColumnsSQL) {			
-			$tParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-			$table = (array_key_exists('schema', $tParsedTableName) ? 
-					$tParsedTableName['schema']['name'].".".$tParsedTableName['table']['name'] :
-					$tParsedTableName['table']['name']);
+			$table = (array_key_exists('schema', $pParsedTableName) ? 
+					$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+					$pParsedTableName['table']['name']);
 
 			$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 

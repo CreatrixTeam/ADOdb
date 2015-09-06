@@ -52,18 +52,17 @@ class ADODB_pdo_mssql extends ADODB_pdo {
 		return false;
 	}
 
-	function MetaColumns($table,$normalize=true)
+	function _MetaColumns($pParsedTableName)
 	{
 		return false;
 	}
 
 	//VERBATIM COPY FROM "adodb-mssqlnative.inc.php"/"adodb-odbc_mssql.inc.php"
-	function MetaIndexes($pTableName,$primary=false, $owner = false)
+	function _MetaIndexes($pParsedTableName,$primary=false, $owner = false)
 	{
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 		$table = $this->qstr($table);
 
 		$sql = "SELECT i.name AS ind_name, C.name AS col_name, USER_NAME(O.uid) AS Owner, c.colid, k.Keyno,

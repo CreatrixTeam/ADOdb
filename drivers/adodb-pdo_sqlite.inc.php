@@ -112,17 +112,16 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 
 
     // mark newnham
-	function MetaColumns($pTableName,$pIsToNormalize=null)
+	function _MetaColumns($pParsedTableName)
 	{
 	  global $ADODB_FETCH_MODE;
 
 	  $false = false;
 	  $save = $ADODB_FETCH_MODE;
 	  $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-	  $vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-	  $tab = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+	  $tab = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 	  if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
 	  $rs = $this->Execute("PRAGMA table_info('$tab')");
 	  if (isset($savem)) $this->SetFetchMode($savem);
@@ -171,17 +170,16 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
    }
 
     //Verbatim copy from "adodb-sqlite.inc.php"/"adodb-sqlite3.inc.php"
-	function MetaIndexes($pTableName, $primary = FALSE, $owner=false, $owner = false)
+	function _MetaIndexes($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		$false = false;
 		// save old fetch mode
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 		if ($this->fetchMode !== FALSE) {
 			$savem = $this->SetFetchMode(FALSE);
 		}

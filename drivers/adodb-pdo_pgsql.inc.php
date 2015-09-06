@@ -109,14 +109,13 @@ select viewname,'V' from pg_views where viewname like $mask";
 		return $ret;
 	}
 
-	function MetaColumns($pTableName,$pIsToNormalize=null)
+	function _MetaColumns($pParsedTableName)
 	{
 	global $ADODB_FETCH_MODE;
 
-		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-		$table = $vParsedTableName['table']['name'];
-		$normalize = $vParsedTableName['table']['isToNormalize'];
-		$schema = @$vParsedTableName['schema']['name'];
+		$table = $pParsedTableName['table']['name'];
+		$normalize = $pParsedTableName['table']['isToNormalize'];
+		$schema = @$pParsedTableName['schema']['name'];
 
 		if ($normalize) $table = strtolower($table);
 
@@ -227,13 +226,12 @@ select viewname,'V' from pg_views where viewname like $mask";
 	}
 
 	//VERBATIM COPY FROM "adodb-postgres64.inc.php"
-	function MetaIndexes ($pTableName, $primary = FALSE, $owner = false)
+	function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner = false)
 	{
 		global $ADODB_FETCH_MODE;
 
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = $vParsedTableName['table']['name'];
-		$schema = @$vParsedTableName['schema']['name'];
+		$table = $pParsedTableName['table']['name'];
+		$schema = @$pParsedTableName['schema']['name'];
 
 		if ($schema) { // requires pgsql 7.3+ - pg_namespace used.
 			$sql = '
@@ -276,7 +274,7 @@ select viewname,'V' from pg_views where viewname like $mask";
 			return $false;
 		}
 
-		$col_names = $this->MetaColumnNames($pTableName,true,true);
+		$col_names = $this->_MetaColumnNames($pParsedTableName,true,true);
 		//3rd param is use attnum,
 		// see http://sourceforge.net/tracker/index.php?func=detail&aid=1451245&group_id=42718&atid=433976
 		$indexes = array();

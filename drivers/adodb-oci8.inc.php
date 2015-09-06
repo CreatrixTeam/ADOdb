@@ -98,13 +98,12 @@ class ADODB_oci8 extends ADOConnection {
 	}
 
 	/*  function MetaColumns($table, $normalize=true) added by smondino@users.sourceforge.net*/
-	function MetaColumns($pTableName, $pIsToNormalize=null)
+	function _MetaColumns($pParsedTableName)
 	{
 	global $ADODB_FETCH_MODE;
 		
-		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-		$table = $vParsedTableName['table']['name'];
-		$schema = @$vParsedTableName['schema']['name'];
+		$table = $pParsedTableName['table']['name'];
+		$schema = @$pParsedTableName['schema']['name'];
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
@@ -398,17 +397,16 @@ class ADODB_oci8 extends ADOConnection {
 	}
 
 	// Mark Newnham
-	function MetaIndexes ($pTableName, $primary = FALSE, $owner=false)
+	function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		// save old fetch mode
 		global $ADODB_FETCH_MODE;
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 
 		if ($this->fetchMode !== FALSE) {
 			$savem = $this->SetFetchMode(FALSE);

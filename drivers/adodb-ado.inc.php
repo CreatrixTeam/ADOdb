@@ -169,13 +169,12 @@ class ADODB_ado extends ADOConnection {
 		return $arr;
 	}
 
-	function MetaColumns($pTableName, $normalize=true)
+	function _MetaColumns($pParsedTableName)
 	{
-		$pTableName = strtoupper($pTableName);
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
+		$table = strtoupper($table);
 		$arr = array();
 		$dbc = $this->_connectionID;
 

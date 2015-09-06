@@ -289,14 +289,13 @@ class ADODB_mssql extends ADOConnection {
 		{return ADOConnection::RowLock($tables,$where,$col);}
 
 
-	function MetaColumns($pTableName, $pIsToNormalize=null)
+	function _MetaColumns($pParsedTableName)
 	{
 //		$arr = ADOConnection::MetaColumns($table);
 //		return $arr;
 
-		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-		$table = $vParsedTableName['table']['name'];
-		$schema = @$vParsedTableName['schema']['name'];
+		$table = $pParsedTableName['table']['name'];
+		$schema = @$pParsedTableName['schema']['name'];
 		if ($schema) {
 			$dbName = $this->database;
 			$this->SelectDB($schema);
@@ -349,12 +348,11 @@ class ADODB_mssql extends ADOConnection {
 	}
 
 
-	function MetaIndexes($pTableName,$primary=false, $owner=false)
+	function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
 	{
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 		$table = $this->qstr($table);
 
 		$sql = "SELECT i.name AS ind_name, C.name AS col_name, USER_NAME(O.uid) AS Owner, c.colid, k.Keyno,

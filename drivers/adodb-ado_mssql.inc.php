@@ -92,13 +92,12 @@ class  ADODB_ado_mssql extends ADODB_ado {
 		return str_replace("\0", "\\\\000", $s);
 	}
 
-	function MetaColumns($pTableName, $normalize=true)
+	function _MetaColumns($pParsedTableName)
 	{
-        $pTableName = strtoupper($pTableName);
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
+		$table = strtoupper($table);
         $arr= array();
         $dbc = $this->_connectionID;
 

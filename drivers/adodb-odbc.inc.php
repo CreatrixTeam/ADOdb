@@ -347,15 +347,14 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 		}
 	}
 
-	function MetaColumns($pTableName, $normalize=true)
+	function _MetaColumns($pParsedTableName)
 	{
 	global $ADODB_FETCH_MODE;
 
 		$false = false;
-		if ($this->uCaseTables) $pTableName = strtoupper($pTableName);
-		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-		$table = $vParsedTableName['table']['name'];
-		$schema = @$vParsedTableName['schema']['name'];
+		$table = $pParsedTableName['table']['name'];
+		$schema = @$pParsedTableName['schema']['name'];
+		if ($this->uCaseTables) $table = strtoupper($table);
 
 		$savem = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;

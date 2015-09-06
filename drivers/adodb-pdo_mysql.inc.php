@@ -95,11 +95,10 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		$this->Execute('SET SESSION TRANSACTION ' . $transaction_mode);
 	}
 
-	function MetaColumns($pTableName, $pIsToNormalize=null)
+	function _MetaColumns($pParsedTableName)
 	{
-		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-		$table = $vParsedTableName['table']['name'];
-		$schema = @$vParsedTableName['schema']['name'];
+		$table = $pParsedTableName['table']['name'];
+		$schema = @$pParsedTableName['schema']['name'];
 		if ($schema) {
 			$dbName = $this->database;
 			$this->SelectDB($schema);
@@ -180,7 +179,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	}
 
 	//Verbatim copy from "adodb-mysql.inc.php"
-	function MetaIndexes ($pTableName, $primary = FALSE, $owner=false)
+	function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		// save old fetch mode
 		global $ADODB_FETCH_MODE;
@@ -188,10 +187,9 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		$false = false;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 		if ($this->fetchMode !== FALSE) {
 			$savem = $this->SetFetchMode(FALSE);
 		}

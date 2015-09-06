@@ -71,15 +71,14 @@ class ADODB_sybase_ase extends ADODB_sybase {
 	}
 
 	// fix a bug which prevent the metaColumns query to be executed for Sybase ASE
-	function MetaColumns($pTableName,$pIsToNormalize=null)
+	function _MetaColumns($pParsedTableName)
 	{
 		$false = false;
 		if (!empty($this->metaColumnsSQL)) {
 
-			$tParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-			$table = (array_key_exists('schema', $tParsedTableName) ? 
-					$tParsedTableName['schema']['name'].".".$tParsedTableName['table']['name'] :
-					$tParsedTableName['table']['name']);
+			$table = (array_key_exists('schema', $pParsedTableName) ? 
+					$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+					$pParsedTableName['table']['name']);
 			$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 			if ($rs === false) return $false;
 

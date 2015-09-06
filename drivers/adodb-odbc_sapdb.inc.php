@@ -51,12 +51,11 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		return $this->GetCol("SELECT columnname FROM COLUMNS WHERE tablename=$table AND mode='KEY' ORDER BY pos");
 	}
 
- 	function MetaIndexes ($pTableName, $primary = FALSE, $owner = false)
+ 	function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner = false)
 	{
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 		$table = $this->Quote(strtoupper($table));
 
 		$sql = "SELECT INDEXNAME,TYPE,COLUMNNAME FROM INDEXCOLUMNS ".
@@ -94,13 +93,12 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
         return $indexes;
 	}
 
- 	function MetaColumns ($pTableName, $normalize = true)
+ 	function _MetaColumns ($pParsedTableName)
 	{
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
         $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$tParsedTableName = $this->ParseTableName($pTableName);
-		$table = $tParsedTableName['table']['name'];
+		$table = $pParsedTableName['table']['name'];
         if ($this->fetchMode !== FALSE) {
         	$savem = $this->SetFetchMode(FALSE);
         }
@@ -144,13 +142,12 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		return $retarr;
 	}
 
-	function MetaColumnNames($pTableName, $numIndexes = false, $useattnum = false))
+	function _MetaColumnNames($pParsedTableName, $numIndexes = false, $useattnum = false))
 	{
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".
-				$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".
+				$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 		$table = $this->Quote(strtoupper($table));
 
 		return $this->GetCol("SELECT columnname FROM COLUMNS WHERE tablename=$table ORDER BY pos");

@@ -198,17 +198,16 @@ class ADODB_ibase extends ADOConnection {
 		return $ret;
 	}
 
-	function MetaIndexes ($pTableName, $primary = FALSE, $owner=false)
+	function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		// save old fetch mode
 		global $ADODB_FETCH_MODE;
 		$false = false;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 		if ($this->fetchMode !== FALSE) {
 				$savem = $this->SetFetchMode(FALSE);
 		}
@@ -470,16 +469,15 @@ class ADODB_ibase extends ADOConnection {
 	//OPN STUFF end
 
 	// returns array of ADOFieldObjects for current table
-	function MetaColumns($pTableName, $pIsToNormalize=null)
+	function _MetaColumns($pParsedTableName)
 	{
 	global $ADODB_FETCH_MODE;
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-					$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-					$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+					$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+					$pParsedTableName['table']['name']);
 		
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
 

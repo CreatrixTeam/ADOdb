@@ -183,16 +183,15 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 		return $arr2;
 	}
 
-	function MetaIndexes ($pTableName, $primary = FALSE, $owner=false)
+	function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
         // save old fetch mode
         global $ADODB_FETCH_MODE;
         $save = $ADODB_FETCH_MODE;
         $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
         if ($this->fetchMode !== FALSE) {
                $savem = $this->SetFetchMode(FALSE);
         }

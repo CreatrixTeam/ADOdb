@@ -48,14 +48,13 @@ class  ADODB_odbc_oracle extends ADODB_odbc {
 		return $arr2;
 	}
 
-	function MetaColumns($pTableName, $pIsToNormalize=null)
+	function _MetaColumns($pParsedTableName)
 	{
 	global $ADODB_FETCH_MODE;
 
-		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
 		if ($rs === false) {

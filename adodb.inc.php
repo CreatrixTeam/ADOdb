@@ -2548,24 +2548,43 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 	}
 
+	
 	/**
 	 * List columns in a database as an array of ADOFieldObjects.
 	 * See top of file for definition of object.
+	 * ACCESS: FINAL PUBLIC
 	 *
-	 * @param $table	table name to query
+	 * @param $table	table name to query optionaly formated name per the 
+	 *		ADODB_DataDict::ParseIdentifierName specification
 	 * @param $normalize	makes table name case-insensitive (required by some databases)
 	 * @schema is optional database schema to use - not supported by all databases.
 	 *
 	 * @return  array of ADOFieldObjects for current table.
 	 */
 	function MetaColumns($pTableName,$pIsToNormalize=null) {
+		return $this->_MetaColumns(
+				$this->_dataDict->ParseTableName($pTableName, $pIsToNormalize));
+	}
+	
+	/**
+	 * List columns in a database as an array of ADOFieldObjects.
+	 * See top of file for definition of object.
+	 * ACCESS: PROTECTED
+	 *	
+	 * @param pParsedTableName  the parsed info of the table name to query. Refer to 
+	 *		ADODB_DataDict::ParseIdentifierName for full specification. Note that quotation
+	 *		info in is ignored, and table names are always to be quoted by implementing classes.
+	 * @schema is optional database schema to use - not supported by all databases.
+	 *
+	 * @return  array of ADOFieldObjects for current table.
+	 */
+	function _MetaColumns($pParsedTableName) {
 		global $ADODB_FETCH_MODE;
 
 		if (!empty($this->metaColumnsSQL)) {
-			$tParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-			$table = $tParsedTableName['table']['name'];
-			$normalize = $tParsedTableName['table']['isToNormalize'];
-			$schema = @$tParsedTableName['schema']['name'];
+			$table = $pParsedTableName['table']['name'];
+			$normalize = $pParsedTableName['table']['isToNormalize'];
+			$schema = @$pParsedTableName['schema']['name'];
 
 			$save = $ADODB_FETCH_MODE;
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
@@ -2613,7 +2632,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 	/**
 	 * List indexes on a table as an array.
-	 * @param table  table name to query
+	 * ACCESS: FINAL PUBLIC
+	 * @param table  table name to query optionaly formated name per the 
+	 *		ADODB_DataDict::ParseIdentifierName specification
 	 * @param primary true to only show primary keys. Not actually used for most databases
 	 *
 	 * @return array of indexes on current table. Each element represents an index, and is itself an associative array.
@@ -2629,17 +2650,58 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * )
 	 */
 	function MetaIndexes($table, $primary = false, $owner = false) {
+		return $this->_MetaIndexes($this->_dataDict->ParseTableName($table),
+				$primary, $owner);
+	}
+	
+	/**
+	 * List indexes on a table as an array.
+	 * ACCESS: PROTECTED
+	 * @param pParsedTableName  the parsed info of a table name. Refer to 
+	 *		ADODB_DataDict::ParseIdentifierName for full specification. Note that quotation
+	 *		info in is ignored, and table names are always to be quoted by implementing classes.
+	 * @param primary true to only show primary keys. Not actually used for most databases
+	 *
+	 * @return array of indexes on current table. Each element represents an index, and is itself an associative array.
+	 *
+	 * Array(
+	 *   [name_of_index] => Array(
+	 *     [unique] => true or false
+	 *     [columns] => Array(
+	 *       [0] => firstname
+	 *       [1] => lastname
+	 *     )
+	 *   )
+	 * )
+	 */
+	function _MetaIndexes($pParsedTableName, $primary = false, $owner = false) {
 		return false;
 	}
 
 	/**
 	 * List columns names in a table as an array.
-	 * @param table	table name to query
+	 * ACCESS: FINAL PUBLIC
+	 * @param table	table name to query optionaly formated name per the 
+	 *		ADODB_DataDict::ParseIdentifierName specification
 	 *
 	 * @return  array of column names for current table.
 	 */
 	function MetaColumnNames($table, $numIndexes=false,$useattnum=false /* only for postgres */) {
-		$objarr = $this->MetaColumns($table);
+		return $this->_MetaColumnNames($this->_dataDict->ParseTableName($table),
+				$numIndexes, $useattnum);
+	}
+
+	/**
+	 * List columns names in a table as an array.
+	 * ACCESS: PROTECTED
+	 * @param pParsedTableName  the parsed info of the table name to query. Refer to 
+	 *		ADODB_DataDict::ParseIdentifierName for full specification. Note that quotation
+	 *		info in is ignored, and table names are always to be quoted by implementing classes.
+	 *
+	 * @return  array of column names for current table.
+	 */
+	function _MetaColumnNames($pParsedTableName, $numIndexes=false,$useattnum=false /* only for postgres */) {
+		$objarr = $this->_MetaColumns($pParsedTableName);
 		if (!is_array($objarr)) {
 			return false;
 		}

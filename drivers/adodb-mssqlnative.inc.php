@@ -490,12 +490,11 @@ class ADODB_mssqlnative extends ADOConnection {
 		return ADORecordSet_array_mssqlnative::UnixTimeStamp($v);
 	}
 
-	function MetaIndexes($pTableName,$primary=false, $owner=false)
+	function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
 	{
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 		$table = $this->qstr($table);
 
 		$sql = "SELECT i.name AS ind_name, C.name AS col_name, USER_NAME(O.uid) AS Owner, c.colid, k.Keyno,
@@ -631,15 +630,15 @@ class ADODB_mssqlnative extends ADOConnection {
 		}
 		return $ret;
 	}
-	function MetaColumns($pTableName, $pIsToNormalize=null, $schema=false){
+	function _MetaColumns($pParsedTableName){
 
 		# start adg
 		static $cached_columns = array();
-		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
-		$schema = (!$schema ? @$vParsedTableName['schema']['name']: $schema);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
+		$schema = (!empty(@$pParsedTableName['schema']['name']) ? 
+				$pParsedTableName['schema']['name'] : false);
 		if ($this->cachedSchemaFlush)
 			$cached_columns = array();
 

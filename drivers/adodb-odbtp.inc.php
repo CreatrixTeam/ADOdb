@@ -312,14 +312,13 @@ class ADODB_odbtp extends ADOConnection{
 		return $arr2;
 	}
 
-	function MetaColumns($pTableName,$pIsToNormalize=null)
+	function _MetaColumns($pParsedTableName)
 	{
 	global $ADODB_FETCH_MODE;
 
-		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-		$table = $vParsedTableName['table']['name'];
-		$upper = $vParsedTableName['table']['isToNormalize'];
-		$schema = @$vParsedTableName['schema']['name'];
+		$table = $pParsedTableName['table']['name'];
+		$upper = $pParsedTableName['table']['isToNormalize'];
+		$schema = @$pParsedTableName['schema']['name'];
 		if ($upper) $table = strtoupper($table);
 
 		$savem = $ADODB_FETCH_MODE;
@@ -537,22 +536,27 @@ class ADODB_odbtp extends ADOConnection{
 		return @odbtp_execute( $stmt ) != false;
 	}
 
-	function MetaIndexes($table,$primary=false, $owner=false)
+	function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
 	{
 		switch ( $this->odbc_driver) {
 			case ODB_DRIVER_MSSQL:
-				return $this->MetaIndexes_mssql($table, $primary);
+				return $this->_MetaIndexes_mssql($pParsedTableName, $primary);
 			default:
 				return array();
 		}
 	}
-
+	
 	function MetaIndexes_mssql($pTableName,$primary=false, $owner = false)
 	{
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'].".".$vParsedTableName['table']['name'] :
-				$vParsedTableName['table']['name']);
+		return $this->_MetaIndexes_mssql($this->_dataDict->ParseIdentifierName($pTableName),
+				$primary, $owner);
+	}
+
+	function _MetaIndexes_mssql($pParsedTableName,$primary=false, $owner = false)
+	{
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
 		$table = strtolower($this->qstr($table));
 
 		$sql = "SELECT i.name AS ind_name, C.name AS col_name, USER_NAME(O.uid) AS Owner, c.colid, k.Keyno,

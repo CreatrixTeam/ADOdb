@@ -397,16 +397,15 @@ class ADODB_postgres64 extends ADOConnection{
 	// for schema support, pass in the $table param "$schema.$tabname".
 	// converts field names to lowercase, $upper is ignored
 	// see http://phplens.com/lens/lensforum/msgs.php?id=14018 for more info
-	function MetaColumns($pTableName,$pIsToNormalize=null)
+	function _MetaColumns($pParsedTableName)
 	{
 		global $ADODB_FETCH_MODE;
 
 		$false = false;
-		$vParsedTableName = $this->ParseTableName($pTableName, $pIsToNormalize);
-		$table = $vParsedTableName['table']['name'];
-		$normalize = $vParsedTableName['table']['isToNormalize'];
-		$schema = (array_key_exists('schema', $vParsedTableName) ? 
-				$vParsedTableName['schema']['name'] : false);
+		$table = $pParsedTableName['table']['name'];
+		$normalize = $pParsedTableName['table']['isToNormalize'];
+		$schema = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'] : false);
 
 		if ($normalize) $table = strtolower($table);
 
@@ -524,13 +523,12 @@ class ADODB_postgres64 extends ADOConnection{
 		return '$'.$this->_pnum;
 	}
 
-	function MetaIndexes ($pTableName, $primary = FALSE, $owner = false)
+	function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner = false)
 	{
 		global $ADODB_FETCH_MODE;
 
-		$vParsedTableName = $this->ParseTableName($pTableName);
-		$table = $vParsedTableName['table']['name'];
-		$schema = @$vParsedTableName['schema']['name'];
+		$table = $pParsedTableName['table']['name'];
+		$schema = @$pParsedTableName['schema']['name'];
 
 		if ($schema) { // requires pgsql 7.3+ - pg_namespace used.
 			$sql = '
@@ -573,7 +571,7 @@ class ADODB_postgres64 extends ADOConnection{
 			return $false;
 		}
 
-		$col_names = $this->MetaColumnNames($pTableName,true,true);
+		$col_names = $this->_MetaColumnNames($pParsedTableName,true,true);
 		//3rd param is use attnum,
 		// see http://sourceforge.net/tracker/index.php?func=detail&aid=1451245&group_id=42718&atid=433976
 		$indexes = array();
