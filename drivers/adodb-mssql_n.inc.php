@@ -51,14 +51,14 @@ if (!defined('SINGLEQUOTE')) define('SINGLEQUOTE', "'");
 include_once(ADODB_DIR.'/drivers/adodb-mssql.inc.php');
 
 class ADODB_mssql_n extends ADODB_mssql {
-	var $databaseType = "mssql_n";
+	public  $databaseType = "mssql_n";
 
-	function ADODB_mssqlpo()
+	public function ADODB_mssqlpo()
 	{
 		ADODB_mssql::ADODB_mssql();
 	}
 
-	function _query($sql,$inputarr=false)
+	public function _query($sql,$inputarr=false)
 	{
         $sql = $this->_appendN($sql);
 		return ADODB_mssql::_query($sql,$inputarr);
@@ -81,7 +81,7 @@ class ADODB_mssql_n extends ADODB_mssql {
      *
      * @return mixed
      */
-    function _appendN($inboundData) {
+    protected function _appendN($inboundData) {
 
         $inboundIsArray  = false;
        
@@ -246,9 +246,9 @@ class ADODB_mssql_n extends ADODB_mssql {
 }
 
 class ADORecordset_mssql_n extends ADORecordset_mssql {
-	var $databaseType = "mssql_n";
-	function ADORecordset_mssql_n($id,$mode=false)
+	public  $databaseType = "mssql_n";
+	public function __construct($id,$mode=false)
 	{
-		$this->ADORecordset_mssql($id,$mode);
+		parent::__construct($id,$mode);
 	}
 }

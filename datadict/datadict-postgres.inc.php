@@ -15,18 +15,18 @@ if (!defined('ADODB_DIR')) die();
 
 class ADODB2_postgres extends ADODB_DataDict {
 
-	var $databaseType = 'postgres';
-	var $seqField = false;
-	var $seqPrefix = 'SEQ_';
-	var $addCol = ' ADD COLUMN';
-	var $quote = '"';
-	var $renameTable = 'ALTER TABLE %s RENAME TO %s'; // at least since 7.1
-	var $dropTable = 'DROP TABLE %s CASCADE';
-	var $sql_concatenateOperator = '||';
-	var $sql_sysDate = "CURRENT_DATE";
-	var $sql_sysTimeStamp = "CURRENT_TIMESTAMP";
+	public  $databaseType = 'postgres';
+	public  $seqField = false;
+	public  $seqPrefix = 'SEQ_';
+	public  $addCol = ' ADD COLUMN';
+	public  $quote = '"';
+	public  $renameTable = 'ALTER TABLE %s RENAME TO %s'; // at least since 7.1
+	public  $dropTable = 'DROP TABLE %s CASCADE';
+	public  $sql_concatenateOperator = '||';
+	public  $sql_sysDate = "CURRENT_DATE";
+	public  $sql_sysTimeStamp = "CURRENT_TIMESTAMP";
 
-	function MetaType($t,$len=-1,$fieldobj=false)
+	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -90,7 +90,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 		}
 	}
 
- 	function ActualType($meta)
+ 	public function ActualType($meta)
 	{
 		switch($meta) {
 		case 'C': return 'VARCHAR';
@@ -129,7 +129,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 	 * @param string $flds column-names and types for the changed columns
 	 * @return array with SQL strings
 	 */
-	function AddColumnSQL($tabname, $flds)
+	public function AddColumnSQL($tabname, $flds)
 	{
 		$tabname = $this->TableName ($tabname);
 		$sql = array();
@@ -157,7 +157,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 	}
 
 
-	function DropIndexSQL ($idxname, $tabname = NULL)
+	public function DropIndexSQL ($idxname, $tabname = NULL)
 	{
 	   return array(sprintf($this->dropIndex, $this->TableName($idxname), $this->TableName($tabname)));
 	}
@@ -174,7 +174,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 	 * @return array with SQL strings
 	 */
 	 /*
-	function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		if (!$tableflds) {
 			if ($this->debug) ADOConnection::outp("AlterColumnSQL needs a complete table-definiton for PostgreSQL");
@@ -183,7 +183,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 		return $this->_recreate_copy_table($tabname,False,$tableflds,$tableoptions);
 	}*/
 
-	function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		// Check if alter single column datatype available - works with 8.0+
 		$has_alter_column = 8.0 <= (float) $this->GetServerInfo('version');
@@ -283,7 +283,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 	 * @param array/ $tableoptions options for the new table see CreateTableSQL, default ''
 	 * @return array with SQL strings
 	 */
-	function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		$has_drop_column = 7.3 <= (float) $this->GetServerInfo('version');
 		if (!$has_drop_column && !$tableflds) {
@@ -308,7 +308,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 	 * @param array/string $tableoptions options for the new table see CreateTableSQL, default ''
 	 * @return array with SQL strings
 	 */
-	function _recreate_copy_table($tabname,$dropflds,$tableflds,$tableoptions='')
+	protected function _recreate_copy_table($tabname,$dropflds,$tableflds,$tableoptions='')
 	{
 		if ($dropflds && !is_array($dropflds)) $dropflds = explode(',',$dropflds);
 		$copyflds = array();
@@ -354,7 +354,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 		return $aSql;
 	}
 
-	function DropTableSQL($tabname)
+	public function DropTableSQL($tabname)
 	{
 		$sql = ADODB_DataDict::DropTableSQL($tabname);
 
@@ -365,7 +365,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 	}
 
 	// return string must begin with space
-	function _CreateSuffix($fname, &$ftype, $fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
+	protected function _CreateSuffix($fname, &$ftype, $fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
 	{
 		if ($fautoinc) {
 			$ftype = 'SERIAL';
@@ -381,7 +381,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 	// search for a sequece for the given table (asumes the seqence-name contains the table-name!)
 	// if yes return sql to drop it
 	// this is still necessary if postgres < 7.3 or the SERIAL was created on an earlier version!!!
-	function _DropAutoIncrement($tabname)
+	protected function _DropAutoIncrement($tabname)
 	{
 		$tabname = $this->connection->quote('%'.$tabname.'%');
 
@@ -394,7 +394,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 		return "DROP SEQUENCE ".$seq;
 	}
 
-	function RenameTableSQL($tabname,$newname)
+	public function RenameTableSQL($tabname,$newname)
 	{
 		if (!empty($this->schema)) {
 			$rename_from = $this->TableName($tabname);
@@ -441,7 +441,7 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 [ USING acc_method ] ( func_name( column [, ... ]) [ ops_name ] )
 [ WHERE predicate ]
 	*/
-	function _IndexSQL($idxname, $tabname, $flds, $idxoptions)
+	protected function _IndexSQL($idxname, $tabname, $flds, $idxoptions)
 	{
 		$sql = array();
 
@@ -473,7 +473,7 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 		return $sql;
 	}
 
-	function _GetSize($ftype, $ty, $fsize, $fprec)
+	protected function _GetSize($ftype, $ty, $fsize, $fprec)
 	{
 		if (strlen($fsize) && $ty != 'X' && $ty != 'B' && $ty  != 'I' && strpos($ftype,'(') === false) {
 			$ftype .= "(".$fsize;
@@ -482,7 +482,7 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 		}
 		return $ftype;
 	}
-	function ChangeTableSQL($pTableName, $pTableFields, $pTableOptions = false, 
+	public function ChangeTableSQL($pTableName, $pTableFields, $pTableOptions = false, 
 			$pIsToDropOldFields = false)
 	{
 		global $ADODB_FETCH_MODE;
@@ -557,7 +557,7 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 	}
 
 	// Format date column in sql string given an input format that understands Y M D
-	function _FormatDateSQL($fmt, $pParsedColumnName=false)
+	protected function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
 		$col = false;
 
@@ -639,10 +639,10 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 		return array($s. "')");
 	}
 
-	function RowLockSQL($tables,$where,$col='1 as adodbignore')
+	public function RowLockSQL($tables,$where,$col='1 as adodbignore')
 		{return array("select $col from $tables where $where for update");}
 
-	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
 		return array
 		(
@@ -650,10 +650,10 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 		);
 	}
 
-	function _DropSequenceSQL($pParsedSequenceName)
+	protected function _DropSequenceSQL($pParsedSequenceName)
 		{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
 
-	function _GenIDSQL($pParsedSequenceName)
+	protected function _GenIDSQL($pParsedSequenceName)
 		{return array(sprintf("SELECT NEXTVAL('%s')", $pParsedSequenceName['name']));}
 		
 }

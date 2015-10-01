@@ -15,14 +15,14 @@ if (!defined('ADODB_DIR')) die();
 
 class ADODB2_informix extends ADODB_DataDict {
 
-	var $databaseType = 'informix';
-	var $seqField = false;
-	var $sql_concatenateOperator = '||';
-	var $sql_sysDate = 'TODAY';
-	var $sql_sysTimeStamp = 'CURRENT';
+	public  $databaseType = 'informix';
+	public  $seqField = false;
+	public  $sql_concatenateOperator = '||';
+	public  $sql_sysDate = 'TODAY';
+	public  $sql_sysTimeStamp = 'CURRENT';
 
 
-	function ActualType($meta)
+	public function ActualType($meta)
 	{
 		switch($meta) {
 		case 'C': return 'VARCHAR';// 255
@@ -52,21 +52,21 @@ class ADODB2_informix extends ADODB_DataDict {
 		}
 	}
 
-	function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
 	{
 		if ($this->debug) ADOConnection::outp("AlterColumnSQL not supported");
 		return array();
 	}
 
 
-	function DropColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
+	public function DropColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
 	{
 		if ($this->debug) ADOConnection::outp("DropColumnSQL not supported");
 		return array();
 	}
 
 	// return string must begin with space
-	function _CreateSuffix($fname, &$ftype, $fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
+	protected function _CreateSuffix($fname, &$ftype, $fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
 	{
 		if ($fautoinc) {
 			$ftype = 'SERIAL';
@@ -79,7 +79,7 @@ class ADODB2_informix extends ADODB_DataDict {
 		return $suffix;
 	}
 
-	function RowLockSQL($tables,$where,$col='1 as adodbignore')
+	public function RowLockSQL($tables,$where,$col='1 as adodbignore')
 		{return array("select $col from $tables where $where for update");}
 	
 }

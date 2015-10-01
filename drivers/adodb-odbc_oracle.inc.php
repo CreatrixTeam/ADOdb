@@ -19,22 +19,22 @@ if (!defined('_ADODB_ODBC_LAYER')) {
 
 
 class  ADODB_odbc_oracle extends ADODB_odbc {
-	var $databaseType = 'odbc_oracle';
- 	var $replaceQuote = "''"; // string to use to replace quotes
-	var $fmtDate = "'Y-m-d 00:00:00'";
-	var $fmtTimeStamp = "'Y-m-d h:i:sA'";
-	var $metaTablesSQL = 'select table_name from cat';
-	var $metaColumnsSQL = "select cname,coltype,width from col where tname='%s' order by colno";
-	var $hasGenID = true;
+	public  $databaseType = 'odbc_oracle';
+ 	public  $replaceQuote = "''"; // string to use to replace quotes
+	public  $fmtDate = "'Y-m-d 00:00:00'";
+	public  $fmtTimeStamp = "'Y-m-d h:i:sA'";
+	public  $metaTablesSQL = 'select table_name from cat';
+	public  $metaColumnsSQL = "select cname,coltype,width from col where tname='%s' order by colno";
+	public  $hasGenID = true;
 
-	//var $_bindInputArray = false;
+	//protected  $_bindInputArray = false;
 
-	function ADODB_odbc_oracle()
+	public function __construct()
 	{
-		$this->ADODB_odbc();
+		parent::__construct();
 	}
 
-	function MetaTables($ttype = false, $showSchema = false, $mask = false)
+	public function MetaTables($ttype = false, $showSchema = false, $mask = false)
 	{
 		$false = false;
 		$rs = $this->Execute($this->metaTablesSQL);
@@ -48,7 +48,7 @@ class  ADODB_odbc_oracle extends ADODB_odbc {
 		return $arr2;
 	}
 
-	function _MetaColumns($pParsedTableName)
+	protected function _MetaColumns($pParsedTableName)
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -79,7 +79,7 @@ class  ADODB_odbc_oracle extends ADODB_odbc {
 	}
 
 	// returns true or false
-	function _connect($argDSN, $argUsername, $argPassword, $argDatabasename)
+	protected function _connect($argDSN, $argUsername, $argPassword, $argDatabasename)
 	{
 	global $php_errormsg;
 
@@ -92,7 +92,7 @@ class  ADODB_odbc_oracle extends ADODB_odbc {
 		return $this->_connectionID != false;
 	}
 	// returns true or false
-	function _pconnect($argDSN, $argUsername, $argPassword, $argDatabasename)
+	protected function _pconnect($argDSN, $argUsername, $argPassword, $argDatabasename)
 	{
 	global $php_errormsg;
 		$php_errormsg = '';
@@ -107,10 +107,10 @@ class  ADODB_odbc_oracle extends ADODB_odbc {
 
 class  ADORecordSet_odbc_oracle extends ADORecordSet_odbc {
 
-	var $databaseType = 'odbc_oracle';
+	public  $databaseType = 'odbc_oracle';
 
-	function ADORecordSet_odbc_oracle($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_odbc($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }

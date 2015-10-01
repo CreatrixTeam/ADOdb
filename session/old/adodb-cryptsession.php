@@ -102,7 +102,7 @@ if (empty($ADODB_SESSION_EXPIRE_NOTIFY)) {
 	$ADODB_SESSION_EXPIRE_NOTIFY = false;
 }
 
-function ADODB_Session_Key()
+public function ADODB_Session_Key()
 {
 $ADODB_CRYPT_KEY = 'CRYPTED ADODB SESSIONS ROCK!';
 
@@ -118,7 +118,7 @@ if ($ADODB_SESS_LIFE <= 1) {
 	$ADODB_SESS_LIFE=1440;
 }
 
-function adodb_sess_open($save_path, $session_name)
+public function adodb_sess_open($save_path, $session_name)
 {
 GLOBAL 	$ADODB_SESSION_CONNECT,
 	$ADODB_SESSION_DRIVER,
@@ -142,7 +142,7 @@ GLOBAL 	$ADODB_SESSION_CONNECT,
 
 }
 
-function adodb_sess_close()
+public function adodb_sess_close()
 {
 global $ADODB_SESS_CONN;
 
@@ -150,7 +150,7 @@ global $ADODB_SESS_CONN;
 	return true;
 }
 
-function adodb_sess_read($key)
+public function adodb_sess_read($key)
 {
 $Crypt = new MD5Crypt;
 global $ADODB_SESS_CONN,$ADODB_SESS_INSERT,$ADODB_SESSION_TBL;
@@ -171,7 +171,7 @@ global $ADODB_SESS_CONN,$ADODB_SESS_INSERT,$ADODB_SESSION_TBL;
 	return '';
 }
 
-function adodb_sess_write($key, $val)
+public function adodb_sess_write($key, $val)
 {
 $Crypt = new MD5Crypt;
 	global $ADODB_SESS_INSERT,$ADODB_SESS_CONN, $ADODB_SESS_LIFE, $ADODB_SESSION_TBL,$ADODB_SESSION_EXPIRE_NOTIFY;
@@ -203,7 +203,7 @@ $Crypt = new MD5Crypt;
 	return isset($rs);
 }
 
-function adodb_sess_destroy($key)
+public function adodb_sess_destroy($key)
 {
 	global $ADODB_SESS_CONN, $ADODB_SESSION_TBL,$ADODB_SESSION_EXPIRE_NOTIFY;
 
@@ -232,7 +232,7 @@ function adodb_sess_destroy($key)
 }
 
 
-function adodb_sess_gc($maxlifetime) {
+public function adodb_sess_gc($maxlifetime) {
 	global $ADODB_SESS_CONN, $ADODB_SESSION_TBL,$ADODB_SESSION_EXPIRE_NOTIFY,$ADODB_SESS_DEBUG;
 
 	if ($ADODB_SESSION_EXPIRE_NOTIFY) {

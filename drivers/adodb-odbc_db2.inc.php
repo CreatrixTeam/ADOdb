@@ -96,30 +96,30 @@ if (!defined('ADODB_ODBC_DB2')){
 define('ADODB_ODBC_DB2',1);
 
 class ADODB_odbc_db2 extends ADODB_odbc {
-	var $databaseType = "odbc_db2";
-	var $sysTime = 'CURRENT TIME'; //Note: This variable is not used any where in the entirety of this library.
+	public  $databaseType = "odbc_db2";
+	public  $sysTime = 'CURRENT TIME'; //Note: This variable is not used any where in the entirety of this library.
 	// The complete string representation of a timestamp has the form
 	// yyyy-mm-dd-hh.mm.ss.nnnnnn.
-	var $fmtTimeStamp = "'Y-m-d-H.i.s'";
-	var $ansiOuter = true;
-	var $identitySQL = 'values IDENTITY_VAL_LOCAL()';
-	var $_bindInputArray = true;
-	 var $hasInsertID = true;
-	var $rsPrefix = 'ADORecordset_odbc_';
-	var $hasGenID = true;
+	public  $fmtTimeStamp = "'Y-m-d-H.i.s'";
+	public  $ansiOuter = true;
+	public  $identitySQL = 'values IDENTITY_VAL_LOCAL()';
+	protected  $_bindInputArray = true;
+	 public  $hasInsertID = true;
+	public  $rsPrefix = 'ADORecordset_odbc_';
+	public  $hasGenID = true;
 
-	function ADODB_odbc_db2()
+	public function __construct()
 	{
 		if (strncmp(PHP_OS,'WIN',3) === 0) $this->curmode = SQL_CUR_USE_ODBC;
-		$this->ADODB_odbc();
+		parent::__construct();
 	}
 
-	function IfNull( $field, $ifNull )
+	public function IfNull( $field, $ifNull )
 	{
 		return " COALESCE($field, $ifNull) "; // if DB2 UDB
 	}
 
-	function ServerInfo()
+	public function ServerInfo()
 	{
 		//odbc_setoption($this->_connectionID,1,101 /*SQL_ATTR_ACCESS_MODE*/, 1 /*SQL_MODE_READ_ONLY*/);
 		$vers = $this->GetOne('select versionnumber from sysibm.sysversions');
@@ -127,19 +127,19 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 		return array('description'=>'DB2 ODBC driver', 'version'=>$vers);
 	}
 
-	function _insertid()
+	protected function _insertid()
 	{
 		return $this->GetOne($this->identitySQL);
 	}
 
-	function RowLock($tables,$where,$col='1 as adodbignore')
+	public function RowLock($tables,$where,$col='1 as adodbignore')
 	{
 		if ($this->_autocommit) $this->BeginTrans();
 		$vSQL = $this->_dataDict->RowLockSQL($tables,$where,$col);
 		return $this->GetOne($vSQL[0]);
 	}
 
-	function MetaTables($ttype=false,$showSchema=false, $qtable="%", $qschema="%")
+	public function MetaTables($ttype=false,$showSchema=false, $qtable="%", $qschema="%")
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -183,7 +183,7 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 		return $arr2;
 	}
 
-	function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
+	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
         // save old fetch mode
         global $ADODB_FETCH_MODE;
@@ -225,7 +225,7 @@ class ADODB_odbc_db2 extends ADODB_odbc {
         return $indexes;
 	}
 
-	function SelectLimit($sql, $nrows = -1, $offset = -1, $inputArr = false, $secs2cache = 0)
+	public function SelectLimit($sql, $nrows = -1, $offset = -1, $inputArr = false, $secs2cache = 0)
 	{
 		$nrows = (integer) $nrows;
 		if ($offset <= 0) {
@@ -249,14 +249,14 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 
 class  ADORecordSet_odbc_db2 extends ADORecordSet_odbc {
 
-	var $databaseType = "odbc_db2";
+	public  $databaseType = "odbc_db2";
 
-	function ADORecordSet_odbc_db2($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		$this->ADORecordSet_odbc($id,$mode);
+		parent::__construct($id,$mode);
 	}
 
-	function MetaType($t,$len=-1,$fieldobj=false)
+	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;

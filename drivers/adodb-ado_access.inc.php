@@ -15,38 +15,38 @@ Set tabs to 4 for best viewing.
 if (!defined('ADODB_DIR')) die();
 
 if (!defined('_ADODB_ADO_LAYER')) {
-	if (PHP_VERSION >= 5) include(ADODB_DIR."/drivers/adodb-ado5.inc.php");
-	else include(ADODB_DIR."/drivers/adodb-ado.inc.php");
+	include(ADODB_DIR."/drivers/adodb-ado5.inc.php");
+	
 }
 
 class  ADODB_ado_access extends ADODB_ado {
-	var $databaseType = 'ado_access';
-	var $hasTop = 'top';		// support mssql SELECT TOP 10 * FROM TABLE
-	var $fmtDate = "#Y-m-d#";
-	var $fmtTimeStamp = "#Y-m-d h:i:sA#";// note no comma
-	var $upperCase = 'ucase';
-	var $hasGenID = true;
+	public  $databaseType = 'ado_access';
+	public  $hasTop = 'top';		// support mssql SELECT TOP 10 * FROM TABLE
+	public  $fmtDate = "#Y-m-d#";
+	public  $fmtTimeStamp = "#Y-m-d h:i:sA#";// note no comma
+	public  $upperCase = 'ucase';
+	public  $hasGenID = true;
 
-	function ADODB_ado_access()
+	public function __construct()
 	{
-		$this->ADODB_ado();
+		parent::__construct();
 	}
 
 	/*function BeginTrans() { return false;}
 
-	function CommitTrans() { return false;}
+	public function CommitTrans() { return false;}
 
-	function RollbackTrans() { return false;}*/
+	public function RollbackTrans() { return false;}*/
 
 }
 
 
 class  ADORecordSet_ado_access extends ADORecordSet_ado {
 
-	var $databaseType = "ado_access";
+	public  $databaseType = "ado_access";
 
-	function ADORecordSet_ado_access($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_ado($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }

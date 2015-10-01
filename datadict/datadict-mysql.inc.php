@@ -14,17 +14,17 @@
 if (!defined('ADODB_DIR')) die();
 
 class ADODB2_mysql extends ADODB_DataDict {
-	var $databaseType = 'mysql';
-	var $alterCol = ' MODIFY COLUMN';
-	var $alterTableAddIndex = true;
-	var $dropTable = 'DROP TABLE IF EXISTS %s'; // requires mysql 3.22 or later
+	public  $databaseType = 'mysql';
+	public  $alterCol = ' MODIFY COLUMN';
+	public  $alterTableAddIndex = true;
+	public  $dropTable = 'DROP TABLE IF EXISTS %s'; // requires mysql 3.22 or later
 
-	var $dropIndex = 'DROP INDEX %s ON %s';
-	var $renameColumn = 'ALTER TABLE %s CHANGE COLUMN %s %s %s';	// needs column-definition!
-	var $sql_sysDate = 'CURDATE()';
-	var $sql_sysTimeStamp = 'NOW()';
+	public  $dropIndex = 'DROP INDEX %s ON %s';
+	public  $renameColumn = 'ALTER TABLE %s CHANGE COLUMN %s %s %s';	// needs column-definition!
+	public  $sql_sysDate = 'CURDATE()';
+	public  $sql_sysTimeStamp = 'NOW()';
 
-	function MetaType($t,$len=-1,$fieldobj=false)
+	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -78,7 +78,7 @@ class ADODB2_mysql extends ADODB_DataDict {
 		}
 	}
 
-	function ActualType($meta)
+	public function ActualType($meta)
 	{
 		switch(strtoupper($meta)) {
 		case 'C': return 'VARCHAR';
@@ -110,7 +110,7 @@ class ADODB2_mysql extends ADODB_DataDict {
 	}
 
 	// return string must begin with space
-	function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
+	protected function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
 	{
 		$suffix = '';
 		if ($funsigned) $suffix .= ' UNSIGNED';
@@ -142,7 +142,7 @@ class ADODB2_mysql extends ADODB_DataDict {
 		ON tbl_name (col_name[(length)],... )
 	*/
 
-	function _IndexSQL($idxname, $tabname, $flds, $idxoptions)
+	protected function _IndexSQL($idxname, $tabname, $flds, $idxoptions)
 	{
 		$sql = array();
 
@@ -181,7 +181,7 @@ class ADODB2_mysql extends ADODB_DataDict {
 		return $sql;
 	}
 
-	function _FormatDateSQL($fmt, $pParsedColumnName=false)
+	protected function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
 		$col = false;
 
@@ -359,14 +359,14 @@ class ADODB2_mysql extends ADODB_DataDict {
 		}
 	}
 
-	function RowLockSQL($tables,$where='',$col='1 as adodbignore')
+	public function RowLockSQL($tables,$where='',$col='1 as adodbignore')
 	{
 		if ($where) $where = ' where '.$where;
 
 		return array("select $col from $tables $where for update");
 	}
 
-	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
 		return array
 		(
@@ -376,18 +376,18 @@ class ADODB2_mysql extends ADODB_DataDict {
 		);
 	}
 	
-	function _DropSequenceSQL($pParsedSequenceName)
+	protected function _DropSequenceSQL($pParsedSequenceName)
 		{return array(sprintf("drop table if exists %s", $pParsedSequenceName['name']));}
 
 	// See http://www.mysql.com/doc/M/i/Miscellaneous_functions.html
 	// Reference on Last_Insert_ID on the recommended way to simulate sequences
-	function _GenIDSQL($pParsedSequenceName)
+	protected function _GenIDSQL($pParsedSequenceName)
 	{
 		return array(sprintf("update %s set id=LAST_INSERT_ID(id+1);",
 				$pParsedSequenceName['name']));
 	}
 
-	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	protected function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
 	{
 		if($pADORecordSet)
 		{

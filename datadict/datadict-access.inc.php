@@ -15,13 +15,13 @@ if (!defined('ADODB_DIR')) die();
 
 class ADODB2_access extends ADODB_DataDict {
 
-	var $databaseType = 'access';
-	var $seqField = false;
-	var $sql_sysDate = "FORMAT(NOW,'yyyy-mm-dd')";
-	var $sql_sysTimeStamp = 'NOW';
+	public  $databaseType = 'access';
+	public  $seqField = false;
+	public  $sql_sysDate = "FORMAT(NOW,'yyyy-mm-dd')";
+	public  $sql_sysTimeStamp = 'NOW';
 
 
- 	function ActualType($meta)
+ 	public function ActualType($meta)
 	{
 		switch($meta) {
 		case 'C': return 'TEXT';
@@ -52,7 +52,7 @@ class ADODB2_access extends ADODB_DataDict {
 	}
 
 	// return string must begin with space
-	function _CreateSuffix($fname, &$ftype, $fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
+	protected function _CreateSuffix($fname, &$ftype, $fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
 	{
 		if ($fautoinc) {
 			$ftype = 'COUNTER';
@@ -69,30 +69,30 @@ class ADODB2_access extends ADODB_DataDict {
 		return $suffix;
 	}
 
-	function CreateDatabase($dbname,$options=false)
+	public function CreateDatabase($dbname,$options=false)
 	{
 		return array();
 	}
 
 
-	function SetSchema($schema)
+	public function SetSchema($schema)
 	{
 	}
 
-	function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		if ($this->debug) ADOConnection::outp("AlterColumnSQL not supported");
 		return array();
 	}
 
 
-	function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		if ($this->debug) ADOConnection::outp("DropColumnSQL not supported");
 		return array();
 	}
 
-	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
 		$vStartID = $pStartID - 1;
 
@@ -103,13 +103,13 @@ class ADODB2_access extends ADODB_DataDict {
 		);
 	}
 
-	function _DropSequenceSQL($pParsedSequenceName)
+	protected function _DropSequenceSQL($pParsedSequenceName)
 		{return array(sprintf('drop table %s', $pParsedSequenceName['name']));}
 
-	function _GenIDSQL($pParsedSequenceName)
+	protected function _GenIDSQL($pParsedSequenceName)
 		{return array("select id from $pParsedSequenceName[name]");}
 		
-	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	protected function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
 	{
 		$vNumber = (integer)(($pADORecordSet && !$pADORecordSet->EOF) ? 
 				reset($pADORecordSet->fields) : 0);

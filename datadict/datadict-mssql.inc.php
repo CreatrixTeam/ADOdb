@@ -42,19 +42,19 @@ In ADOdb, named quotes for MS SQL Server use ". From the MSSQL Docs:
 if (!defined('ADODB_DIR')) die();
 
 class ADODB2_mssql extends ADODB_DataDict {
-	var $databaseType = 'mssql';
-	var $dropIndex = 'DROP INDEX %2$s.%1$s';
-	var $renameTable = "EXEC sp_rename '%s','%s'";
-	var $renameColumn = "EXEC sp_rename '%s.%s','%s'";
-	var $sql_sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
-	var $sql_sysTimeStamp = 'GetDate()';
+	public  $databaseType = 'mssql';
+	public  $dropIndex = 'DROP INDEX %2$s.%1$s';
+	public  $renameTable = "EXEC sp_rename '%s','%s'";
+	public  $renameColumn = "EXEC sp_rename '%s.%s','%s'";
+	public  $sql_sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
+	public  $sql_sysTimeStamp = 'GetDate()';
 
-	var $typeX = 'TEXT';  ## Alternatively, set it to VARCHAR(4000)
-	var $typeXL = 'TEXT';
+	public  $typeX = 'TEXT';  ## Alternatively, set it to VARCHAR(4000)
+	public  $typeXL = 'TEXT';
 
-	//var $alterCol = ' ALTER COLUMN ';
+	//public  $alterCol = ' ALTER COLUMN ';
 
-	function _event_connectionSet($pADOConnection)
+	protected function _event_connectionSet($pADOConnection)
 	{
 		if($this->dataProvider === "mssqlnative")
 			{$this->dropIndex = 'DROP INDEX %1$s ON %2$s';}
@@ -69,7 +69,7 @@ class ADODB2_mssql extends ADODB_DataDict {
 			$pADOConnection->concat_operator = $this->sql_concatenateOperator;
 		}
 	}
-	function MetaType($t,$len=-1,$fieldobj=false)
+	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -133,7 +133,7 @@ class ADODB2_mssql extends ADODB_DataDict {
 		}
 	}
 
-	function ActualType($meta)
+	public function ActualType($meta)
 	{
 		if($this->dataProvider !== "mssqlnative")
 		{
@@ -201,7 +201,7 @@ class ADODB2_mssql extends ADODB_DataDict {
 	}
 
 
-	function AddColumnSQL($tabname, $flds)
+	public function AddColumnSQL($tabname, $flds)
 	{
 		$tabname = $this->TableName ($tabname);
 		$f = array();
@@ -216,7 +216,7 @@ class ADODB2_mssql extends ADODB_DataDict {
 	}
 
 	/*
-	function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
 	{
 		$tabname = $this->TableName ($tabname);
 		$sql = array();
@@ -239,7 +239,7 @@ class ADODB2_mssql extends ADODB_DataDict {
 	 *
 	 * @return string  The SQL necessary to drop the column
 	 */
-	function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		if($this->dataProvider !== "mssqlnative")
 		{
@@ -273,7 +273,7 @@ class ADODB2_mssql extends ADODB_DataDict {
 	}
 
 	// return string must begin with space
-	function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
+	protected function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
 	{
 		$suffix = '';
 		if (strlen($fdefault)) $suffix .= " DEFAULT $fdefault";
@@ -356,7 +356,7 @@ CREATE TABLE
 		    SORT_IN_TEMPDB
 		}
 */
-	function _IndexSQL($idxname, $tabname, $flds, $idxoptions)
+	protected function _IndexSQL($idxname, $tabname, $flds, $idxoptions)
 	{
 		$sql = array();
 
@@ -387,7 +387,7 @@ CREATE TABLE
 	}
 
 
-	function _GetSize($ftype, $ty, $fsize, $fprec)
+	protected function _GetSize($ftype, $ty, $fsize, $fprec)
 	{
 		switch ($ftype) {
 		case 'INT':
@@ -401,7 +401,7 @@ CREATE TABLE
 
 	}
 
-	function _FormatDateSQL($fmt, $pParsedColumnName=false)
+	protected function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
 		$col = false;
 
@@ -465,14 +465,14 @@ CREATE TABLE
 		return (empty($s) ? array() : array($s));
 	}
 	
-	function RowLockSQL($tables,$where,$col='1 as adodbignore')
+	public function RowLockSQL($tables,$where,$col='1 as adodbignore')
 	{
 		if ($col == '1 as adodbignore') $col = 'top 1 null as ignore';
 
 		return array("select $col from $tables with (ROWLOCK,HOLDLOCK) where $where");
 	}
 
-	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
 		$vVersion = @intval($this->_serverInfoArray['version']);
 
@@ -513,7 +513,7 @@ CREATE TABLE
 		}
 	}
 
-	function _DropSequenceSQL($pParsedSequenceName)
+	protected function _DropSequenceSQL($pParsedSequenceName)
 	{
 		$vVersion = @intval($this->_serverInfoArray['version']);
 		
@@ -525,8 +525,10 @@ CREATE TABLE
 			{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
 	}
 
-	function _GenIDSQL($pParsedSequenceName)
+	protected function _GenIDSQL($pParsedSequenceName)
 	{
+		$vVersion = @intval($this->_serverInfoArray['version']);
+
 		if(($vVersion < 11) || ($this->databaseType === "odbc_mssql") ||
 				($this->databaseType === "ado_mssql") ||
 				($this->databaseType === "mssql"))
@@ -535,7 +537,7 @@ CREATE TABLE
 			{return array("SELECT NEXT VALUE FOR $pParsedSequenceName[name]");}
 	}
 		
-	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	protected function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
 	{
 		if($this->databaseType === "odbc_mssql")
 		{

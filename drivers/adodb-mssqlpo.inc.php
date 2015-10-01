@@ -25,14 +25,14 @@ if (!defined('ADODB_DIR')) die();
 include_once(ADODB_DIR.'/drivers/adodb-mssql.inc.php');
 
 class ADODB_mssqlpo extends ADODB_mssql {
-	var $databaseType = "mssqlpo";
+	public  $databaseType = "mssqlpo";
 
-	function ADODB_mssqlpo()
+	public function __construct()
 	{
 		ADODB_mssql::ADODB_mssql();
 	}
 
-	function PrepareSP($sql, $param = true)
+	public function PrepareSP($sql, $param = true)
 	{
 		if (!$this->_has_mssql_init) {
 			ADOConnection::outp( "PrepareSP: mssql_init only available since PHP 4.1.0");
@@ -44,7 +44,7 @@ class ADODB_mssqlpo extends ADODB_mssql {
 		return array($sql,$stmt);
 	}
 
-	function _query($sql,$inputarr=false)
+	public function _query($sql,$inputarr=false)
 	{
 		if (is_string($sql)) $sql = str_replace('||','+',$sql);
 		return ADODB_mssql::_query($sql,$inputarr);
@@ -52,9 +52,9 @@ class ADODB_mssqlpo extends ADODB_mssql {
 }
 
 class ADORecordset_mssqlpo extends ADORecordset_mssql {
-	var $databaseType = "mssqlpo";
-	function ADORecordset_mssqlpo($id,$mode=false)
+	public  $databaseType = "mssqlpo";
+	public function __construct($id,$mode=false)
 	{
-		$this->ADORecordset_mssql($id,$mode);
+		parent::__construct($id,$mode);
 	}
 }

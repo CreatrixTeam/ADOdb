@@ -14,11 +14,11 @@
 if (!defined('ADODB_DIR')) die();
 
 class ADODB2_vfp extends ADODB_DataDict {
-	var $databaseType = 'vfp';
-	var $sql_sysDate = 'date()';
-	var $sql_sysTimeStamp = 'datetime()';
+	public  $databaseType = 'vfp';
+	public  $sql_sysDate = 'date()';
+	public  $sql_sysTimeStamp = 'datetime()';
 	
-	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
 		$vStartID = $pStartID - 1;
 
@@ -29,13 +29,13 @@ class ADODB2_vfp extends ADODB_DataDict {
 		);
 	}
 
-	function _DropSequenceSQL($pParsedSequenceName)
+	protected function _DropSequenceSQL($pParsedSequenceName)
 		{return array(sprintf('drop table %s', $pParsedSequenceName['name']));}
 
-	function _GenIDSQL($pParsedSequenceName)
+	protected function _GenIDSQL($pParsedSequenceName)
 		{return array("select id from $pParsedSequenceName[name]");}
 		
-	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	protected function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
 	{
 		$vNumber = (integer)(($pADORecordSet && !$pADORecordSet->EOF) ? 
 				reset($pADORecordSet->fields) : 0);

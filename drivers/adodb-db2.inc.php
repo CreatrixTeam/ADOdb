@@ -28,40 +28,40 @@ if (!defined('ADODB_DIR')) die();
 
 
 class ADODB_db2 extends ADOConnection {
-	var $databaseType = "db2";
-	var $fmtDate = "'Y-m-d'";
+	public  $databaseType = "db2";
+	public  $fmtDate = "'Y-m-d'";
 
-	var $sysTime = 'CURRENT TIME';
+	public  $sysTime = 'CURRENT TIME';
 
-	var $fmtTimeStamp = "'Y-m-d H:i:s'";
-	var $replaceQuote = "''"; // string to use to replace quotes
-	var $dataProvider = "db2";
-	var $hasAffectedRows = true;
+	public  $fmtTimeStamp = "'Y-m-d H:i:s'";
+	public  $replaceQuote = "''"; // string to use to replace quotes
+	public  $dataProvider = "db2";
+	public  $hasAffectedRows = true;
 
-	var $binmode = DB2_BINARY;
+	public  $binmode = DB2_BINARY;
 
-	var $useFetchArray = false; // setting this to true will make array elements in FETCH_ASSOC mode case-sensitive
+	public  $useFetchArray = false; // setting this to true will make array elements in FETCH_ASSOC mode case-sensitive
 								// breaking backward-compat
-	var $_bindInputArray = false;
-	var $_autocommit = true;
-	var $_haserrorfunctions = true;
-	var $_lastAffectedRows = 0;
-	var $uCaseTables = true; // for meta* functions, uppercase table names
-	var $hasInsertID = true;
+	protected  $_bindInputArray = false;
+	protected  $_autocommit = true;
+	protected  $_haserrorfunctions = true;
+	protected  $_lastAffectedRows = 0;
+	public  $uCaseTables = true; // for meta* functions, uppercase table names
+	public  $hasInsertID = true;
 
 
-    function _insertid()
+    protected function _insertid()
     {
         return ADOConnection::GetOne('VALUES IDENTITY_VAL_LOCAL()');
     }
 
-	function ADODB_db2()
+	public function __construct()
 	{
-		$this->_haserrorfunctions = ADODB_PHPVER >= 0x4050;
+		$this->_haserrorfunctions = true;
 	}
 
 		// returns true or false
-	function _connect($argDSN, $argUsername, $argPassword, $argDatabasename)
+	protected function _connect($argDSN, $argUsername, $argPassword, $argDatabasename)
 	{
 		global $php_errormsg;
 
@@ -95,7 +95,7 @@ class ADODB_db2 extends ADOConnection {
 	}
 
 	// returns true or false
-	function _pconnect($argDSN, $argUsername, $argPassword, $argDatabasename)
+	protected function _pconnect($argDSN, $argUsername, $argPassword, $argDatabasename)
 	{
 		global $php_errormsg;
 
@@ -128,14 +128,14 @@ class ADODB_db2 extends ADOConnection {
 	}
 
 	// format and return date string in database timestamp format
-	function DBTimeStamp($ts, $isfld = false)
+	public function DBTimeStamp($ts, $isfld = false)
 	{
 		if (empty($ts) && $ts !== 0) return 'null';
 		if (is_string($ts)) $ts = ADORecordSet::UnixTimeStamp($ts);
 		return 'TO_DATE('.adodb_date($this->fmtTimeStamp,$ts).",'YYYY-MM-DD HH24:MI:SS')";
 	}
 
-	function ServerInfo()
+	public function ServerInfo()
 	{
 		$row = $this->GetRow("SELECT service_level, fixpack_num FROM TABLE(sysproc.env_get_inst_info())
 			as INSTANCEINFO");
@@ -152,7 +152,7 @@ class ADODB_db2 extends ADOConnection {
 		return $info;
 	}
 
-	function SelectLimit($sql, $nrows = -1, $offset = -1, $inputArr = false, $secs2cache = 0)
+	public function SelectLimit($sql, $nrows = -1, $offset = -1, $inputArr = false, $secs2cache = 0)
 	{
 		$nrows = (integer) $nrows;
 		if ($offset <= 0) {
@@ -171,7 +171,7 @@ class ADODB_db2 extends ADOConnection {
 		return $rs;
 	}
 
-	function ErrorMsg()
+	public function ErrorMsg()
 	{
 		if ($this->_haserrorfunctions) {
 			if ($this->_errorMsg !== false) return $this->_errorMsg;
@@ -180,7 +180,7 @@ class ADODB_db2 extends ADOConnection {
 		} else return ADOConnection::ErrorMsg();
 	}
 
-	function ErrorNo()
+	public function ErrorNo()
 	{
 
 		if ($this->_haserrorfunctions) {
@@ -201,7 +201,7 @@ class ADODB_db2 extends ADOConnection {
 
 
 
-	function BeginTrans()
+	public function BeginTrans()
 	{
 		if (!$this->hasTransactions) return false;
 		if ($this->transOff) return true;
@@ -210,7 +210,7 @@ class ADODB_db2 extends ADOConnection {
 		return db2_autocommit($this->_connectionID,false);
 	}
 
-	function CommitTrans($ok=true)
+	public function CommitTrans($ok=true)
 	{
 		if ($this->transOff) return true;
 		if (!$ok) return $this->RollbackTrans();
@@ -221,7 +221,7 @@ class ADODB_db2 extends ADOConnection {
 		return $ret;
 	}
 
-	function RollbackTrans()
+	public function RollbackTrans()
 	{
 		if ($this->transOff) return true;
 		if ($this->transCnt) $this->transCnt -= 1;
@@ -231,7 +231,7 @@ class ADODB_db2 extends ADOConnection {
 		return $ret;
 	}
 
-	function MetaPrimaryKeys($table, $owner = false)
+	public function MetaPrimaryKeys($table, $owner = false)
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -261,7 +261,7 @@ class ADODB_db2 extends ADOConnection {
 		return $arr2;
 	}
 
-	function MetaForeignKeys($table, $owner = FALSE, $upper = FALSE, $asociative = FALSE )
+	public function MetaForeignKeys($table, $owner = FALSE, $upper = FALSE, $asociative = FALSE )
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -307,7 +307,7 @@ class ADODB_db2 extends ADOConnection {
 	}
 
 
-	function MetaTables($ttype = false, $schema = false, $mask = false)
+	public function MetaTables($ttype = false, $schema = false, $mask = false)
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -372,7 +372,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 #define SQL_UNICODE_VARCHAR                     (-96)
 #define SQL_UNICODE_LONGVARCHAR                 (-97)
 */
-	function DB2Types($t)
+	public function DB2Types($t)
 	{
 		switch ((integer)$t) {
 		case 1:
@@ -412,7 +412,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		}
 	}
 
-	function _MetaColumns($pParsedTableName)
+	protected function _MetaColumns($pParsedTableName)
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -509,7 +509,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	}
 
 
-	function Prepare($sql)
+	public function Prepare($sql)
 	{
 		if (! $this->_bindInputArray) return $sql; // no binding
 		$stmt = db2_prepare($this->_connectionID,$sql);
@@ -521,7 +521,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	}
 
 	/* returns queryID or false */
-	function _query($sql,$inputarr=false)
+	public function _query($sql,$inputarr=false)
 	{
 	GLOBAL $php_errormsg;
 		if (isset($php_errormsg)) $php_errormsg = '';
@@ -593,20 +593,20 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		$conn->Execute('INSERT INTO blobtable (id, blobcol) VALUES (1, null)');
 		$conn->UpdateBlob('blobtable','blobcol',$blob,'id=1');
 	*/
-	function UpdateBlob($table,$column,$val,$where,$blobtype='BLOB')
+	public function UpdateBlob($table,$column,$val,$where,$blobtype='BLOB')
 	{
 		return $this->Execute("UPDATE $table SET $column=? WHERE $where",array($val)) != false;
 	}
 
 	// returns true or false
-	function _close()
+	protected function _close()
 	{
 		$ret = @db2_close($this->_connectionID);
 		$this->_connectionID = false;
 		return $ret;
 	}
 
-	function _affectedrows()
+	protected function _affectedrows()
 	{
 		return $this->_lastAffectedRows;
 	}
@@ -619,12 +619,12 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 
 class ADORecordSet_db2 extends ADORecordSet {
 
-	var $bind = false;
-	var $databaseType = "db2";
-	var $dataProvider = "db2";
-	var $useFetchArray;
+	public  $bind = false;
+	public  $databaseType = "db2";
+	public  $dataProvider = "db2";
+	public  $useFetchArray;
 
-	function ADORecordSet_db2($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
 		if ($mode === false) {
 			global $ADODB_FETCH_MODE;
@@ -637,7 +637,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 
 
 	// returns the field object
-	function FetchField($offset = -1)
+	public function FetchField($offset = -1)
 	{
 		$o= new ADOFieldObject();
 		$o->name = @db2_field_name($this->_queryID,$offset);
@@ -649,7 +649,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 	}
 
 	/* Use associative array to get fields array */
-	function Fields($colname)
+	public function Fields($colname)
 	{
 		if ($this->fetchMode & ADODB_FETCH_ASSOC) return $this->fields[$colname];
 		if (!$this->bind) {
@@ -664,7 +664,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 	}
 
 
-	function _initrs()
+	protected function _initrs()
 	{
 	global $ADODB_COUNTRECS;
 		$this->_numOfRows = ($ADODB_COUNTRECS) ? @db2_num_rows($this->_queryID) : -1;
@@ -673,13 +673,13 @@ class ADORecordSet_db2 extends ADORecordSet {
 		if ($this->_numOfRows == 0) $this->_numOfRows = -1;
 	}
 
-	function _seek($row)
+	protected function _seek($row)
 	{
 		return false;
 	}
 
 	// speed up SelectLimit() by switching to ADODB_FETCH_NUM as ADODB_FETCH_ASSOC is emulated
-	function GetArrayLimit($nrows,$offset=-1)
+	public function GetArrayLimit($nrows,$offset=-1)
 	{
 		if ($offset <= 0) {
 			$rs = $this->GetArray($nrows);
@@ -705,7 +705,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 	}
 
 
-	function MoveNext()
+	public function MoveNext()
 	{
 		if ($this->_numOfRows != 0 && !$this->EOF) {
 			$this->_currentRow++;
@@ -723,7 +723,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 		return false;
 	}
 
-	function _fetch()
+	protected function _fetch()
 	{
 
 		$this->fields = db2_fetch_array($this->_queryID);
@@ -737,7 +737,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 		return false;
 	}
 
-	function _close()
+	protected function _close()
 	{
 		return @db2_free_result($this->_queryID);
 	}

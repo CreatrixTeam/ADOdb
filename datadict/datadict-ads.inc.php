@@ -14,21 +14,21 @@
 if (!defined('ADODB_DIR')) die();
 
 class ADODB2_ads extends ADODB_DataDict {
-	var $databaseType = "ads";
-	var $sql_concatenateOperator = '';
+	public  $databaseType = "ads";
+	public  $sql_concatenateOperator = '';
 
-	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
 		return array("CREATE TABLE $pParsedSequenceName[name] ( ID autoinc( 1 ) ) IN DATABASE");
 	}
 	
-	function _DropSequenceSQL($pParsedSequenceName)
+	protected function _DropSequenceSQL($pParsedSequenceName)
 		{return array("DROP TABLE $pParsedSequenceName[name]");}
 
-	function _GenIDSQL($pParsedSequenceName)
+	protected function _GenIDSQL($pParsedSequenceName)
 		{return array("select * from $pParsedSequenceName[name]");}
 		
-	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	protected function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
 	{
 		if($pADORecordSet)
 		{

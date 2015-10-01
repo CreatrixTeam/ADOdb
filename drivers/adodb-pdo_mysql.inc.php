@@ -15,26 +15,26 @@ include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
 
 class ADODB_pdo_mysql extends ADODB_pdo {
 
-	var $databaseType = "pdo_mysql";
-	var $dsnType = 'mysql';
-	var $metaTablesSQL = "SELECT
+	public  $databaseType = "pdo_mysql";
+	public  $dsnType = 'mysql';
+	public  $metaTablesSQL = "SELECT
 			TABLE_NAME,
 			CASE WHEN TABLE_TYPE = 'VIEW' THEN 'V' ELSE 'T' END
 		FROM INFORMATION_SCHEMA.TABLES
 		WHERE TABLE_SCHEMA=";
-	var $metaColumnsSQL = "SHOW COLUMNS FROM `%s`";
-	var $hasGenID = true;
-	var $fmtTimeStamp = "'Y-m-d, H:i:s'";
-	var $nameQuote = '`';
-	var $hasTransactions = false;
-	#var $_bindInputArray = false;
-	var $hasInsertID = true;
+	public  $metaColumnsSQL = "SHOW COLUMNS FROM `%s`";
+	public  $hasGenID = true;
+	public  $fmtTimeStamp = "'Y-m-d, H:i:s'";
+	public  $nameQuote = '`';
+	public  $hasTransactions = false;
+	#protected  $_bindInputArray = false;
+	public  $hasInsertID = true;
 
-	function event_pdoConnectionEstablished()
+	public function event_pdoConnectionEstablished()
 		{$this->_connectionID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);}
 
 	// dayFraction is a day in floating point
-	function OffsetDate($dayFraction, $date=false)
+	public function OffsetDate($dayFraction, $date=false)
 	{
 		if (!$date) {
 			$date = $this->sysDate;
@@ -45,7 +45,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 //		return "from_unixtime(unix_timestamp($date)+$fraction)";
 	}
 
-	function Concat()
+	public function Concat()
 	{
 		$s = '';
 		$arr = func_get_args();
@@ -58,14 +58,14 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		return '';
 	}
 
-	function ServerInfo()
+	public function ServerInfo()
 	{
 		$arr['description'] = ADOConnection::GetOne('select version()');
 		$arr['version'] = ADOConnection::_findvers($arr['description']);
 		return $arr;
 	}
 
-	function MetaTables($ttype=false, $showSchema=false, $mask=false)
+	public function MetaTables($ttype=false, $showSchema=false, $mask=false)
 	{
 		$save = $this->metaTablesSQL;
 		if ($showSchema && is_string($showSchema)) {
@@ -82,7 +82,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		return $ret;
 	}
 
-	function SetTransactionMode($transaction_mode)
+	public function SetTransactionMode($transaction_mode)
 	{
 		$this->_transmode  = $transaction_mode;
 		if (empty($transaction_mode)) {
@@ -95,7 +95,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		$this->Execute('SET SESSION TRANSACTION ' . $transaction_mode);
 	}
 
-	function _MetaColumns($pParsedTableName)
+	protected function _MetaColumns($pParsedTableName)
 	{
 		$table = $pParsedTableName['table']['name'];
 		$schema = @$pParsedTableName['schema']['name'];
@@ -179,7 +179,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	}
 
 	//Verbatim copy from "adodb-mysql.inc.php"
-	function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
+	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		// save old fetch mode
 		global $ADODB_FETCH_MODE;
@@ -235,7 +235,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	}
 
 	// returns true or false
-	function SelectDB($dbName)
+	public function SelectDB($dbName)
 	{
 		$this->database = $dbName;
 		$this->databaseName = $dbName; # obsolete, retained for compat with older adodb versions
@@ -244,7 +244,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	}
 
 	// parameters use PostgreSQL convention, not MySQL
-	function SelectLimit($sql, $nrows=-1, $offset=-1, $inputarr=false, $secs=0)
+	public function SelectLimit($sql, $nrows=-1, $offset=-1, $inputarr=false, $secs=0)
 	{
 		$offsetStr =($offset>=0) ? "$offset," : '';
 		// jason judge, see http://phplens.com/lens/lensforum/msgs.php?id=9220
@@ -264,10 +264,10 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 
 class  ADORecordSet_pdo_mysql extends ADORecordSet_pdo {
 
-	var $databaseType = 'pdo_mysql';
+	public  $databaseType = 'pdo_mysql';
 
-	function ADORecordSet_pdo_mysql($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_pdo($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }

@@ -1098,7 +1098,7 @@ static $jan1_1971;
 	$max = strlen($fmt);
 	$dates = '';
 
-	$isphp5 = PHP_VERSION >= 5;
+	$isphp5 = true;
 
 	/*
 		at this point, we have the following integer vars to manipulate:

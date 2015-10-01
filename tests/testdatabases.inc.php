@@ -273,8 +273,7 @@ if (!empty($testvfp)) { // ODBC
 if (!empty($testmysql)) { // MYSQL
 
 
-	if (PHP_VERSION >= 5 || $_SERVER['HTTP_HOST'] == 'localhost') $server = 'localhost';
-	else $server = "mangrove";
+	$server = 'localhost';	
 	$user = 'root'; $password = ''; $database = 'northwind';
 	$db = ADONewConnection("mysqlt://$user:$password@$server/$database?persist");
 	print "<h1>Connecting $db->databaseType...</h1>";
@@ -292,8 +291,7 @@ if (!empty($testmysqli)) { // MYSQL
 
 	$db = ADONewConnection('mysqli');
 	print "<h1>Connecting $db->databaseType...</h1>";
-	if (PHP_VERSION >= 5 || $_SERVER['HTTP_HOST'] == 'localhost') $server = 'localhost';
-	else $server = "mangrove";
+	$server = 'localhost';	
 	if ($db->PConnect($server, "root", "", "northwind")) {
 		//$db->debug=1;$db->Execute('drop table ADOXYZ');
 		testdb($db,

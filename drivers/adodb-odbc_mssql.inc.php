@@ -21,37 +21,37 @@ if (!defined('_ADODB_ODBC_LAYER')) {
 
 
 class  ADODB_odbc_mssql extends ADODB_odbc {
-	var $databaseType = 'odbc_mssql';
-	var $fmtDate = "'Y-m-d'";
-	var $fmtTimeStamp = "'Y-m-d\TH:i:s'";
-	var $_bindInputArray = true;
-	var $metaDatabasesSQL = "select name from sysdatabases where name <> 'master'";
-	var $metaTablesSQL="select name,case when type='U' then 'T' else 'V' end from sysobjects where (type='U' or type='V') and (name not in ('sysallocations','syscolumns','syscomments','sysdepends','sysfilegroups','sysfiles','sysfiles1','sysforeignkeys','sysfulltextcatalogs','sysindexes','sysindexkeys','sysmembers','sysobjects','syspermissions','sysprotects','sysreferences','systypes','sysusers','sysalternates','sysconstraints','syssegments','REFERENTIAL_CONSTRAINTS','CHECK_CONSTRAINTS','CONSTRAINT_TABLE_USAGE','CONSTRAINT_COLUMN_USAGE','VIEWS','VIEW_TABLE_USAGE','VIEW_COLUMN_USAGE','SCHEMATA','TABLES','TABLE_CONSTRAINTS','TABLE_PRIVILEGES','COLUMNS','COLUMN_DOMAIN_USAGE','COLUMN_PRIVILEGES','DOMAINS','DOMAIN_CONSTRAINTS','KEY_COLUMN_USAGE'))";
-	var $metaColumnsSQL = # xtype==61 is datetime
+	public  $databaseType = 'odbc_mssql';
+	public  $fmtDate = "'Y-m-d'";
+	public  $fmtTimeStamp = "'Y-m-d\TH:i:s'";
+	protected  $_bindInputArray = true;
+	public  $metaDatabasesSQL = "select name from sysdatabases where name <> 'master'";
+	public  $metaTablesSQL="select name,case when type='U' then 'T' else 'V' end from sysobjects where (type='U' or type='V') and (name not in ('sysallocations','syscolumns','syscomments','sysdepends','sysfilegroups','sysfiles','sysfiles1','sysforeignkeys','sysfulltextcatalogs','sysindexes','sysindexkeys','sysmembers','sysobjects','syspermissions','sysprotects','sysreferences','systypes','sysusers','sysalternates','sysconstraints','syssegments','REFERENTIAL_CONSTRAINTS','CHECK_CONSTRAINTS','CONSTRAINT_TABLE_USAGE','CONSTRAINT_COLUMN_USAGE','VIEWS','VIEW_TABLE_USAGE','VIEW_COLUMN_USAGE','SCHEMATA','TABLES','TABLE_CONSTRAINTS','TABLE_PRIVILEGES','COLUMNS','COLUMN_DOMAIN_USAGE','COLUMN_PRIVILEGES','DOMAINS','DOMAIN_CONSTRAINTS','KEY_COLUMN_USAGE'))";
+	public  $metaColumnsSQL = # xtype==61 is datetime
 	"select c.name,t.name,c.length,c.isnullable, c.status,
 		(case when c.xusertype=61 then 0 else c.xprec end),
 		(case when c.xusertype=61 then 0 else c.xscale end)
 		from syscolumns c join systypes t on t.xusertype=c.xusertype join sysobjects o on o.id=c.id where o.name='%s'";
-	var $hasTop = 'top';		// support mssql/interbase SELECT TOP 10 * FROM TABLE
-	var $leftOuter = '*=';
-	var $rightOuter = '=*';
-	var $substr = 'substring';
-	var $length = 'len';
-	var $ansiOuter = true; // for mssql7 or later
-	var $identitySQL = 'select SCOPE_IDENTITY()'; // 'select SCOPE_IDENTITY'; # for mssql 2000
-	var $hasInsertID = true;
-	var $connectStmt = 'SET CONCAT_NULL_YIELDS_NULL OFF'; # When SET CONCAT_NULL_YIELDS_NULL is ON,
+	public  $hasTop = 'top';		// support mssql/interbase SELECT TOP 10 * FROM TABLE
+	public  $leftOuter = '*=';
+	public  $rightOuter = '=*';
+	public  $substr = 'substring';
+	public  $length = 'len';
+	public  $ansiOuter = true; // for mssql7 or later
+	public  $identitySQL = 'select SCOPE_IDENTITY()'; // 'select SCOPE_IDENTITY'; # for mssql 2000
+	public  $hasInsertID = true;
+	public  $connectStmt = 'SET CONCAT_NULL_YIELDS_NULL OFF'; # When SET CONCAT_NULL_YIELDS_NULL is ON,
 														  # concatenating a null value with a string yields a NULL result
-	var $hasGenID = true;
+	public  $hasGenID = true;
 
-	function ADODB_odbc_mssql()
+	public function __construct()
 	{
-		$this->ADODB_odbc();
+		parent::__construct();
 		//$this->curmode = SQL_CUR_USE_ODBC;
 	}
 
 	// crashes php...
-	function ServerInfo()
+	public function ServerInfo()
 	{
 	global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
@@ -64,12 +64,12 @@ class  ADODB_odbc_mssql extends ADODB_odbc {
 		return $arr;
 	}
 
-	function IfNull( $field, $ifNull )
+	public function IfNull( $field, $ifNull )
 	{
 		return " ISNULL($field, $ifNull) "; // if MS SQL Server
 	}
 
-	function _insertid()
+	protected function _insertid()
 	{
 	// SCOPE_IDENTITY()
 	// Returns the last IDENTITY value inserted into an IDENTITY column in
@@ -80,7 +80,7 @@ class  ADODB_odbc_mssql extends ADODB_odbc {
 	}
 
 
-	function MetaForeignKeys($table, $owner=false, $upper=false)
+	public function MetaForeignKeys($table, $owner=false, $upper=false)
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -119,7 +119,7 @@ order by constraint_name, referenced_table_name, keyno";
 		return $arr2;
 	}
 
-	function MetaTables($ttype=false,$showSchema=false,$mask=false)
+	public function MetaTables($ttype=false,$showSchema=false,$mask=false)
 	{
 		if ($mask) {//$this->debug=1;
 			$save = $this->metaTablesSQL;
@@ -134,7 +134,7 @@ order by constraint_name, referenced_table_name, keyno";
 		return $ret;
 	}
 
-	function _MetaColumns($pParsedTableName)
+	protected function _MetaColumns($pParsedTableName)
 	{
 		$table = $pParsedTableName['table']['name'];
 		$schema = @$pParsedTableName['schema']['name'];
@@ -193,7 +193,7 @@ order by constraint_name, referenced_table_name, keyno";
 	}
 
 
-	function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
+	protected function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
 	{
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
@@ -236,13 +236,13 @@ order by constraint_name, referenced_table_name, keyno";
         return $indexes;
 	}
 
-	function _query($sql,$inputarr=false)
+	public function _query($sql,$inputarr=false)
 	{
 		if (is_string($sql)) $sql = str_replace('||','+',$sql);
 		return ADODB_odbc::_query($sql,$inputarr);
 	}
 
-	function SetTransactionMode( $transaction_mode )
+	public function SetTransactionMode( $transaction_mode )
 	{
 		$this->_transmode  = $transaction_mode;
 		if (empty($transaction_mode)) {
@@ -255,7 +255,7 @@ order by constraint_name, referenced_table_name, keyno";
 
 	// "Stein-Aksel Basma" <basma@accelero.no>
 	// tested with MSSQL 2000
-	function MetaPrimaryKeys($table, $owner = false)
+	public function MetaPrimaryKeys($table, $owner = false)
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -279,7 +279,7 @@ order by constraint_name, referenced_table_name, keyno";
 		return $false;
 	}
 
-	function SelectLimit($sql,$nrows=-1,$offset=-1, $inputarr=false,$secs2cache=0)
+	public function SelectLimit($sql,$nrows=-1,$offset=-1, $inputarr=false,$secs2cache=0)
 	{
 		if ($nrows > 0 && $offset <= 0) {
 			$sql = preg_replace(
@@ -295,10 +295,10 @@ order by constraint_name, referenced_table_name, keyno";
 
 class  ADORecordSet_odbc_mssql extends ADORecordSet_odbc {
 
-	var $databaseType = 'odbc_mssql';
+	public  $databaseType = 'odbc_mssql';
 
-	function ADORecordSet_odbc_mssql($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_odbc($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }

@@ -15,19 +15,19 @@ if (!defined('ADODB_DIR')) die();
 
 class ADODB2_oci8 extends ADODB_DataDict {
 
-	var $databaseType = 'oci8';
-	var $seqField = false;
-	var $seqPrefix = 'SEQ_';
-	var $dropTable = "DROP TABLE %s CASCADE CONSTRAINTS";
-	var $trigPrefix = 'TRIG_';
-	var $alterCol = ' MODIFY ';
-	var $typeX = 'VARCHAR(4000)';
-	var $typeXL = 'CLOB';
-	var $sql_concatenateOperator='||';
-	var $sql_sysDate = "TRUNC(SYSDATE)";
-	var $sql_sysTimeStamp = 'SYSDATE'; // requires oracle 9 or later, otherwise use SYSDATE
+	public  $databaseType = 'oci8';
+	public  $seqField = false;
+	public  $seqPrefix = 'SEQ_';
+	public  $dropTable = "DROP TABLE %s CASCADE CONSTRAINTS";
+	public  $trigPrefix = 'TRIG_';
+	public  $alterCol = ' MODIFY ';
+	public  $typeX = 'VARCHAR(4000)';
+	public  $typeXL = 'CLOB';
+	public  $sql_concatenateOperator='||';
+	public  $sql_sysDate = "TRUNC(SYSDATE)";
+	public  $sql_sysTimeStamp = 'SYSDATE'; // requires oracle 9 or later, otherwise use SYSDATE
 
-	function _event_connectionSet($pADOConnection)
+	protected function _event_connectionSet($pADOConnection)
 	{
 		if($this->databaseType === "oracle")
 		{
@@ -35,7 +35,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 			$pADOConnection->sysDate = $this->sql_sysDate;
 		}
 	}
-	function MetaType($t, $len=-1, $fieldobj=false)
+	public function MetaType($t, $len=-1, $fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -82,7 +82,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 		}
 	}
 
- 	function ActualType($meta)
+ 	public function ActualType($meta)
 	{
 		switch($meta) {
 		case 'C': return 'VARCHAR';
@@ -114,7 +114,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 		}
 	}
 
-	function CreateDatabase($dbname, $options=false)
+	public function CreateDatabase($dbname, $options=false)
 	{
 		$options = $this->_Options($options);
 		$password = isset($options['PASSWORD']) ? $options['PASSWORD'] : 'tiger';
@@ -125,7 +125,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 		return $sql;
 	}
 
-	function AddColumnSQL($tabname, $flds)
+	public function AddColumnSQL($tabname, $flds)
 	{
 		$tabname = $this->TableName($tabname);
 		$f = array();
@@ -140,7 +140,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 		return $sql;
 	}
 
-	function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
 	{
 		$tabname = $this->TableName($tabname);
 		$f = array();
@@ -154,7 +154,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 		return $sql;
 	}
 
-	function DropColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
+	public function DropColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
 	{
 		if (!is_array($flds)) $flds = explode(',',$flds);
 		foreach ($flds as $k => $v) $flds[$k] = $this->NameQuote($v);
@@ -166,7 +166,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 		return $sql;
 	}
 
-	function _DropAutoIncrement($t)
+	protected function _DropAutoIncrement($t)
 	{
 		if (strpos($t,'.') !== false) {
 			$tarr = explode('.',$t);
@@ -176,7 +176,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 	}
 
 	// return string must begin with space
-	function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
+	protected function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
 	{
 		$suffix = '';
 
@@ -202,7 +202,7 @@ begin
 select seqaddress.nextval into :new.A_ID from dual;
 end;
 */
-	function _Triggers($tabname,$tableoptions)
+	protected function _Triggers($tabname,$tableoptions)
 	{
 		if (!$this->seqField) return array();
 
@@ -256,7 +256,7 @@ end;
 
 
 
-	function _IndexSQL($idxname, $tabname, $flds,$idxoptions)
+	protected function _IndexSQL($idxname, $tabname, $flds,$idxoptions)
 	{
 		$sql = array();
 
@@ -294,21 +294,21 @@ end;
 		return $sql;
 	}
 
-	function GetCommentSQL($table,$col)
+	public function GetCommentSQL($table,$col)
 	{
 		$table = $this->connection->qstr($table);
 		$col = $this->connection->qstr($col);
 		return "select comments from USER_COL_COMMENTS where TABLE_NAME=$table and COLUMN_NAME=$col";
 	}
 
-	function SetCommentSQL($table,$col,$cmt)
+	public function SetCommentSQL($table,$col,$cmt)
 	{
 		$cmt = $this->connection->qstr($cmt);
 		return  "COMMENT ON COLUMN $table.$col IS $cmt";
 	}
 	
 	//WARNING: requires oracle 9 or later due to dependency on 'SYSDATE'. See $this->sql_sysTimeStamp
-	function _FormatDateSQL($fmt, $pParsedColumnName=false)
+	protected function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
 		$col = false;
 
@@ -396,10 +396,10 @@ end;
 		return array($s. "')");
 	}
 
-	function RowLockSQL($tables,$where,$col='1 as adodbignore')
+	public function RowLockSQL($tables,$where,$col='1 as adodbignore')
 		{return array("select $col from $tables where $where for update");}
 
-	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
 		if($this->databaseType !== "odbc_oracle")
 		{
@@ -428,7 +428,7 @@ end;
 		}
 	}
 	
-	function _DropSequenceSQL($pParsedSequenceName)
+	protected function _DropSequenceSQL($pParsedSequenceName)
 	{
 		if($this->databaseType !== "odbc_oracle")
 			{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
@@ -436,7 +436,7 @@ end;
 			{return array(sprintf('drop table %s', $pParsedSequenceName['name']));}
 	}
 
-	function _GenIDSQL($pParsedSequenceName)
+	protected function _GenIDSQL($pParsedSequenceName)
 	{
 		if($this->databaseType !== "odbc_oracle")
 			{return array(sprintf("SELECT (%s.nextval) FROM DUAL", $pParsedSequenceName['name']));}
@@ -444,7 +444,7 @@ end;
 			{return array("select id from $pParsedSequenceName[name]");}
 	}
 	
-	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	protected function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
 	{
 		if($this->databaseType !== "odbc_oracle")
 		{

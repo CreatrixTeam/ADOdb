@@ -153,21 +153,21 @@ function _colonparser($sql,$arr)
 }
 
 class ADODB_db2oci extends ADODB_db2 {
-	var $databaseType = "db2oci";
-	var $_bindInputArray = true;
+	public  $databaseType = "db2oci";
+	protected  $_bindInputArray = true;
 
-	function ADODB_db2oci()
+	public function __construct()
 	{
 		parent::ADODB_db2();
 	}
 
-	function Param($name,$type='C')
+	public function Param($name,$type='C')
 	{
 		return ':'.$name;
 	}
 
 
-	function MetaTables($ttype = false, $schema = false, $mask = false)
+	public function MetaTables($ttype = false, $schema = false, $mask = false)
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -206,7 +206,7 @@ class ADODB_db2oci extends ADODB_db2 {
 		return $arr2;
 	}
 
-	function _Execute($sql, $inputarr=false	)
+	protected function _Execute($sql, $inputarr=false	)
 	{
 		if ($inputarr) list($sql,$inputarr) = _colonparser($sql, $inputarr);
 		return parent::_Execute($sql, $inputarr);
@@ -216,11 +216,11 @@ class ADODB_db2oci extends ADODB_db2 {
 
 class  ADORecordSet_db2oci extends ADORecordSet_db2 {
 
-	var $databaseType = "db2oci";
+	public  $databaseType = "db2oci";
 
-	function ADORecordSet_db2oci($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_db2($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }
 

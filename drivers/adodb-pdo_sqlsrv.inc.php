@@ -12,45 +12,45 @@ include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
 class ADODB_pdo_sqlsrv extends ADODB_pdo
 {
 
-	var $databaseType = 'pdo_sqlsrv';
-	var $dsnType = 'sqlsrv';
-	var $hasTop = 'top';
-	var $hasTransactions = true;
-	var $_bindInputArray = true;
-	var $hasInsertID = true;
-	var $fmtTimeStamp = "'Y-m-d H:i:s'";
-	var $fmtDate = "'Y-m-d'";
-	var $hasGenID = true;
+	public  $databaseType = 'pdo_sqlsrv';
+	public  $dsnType = 'sqlsrv';
+	public  $hasTop = 'top';
+	public  $hasTransactions = true;
+	protected  $_bindInputArray = true;
+	public  $hasInsertID = true;
+	public  $fmtTimeStamp = "'Y-m-d H:i:s'";
+	public  $fmtDate = "'Y-m-d'";
+	public  $hasGenID = true;
 
-	function BeginTrans()
+	public function BeginTrans()
 	{
 		$returnval = parent::BeginTrans();
 		return $returnval;
 	}
 
-	function _MetaColumns($pParsedTableName)
+	protected function _MetaColumns($pParsedTableName)
 	{
 		return false;
 	}
 
-	function MetaTables($ttype = false, $showSchema = false, $mask = false)
+	public function MetaTables($ttype = false, $showSchema = false, $mask = false)
 	{
 		return false;
 	}
 
-	function SelectLimit($sql, $nrows = -1, $offset = -1, $inputarr = false, $secs2cache = 0)
+	public function SelectLimit($sql, $nrows = -1, $offset = -1, $inputarr = false, $secs2cache = 0)
 	{
 		$ret = ADOConnection::SelectLimit($sql, $nrows, $offset, $inputarr, $secs2cache);
 		return $ret;
 	}
 
-	function ServerInfo()
+	public function ServerInfo()
 	{
 		return ADOConnection::ServerInfo();
 	}
 
 	//VERBATIM COPY FROM "adodb-mssqlnative.inc.php"/"adodb-odbc_mssql.inc.php"
-	function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
+	protected function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
 	{
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
@@ -96,10 +96,10 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 
 class  ADORecordSet_pdo_sqlsrv extends ADORecordSet_pdo {
 
-	var $databaseType = 'pdo_sqlsrv';
+	public  $databaseType = 'pdo_sqlsrv';
 
-	function ADORecordSet_pdo_sqlsrv($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_pdo($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }

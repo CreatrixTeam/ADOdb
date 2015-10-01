@@ -162,69 +162,69 @@ function Lens_ParseArgs($args,$endstmtchar=',',$tokenchars='_.-')
 
 
 class ADODB_DataDict {
-	var $connection = null;
-	var $debug = false;
-	var $dropTable = 'DROP TABLE %s';
-	var $renameTable = 'RENAME TABLE %s TO %s';
-	var $dropIndex = 'DROP INDEX %s';
-	var $addCol = ' ADD';
-	var $alterCol = ' ALTER COLUMN';
-	var $dropCol = ' DROP COLUMN';
-	var $renameColumn = 'ALTER TABLE %s RENAME COLUMN %s TO %s';	// table, old-column, new-column, column-definitions (not used by default)
-	var $nameRegex = '\w';
-	var $nameRegexBrackets = 'a-zA-Z0-9_\(\)';
-	var $schema = false;
-	var $serverInfo = array();//DEPRECATED; Use GetServerInfo() instead;
-	var $autoIncrement = false;
-	var $dataProvider = null;
-	var $databaseType = null;
-	var $invalidResizeTypes4 = array('CLOB','BLOB','TEXT','DATE','TIME'); // for changetablesql
-	var $blobSize = 100; 	/// any varchar/char field this size or greater is treated as a blob
+	public  $connection = null;
+	public  $debug = false;
+	public  $dropTable = 'DROP TABLE %s';
+	public  $renameTable = 'RENAME TABLE %s TO %s';
+	public  $dropIndex = 'DROP INDEX %s';
+	public  $addCol = ' ADD';
+	public  $alterCol = ' ALTER COLUMN';
+	public  $dropCol = ' DROP COLUMN';
+	public  $renameColumn = 'ALTER TABLE %s RENAME COLUMN %s TO %s';	// table, old-column, new-column, column-definitions (not used by default)
+	public  $nameRegex = '\w';
+	public  $nameRegexBrackets = 'a-zA-Z0-9_\(\)';
+	public  $schema = false;
+	public  $serverInfo = array();//DEPRECATED; Use GetServerInfo() instead;
+	public  $autoIncrement = false;
+	public  $dataProvider = null;
+	public  $databaseType = null;
+	public  $invalidResizeTypes4 = array('CLOB','BLOB','TEXT','DATE','TIME'); // for changetablesql
+	public  $blobSize = 100; 	/// any varchar/char field this size or greater is treated as a blob
 							/// in other words, we use a text area for editting.
-	var $sql_concatenateOperator = '+'; /// default concat operator -- change to || for Oracle/Interbase
-	var $sql_sysDate = false; /// name of function that returns the current date
-	var $sql_sysTimeStamp = false; /// name of function that returns the current timestamp
+	public  $sql_concatenateOperator = '+'; /// default concat operator -- change to || for Oracle/Interbase
+	public  $sql_sysDate = false; /// name of function that returns the current date
+	public  $sql_sysTimeStamp = false; /// name of function that returns the current timestamp
 	//PRIVATES
-	var $_serverInfoArray = null;
+	protected  $_serverInfoArray = null;
 
-	function GetCommentSQL($table,$col)
+	public function GetCommentSQL($table,$col)
 	{
 		return false;
 	}
 
-	function SetCommentSQL($table,$col,$cmt)
+	public function SetCommentSQL($table,$col,$cmt)
 	{
 		return false;
 	}
 
-	function MetaTables()
+	public function MetaTables()
 	{
 		if (!$this->connection->IsConnected()) return array();
 		return $this->connection->MetaTables();
 	}
 
 	//NOTE: THIS FUNCTION PROMISES TO QUOTE THE TABLE NAME, BUT THE PROMISE IS KEPT BY THE CORE ADODB
-	function MetaColumns($tab, $upper=null, $schema=false)
+	public function MetaColumns($tab, $upper=null, $schema=false)
 	{
 		if (!$this->connection->IsConnected()) return array();
 		return $this->connection->MetaColumns($tab, $upper, $schema);
 	}
 
 	//NOTE: THIS FUNCTION PROMISES TO QUOTE THE TABLE NAME, BUT THE PROMISE IS KEPT BY THE CORE ADODB
-	function MetaPrimaryKeys($tab,$owner=false,$intkey=false)
+	public function MetaPrimaryKeys($tab,$owner=false,$intkey=false)
 	{
 		if (!$this->connection->IsConnected()) return array();
 		return $this->connection->MetaPrimaryKeys($this->TableNameWithNoNameQuote($tab), $owner, $intkey);
 	}
 
 	//NOTE: THIS FUNCTION PROMISES TO QUOTE THE TABLE NAME, BUT THE PROMISE IS KEPT BY THE CORE ADODB
-	function MetaIndexes($table, $primary = false, $owner = false)
+	public function MetaIndexes($table, $primary = false, $owner = false)
 	{
 		if (!$this->connection->IsConnected()) return array();
 		return $this->connection->MetaIndexes($table, $primary, $owner);
 	}
 
-	function MetaType($t,$len=-1,$fieldobj=false)
+	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		static $typeMap = array(
 		'VARCHAR' => 'C',
@@ -338,7 +338,7 @@ class ADODB_DataDict {
 		return $this->connection->MetaType($t,$len,$fieldobj);
 	}
 
-	function NameQuote($name = NULL,$allowBrackets=false)
+	public function NameQuote($name = NULL,$allowBrackets=false)
 	{
 		if (!is_string($name)) {
 			return FALSE;
@@ -367,7 +367,7 @@ class ADODB_DataDict {
 		return $name;
 	}
 
-	function TableName($name)
+	public function TableName($name)
 	{
 		if ( $this->schema ) {
 			return $this->NameQuote($this->schema) .'.'. $this->NameQuote($name);
@@ -376,7 +376,7 @@ class ADODB_DataDict {
 	}
 	
 	//PRIVATE	
-	function removeStandardAdodbDataDictNameQuotes($pName)
+	public function removeStandardAdodbDataDictNameQuotes($pName)
 	{
 		$vName = trim($pName);
 		$vMatches = NULL;
@@ -387,7 +387,7 @@ class ADODB_DataDict {
 	}
 	
 	//PRIVATE
-	function TableNameWithNoNameQuote($pTableName)
+	public function TableNameWithNoNameQuote($pTableName)
 	{
 		if($this->schema)
 		{
@@ -398,7 +398,7 @@ class ADODB_DataDict {
 	}
 
 	// Executes the sql array returned by GetTableSQL and GetIndexSQL
-	function ExecuteSQLArray($sql, $continueOnError = true)
+	public function ExecuteSQLArray($sql, $continueOnError = true)
 	{
 		$rez = 2;
 		$conn = $this->connection;
@@ -435,12 +435,12 @@ class ADODB_DataDict {
 		N:  Numeric or decimal number
 	*/
 
-	function ActualType($meta)
+	public function ActualType($meta)
 	{
 		return $meta;
 	}
 
-	function CreateDatabase($dbname,$options=false)
+	public function CreateDatabase($dbname,$options=false)
 	{
 		$options = $this->_Options($options);
 		$sql = array();
@@ -456,7 +456,7 @@ class ADODB_DataDict {
 	/*
 	 Generates the SQL to create index. Returns an array of sql strings.
 	*/
-	function CreateIndexSQL($idxname, $tabname, $flds, $idxoptions = false)
+	public function CreateIndexSQL($idxname, $tabname, $flds, $idxoptions = false)
 	{
 		if (!is_array($flds)) {
 			$flds = explode(',',$flds);
@@ -470,17 +470,17 @@ class ADODB_DataDict {
 		return $this->_IndexSQL($this->NameQuote($idxname), $this->TableName($tabname), $flds, $this->_Options($idxoptions));
 	}
 
-	function DropIndexSQL ($idxname, $tabname = NULL)
+	public function DropIndexSQL ($idxname, $tabname = NULL)
 	{
 		return array(sprintf($this->dropIndex, $this->NameQuote($idxname), $this->TableName($tabname)));
 	}
 
-	function SetSchema($schema)
+	public function SetSchema($schema)
 	{
 		$this->schema = $schema;
 	}
 
-	function AddColumnSQL($tabname, $flds)
+	public function AddColumnSQL($tabname, $flds)
 	{
 		$tabname = $this->TableName ($tabname);
 		$sql = array();
@@ -511,7 +511,7 @@ class ADODB_DataDict {
 	 * @param array/string $tableoptions='' options for the new table see CreateTableSQL, default ''
 	 * @return array with SQL strings
 	 */
-	function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		$tabname = $this->TableName ($tabname);
 		$sql = array();
@@ -542,7 +542,7 @@ class ADODB_DataDict {
 	 * @param string $flds='' complete column-defintion-string like for AddColumnSQL, only used by mysql atm., default=''
 	 * @return array with SQL strings
 	 */
-	function RenameColumnSQL($tabname,$oldcolumn,$newcolumn,$flds='')
+	public function RenameColumnSQL($tabname,$oldcolumn,$newcolumn,$flds='')
 	{
 		$tabname = $this->TableName ($tabname);
 		if ($flds) {
@@ -566,7 +566,7 @@ class ADODB_DataDict {
 	 * @param array/string $tableoptions='' options for the new table see CreateTableSQL, default ''
 	 * @return array with SQL strings
 	 */
-	function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		$tabname = $this->TableName ($tabname);
 		if (!is_array($flds)) $flds = explode(',',$flds);
@@ -578,12 +578,12 @@ class ADODB_DataDict {
 		return $sql;
 	}
 
-	function DropTableSQL($tabname)
+	public function DropTableSQL($tabname)
 	{
 		return array (sprintf($this->dropTable, $this->TableName($tabname)));
 	}
 
-	function RenameTableSQL($tabname,$newname)
+	public function RenameTableSQL($tabname,$newname)
 	{
 		return array (sprintf($this->renameTable, $this->TableName($tabname),$this->TableName($newname)));
 	}
@@ -591,7 +591,7 @@ class ADODB_DataDict {
 	/**
 	 Generate the SQL to create table. Returns an array of sql strings.
 	*/
-	function CreateTableSQL($tabname, $flds, $tableoptions=array())
+	public function CreateTableSQL($tabname, $flds, $tableoptions=array())
 	{
 		list($lines,$pkey,$idxs) = $this->_GenFields($flds, true);
 		// genfields can return FALSE at times
@@ -623,7 +623,7 @@ class ADODB_DataDict {
 
 
 
-	function _GenFields($flds,$widespacing=false)
+	protected function _GenFields($flds,$widespacing=false)
 	{
 		if (is_string($flds)) {
 			$padding = '     ';
@@ -835,7 +835,7 @@ class ADODB_DataDict {
 			$ftype is the actual type
 			$ty is the type defined originally in the DDL
 	*/
-	function _GetSize($ftype, $ty, $fsize, $fprec)
+	protected function _GetSize($ftype, $ty, $fsize, $fprec)
 	{
 		if (strlen($fsize) && $ty != 'X' && $ty != 'B' && strpos($ftype,'(') === false) {
 			$ftype .= "(".$fsize;
@@ -847,7 +847,7 @@ class ADODB_DataDict {
 
 
 	// return string must begin with space
-	function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
+	protected function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
 	{
 		$suffix = '';
 		if (strlen($fdefault)) $suffix .= " DEFAULT $fdefault";
@@ -856,7 +856,7 @@ class ADODB_DataDict {
 		return $suffix;
 	}
 
-	function _IndexSQL($idxname, $tabname, $flds, $idxoptions)
+	protected function _IndexSQL($idxname, $tabname, $flds, $idxoptions)
 	{
 		$sql = array();
 
@@ -885,12 +885,12 @@ class ADODB_DataDict {
 		return $sql;
 	}
 
-	function _DropAutoIncrement($tabname)
+	protected function _DropAutoIncrement($tabname)
 	{
 		return false;
 	}
 
-	function _TableSQL($tabname,$lines,$pkey,$tableoptions)
+	protected function _TableSQL($tabname,$lines,$pkey,$tableoptions)
 	{
 		$sql = array();
 
@@ -927,7 +927,7 @@ class ADODB_DataDict {
 		GENERATE TRIGGERS IF NEEDED
 		used when table has auto-incrementing field that is emulated using triggers
 	*/
-	function _Triggers($tabname,$taboptions)
+	protected function _Triggers($tabname,$taboptions)
 	{
 		return array();
 	}
@@ -935,7 +935,7 @@ class ADODB_DataDict {
 	/**
 		Sanitize options, so that array elements with no keys are promoted to keys
 	*/
-	function _Options($opts)
+	protected function _Options($opts)
 	{
 		if (!is_array($opts)) return array();
 		$newopts = array();
@@ -947,7 +947,7 @@ class ADODB_DataDict {
 	}
 
 
-	function _getSizePrec($size)
+	protected function _getSizePrec($size)
 	{
 		$fsize = false;
 		$fprec = false;
@@ -967,7 +967,7 @@ class ADODB_DataDict {
 	This function changes/adds new fields to your table. You don't
 	have to know if the col is new or not. It will check on its own.
 	*/
-	function ChangeTableSQL($tablename, $flds, $tableoptions = false, $dropOldFlds=false)
+	public function ChangeTableSQL($tablename, $flds, $tableoptions = false, $dropOldFlds=false)
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -1067,7 +1067,7 @@ class ADODB_DataDict {
 	*		avoids having to do the same in each of ADODB's driver's connect functions. However
 	*		functionality should be moved there eventually.
 	*/	
-	function _BuildServerInfo($pIsToForceReBuild = false)
+	protected function _BuildServerInfo($pIsToForceReBuild = false)
 	{
 		if(($this->_serverInfoArray === null) || $pIsToForceReBuild)
 		{
@@ -1083,7 +1083,7 @@ class ADODB_DataDict {
 	*		ADOConnection::ServerInfo(). Current possible values for $pKey are 'description' and 
 	*		'version'.
 	*/	
-	function GetServerInfo($pKey)
+	public function GetServerInfo($pKey)
 	{
 		$this->_BuildServerInfo();
 		return @$this->_serverInfoArray[$pKey];
@@ -1096,7 +1096,7 @@ class ADODB_DataDict {
 	*		connection used is indeed relevant to the ADODB_DataDict instance.(Refer to 
 	*		NewDataDictionary())
 	*/
-	function SetConnection($pADOConnection)
+	public function SetConnection($pADOConnection)
 	{
 		$this->connection = $pADOConnection;
 		$this->dataProvider = $pADOConnection->dataProvider;
@@ -1117,7 +1117,7 @@ class ADODB_DataDict {
 	*	Fired when SetConnection() is called and finished execution. Usefull if data dicionaries
 	*		need to set up variables differently based on ADODB Driver and Database version.
 	*/
-	function _event_connectionSet($pADOConnection)
+	protected function _event_connectionSet($pADOConnection)
 		{}
 
 	/**
@@ -1126,7 +1126,7 @@ class ADODB_DataDict {
 	*			to ADOConnection::SQLDate() for specification. The parameter $pColumnName
 	*			accepts a formated name per the ADODB_DataDict::ParseIdentifierName specification.
 	*/
-	function FormatDateSQL($pFormat, $pColumnName = false)
+	public function FormatDateSQL($pFormat, $pColumnName = false)
 	{
 		if(!$pColumnName) 
 			{return $this->_FormatDateSQL($pFormat, false);}
@@ -1142,7 +1142,7 @@ class ADODB_DataDict {
 	*	@param $pFormat	Refer to ADOConnection::SQLDate()
 	*	@param $pParsedColumnName The parsed info of identifier name. Refer to ADODB_DataDict::ParseIdentifierName for full specification of the return.
 	*/
-	function _FormatDateSQL($pFormat, $pParsedColumnName = false)
+	protected function _FormatDateSQL($pFormat, $pParsedColumnName = false)
 	{
 		if (!$pParsedColumnName) {
 			return array($this->sql_sysDate);
@@ -1181,7 +1181,7 @@ class ADODB_DataDict {
 	* @param pIdentifierName					Identifier name
 	* @param pPassedIsToNormalizeParameter		This is used for backward compatibility Possible values are '-1', 'null', 'true', 'false'
 	*/
-	function ParseIdentifierName($pIdentifierName,  $pPassedIsToNormalizeParameter = -1)
+	public function ParseIdentifierName($pIdentifierName,  $pPassedIsToNormalizeParameter = -1)
 	{
 		$vIdentifierName = trim($pIdentifierName);
 		$vMatches = NULL;
@@ -1225,7 +1225,7 @@ class ADODB_DataDict {
 	/**
 	*	ACCESS: PUBLIC
 	*/
-	function ParseTableName($pTableName, $pPassedIsToNormalizeParameter = -1)
+	public function ParseTableName($pTableName, $pPassedIsToNormalizeParameter = -1)
 	{
 		$vReturn = array();
 
@@ -1250,7 +1250,7 @@ class ADODB_DataDict {
 	*	Returns the sql required for locking a row. Refer to ADOConnection::RowLock() for 
 	*		specification
 	*/	
-	function RowLockSQL($pTableNamesSqlSegment, $pWhereSqlSegment, $col='1 as adodbignore')
+	public function RowLockSQL($pTableNamesSqlSegment, $pWhereSqlSegment, $col='1 as adodbignore')
 		{return array();}
 		
 	/**
@@ -1259,7 +1259,7 @@ class ADODB_DataDict {
 	*		specification. The parameter $pSequenceName accepts a formated name per the 
 	*		ADODB_DataDict::ParseIdentifierName specification.
 	*/
-	function CreateSequenceSQL($pSequenceName, $pStartID = 1)
+	public function CreateSequenceSQL($pSequenceName, $pStartID = 1)
 	{
 		$vParsedSequenceName = $this->ParseIdentifierName($pSequenceName);
 
@@ -1273,7 +1273,7 @@ class ADODB_DataDict {
 	*		name. Refer to ADODB_DataDict::ParseIdentifierName for full specification of the 
 	*		return.
 	*/
-	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 		{return array();}
 
 	/**
@@ -1282,7 +1282,7 @@ class ADODB_DataDict {
 	*		specification. The parameter $pSequenceName accepts a formated name per the 
 	*		ADODB_DataDict::ParseIdentifierName specification.
 	*/
-	function DropSequenceSQL($pSequenceName)
+	public function DropSequenceSQL($pSequenceName)
 	{
 		$vParsedSequenceName = $this->ParseIdentifierName($pSequenceName);
 
@@ -1296,7 +1296,7 @@ class ADODB_DataDict {
 	*		name. Refer to ADODB_DataDict::ParseIdentifierName for full specification of the 
 	*		return.
 	*/
-	function _DropSequenceSQL($pParsedSequenceName)
+	protected function _DropSequenceSQL($pParsedSequenceName)
 		{return array();}
 		
 	/**
@@ -1305,7 +1305,7 @@ class ADODB_DataDict {
 	*		specification. The parameter $pSequenceName accepts a formated name per the 
 	*		ADODB_DataDict::ParseIdentifierName specification.
 	*/
-	function GenIDSQL($pSequenceName, $pStartID = 1)
+	public function GenIDSQL($pSequenceName, $pStartID = 1)
 	{
 		$vParsedSequenceName = $this->ParseIdentifierName($pSequenceName);
 
@@ -1319,7 +1319,7 @@ class ADODB_DataDict {
 	*		name. Refer to ADODB_DataDict::ParseIdentifierName for full specification of the 
 	*		return.
 	*/
-	function _GenIDSQL($pParsedSequenceName)
+	protected function _GenIDSQL($pParsedSequenceName)
 		{return array();}
 
 	/**
@@ -1331,7 +1331,7 @@ class ADODB_DataDict {
 	*		that ADOConnection::GenID() executed. The statement is provided by GenIDSQL()
 	*	Note: If ADOConnection::$genID is set to 0, it indicates a false.
 	*/	
-	function event_GenID_calculateAndSetGenID($pSequenceName, $pADORecordSet)
+	public function event_GenID_calculateAndSetGenID($pSequenceName, $pADORecordSet)
 	{
 		$vParsedSequenceName = $this->ParseIdentifierName($pSequenceName);
 		
@@ -1350,7 +1350,7 @@ class ADODB_DataDict {
 	*	Note: ADOConnection::$genID is already set to 0 before entering this function. Hence
 	*		not explicitly setting it is the same as setting it to 0;
 	*/	
-	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	protected function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
 	{
 		if($pADORecordSet && !$pADORecordSet->EOF)
 			{$this->connection->genID = (integer) reset($pADORecordSet->fields);}

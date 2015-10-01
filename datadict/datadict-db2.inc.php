@@ -14,13 +14,13 @@ if (!defined('ADODB_DIR')) die();
 
 class ADODB2_db2 extends ADODB_DataDict {
 
-	var $databaseType = 'db2';
-	var $seqField = false;
-	var $sql_concatenateOperator = '||';
-	var $sql_sysDate = 'CURRENT DATE';
-	var $sql_sysTimeStamp = 'CURRENT TIMESTAMP';
+	public  $databaseType = 'db2';
+	public  $seqField = false;
+	public  $sql_concatenateOperator = '||';
+	public  $sql_sysDate = 'CURRENT DATE';
+	public  $sql_sysTimeStamp = 'CURRENT TIMESTAMP';
 
- 	function ActualType($meta)
+ 	public function ActualType($meta)
 	{
 		switch($meta) {
 		case 'C': return 'VARCHAR';
@@ -51,7 +51,7 @@ class ADODB2_db2 extends ADODB_DataDict {
 	}
 
 	// return string must begin with space
-	function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
+	protected function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
 	{
 		$suffix = '';
 		if ($fautoinc) return ' GENERATED ALWAYS AS IDENTITY'; # as identity start with
@@ -61,21 +61,21 @@ class ADODB2_db2 extends ADODB_DataDict {
 		return $suffix;
 	}
 
-	function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		if ($this->debug) ADOConnection::outp("AlterColumnSQL not supported");
 		return array();
 	}
 
 
-	function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		if ($this->debug) ADOConnection::outp("DropColumnSQL not supported");
 		return array();
 	}
 
 
-	function ChangeTableSQL($tablename, $flds, $tableoptions = false)
+	public function ChangeTableSQL($tablename, $flds, $tableoptions = false)
 	{
 
 		/**
@@ -141,7 +141,7 @@ class ADODB2_db2 extends ADODB_DataDict {
 		return $sql;
 	}
 
-	function _FormatDateSQL($fmt, $pParsedColumnName=false)
+	protected function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
 		$col = false;
 
@@ -266,10 +266,10 @@ class ADODB2_db2 extends ADODB_DataDict {
 		}
 	}	
 
-	function RowLockSQL($tables,$where,$col='1 as adodbignore')
+	public function RowLockSQL($tables,$where,$col='1 as adodbignore')
 		{return array("select $col from $tables where $where for update");}
 
-	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
 		if($this->databaseType !== "odbc_db2")
 		{
@@ -291,7 +291,7 @@ class ADODB2_db2 extends ADODB_DataDict {
 		}
 	}
 	
-	function _DropSequenceSQL($pParsedSequenceName)
+	protected function _DropSequenceSQL($pParsedSequenceName)
 	{
 		if($this->databaseType !== "odbc_db2")
 			{return array(sprintf("DROP SEQUENCE %s", $pParsedSequenceName['name']));}
@@ -299,7 +299,7 @@ class ADODB2_db2 extends ADODB_DataDict {
 			{return array(sprintf('drop table %s', $pParsedSequenceName['name']));}
 	}
 
-	function _GenIDSQL($pParsedSequenceName)
+	protected function _GenIDSQL($pParsedSequenceName)
 	{
 		if($this->databaseType !== "odbc_db2")
 			{return array("VALUES NEXTVAL FOR $pParsedSequenceName[name]");}
@@ -307,7 +307,7 @@ class ADODB2_db2 extends ADODB_DataDict {
 			{return array("select id from $pParsedSequenceName[name]");}
 	}
 	
-	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	protected function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
 	{
 		if($this->databaseType !== "odbc_db2")
 		{

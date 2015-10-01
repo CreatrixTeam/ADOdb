@@ -31,13 +31,13 @@ This may be resolved with 4.3.3.
 class ADODB_Encrypt_Secret {
 	/**
 	 */
-	function write($data, $key) {
+	public function write($data, $key) {
 		return Secret::write($key, $data);
 	}
 
 	/**
 	 */
-	function read($data, $key) {
+	public function read($data, $key) {
 		return Secret::read($key, $data);
 	}
 

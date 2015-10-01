@@ -16,21 +16,21 @@ V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights res
 if (!defined('ADODB_DIR')) die();
 
 class ADODB_oracle extends ADOConnection {
-	var $databaseType = "oracle";
-	var $replaceQuote = "''"; // string to use to replace quotes
-	var $_curs;
-	var $_initdate = true; // init date to YYYY-MM-DD
-	var $metaTablesSQL = 'select table_name from cat';
-	var $metaColumnsSQL = "select cname,coltype,width from col where tname='%s' order by colno";
-	var $connectSID = true;
-	var $hasGenID = true;
+	public  $databaseType = "oracle";
+	public  $replaceQuote = "''"; // string to use to replace quotes
+	protected  $_curs;
+	protected  $_initdate = true; // init date to YYYY-MM-DD
+	public  $metaTablesSQL = 'select table_name from cat';
+	public  $metaColumnsSQL = "select cname,coltype,width from col where tname='%s' order by colno";
+	public  $connectSID = true;
+	public  $hasGenID = true;
 
-	function ADODB_oracle()
+	public function __construct()
 	{
 	}
 
 	// format and return date string in database date format
-	function DBDate($d, $isfld = false)
+	public function DBDate($d, $isfld = false)
 	{
 		if (is_string($d)) $d = ADORecordSet::UnixDate($d);
 		if (is_object($d)) $ds = $d->format($this->fmtDate);
@@ -39,7 +39,7 @@ class ADODB_oracle extends ADOConnection {
 	}
 
 	// format and return date string in database timestamp format
-	function DBTimeStamp($ts, $isfld = false)
+	public function DBTimeStamp($ts, $isfld = false)
 	{
 
 		if (is_string($ts)) $ts = ADORecordSet::UnixTimeStamp($ts);
@@ -49,7 +49,7 @@ class ADODB_oracle extends ADOConnection {
 	}
 
 
-	function BindDate($d)
+	public function BindDate($d)
 	{
 		$d = ADOConnection::DBDate($d);
 		if (strncmp($d,"'",1)) return $d;
@@ -57,7 +57,7 @@ class ADODB_oracle extends ADOConnection {
 		return substr($d,1,strlen($d)-2);
 	}
 
-	function BindTimeStamp($d)
+	public function BindTimeStamp($d)
 	{
 		$d = ADOConnection::DBTimeStamp($d);
 		if (strncmp($d,"'",1)) return $d;
@@ -67,7 +67,7 @@ class ADODB_oracle extends ADOConnection {
 
 
 
-	function BeginTrans()
+	public function BeginTrans()
 	{
 		 $this->autoCommit = false;
 		 ora_commitoff($this->_connectionID);
@@ -75,7 +75,7 @@ class ADODB_oracle extends ADOConnection {
 	}
 
 
-	function CommitTrans($ok=true)
+	public function CommitTrans($ok=true)
 	{
 		   if (!$ok) return $this->RollbackTrans();
 		   $ret = ora_commit($this->_connectionID);
@@ -84,7 +84,7 @@ class ADODB_oracle extends ADOConnection {
 	}
 
 
-	function RollbackTrans()
+	public function RollbackTrans()
 	{
 		$ret = ora_rollback($this->_connectionID);
 		ora_commiton($this->_connectionID);
@@ -93,7 +93,7 @@ class ADODB_oracle extends ADOConnection {
 
 
 	/* there seems to be a bug in the oracle extension -- always returns ORA-00000 - no error */
-	function ErrorMsg()
+	public function ErrorMsg()
  	{
         if ($this->_errorMsg !== false) return $this->_errorMsg;
 
@@ -103,7 +103,7 @@ class ADODB_oracle extends ADOConnection {
 	}
 
 
-	function ErrorNo()
+	public function ErrorNo()
 	{
 		if ($this->_errorCode !== false) return $this->_errorCode;
 
@@ -115,7 +115,7 @@ class ADODB_oracle extends ADOConnection {
 
 
 		// returns true or false
-		function _connect($argHostname, $argUsername, $argPassword, $argDatabasename, $mode=0)
+		protected function _connect($argHostname, $argUsername, $argPassword, $argDatabasename, $mode=0)
 		{
 			if (!function_exists('ora_plogon')) return null;
 
@@ -168,14 +168,14 @@ class ADODB_oracle extends ADOConnection {
 
 
 		// returns true or false
-		function _pconnect($argHostname, $argUsername, $argPassword, $argDatabasename)
+		protected function _pconnect($argHostname, $argUsername, $argPassword, $argDatabasename)
 		{
 			return $this->_connect($argHostname, $argUsername, $argPassword, $argDatabasename, 1);
 		}
 
 
 		// returns query ID if successful, otherwise false
-		function _query($sql,$inputarr=false)
+		public function _query($sql,$inputarr=false)
 		{
             // <G. Giunta 2003/03/03/> Reset error messages before executing
             $this->_errorMsg = false;
@@ -198,7 +198,7 @@ class ADODB_oracle extends ADOConnection {
 
 
 		// returns true or false
-		function _close()
+		protected function _close()
 		{
 			return @ora_logoff($this->_connectionID);
 		}
@@ -214,10 +214,10 @@ class ADODB_oracle extends ADOConnection {
 
 class ADORecordset_oracle extends ADORecordSet {
 
-	var $databaseType = "oracle";
-	var $bind = false;
+	public  $databaseType = "oracle";
+	public  $bind = false;
 
-	function ADORecordset_oracle($queryID,$mode=false)
+	public function __construct($queryID,$mode=false)
 	{
 
 		if ($mode === false) {
@@ -250,7 +250,7 @@ class ADORecordset_oracle extends ADORecordSet {
 			   fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by
 			   fetchField() is retrieved.		*/
 
-	   function FetchField($fieldOffset = -1)
+	   public function FetchField($fieldOffset = -1)
 	   {
 			$fld = new ADOFieldObject;
 			$fld->name = ora_columnname($this->_queryID, $fieldOffset);
@@ -260,7 +260,7 @@ class ADORecordset_oracle extends ADORecordSet {
 	   }
 
 	/* Use associative array to get fields array */
-	function Fields($colname)
+	public function Fields($colname)
 	{
 		if (!$this->bind) {
 			$this->bind = array();
@@ -273,19 +273,19 @@ class ADORecordset_oracle extends ADORecordSet {
 		 return $this->fields[$this->bind[strtoupper($colname)]];
 	}
 
-   function _initrs()
+   protected function _initrs()
    {
 		   $this->_numOfRows = -1;
 		   $this->_numOfFields = @ora_numcols($this->_queryID);
    }
 
 
-   function _seek($row)
+   protected function _seek($row)
    {
 		   return false;
    }
 
-   function _fetch($ignore_fields=false) {
+   protected function _fetch($ignore_fields=false) {
 // should remove call by reference, but ora_fetch_into requires it in 4.0.3pl1
 		if ($this->fetchMode & ADODB_FETCH_ASSOC)
 			return @ora_fetch_into($this->_queryID,$this->fields,ORA_FETCHINTO_NULLS|ORA_FETCHINTO_ASSOC);
@@ -296,12 +296,12 @@ class ADORecordset_oracle extends ADORecordSet {
    /*		close() only needs to be called if you are worried about using too much memory while your script
 		   is running. All associated result memory for the specified result identifier will automatically be freed.		*/
 
-   function _close()
+   protected function _close()
 {
 		   return @ora_close($this->_queryID);
    }
 
-	function MetaType($t, $len = -1, $fieldobj = false)
+	public function MetaType($t, $len = -1, $fieldobj = false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;

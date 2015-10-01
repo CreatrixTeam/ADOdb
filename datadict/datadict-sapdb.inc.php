@@ -16,14 +16,14 @@ if (!defined('ADODB_DIR')) die();
 
 class ADODB2_sapdb extends ADODB_DataDict {
 
-	var $databaseType = 'sapdb';
-	var $seqField = false;
-	var $renameColumn = 'RENAME COLUMN %s.%s TO %s';
-	var $sql_concatenateOperator = '||';
-	var $sql_sysDate = 'DATE';
-	var $sql_sysTimeStamp = 'TIMESTAMP';
+	public  $databaseType = 'sapdb';
+	public  $seqField = false;
+	public  $renameColumn = 'RENAME COLUMN %s.%s TO %s';
+	public  $sql_concatenateOperator = '||';
+	public  $sql_sysDate = 'DATE';
+	public  $sql_sysTimeStamp = 'TIMESTAMP';
 
- 	function ActualType($meta)
+ 	public function ActualType($meta)
 	{
 		switch($meta) {
 		case 'C': return 'VARCHAR';
@@ -53,7 +53,7 @@ class ADODB2_sapdb extends ADODB_DataDict {
 		}
 	}
 
-	function MetaType($t,$len=-1,$fieldobj=false)
+	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -84,7 +84,7 @@ class ADODB2_sapdb extends ADODB_DataDict {
 	}
 
 	// return string must begin with space
-	function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
+	protected function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
 	{
 		$suffix = '';
 		if ($funsigned) $suffix .= ' UNSIGNED';
@@ -95,7 +95,7 @@ class ADODB2_sapdb extends ADODB_DataDict {
 		return $suffix;
 	}
 
-	function AddColumnSQL($tabname, $flds)
+	public function AddColumnSQL($tabname, $flds)
 	{
 		$tabname = $this->TableName ($tabname);
 		$sql = array();
@@ -103,7 +103,7 @@ class ADODB2_sapdb extends ADODB_DataDict {
 		return array( 'ALTER TABLE ' . $tabname . ' ADD (' . implode(', ',$lines) . ')' );
 	}
 
-	function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
 	{
 		$tabname = $this->TableName ($tabname);
 		$sql = array();
@@ -111,7 +111,7 @@ class ADODB2_sapdb extends ADODB_DataDict {
 		return array( 'ALTER TABLE ' . $tabname . ' MODIFY (' . implode(', ',$lines) . ')' );
 	}
 
-	function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		$tabname = $this->TableName ($tabname);
 		if (!is_array($flds)) $flds = explode(',',$flds);
@@ -121,7 +121,7 @@ class ADODB2_sapdb extends ADODB_DataDict {
 		return array( 'ALTER TABLE ' . $tabname . ' DROP (' . implode(', ',$flds) . ')' );
 	}
 	
-	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
 		$vStartID = $pStartID - 1;
 
@@ -132,13 +132,13 @@ class ADODB2_sapdb extends ADODB_DataDict {
 		);
 	}
 
-	function _DropSequenceSQL($pParsedSequenceName)
+	protected function _DropSequenceSQL($pParsedSequenceName)
 		{return array(sprintf('drop table %s', $pParsedSequenceName['name']));}
 
-	function _GenIDSQL($pParsedSequenceName)
+	protected function _GenIDSQL($pParsedSequenceName)
 		{return array("select id from $pParsedSequenceName[name]");}
 		
-	function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
+	protected function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
 	{
 		$vNumber = (integer)(($pADORecordSet && !$pADORecordSet->EOF) ? 
 				reset($pADORecordSet->fields) : 0);

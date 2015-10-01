@@ -15,14 +15,14 @@ if (!defined('ADODB_DIR')) die();
 
 class ADODB2_ibase extends ADODB_DataDict {
 
-	var $databaseType = 'ibase';
-	var $seqField = false;
-	var $sql_concatenateOperator = '||';
-	var $sql_sysDate = "cast('TODAY' as timestamp)";
-	var $sql_sysTimeStamp = "CURRENT_TIMESTAMP"; //"cast('NOW' as timestamp)";
+	public  $databaseType = 'ibase';
+	public  $seqField = false;
+	public  $sql_concatenateOperator = '||';
+	public  $sql_sysDate = "cast('TODAY' as timestamp)";
+	public  $sql_sysTimeStamp = "CURRENT_TIMESTAMP"; //"cast('NOW' as timestamp)";
 
 
- 	function ActualType($meta)
+ 	public function ActualType($meta)
 	{
 		switch($meta) {
 		case 'C': return 'VARCHAR';
@@ -52,14 +52,14 @@ class ADODB2_ibase extends ADODB_DataDict {
 		}
 	}
 
-	function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
 	{
 		if ($this->debug) ADOConnection::outp("AlterColumnSQL not supported");
 		return array();
 	}
 
 
-	function DropColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
+	public function DropColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
 	{
 		if ($this->debug) ADOConnection::outp("DropColumnSQL not supported");
 		return array();
@@ -68,7 +68,7 @@ class ADODB2_ibase extends ADODB_DataDict {
 	// Format date column in sql string given an input format that understands Y M D
 	// Only since Interbase 6.0 - uses EXTRACT
 	// problem - does not zero-fill the day and month yet
-	function _FormatDateSQL($fmt, $pParsedColumnName=false)
+	protected function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
 		$col = false;
 
@@ -124,12 +124,12 @@ class ADODB2_ibase extends ADODB_DataDict {
 		return (empty($s) ? array() : array($s));
 	}
 
-	function RowLockSQL($table,$where,$col=false)
+	public function RowLockSQL($table,$where,$col=false)
 	{
 		return array("UPDATE $table SET $col=$col WHERE $where "); // is this correct - jlim?
 	}
 	
-	function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
 		return array
 		(
@@ -138,12 +138,12 @@ class ADODB2_ibase extends ADODB_DataDict {
 		);
 	}
 
-	function _DropSequenceSQL($pParsedSequenceName)
+	protected function _DropSequenceSQL($pParsedSequenceName)
 	{
 		return array("delete from RDB\$GENERATORS where RDB\$GENERATOR_NAME='".
 				strtoupper($pParsedSequenceName['name'])."'");
 	}
 	
-	function _GenIDSQL($pParsedSequenceName)
+	protected function _GenIDSQL($pParsedSequenceName)
 		{return array ("SELECT Gen_ID($pParsedSequenceName[name],1) FROM RDB\$DATABASE");}
 }

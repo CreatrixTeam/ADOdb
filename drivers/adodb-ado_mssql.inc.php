@@ -19,29 +19,28 @@ Set tabs to 4 for best viewing.
 if (!defined('ADODB_DIR')) die();
 
 if (!defined('_ADODB_ADO_LAYER')) {
-	if (PHP_VERSION >= 5) include(ADODB_DIR."/drivers/adodb-ado5.inc.php");
-	else include(ADODB_DIR."/drivers/adodb-ado.inc.php");
+	include(ADODB_DIR."/drivers/adodb-ado5.inc.php");	
 }
 
 
 class  ADODB_ado_mssql extends ADODB_ado {
-	var $databaseType = 'ado_mssql';
-	var $hasTop = 'top';
-	var $hasInsertID = true;
-	var $leftOuter = '*=';
-	var $rightOuter = '=*';
-	var $ansiOuter = true; // for mssql7 or later
-	var $substr = "substring";
-	var $length = 'len';
+	public  $databaseType = 'ado_mssql';
+	public  $hasTop = 'top';
+	public  $hasInsertID = true;
+	public  $leftOuter = '*=';
+	public  $rightOuter = '=*';
+	public  $ansiOuter = true; // for mssql7 or later
+	public  $substr = "substring";
+	public  $length = 'len';
 
-	//var $_inTransaction = 1; // always open recordsets, so no transaction problems.
+	//protected  $_inTransaction = 1; // always open recordsets, so no transaction problems.
 
-	function ADODB_ado_mssql()
+	public function __construct()
 	{
-	        $this->ADODB_ado();
+	        parent::__construct();
 	}
 
-	function ServerInfo()
+	public function ServerInfo()
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -65,17 +64,17 @@ class  ADODB_ado_mssql extends ADODB_ado {
 		return $arr;
 	}
 	
-	function _insertid()
+	protected function _insertid()
 	{
 	        return $this->GetOne('select SCOPE_IDENTITY()');
 	}
 
-	function _affectedrows()
+	protected function _affectedrows()
 	{
 	        return $this->GetOne('select @@rowcount');
 	}
 
-	function SetTransactionMode( $transaction_mode )
+	public function SetTransactionMode( $transaction_mode )
 	{
 		$this->_transmode  = $transaction_mode;
 		if (empty($transaction_mode)) {
@@ -86,13 +85,13 @@ class  ADODB_ado_mssql extends ADODB_ado {
 		$this->Execute("SET TRANSACTION ".$transaction_mode);
 	}
 
-	function qstr($s,$magic_quotes=false)
+	public function qstr($s,$magic_quotes=false)
 	{
 		$s = ADOConnection::qstr($s, $magic_quotes);
 		return str_replace("\0", "\\\\000", $s);
 	}
 
-	function _MetaColumns($pParsedTableName)
+	protected function _MetaColumns($pParsedTableName)
 	{
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
@@ -126,7 +125,7 @@ class  ADODB_ado_mssql extends ADODB_ado {
 		return empty($arr) ? $false : $arr;
 	}
 
-	function CreateSequence($seq='adodbseq',$start=1)
+	public function CreateSequence($seq='adodbseq',$start=1)
 	{
 
 		$this->Execute('BEGIN TRANSACTION adodbseq');
@@ -139,7 +138,7 @@ class  ADODB_ado_mssql extends ADODB_ado {
 		return true;
 	}
 
-	function GenID($seq='adodbseq',$start=1)
+	public function GenID($seq='adodbseq',$start=1)
 	{
 		//$this->debug=1;
 		$this->Execute('BEGIN TRANSACTION adodbseq');
@@ -160,10 +159,10 @@ class  ADODB_ado_mssql extends ADODB_ado {
 
 	class  ADORecordSet_ado_mssql extends ADORecordSet_ado {
 
-	var $databaseType = 'ado_mssql';
+	public  $databaseType = 'ado_mssql';
 
-	function ADORecordSet_ado_mssql($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-	        return $this->ADORecordSet_ado($id,$mode);
+	        return parent::__construct($id,$mode);
 	}
 }

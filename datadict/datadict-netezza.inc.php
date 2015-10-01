@@ -16,8 +16,8 @@ if (!defined('ADODB_DIR')) die();
 include_once(ADODB_DIR.'/datadict/datadict-postgres.inc.php');
 
 class ADODB2_netezza extends ADODB2_postgres {
-	var $databaseType = 'netezza';
-	var $sql_concatenateOperator = '||';
-	var $sql_sysDate = "CURRENT_DATE";
-	var $sql_sysTimeStamp = "CURRENT_TIMESTAMP";
+	public  $databaseType = 'netezza';
+	public  $sql_concatenateOperator = '||';
+	public  $sql_sysDate = "CURRENT_DATE";
+	public  $sql_sysTimeStamp = "CURRENT_TIMESTAMP";
 }

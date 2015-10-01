@@ -19,20 +19,20 @@ if (!defined('ADODB_DIR')) die();
 include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
 
 class ADODB_pdo_sqlite extends ADODB_pdo {
-	var $databaseType    = "pdo_sqlite";
-	var $dsnType 		 = 'sqlite'; 
-	var $metaTablesSQL   = "SELECT name FROM sqlite_master WHERE type='table'";
-	var $sysDate         = 'current_date';
-	var $sysTimeStamp    = 'current_timestamp';
-	var $nameQuote       = '`';
-	var $replaceQuote    = "''";
-	var $hasGenID        = true;
-	var $random='abs(random())';
-	var $_bindInputArray = true;
-	var $hasTransactions = false; // // should be set to false because of PDO SQLite driver not supporting changing autocommit mode
-	var $hasInsertID = true;
+	public  $databaseType    = "pdo_sqlite";
+	public  $dsnType 		 = 'sqlite'; 
+	public  $metaTablesSQL   = "SELECT name FROM sqlite_master WHERE type='table'";
+	public  $sysDate         = 'current_date';
+	public  $sysTimeStamp    = 'current_timestamp';
+	public  $nameQuote       = '`';
+	public  $replaceQuote    = "''";
+	public  $hasGenID        = true;
+	public  $random='abs(random())';
+	protected  $_bindInputArray = true;
+	public  $hasTransactions = false; // // should be set to false because of PDO SQLite driver not supporting changing autocommit mode
+	public  $hasInsertID = true;
 
-	function ServerInfo()
+	public function ServerInfo()
 	{
 		@($ver = array_pop($this->GetCol("SELECT sqlite_version()")));
 		@($enc = array_pop($this->GetCol("PRAGMA encoding")));
@@ -44,7 +44,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		return $arr;
 	}
 
-	function SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false,$secs2cache=0)
+	public function SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false,$secs2cache=0)
 	{
 		$offsetStr = ($offset >= 0) ? " OFFSET $offset" : '';
 		$limitStr  = ($nrows >= 0)  ? " LIMIT $nrows" : ($offset >= 0 ? ' LIMIT 999999999' : '');
@@ -57,7 +57,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	}
 
 	//VERBATIM copy in adodb-pdo_sqlite.inc.php, adodb-sqlite.inc.php and adodb-sqlite3.inc.php
-	function GenID($seq='adodbseq',$start=1)
+	public function GenID($seq='adodbseq',$start=1)
 	{
 		if (!$this->hasGenID) {
 			return 0; // formerly returns false pre 1.60
@@ -76,12 +76,12 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		return false;
 	}
 
-	function SetTransactionMode($transaction_mode)
+	public function SetTransactionMode($transaction_mode)
 	{
 		$this->_transmode = strtoupper($transaction_mode);
 	}
 
-	function BeginTrans()
+	public function BeginTrans()
 	{
 		if ($this->transOff) return true;
 		$this->transCnt += 1;
@@ -89,7 +89,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		return $this->Execute("BEGIN {$this->_transmode}");
 	}
 
-	function CommitTrans($ok=true)
+	public function CommitTrans($ok=true)
 	{
 		if ($this->transOff) return true;
 		if (!$ok) return $this->RollbackTrans();
@@ -100,7 +100,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		return $ret;
 	}
 
-	function RollbackTrans()
+	public function RollbackTrans()
 	{
 		if ($this->transOff) return true;
 		if ($this->transCnt) $this->transCnt -= 1;
@@ -112,7 +112,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 
 
     // mark newnham
-	function _MetaColumns($pParsedTableName)
+	protected function _MetaColumns($pParsedTableName)
 	{
 	  global $ADODB_FETCH_MODE;
 
@@ -152,7 +152,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	  return $arr;
 	}
 
-	function MetaTables($ttype=false,$showSchema=false,$mask=false)
+	public function MetaTables($ttype=false,$showSchema=false,$mask=false)
 	{
 
 		if ($mask) {
@@ -170,7 +170,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
    }
 
     //Verbatim copy from "adodb-sqlite.inc.php"/"adodb-sqlite3.inc.php"
-	function _MetaIndexes($pParsedTableName, $primary = FALSE, $owner=false)
+	protected function _MetaIndexes($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		$false = false;
 		// save old fetch mode
@@ -228,10 +228,10 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 
 class  ADORecordSet_pdo_sqlite extends ADORecordSet_pdo {
 
-	var $databaseType = 'pdo_sqlite';
+	public  $databaseType = 'pdo_sqlite';
 
-	function ADORecordSet_pdo_sqlite($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_pdo($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }

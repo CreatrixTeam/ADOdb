@@ -17,26 +17,26 @@ include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
 
 class ADODB_pdo_mssql extends ADODB_pdo {
 
-	var $databaseType = "pdo_mssql";
-	var $dsnType = 'mssql';
-	var $hasTop = 'top';
-	var $hasTransactions = false; ## <<< BUG IN PDO mssql driver	
-	var $hasInsertID = true;
-	var $_bindInputArray = false;
-	var $hasGenID = true;
+	public  $databaseType = "pdo_mssql";
+	public  $dsnType = 'mssql';
+	public  $hasTop = 'top';
+	public  $hasTransactions = false; ## <<< BUG IN PDO mssql driver	
+	public  $hasInsertID = true;
+	protected  $_bindInputArray = false;
+	public  $hasGenID = true;
 
-	function ServerInfo()
+	public function ServerInfo()
 	{
 		return ADOConnection::ServerInfo();
 	}
 
-	function SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false,$secs2cache=0)
+	public function SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false,$secs2cache=0)
 	{
 		$ret = ADOConnection::SelectLimit($sql,$nrows,$offset,$inputarr,$secs2cache);
 		return $ret;
 	}
 
-	function SetTransactionMode( $transaction_mode )
+	public function SetTransactionMode( $transaction_mode )
 	{
 		$this->_transmode  = $transaction_mode;
 		if (empty($transaction_mode)) {
@@ -47,18 +47,18 @@ class ADODB_pdo_mssql extends ADODB_pdo {
 		$this->Execute("SET TRANSACTION ".$transaction_mode);
 	}
 
-	function MetaTables($ttype=false,$showSchema=false,$mask=false)
+	public function MetaTables($ttype=false,$showSchema=false,$mask=false)
 	{
 		return false;
 	}
 
-	function _MetaColumns($pParsedTableName)
+	protected function _MetaColumns($pParsedTableName)
 	{
 		return false;
 	}
 
 	//VERBATIM COPY FROM "adodb-mssqlnative.inc.php"/"adodb-odbc_mssql.inc.php"
-	function _MetaIndexes($pParsedTableName,$primary=false, $owner = false)
+	protected function _MetaIndexes($pParsedTableName,$primary=false, $owner = false)
 	{
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
@@ -104,10 +104,10 @@ class ADODB_pdo_mssql extends ADODB_pdo {
 
 class  ADORecordSet_pdo_mssql extends ADORecordSet_pdo {
 
-	var $databaseType = 'pdo_mssql';
+	public  $databaseType = 'pdo_mssql';
 
-	function ADORecordSet_pdo_mssql($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_pdo($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }

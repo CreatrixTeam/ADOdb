@@ -20,45 +20,43 @@ define("_ADODB_ADO_LAYER", 1 );
 
 
 class ADODB_ado extends ADOConnection {
-	var $databaseType = "ado";
-	var $_bindInputArray = false;
-	var $fmtDate = "'Y-m-d'";
-	var $fmtTimeStamp = "'Y-m-d, h:i:sA'";
-	var $replaceQuote = "''"; // string to use to replace quotes
-	var $dataProvider = "ado";
-	var $hasAffectedRows = true;
-	var $adoParameterType = 201; // 201 = long varchar, 203=long wide varchar, 205 = long varbinary
-	var $_affectedRows = false;
-	var $_thisTransactions;
-	var $_cursor_type = 3; // 3=adOpenStatic,0=adOpenForwardOnly,1=adOpenKeyset,2=adOpenDynamic
-	var $_cursor_location = 3; // 2=adUseServer, 3 = adUseClient;
-	var $_lock_type = -1;
-	var $_execute_option = -1;
-	var $poorAffectedRows = true;
-	var $charPage;
+	public  $databaseType = "ado";
+	protected  $_bindInputArray = false;
+	public  $fmtDate = "'Y-m-d'";
+	public  $fmtTimeStamp = "'Y-m-d, h:i:sA'";
+	public  $replaceQuote = "''"; // string to use to replace quotes
+	public  $dataProvider = "ado";
+	public  $hasAffectedRows = true;
+	public  $adoParameterType = 201; // 201 = long varchar, 203=long wide varchar, 205 = long varbinary
+	protected  $_affectedRows = false;
+	protected  $_thisTransactions;
+	protected  $_cursor_type = 3; // 3=adOpenStatic,0=adOpenForwardOnly,1=adOpenKeyset,2=adOpenDynamic
+	protected  $_cursor_location = 3; // 2=adUseServer, 3 = adUseClient;
+	protected  $_lock_type = -1;
+	protected  $_execute_option = -1;
+	public  $poorAffectedRows = true;
+	public  $charPage;
 
-	function ADODB_ado()
+	public function __construct()
 	{
 		$this->_affectedRows = new VARIANT;
 	}
 
-	function ServerInfo()
+	public function ServerInfo()
 	{
 		if (!empty($this->_connectionID)) $desc = $this->_connectionID->provider;
 		return array('description' => $desc, 'version' => '');
 	}
 
-	function _affectedrows()
+	protected function _affectedrows()
 	{
-		if (PHP_VERSION >= 5) return $this->_affectedRows;
-
-		return $this->_affectedRows->value;
+		return $this->_affectedRows;
 	}
 
 	// you can also pass a connection string like this:
 	//
 	// $DB->Connect('USER ID=sa;PASSWORD=pwd;SERVER=mangrove;DATABASE=ai',false,false,'SQLOLEDB');
-	function _connect($argHostname, $argUsername, $argPassword,$argDBorProvider, $argProvider= '')
+	protected function _connect($argHostname, $argUsername, $argPassword,$argDBorProvider, $argProvider= '')
 	{
 	// two modes
 	//	-	if $argProvider is empty, we assume that $argDBorProvider holds provider -- this is for backward compat
@@ -125,7 +123,7 @@ class ADODB_ado extends ADOConnection {
 	}
 
 	// returns true or false
-	function _pconnect($argHostname, $argUsername, $argPassword, $argProvider='MSDASQL')
+	protected function _pconnect($argHostname, $argUsername, $argPassword, $argProvider='MSDASQL')
 	{
 		return $this->_connect($argHostname,$argUsername,$argPassword,$argProvider);
 	}
@@ -172,7 +170,7 @@ class ADODB_ado extends ADOConnection {
 
 */
 
-	function MetaTables($ttype = false, $showSchema = false, $mask = false)
+	public function MetaTables($ttype = false, $showSchema = false, $mask = false)
 	{
 		$arr= array();
 		$dbc = $this->_connectionID;
@@ -194,7 +192,7 @@ class ADODB_ado extends ADOConnection {
 		return $arr;
 	}
 
-	function _MetaColumns($pParsedTableName)
+	protected function _MetaColumns($pParsedTableName)
 	{
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
@@ -229,7 +227,7 @@ class ADODB_ado extends ADOConnection {
 	}
 
 	/* returns queryID or false */
-	function _query($sql,$inputarr=false)
+	public function _query($sql,$inputarr=false)
 	{
 		try { // In PHP5, all COM errors are exceptions, so to maintain old behaviour...
 
@@ -296,7 +294,7 @@ class ADODB_ado extends ADOConnection {
 	}
 
 
-	function BeginTrans()
+	public function BeginTrans()
 	{
 		if ($this->transOff) return true;
 
@@ -311,7 +309,7 @@ class ADODB_ado extends ADOConnection {
 		$this->transCnt += 1;
 		return true;
 	}
-	function CommitTrans($ok=true)
+	public function CommitTrans($ok=true)
 	{
 		if (!$ok) return $this->RollbackTrans();
 		if ($this->transOff) return true;
@@ -320,7 +318,7 @@ class ADODB_ado extends ADOConnection {
 		if ($this->transCnt) @$this->transCnt -= 1;
 		return true;
 	}
-	function RollbackTrans() {
+	public function RollbackTrans() {
 		if ($this->transOff) return true;
 		@$this->_connectionID->RollbackTrans();
 		if ($this->transCnt) @$this->transCnt -= 1;
@@ -329,7 +327,7 @@ class ADODB_ado extends ADOConnection {
 
 	/*	Returns: the last error message from previous database operation	*/
 
-	function ErrorMsg()
+	public function ErrorMsg()
 	{
 		if (!$this->_connectionID) return "No connection established";
 		$errmsg = '';
@@ -345,7 +343,7 @@ class ADODB_ado extends ADOConnection {
 		return $errmsg;
 	}
 
-	function ErrorNo()
+	public function ErrorNo()
 	{
 		$errc = $this->_connectionID->Errors;
 		if ($errc->Count == 0) return 0;
@@ -354,7 +352,7 @@ class ADODB_ado extends ADOConnection {
 	}
 
 	// returns true or false
-	function _close()
+	protected function _close()
 	{
 		if ($this->_connectionID) $this->_connectionID->Close();
 		$this->_connectionID = false;
@@ -370,27 +368,27 @@ class ADODB_ado extends ADOConnection {
 
 class ADORecordSet_ado extends ADORecordSet {
 
-	var $bind = false;
-	var $databaseType = "ado";
-	var $dataProvider = "ado";
-	var $_tarr = false; // caches the types
-	var $_flds; // and field objects
-	var $canSeek = true;
-  	var $hideErrors = true;
+	public  $bind = false;
+	public  $databaseType = "ado";
+	public  $dataProvider = "ado";
+	protected  $_tarr = false; // caches the types
+	protected  $_flds; // and field objects
+	public  $canSeek = true;
+  	public  $hideErrors = true;
 
-	function ADORecordSet_ado($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
 		if ($mode === false) {
 			global $ADODB_FETCH_MODE;
 			$mode = $ADODB_FETCH_MODE;
 		}
 		$this->fetchMode = $mode;
-		return $this->ADORecordSet($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 
 
 	// returns the field object
-	function FetchField($fieldOffset = -1) {
+	public function FetchField($fieldOffset = -1) {
 		$off=$fieldOffset+1; // offsets begin at 1
 
 		$o= new ADOFieldObject();
@@ -410,7 +408,7 @@ class ADORecordSet_ado extends ADORecordSet {
 	}
 
 	/* Use associative array to get fields array */
-	function Fields($colname)
+	public function Fields($colname)
 	{
 		if ($this->fetchMode & ADODB_FETCH_ASSOC) return $this->fields[$colname];
 		if (!$this->bind) {
@@ -425,7 +423,7 @@ class ADORecordSet_ado extends ADORecordSet {
 	}
 
 
-	function _initrs()
+	protected function _initrs()
 	{
 		$rs = $this->_queryID;
 
@@ -440,7 +438,7 @@ class ADORecordSet_ado extends ADORecordSet {
 
 
 	 // should only be used to move forward as we normally use forward-only cursors
-	function _seek($row)
+	protected function _seek($row)
 	{
 	   $rs = $this->_queryID;
 		// absoluteposition doesn't work -- my maths is wrong ?
@@ -533,7 +531,7 @@ class ADORecordSet_ado extends ADORecordSet {
 	adPropVariant	= 138,
 	adVarNumeric	= 139
 */
-	function MetaType($t,$len=-1,$fieldobj=false)
+	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -585,7 +583,7 @@ class ADORecordSet_ado extends ADORecordSet {
 	}
 
 	// time stamp not supported yet
-	function _fetch()
+	protected function _fetch()
 	{
 		$rs = $this->_queryID;
 		if (!$rs or $rs->EOF) {
@@ -678,7 +676,7 @@ class ADORecordSet_ado extends ADORecordSet {
 		return true;
 	}
 
-		function NextRecordSet()
+		public function NextRecordSet()
 		{
 			$rs = $this->_queryID;
 			$this->_queryID = $rs->NextRecordSet();
@@ -697,7 +695,7 @@ class ADORecordSet_ado extends ADORecordSet {
 			return true;
 		}
 
-	function _close() {
+	protected function _close() {
 		$this->_flds = false;
 		try {
 		@$this->_queryID->Close();// by Pete Dishman (peterd@telephonetics.co.uk)

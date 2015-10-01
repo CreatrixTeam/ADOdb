@@ -17,26 +17,26 @@ include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
 
 class ADODB_pdo_oci extends ADODB_pdo_base {
 
-	var $databaseType = "pdo_oci";
-	var $dsnType = 'oci';
-	var $NLS_DATE_FORMAT = 'YYYY-MM-DD';  // To include time, use 'RRRR-MM-DD HH24:MI:SS'
-	var $random = "abs(mod(DBMS_RANDOM.RANDOM,10000001)/10000000)";
-	var $metaTablesSQL = "select table_name,table_type from cat where table_type in ('TABLE','VIEW')";
-	var $metaColumnsSQL = "select cname,coltype,width, SCALE, PRECISION, NULLS, DEFAULTVAL from col where tname='%s' order by colno";
-	var $_bindInputArray = true;
-	var $_nestedSQL = true;
-	var $hasGenID = true;
+	public  $databaseType = "pdo_oci";
+	public  $dsnType = 'oci';
+	public  $NLS_DATE_FORMAT = 'YYYY-MM-DD';  // To include time, use 'RRRR-MM-DD HH24:MI:SS'
+	public  $random = "abs(mod(DBMS_RANDOM.RANDOM,10000001)/10000000)";
+	public  $metaTablesSQL = "select table_name,table_type from cat where table_type in ('TABLE','VIEW')";
+	public  $metaColumnsSQL = "select cname,coltype,width, SCALE, PRECISION, NULLS, DEFAULTVAL from col where tname='%s' order by colno";
+	protected  $_bindInputArray = true;
+	protected  $_nestedSQL = true;
+	public  $hasGenID = true;
 
- 	var $_initdate = true;
+ 	protected  $_initdate = true;
 
-	function event_pdoConnectionEstablished()
+	public function event_pdoConnectionEstablished()
 	{
 		if ($this->_initdate) {
 			$this->Execute("ALTER SESSION SET NLS_DATE_FORMAT='".$this->NLS_DATE_FORMAT."'");
 		}
 	}
 
-	function Time()
+	public function Time()
 	{
 		$rs = $this->_Execute("select $this->sysTimeStamp from dual");
 		if ($rs && !$rs->EOF) {
@@ -46,7 +46,7 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 		return false;
 	}
 
-	function MetaTables($ttype=false,$showSchema=false,$mask=false)
+	public function MetaTables($ttype=false,$showSchema=false,$mask=false)
 	{
 		if ($mask) {
 			$save = $this->metaTablesSQL;
@@ -61,7 +61,7 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 		return $ret;
 	}
 
-	function _MetaColumns($pParsedTableName)
+	protected function _MetaColumns($pParsedTableName)
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -107,7 +107,7 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 	}
 
 	//VERBATIM COPY FROM "adodb-oci8.inc.php"
-	function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
+	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		// save old fetch mode
 		global $ADODB_FETCH_MODE;
@@ -191,10 +191,10 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 
 class  ADORecordSet_pdo_oci extends ADORecordSet_pdo {
 
-	var $databaseType = 'pdo_oci';
+	public  $databaseType = 'pdo_oci';
 
-	function ADORecordSet_pdo_oci($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_pdo($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }

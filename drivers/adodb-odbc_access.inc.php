@@ -19,36 +19,36 @@ if (!defined('_ADODB_ODBC_LAYER')) {
  	define('_ADODB_ACCESS',1);
 
 class  ADODB_odbc_access extends ADODB_odbc {
-	var $databaseType = 'odbc_access';
-	var $hasTop = 'top';		// support mssql SELECT TOP 10 * FROM TABLE
-	var $fmtDate = "#Y-m-d#";
-	var $fmtTimeStamp = "#Y-m-d h:i:sA#"; // note not comma
-	var $_bindInputArray = false; // strangely enough, setting to true does not work reliably
-	var $hasTransactions = false;
-	var $upperCase = 'ucase';
-	var $hasGenID = true;
+	public  $databaseType = 'odbc_access';
+	public  $hasTop = 'top';		// support mssql SELECT TOP 10 * FROM TABLE
+	public  $fmtDate = "#Y-m-d#";
+	public  $fmtTimeStamp = "#Y-m-d h:i:sA#"; // note not comma
+	protected  $_bindInputArray = false; // strangely enough, setting to true does not work reliably
+	public  $hasTransactions = false;
+	public  $upperCase = 'ucase';
+	public  $hasGenID = true;
 
-	function ADODB_odbc_access()
+	public function __construct()
 	{
 	global $ADODB_EXTENSION;
 
 		$ADODB_EXTENSION = false;
-		$this->ADODB_odbc();
+		parent::__construct();
 	}
 
-	function Time()
+	public function Time()
 	{
 		return time();
 	}
 
-	function BeginTrans() { return false;}
+	public function BeginTrans() { return false;}
 
-	function IfNull( $field, $ifNull )
+	public function IfNull( $field, $ifNull )
 	{
 		return " IIF(IsNull($field), $ifNull, $field) "; // if Access
 	}
 /*
-	function MetaTables()
+	public function MetaTables()
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -75,11 +75,11 @@ class  ADODB_odbc_access extends ADODB_odbc {
 
 class  ADORecordSet_odbc_access extends ADORecordSet_odbc {
 
-	var $databaseType = "odbc_access";
+	public  $databaseType = "odbc_access";
 
-	function ADORecordSet_odbc_access($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		return $this->ADORecordSet_odbc($id,$mode);
+		return parent::__construct($id,$mode);
 	}
 }// class
 }

@@ -36,20 +36,20 @@ class Auth_Container_ADOdb extends Auth_Container
      * Additional options for the storage container
      * @var array
      */
-    var $options = array();
+    public  $options = array();
 
     /**
      * DB object
      * @var object
      */
-    var $db = null;
-    var $dsn = '';
+    public  $db = null;
+    public  $dsn = '';
 
     /**
      * User that is currently selected from the DB.
      * @var string
      */
-    var $activeUser = '';
+    public  $activeUser = '';
 
     // {{{ Constructor
 
@@ -61,7 +61,7 @@ class Auth_Container_ADOdb extends Auth_Container
      * @param  string Connection data or DB object
      * @return object Returns an error object if something went wrong
      */
-    function Auth_Container_ADOdb($dsn)
+    function __construct($dsn)
     {
         $this->_setDefaults();
 

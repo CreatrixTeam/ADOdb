@@ -15,11 +15,11 @@ if (!defined('ADODB_DIR')) die();
 
 class ADODB2_generic extends ADODB_DataDict {
 
-	var $databaseType = 'generic';
-	var $seqField = false;
+	public  $databaseType = 'generic';
+	public  $seqField = false;
 
 
- 	function ActualType($meta)
+ 	public function ActualType($meta)
 	{
 		switch($meta) {
 		case 'C': return 'VARCHAR';
@@ -49,14 +49,14 @@ class ADODB2_generic extends ADODB_DataDict {
 		}
 	}
 
-	function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		if ($this->debug) ADOConnection::outp("AlterColumnSQL not supported");
 		return array();
 	}
 
 
-	function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		if ($this->debug) ADOConnection::outp("DropColumnSQL not supported");
 		return array();
@@ -66,7 +66,7 @@ class ADODB2_generic extends ADODB_DataDict {
 
 /*
 //db2
- 	function ActualType($meta)
+ 	public function ActualType($meta)
 	{
 		switch($meta) {
 		case 'C': return 'VARCHAR';
@@ -95,7 +95,7 @@ class ADODB2_generic extends ADODB_DataDict {
 	}
 
 // ifx
-function ActualType($meta)
+public function ActualType($meta)
 	{
 		switch($meta) {
 		case 'C': return 'VARCHAR';// 255

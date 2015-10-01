@@ -14,13 +14,13 @@
 if (!defined('ADODB_DIR')) die();
 
 class ADODB2_sybase extends ADODB_DataDict {
-	var $databaseType = 'sybase';
+	public  $databaseType = 'sybase';
 
-	var $dropIndex = 'DROP INDEX %2$s.%1$s';
-	var $sql_sysDate = 'GetDate()';
-	var $sql_sysTimeStamp = 'GetDate()';
+	public  $dropIndex = 'DROP INDEX %2$s.%1$s';
+	public  $sql_sysDate = 'GetDate()';
+	public  $sql_sysTimeStamp = 'GetDate()';
 
-	function MetaType($t,$len=-1,$fieldobj=false)
+	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -44,7 +44,7 @@ class ADODB2_sybase extends ADODB_DataDict {
 		}
 	}
 
-	function ActualType($meta)
+	public function ActualType($meta)
 	{
 		switch(strtoupper($meta)) {
 		case 'C': return 'VARCHAR';
@@ -75,7 +75,7 @@ class ADODB2_sybase extends ADODB_DataDict {
 	}
 
 
-	function AddColumnSQL($tabname, $flds)
+	public function AddColumnSQL($tabname, $flds)
 	{
 		$tabname = $this->TableName ($tabname);
 		$f = array();
@@ -89,7 +89,7 @@ class ADODB2_sybase extends ADODB_DataDict {
 		return $sql;
 	}
 
-	function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
 	{
 		$tabname = $this->TableName ($tabname);
 		$sql = array();
@@ -101,7 +101,7 @@ class ADODB2_sybase extends ADODB_DataDict {
 		return $sql;
 	}
 
-	function DropColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
+	public function DropColumnSQL($tabname, $flds, $tableflds='', $tableoptions='')
 	{
 		$tabname = $this->TableName($tabname);
 		if (!is_array($flds)) $flds = explode(',',$flds);
@@ -116,7 +116,7 @@ class ADODB2_sybase extends ADODB_DataDict {
 	}
 
 	// return string must begin with space
-	function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
+	protected function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)
 	{
 		$suffix = '';
 		if (strlen($fdefault)) $suffix .= " DEFAULT $fdefault";
@@ -199,7 +199,7 @@ CREATE TABLE
 		    SORT_IN_TEMPDB
 		}
 */
-	function _IndexSQL($idxname, $tabname, $flds, $idxoptions)
+	protected function _IndexSQL($idxname, $tabname, $flds, $idxoptions)
 	{
 		$sql = array();
 
@@ -232,7 +232,7 @@ CREATE TABLE
 	# Used ASA SQL Reference Manual -- http://sybooks.sybase.com/onlinebooks/group-aw/awg0800e/dbrfen8/@ebt-link;pt=16756?target=%25N%15_12018_START_RESTART_N%25
 	# to convert similar Microsoft SQL*Server (mssql) API into Sybase compatible version
 	// Format date column in sql string given an input format that understands Y M D
-	function _FormatDateSQL($fmt, $pParsedColumnName=false)
+	protected function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
 		$col = false;
 
@@ -297,7 +297,7 @@ CREATE TABLE
 	}
 
 	// http://www.isug.com/Sybase_FAQ/ASE/section6.1.html#6.1.4
-	function RowLockSQL($tables,$where,$col='1 as adodbignore')
+	public function RowLockSQL($tables,$where,$col='1 as adodbignore')
 	{
 		if($col == "1 as adodbignore")
 			{$col = "top 1 null as ignore";}

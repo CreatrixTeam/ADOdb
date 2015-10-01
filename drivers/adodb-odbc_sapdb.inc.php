@@ -22,20 +22,20 @@ if (!defined('ADODB_SAPDB')){
 define('ADODB_SAPDB',1);
 
 class ADODB_odbc_sapdb extends ADODB_odbc {
-	var $databaseType = "odbc_sapdb";
-	var $fmtDate = "'Y-m-d'";	/// used by DBDate() as the default date format used by the database
-	var $fmtTimeStamp = "'Y-m-d H:i:s'"; /// used by DBTimeStamp as the default timestamp fmt.
-	var $hasInsertId = true;
-	var $_bindInputArray = true;
-	var $hasGenID = true;
+	public  $databaseType = "odbc_sapdb";
+	public  $fmtDate = "'Y-m-d'";	/// used by DBDate() as the default date format used by the database
+	public  $fmtTimeStamp = "'Y-m-d H:i:s'"; /// used by DBTimeStamp as the default timestamp fmt.
+	public  $hasInsertId = true;
+	protected  $_bindInputArray = true;
+	public  $hasGenID = true;
 
-	function ADODB_odbc_sapdb()
+	public function __construct()
 	{
 		//if (strncmp(PHP_OS,'WIN',3) === 0) $this->curmode = SQL_CUR_USE_ODBC;
-		$this->ADODB_odbc();
+		parent::__construct();
 	}
 
-	function ServerInfo()
+	public function ServerInfo()
 	{
 		$info = ADODB_odbc::ServerInfo();
 		if (!$info['version'] && preg_match('/([0-9.]+)/',$info['description'],$matches)) {
@@ -44,14 +44,14 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		return $info;
 	}
 
-	function MetaPrimaryKeys($table, $owner = false)
+	public function MetaPrimaryKeys($table, $owner = false)
 	{
 		$table = $this->Quote(strtoupper($table));
 
 		return $this->GetCol("SELECT columnname FROM COLUMNS WHERE tablename=$table AND mode='KEY' ORDER BY pos");
 	}
 
- 	function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner = false)
+ 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner = false)
 	{
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
@@ -93,7 +93,7 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
         return $indexes;
 	}
 
- 	function _MetaColumns ($pParsedTableName)
+ 	protected function _MetaColumns ($pParsedTableName)
 	{
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
@@ -142,7 +142,7 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		return $retarr;
 	}
 
-	function _MetaColumnNames($pParsedTableName, $numIndexes = false, $useattnum = false))
+	protected function _MetaColumnNames($pParsedTableName, $numIndexes = false, $useattnum = false))
 	{
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".
@@ -154,7 +154,7 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 	}
 
 	// unlike it seems, this depends on the db-session and works in a multiuser environment
-	function _insertid($table,$column)
+	protected function _insertid($table,$column)
 	{
 		return empty($table) ? False : $this->GetOne("SELECT $table.CURRVAL FROM DUAL");
 	}
@@ -178,11 +178,11 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 
 class  ADORecordSet_odbc_sapdb extends ADORecordSet_odbc {
 
-	var $databaseType = "odbc_sapdb";
+	public  $databaseType = "odbc_sapdb";
 
-	function ADORecordSet_odbc_sapdb($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
-		$this->ADORecordSet_odbc($id,$mode);
+		parent::__construct($id,$mode);
 	}
 }
 

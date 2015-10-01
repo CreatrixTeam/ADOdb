@@ -21,21 +21,21 @@ if (!function_exists('gzcompress')) {
 class ADODB_Compress_Gzip {
 	/**
 	 */
-	var $_level = null;
+	protected  $_level = null;
 
 	/**
 	 */
-	var $_min_length = 1;
+	protected  $_min_length = 1;
 
 	/**
 	 */
-	function getLevel() {
+	public function getLevel() {
 		return $this->_level;
 	}
 
 	/**
 	 */
-	function setLevel($level) {
+	public function setLevel($level) {
 		assert('$level >= 0');
 		assert('$level <= 9');
 		$this->_level = (int) $level;
@@ -43,20 +43,20 @@ class ADODB_Compress_Gzip {
 
 	/**
 	 */
-	function getMinLength() {
+	public function getMinLength() {
 		return $this->_min_length;
 	}
 
 	/**
 	 */
-	function setMinLength($min_length) {
+	public function setMinLength($min_length) {
 		assert('$min_length >= 0');
 		$this->_min_length = (int) $min_length;
 	}
 
 	/**
 	 */
-	function ADODB_Compress_Gzip($level = null, $min_length = null) {
+	public function __construct($level = null, $min_length = null) {
 		if (!is_null($level)) {
 			$this->setLevel($level);
 		}
@@ -68,7 +68,7 @@ class ADODB_Compress_Gzip {
 
 	/**
 	 */
-	function write($data, $key) {
+	public function write($data, $key) {
 		if (strlen($data) < $this->_min_length) {
 			return $data;
 		}
@@ -82,7 +82,7 @@ class ADODB_Compress_Gzip {
 
 	/**
 	 */
-	function read($data, $key) {
+	public function read($data, $key) {
 		return $data ? gzuncompress($data) : $data;
 	}
 

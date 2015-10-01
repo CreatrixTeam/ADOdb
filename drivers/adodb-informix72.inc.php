@@ -20,37 +20,37 @@ if (!defined('ADODB_DIR')) die();
 if (!defined('IFX_SCROLL')) define('IFX_SCROLL',1);
 
 class ADODB_informix72 extends ADOConnection {
-	var $databaseType = "informix72";
-	var $dataProvider = "informix";
-	var $replaceQuote = "''"; // string to use to replace quotes
-	var $fmtDate = "'Y-m-d'";
-	var $fmtTimeStamp = "'Y-m-d H:i:s'";
-	var $hasInsertID = true;
-	var $hasAffectedRows = true;
-    var $substr = 'substr';
-	var $metaTablesSQL="select tabname,tabtype from systables where tabtype in ('T','V') and owner!='informix'"; //Don't get informix tables and pseudo-tables
+	public  $databaseType = "informix72";
+	public  $dataProvider = "informix";
+	public  $replaceQuote = "''"; // string to use to replace quotes
+	public  $fmtDate = "'Y-m-d'";
+	public  $fmtTimeStamp = "'Y-m-d H:i:s'";
+	public  $hasInsertID = true;
+	public  $hasAffectedRows = true;
+    public  $substr = 'substr';
+	public  $metaTablesSQL="select tabname,tabtype from systables where tabtype in ('T','V') and owner!='informix'"; //Don't get informix tables and pseudo-tables
 
 
-	var $metaColumnsSQL =
+	public  $metaColumnsSQL =
 		"select c.colname, c.coltype, c.collength, d.default,c.colno
 		from syscolumns c, systables t,outer sysdefaults d
 		where c.tabid=t.tabid and d.tabid=t.tabid and d.colno=c.colno
 		and tabname='%s' order by c.colno";
 
-	var $metaPrimaryKeySQL =
+	public  $metaPrimaryKeySQL =
 		"select part1,part2,part3,part4,part5,part6,part7,part8 from
 		systables t,sysconstraints s,sysindexes i where t.tabname='%s'
 		and s.tabid=t.tabid and s.constrtype='P'
 		and i.idxname=s.idxname";
 
-	var $lastQuery = false;
-	var $has_insertid = true;
+	public  $lastQuery = false;
+	public  $has_insertid = true;
 
-	var $_autocommit = true;
-	var $_bindInputArray = true;  // set to true if ADOConnection.Execute() permits binding of array parameters.
-	var $cursorType = IFX_SCROLL; // IFX_SCROLL or IFX_HOLD or 0
+	protected  $_autocommit = true;
+	protected  $_bindInputArray = true;  // set to true if ADOConnection.Execute() permits binding of array parameters.
+	public  $cursorType = IFX_SCROLL; // IFX_SCROLL or IFX_HOLD or 0
 
-	function ADODB_informix72()
+	public function __construct()
 	{
 		// alternatively, use older method:
 		//putenv("DBDATE=Y4MD-");
@@ -65,7 +65,7 @@ class ADODB_informix72 extends ADOConnection {
 		}
 	}
 
-	function ServerInfo()
+	public function ServerInfo()
 	{
 	    if (isset($this->version)) return $this->version;
 
@@ -77,13 +77,13 @@ class ADODB_informix72 extends ADOConnection {
 
 
 
-	function _insertid()
+	protected function _insertid()
 	{
 		$sqlca =ifx_getsqlca($this->lastQuery);
 		return @$sqlca["sqlerrd1"];
 	}
 
-	function _affectedrows()
+	protected function _affectedrows()
 	{
 		if ($this->lastQuery) {
 		   return @ifx_affected_rows ($this->lastQuery);
@@ -91,7 +91,7 @@ class ADODB_informix72 extends ADOConnection {
 		return 0;
 	}
 
-	function BeginTrans()
+	public function BeginTrans()
 	{
 		if ($this->transOff) return true;
 		$this->transCnt += 1;
@@ -100,7 +100,7 @@ class ADODB_informix72 extends ADOConnection {
 		return true;
 	}
 
-	function CommitTrans($ok=true)
+	public function CommitTrans($ok=true)
 	{
 		if (!$ok) return $this->RollbackTrans();
 		if ($this->transOff) return true;
@@ -110,7 +110,7 @@ class ADODB_informix72 extends ADOConnection {
 		return true;
 	}
 
-	function RollbackTrans()
+	public function RollbackTrans()
 	{
 		if ($this->transOff) return true;
 		if ($this->transCnt) $this->transCnt -= 1;
@@ -119,7 +119,7 @@ class ADODB_informix72 extends ADOConnection {
 		return true;
 	}
 
-	function RowLock($tables,$where,$col='1 as adodbignore')
+	public function RowLock($tables,$where,$col='1 as adodbignore')
 	{
 		if ($this->_autocommit) $this->BeginTrans();
 		$vSQL = $this->_dataDict->RowLockSQL($tables,$where,$col);
@@ -129,14 +129,14 @@ class ADODB_informix72 extends ADOConnection {
 	/*	Returns: the last error message from previous database operation
 		Note: This function is NOT available for Microsoft SQL Server.	*/
 
-	function ErrorMsg()
+	public function ErrorMsg()
 	{
 		if (!empty($this->_logsql)) return $this->_errorMsg;
 		$this->_errorMsg = ifx_errormsg();
 		return $this->_errorMsg;
 	}
 
-	function ErrorNo()
+	public function ErrorNo()
 	{
 		preg_match("/.*SQLCODE=([^\]]*)/",ifx_error(),$parse);
 		if (is_array($parse) && isset($parse[1])) return (int)$parse[1];
@@ -144,7 +144,7 @@ class ADODB_informix72 extends ADOConnection {
 	}
 
 
-	function MetaProcedures($NamePattern = false, $catalog  = null, $schemaPattern  = null)
+	public function MetaProcedures($NamePattern = false, $catalog  = null, $schemaPattern  = null)
     {
         // save old fetch mode
         global $ADODB_FETCH_MODE;
@@ -189,7 +189,7 @@ class ADODB_informix72 extends ADOConnection {
         return $procedures;
     }
 
-    function _MetaColumns($pParsedTableName)
+    protected function _MetaColumns($pParsedTableName)
 	{
 	global $ADODB_FETCH_MODE;
 
@@ -245,12 +245,12 @@ class ADODB_informix72 extends ADOConnection {
 		return $false;
 	}
 
-   function xMetaColumns($table)
+   public function xMetaColumns($table)
    {
 		return ADOConnection::MetaColumns($table,false);
    }
 
-	 function MetaForeignKeys($table, $owner=false, $upper=false) //!Eos
+	 public function MetaForeignKeys($table, $owner=false, $upper=false) //!Eos
 	{
 		$sql = "
 			select tr.tabname,updrule,delrule,
@@ -282,20 +282,20 @@ class ADODB_informix72 extends ADOConnection {
 		return $a;
 	 }
 
-   function UpdateBlob($table, $column, $val, $where, $blobtype = 'BLOB')
+   public function UpdateBlob($table, $column, $val, $where, $blobtype = 'BLOB')
    {
    		$type = ($blobtype == 'TEXT') ? 1 : 0;
 		$blobid = ifx_create_blob($type,0,$val);
 		return $this->Execute("UPDATE $table SET $column=(?) WHERE $where",array($blobid));
    }
 
-   function BlobDecode($blobid)
+   public function BlobDecode($blobid)
    {
    		return function_exists('ifx_byteasvarchar') ? $blobid : @ifx_get_blob($blobid);
    }
 
 	// returns true or false
-   function _connect($argHostname, $argUsername, $argPassword, $argDatabasename)
+   protected function _connect($argHostname, $argUsername, $argPassword, $argDatabasename)
 	{
 		if (!function_exists('ifx_connect')) return null;
 
@@ -309,7 +309,7 @@ class ADODB_informix72 extends ADOConnection {
 	}
 
 	// returns true or false
-   function _pconnect($argHostname, $argUsername, $argPassword, $argDatabasename)
+   protected function _pconnect($argHostname, $argUsername, $argPassword, $argDatabasename)
 	{
 		if (!function_exists('ifx_connect')) return null;
 
@@ -322,7 +322,7 @@ class ADODB_informix72 extends ADOConnection {
 	}
 /*
 	// ifx_do does not accept bind parameters - weird ???
-	function Prepare($sql)
+	public function Prepare($sql)
 	{
 		$stmt = ifx_prepare($sql);
 		if (!$stmt) return $sql;
@@ -330,7 +330,7 @@ class ADODB_informix72 extends ADOConnection {
 	}
 */
 	// returns query ID if successful, otherwise false
-	function _query($sql,$inputarr=false)
+	public function _query($sql,$inputarr=false)
 	{
 	global $ADODB_COUNTRECS;
 
@@ -374,7 +374,7 @@ class ADODB_informix72 extends ADOConnection {
 	}
 
 	// returns true or false
-	function _close()
+	protected function _close()
 	{
 		$this->lastQuery = false;
 		return ifx_close($this->_connectionID);
@@ -388,18 +388,18 @@ class ADODB_informix72 extends ADOConnection {
 
 class ADORecordset_informix72 extends ADORecordSet {
 
-	var $databaseType = "informix72";
-	var $canSeek = true;
-	var $_fieldprops = false;
+	public  $databaseType = "informix72";
+	public  $canSeek = true;
+	protected  $_fieldprops = false;
 
-	function ADORecordset_informix72($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
 		if ($mode === false) {
 			global $ADODB_FETCH_MODE;
 			$mode = $ADODB_FETCH_MODE;
 		}
 		$this->fetchMode = $mode;
-		return $this->ADORecordSet($id);
+		return parent::__construct($id);
 	}
 
 
@@ -408,7 +408,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 		Get column information in the Recordset object. fetchField() can be used in order to obtain information about
 		fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by
 		fetchField() is retrieved.	*/
-	function FetchField($fieldOffset = -1)
+	public function FetchField($fieldOffset = -1)
 	{
 		if (empty($this->_fieldprops)) {
 			$fp = ifx_fieldproperties($this->_queryID);
@@ -426,18 +426,18 @@ class ADORecordset_informix72 extends ADORecordSet {
 		return $ret;
 	}
 
-	function _initrs()
+	protected function _initrs()
 	{
 		$this->_numOfRows = -1; // ifx_affected_rows not reliable, only returns estimate -- ($ADODB_COUNTRECS)? ifx_affected_rows($this->_queryID):-1;
 		$this->_numOfFields = ifx_num_fields($this->_queryID);
 	}
 
-	function _seek($row)
+	protected function _seek($row)
 	{
 		return @ifx_fetch_row($this->_queryID, (int) $row);
 	}
 
-   function MoveLast()
+   public function MoveLast()
    {
 	  $this->fields = @ifx_fetch_row($this->_queryID, "LAST");
 	  if ($this->fields) $this->EOF = false;
@@ -453,7 +453,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 	  return true;
    }
 
-   function MoveFirst()
+   public function MoveFirst()
 	{
 	  $this->fields = @ifx_fetch_row($this->_queryID, "FIRST");
 	  if ($this->fields) $this->EOF = false;
@@ -469,7 +469,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 	  return true;
    }
 
-   function _fetch($ignore_fields=false)
+   protected function _fetch($ignore_fields=false)
    {
 
 		$this->fields = @ifx_fetch_row($this->_queryID);
@@ -487,7 +487,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 
 	/*	close() only needs to be called if you are worried about using too much memory while your script
 		is running. All associated result memory for the specified result identifier will automatically be freed.	*/
-	function _close()
+	protected function _close()
 	{
 		return ifx_free_result($this->_queryID);
 	}
@@ -497,7 +497,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 * Auxiliar function to Parse coltype,collength. Used by Metacolumns
 * return: array ($mtype,$length,$precision,$nullable) (similar to ifx_fieldpropierties)
 */
-function ifx_props($coltype,$collength){
+public function ifx_props($coltype,$collength){
 	$itype=fmod($coltype+1,256);
 	$nullable=floor(($coltype+1) /256) ?"N":"Y";
 	$mtype=substr(" CIIFFNNDN TBXCC     ",$itype,1);

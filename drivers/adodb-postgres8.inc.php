@@ -16,7 +16,7 @@ include_once(ADODB_DIR."/drivers/adodb-postgres7.inc.php");
 
 class ADODB_postgres8 extends ADODB_postgres7
 {
-	var $databaseType = 'postgres8';
+	public  $databaseType = 'postgres8';
 
 
 	/**
@@ -29,7 +29,7 @@ class ADODB_postgres8 extends ADODB_postgres7
 	 * @return int last inserted ID for given table/column, or the most recently
 	 *             returned one if $table or $column are empty
 	 */
-	function _insertid($table, $column)
+	protected function _insertid($table, $column)
 	{
 		return empty($table) || empty($column)
 			? $this->GetOne("SELECT lastval()")
@@ -39,10 +39,10 @@ class ADODB_postgres8 extends ADODB_postgres7
 
 class ADORecordSet_postgres8 extends ADORecordSet_postgres7
 {
-	var $databaseType = "postgres8";
+	public  $databaseType = "postgres8";
 }
 
 class ADORecordSet_assoc_postgres8 extends ADORecordSet_assoc_postgres7
 {
-	var $databaseType = "postgres8";
+	public  $databaseType = "postgres8";
 }

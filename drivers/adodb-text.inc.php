@@ -74,48 +74,48 @@ function adodb_cmpr($a, $b) {
 	return ($a[0] > $b[0]) ? -1 : 1;
 }
 class ADODB_text extends ADOConnection {
-	var $databaseType = 'text';
+	public  $databaseType = 'text';
 
-	var $_origarray; // original data
-	var $_types;
-	var $_proberows = 8;
-	var $_colnames;
-	var $_skiprow1=false;
-	var $readOnly = true;
-	var $hasTransactions = false;
+	protected  $_origarray; // original data
+	protected  $_types;
+	protected  $_proberows = 8;
+	protected  $_colnames;
+	protected  $_skiprow1=false;
+	public  $readOnly = true;
+	public  $hasTransactions = false;
 
-	var $_rezarray;
-	var $_reznames;
-	var $_reztypes;
+	protected  $_rezarray;
+	protected  $_reznames;
+	protected  $_reztypes;
 
-	function ADODB_text()
+	public function __construct()
 	{
 	}
 
-	function RSRecordCount()
+	public function RSRecordCount()
 	{
 		if (!empty($this->_rezarray)) return sizeof($this->_rezarray);
 
 		return sizeof($this->_origarray);
 	}
 
-	function _insertid()
+	protected function _insertid()
 	{
 			return false;
 	}
 
-	function _affectedrows()
+	protected function _affectedrows()
 	{
 			return false;
 	}
 
 		// returns true or false
-	function PConnect(&$array, $types = false, $colnames = false)
+	public function PConnect(&$array, $types = false, $colnames = false)
 	{
 		return $this->Connect($array, $types, $colnames);
 	}
 		// returns true or false
-	function Connect(&$array, $types = false, $colnames = false)
+	public function Connect(&$array, $types = false, $colnames = false)
 	{
 		if (is_string($array) and $array === 'iluvphplens') return 'me2';
 
@@ -181,7 +181,7 @@ class ADODB_text extends ADOConnection {
 	// with the only difference being the order by.
 	//You can filter by using $eval and each clause is stored in $arr .eg. $arr[1] == 'name'
 	// also supports SELECT [DISTINCT] COL FROM ... -- only 1 col supported
-	function _query($sql,$input_arr,$eval=false)
+	public function _query($sql,$input_arr,$eval=false)
 	{
 		if ($this->_origarray === false) return false;
 
@@ -345,19 +345,19 @@ class ADODB_text extends ADOConnection {
 	}
 
 	/*	Returns: the last error message from previous database operation	*/
-	function ErrorMsg()
+	public function ErrorMsg()
 	{
 			return '';
 	}
 
 	/*	Returns: the last error number from previous database operation	*/
-	function ErrorNo()
+	public function ErrorNo()
 	{
 		return 0;
 	}
 
 	// returns true or false
-	function _close()
+	protected function _close()
 	{
 	}
 
@@ -372,11 +372,11 @@ class ADODB_text extends ADOConnection {
 class ADORecordSet_text extends ADORecordSet_array
 {
 
-	var $databaseType = "text";
+	public  $databaseType = "text";
 
-	function ADORecordSet_text(&$conn,$mode=false)
+	public function __construct(&$conn,$mode=false)
 	{
-		$this->ADORecordSet_array();
+		parent::__construct();
 		$this->InitArray($conn->_rezarray,$conn->_reztypes,$conn->_reznames);
 		$conn->_rezarray = false;
 	}

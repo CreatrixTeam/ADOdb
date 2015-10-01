@@ -25,17 +25,17 @@ include_once(ADODB_DIR."/drivers/adodb-mysql.inc.php");
 
 
 class ADODB_mysqlt extends ADODB_mysql {
-	var $databaseType = 'mysqlt';
-	var $ansiOuter = true; // for Version 3.23.17 or later
-	var $hasTransactions = true;
-	var $autoRollback = true; // apparently mysql does not autorollback properly
+	public  $databaseType = 'mysqlt';
+	public  $ansiOuter = true; // for Version 3.23.17 or later
+	public  $hasTransactions = true;
+	public  $autoRollback = true; // apparently mysql does not autorollback properly
 
-	function ADODB_mysqlt()
+	public function __construct()
 	{
 	global $ADODB_EXTENSION; if ($ADODB_EXTENSION) $this->rsPrefix .= 'ext_';
 	}
 
-	function BeginTrans()
+	public function BeginTrans()
 	{
 		if ($this->transOff) return true;
 		$this->transCnt += 1;
@@ -44,7 +44,7 @@ class ADODB_mysqlt extends ADODB_mysql {
 		return true;
 	}
 
-	function CommitTrans($ok=true)
+	public function CommitTrans($ok=true)
 	{
 		if ($this->transOff) return true;
 		if (!$ok) return $this->RollbackTrans();
@@ -55,7 +55,7 @@ class ADODB_mysqlt extends ADODB_mysql {
 		return true;
 	}
 
-	function RollbackTrans()
+	public function RollbackTrans()
 	{
 		if ($this->transOff) return true;
 		if ($this->transCnt) $this->transCnt -= 1;
@@ -67,9 +67,9 @@ class ADODB_mysqlt extends ADODB_mysql {
 }
 
 class ADORecordSet_mysqlt extends ADORecordSet_mysql{
-	var $databaseType = "mysqlt";
+	public  $databaseType = "mysqlt";
 
-	function ADORecordSet_mysqlt($queryID,$mode=false)
+	public function __construct($queryID,$mode=false)
 	{
 		if ($mode === false) {
 			global $ADODB_FETCH_MODE;
@@ -90,7 +90,7 @@ class ADORecordSet_mysqlt extends ADORecordSet_mysql{
 		$this->ADORecordSet($queryID);
 	}
 
-	function MoveNext()
+	public function MoveNext()
 	{
 		if (@$this->fields = mysql_fetch_array($this->_queryID,$this->fetchMode)) {
 			$this->_currentRow += 1;
@@ -106,12 +106,12 @@ class ADORecordSet_mysqlt extends ADORecordSet_mysql{
 
 class ADORecordSet_ext_mysqlt extends ADORecordSet_mysqlt {
 
-	function ADORecordSet_ext_mysqlt($queryID,$mode=false)
+	public function __construct($queryID,$mode=false)
 	{
-		$this->ADORecordSet_mysqlt($queryID,$mode);
+		parent::__construct($queryID,$mode);
 	}
 
-	function MoveNext()
+	public function MoveNext()
 	{
 		return adodb_movenext($this);
 	}

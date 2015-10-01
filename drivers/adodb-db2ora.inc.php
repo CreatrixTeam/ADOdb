@@ -48,15 +48,15 @@ global $_COLONARR,$_COLONSZ;
 }
 
 class ADODB_db2oci extends ADODB_db2 {
-	var $databaseType = "db2oci";
+	public  $databaseType = "db2oci";
 
-	function ADODB_db2oci()
+	public function __construct()
 	{
-		$this->ADODB_db2();
+		parent::__construct();
 	}
 
 
-	function _Execute($sql, $inputarr = false)
+	protected function _Execute($sql, $inputarr = false)
 	{
 		if ($inputarr) list($sql,$inputarr) = _colonscope($sql, $inputarr);
 		return parent::_Execute($sql, $inputarr);
@@ -66,9 +66,9 @@ class ADODB_db2oci extends ADODB_db2 {
 
 class  ADORecordSet_db2oci extends ADORecordSet_odbc {
 
-	var $databaseType = "db2oci";
+	public  $databaseType = "db2oci";
 
-	function ADORecordSet_db2oci($id,$mode=false)
+	public function __construct($id,$mode=false)
 	{
 		return $this->ADORecordSet_db2($id,$mode);
 	}
