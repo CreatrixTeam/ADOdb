@@ -1374,10 +1374,22 @@ if (!defined('_ADODB_LAYER')) {
 	/**
 	 * @returns an array with the primary key columns in it.
 	 */
-	public function MetaPrimaryKeys($table, $owner=false) {
+	public function MetaPrimaryKeys($pTableName, $owner=false)
+	{
+		return $this->_MetaPrimaryKeys(
+				$this->_dataDict->ParseTableName($pTableName));
+	}
+
+	/**
+	 * @param pParsedTableName  the parsed info of the table name to query. Refer to 
+	 *		ADODB_DataDict::ParseIdentifierName for full specification. Note that quotation
+	 *		info in is ignored, and table names are always to be quoted by implementing classes.
+	 * @returns an array with the primary key columns in it.
+	 */
+	protected function _MetaPrimaryKeys($pParsedTableName, $owner=false) {
 	// owner not used in base class - see oci8
 		$p = array();
-		$objs = $this->MetaColumns($table);
+		$objs = $this->_MetaColumns($pParsedTableName);
 		if ($objs) {
 			foreach($objs as $v) {
 				if (!empty($v->primary_key)) {
@@ -1389,7 +1401,7 @@ if (!defined('_ADODB_LAYER')) {
 			return $p;
 		}
 		if (function_exists('ADODB_VIEW_PRIMARYKEYS')) {
-			return ADODB_VIEW_PRIMARYKEYS($this->databaseType, $this->database, $table, $owner);
+			return ADODB_VIEW_PRIMARYKEYS($this->databaseType, $this->database, $pParsedTableName['raw'], $owner);
 		}
 		return false;
 	}
@@ -2523,14 +2535,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 
-	protected function _findschema(&$table,&$schema) {
-		if (!$schema && ($at = strpos($table,'.')) !== false) {
-			$schema = substr($table,0,$at);
-			$table = substr($table,$at+1);
-		}
-	}
-
-	
 	/**
 	 * List columns in a database as an array of ADOFieldObjects.
 	 * See top of file for definition of object.

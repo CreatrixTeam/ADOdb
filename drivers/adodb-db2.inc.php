@@ -231,13 +231,17 @@ class ADODB_db2 extends ADOConnection {
 		return $ret;
 	}
 
-	public function MetaPrimaryKeys($table, $owner = false)
+	protected function _MetaPrimaryKeys($pParsedTableName, $owner = false)
 	{
 	global $ADODB_FETCH_MODE;
 
-		if ($this->uCaseTables) $table = strtoupper($table);
-		$schema = '';
-		$this->_findschema($table,$schema);
+		$table = $pParsedTableName['table']['name'];
+		$schema = @$pParsedTableName['schema']['name'];
+		
+		if ($this->uCaseTables) {
+			$table = strtoupper($table);
+			$schema = strtoupper($schema);
+		}
 
 		$savem = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
@@ -266,8 +270,9 @@ class ADODB_db2 extends ADOConnection {
 	global $ADODB_FETCH_MODE;
 
 		if ($this->uCaseTables) $table = strtoupper($table);
-		$schema = '';
-		$this->_findschema($table,$schema);
+		$vParsedTableName = $this->_dataDict->ParseTableName($table);
+		$table = $vParsedTableName['table']['name'];
+		$schema = @$vParsedTableName['schema']['name'];
 
 		$savem = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;

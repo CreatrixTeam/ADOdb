@@ -1229,6 +1229,7 @@ class ADODB_DataDict {
 	{
 		$vReturn = array();
 
+		$vReturn['raw'] = $pTableName;
 		if(preg_match('/^(.+)\.(.+)$/', $pTableName, $vMatches))
 		{
 			$vReturn['schema'] = $this->ParseIdentifierName($vMatches[1],

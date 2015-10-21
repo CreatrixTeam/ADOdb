@@ -359,10 +359,11 @@ class ADODB_odbtp extends ADOConnection{
 		return $retarr;
 	}
 
-	public function MetaPrimaryKeys($table, $owner='')
+	protected function _MetaPrimaryKeys($pParsedTableName, $owner='')
 	{
 	global $ADODB_FETCH_MODE;
 
+		$table = $pParsedTableName['table']['name'];
 		$savem = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$arr = $this->GetArray("||SQLPrimaryKeys||$owner|$table");

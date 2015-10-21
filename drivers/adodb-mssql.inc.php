@@ -444,12 +444,12 @@ order by constraint_name, referenced_table_name, keyno";
 
 	// "Stein-Aksel Basma" <basma@accelero.no>
 	// tested with MSSQL 2000
-	public function MetaPrimaryKeys($table, $owner=false)
+	protected function _MetaPrimaryKeys($pParsedTableName, $owner=false)
 	{
 	global $ADODB_FETCH_MODE;
 
-		$schema = '';
-		$this->_findschema($table,$schema);
+		$table = $pParsedTableName['table']['name'];
+		$schema = @$pParsedTableName['schema']['name'];
 		if (!$schema) $schema = $this->database;
 		if ($schema) $schema = "and k.table_catalog like '$schema%'";
 

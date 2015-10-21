@@ -1298,11 +1298,9 @@ class ADODB_oci8 extends ADOConnection {
 		$this->_connectionID = false;
 	}
 
-	public function MetaPrimaryKeys($table, $owner=false,$internalKey=false)
+	protected function _MetaPrimaryKeys($pParsedTableName, $owner=false)
 	{
-		if ($internalKey) {
-			return array('ROWID');
-		}
+		$table = $pParsedTableName['table']['name'];
 
 		// tested with oracle 8.1.7
 		$table = strtoupper($table);

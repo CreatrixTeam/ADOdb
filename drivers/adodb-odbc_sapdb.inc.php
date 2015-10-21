@@ -44,8 +44,9 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		return $info;
 	}
 
-	public function MetaPrimaryKeys($table, $owner = false)
+	protected function _MetaPrimaryKeys($pParsedTableName, $owner = false)
 	{
+		$table = $pParsedTableName['table']['name'];
 		$table = $this->Quote(strtoupper($table));
 
 		return $this->GetCol("SELECT columnname FROM COLUMNS WHERE tablename=$table AND mode='KEY' ORDER BY pos");

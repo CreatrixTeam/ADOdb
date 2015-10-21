@@ -104,12 +104,9 @@ class ADODB_ibase extends ADOConnection {
 	}
 
 
-	public function MetaPrimaryKeys($table,$owner_notused=false,$internalKey=false)
+	protected function _MetaPrimaryKeys($pParsedTableName,$owner_notused=false)
 	{
-		if ($internalKey) {
-			return array('RDB$DB_KEY');
-		}
-
+		$table = $pParsedTableName['table']['name'];
 		$table = strtoupper($table);
 
 		$sql = 'SELECT S.RDB$FIELD_NAME AFIELDNAME

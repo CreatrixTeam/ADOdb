@@ -236,8 +236,15 @@ class ADODB_ads extends ADOConnection {
 
   }
 
-        public function &MetaPrimaryKeys($table, $owner = false)
+		public function &MetaPrimaryKeys($pTableName, $owner=false)
+		{
+			return $this->_MetaPrimaryKeys(
+					$this->_dataDict->ParseTableName($pTableName));
+		}
+
+        protected function &_MetaPrimaryKeys($pParsedTableName, $owner = false)
   {
+		  $table = $pParsedTableName['table']['name'];
           $recordSet = $this->Execute("select table_primary_key from system.tables where name='$table'");
                 if(!$recordSet){
                         print $this->ErrorMsg();
