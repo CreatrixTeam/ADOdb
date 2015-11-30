@@ -23,6 +23,7 @@ class ADODB2_mysql extends ADODB_DataDict {
 	public  $renameColumn = 'ALTER TABLE %s CHANGE COLUMN %s %s %s';	// needs column-definition!
 	public  $sql_sysDate = 'CURDATE()';
 	public  $sql_sysTimeStamp = 'NOW()';
+	public  $nameQuote = '`';
 
 	public function MetaType($t,$len=-1,$fieldobj=false)
 	{

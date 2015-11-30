@@ -23,6 +23,7 @@ class ADODB2_sqlite extends ADODB_DataDict {
 	public  $dropIndex = 'DROP INDEX IF EXISTS %s';
 	public  $renameTable = 'ALTER TABLE %s RENAME TO %s';
 	public  $sql_concatenateOperator = '||';
+	public  $nameQuote = '`';
 
 
 

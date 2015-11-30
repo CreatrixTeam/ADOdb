@@ -54,7 +54,6 @@ class ADODB_mysqli extends ADOConnection {
 	public  $port = 3306; //Default to 3306 to fix HHVM bug
 	public  $socket = ''; //Default to empty string to fix HHVM bug
 	protected  $_bindInputArray = false;
-	public  $nameQuote = '`';		/// string to use to quote identifiers and names
 	public  $optionFlags = array(array(MYSQLI_READ_DEFAULT_GROUP,0));
 	public  $arrayClass = 'ADORecordSet_array_mysqli';
 	public  $multiQuery = false;

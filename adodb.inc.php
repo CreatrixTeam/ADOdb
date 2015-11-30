@@ -410,7 +410,7 @@ if (!defined('_ADODB_LAYER')) {
 	public  $true = '1';			/// string that represents TRUE for a database
 	public  $false = '0';			/// string that represents FALSE for a database
 	public  $replaceQuote = "\\'";	/// string to use to replace quotes
-	public  $nameQuote = '"';		/// string to use to quote identifiers and names
+	public  $nameQuote = '';		/// string to use to quote identifiers and names. Set by ADODB_DataDict. Do not overwrite in extending classes (drivers).
 	public  $charSet=false;			/// character set to use - only for interbase, postgres and oci8
 	public  $metaDatabasesSQL = '';
 	public  $metaTablesSQL = '';

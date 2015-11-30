@@ -181,6 +181,7 @@ class ADODB_DataDict {
 	public  $invalidResizeTypes4 = array('CLOB','BLOB','TEXT','DATE','TIME'); // for changetablesql
 	public  $blobSize = 100; 	/// any varchar/char field this size or greater is treated as a blob
 							/// in other words, we use a text area for editting.
+	public	$nameQuote = '"';	/// string to use to quote identifiers
 	public  $sql_concatenateOperator = '+'; /// default concat operator -- change to || for Oracle/Interbase
 	public  $sql_sysDate = false; /// name of function that returns the current date
 	public  $sql_sysTimeStamp = false; /// name of function that returns the current timestamp
@@ -203,21 +204,18 @@ class ADODB_DataDict {
 		return $this->connection->MetaTables();
 	}
 
-	//NOTE: THIS FUNCTION PROMISES TO QUOTE THE TABLE NAME, BUT THE PROMISE IS KEPT BY THE CORE ADODB
 	public function MetaColumns($tab, $upper=null, $schema=false)
 	{
 		if (!$this->connection->IsConnected()) return array();
 		return $this->connection->MetaColumns($tab, $upper, $schema);
 	}
 
-	//NOTE: THIS FUNCTION PROMISES TO QUOTE THE TABLE NAME, BUT THE PROMISE IS KEPT BY THE CORE ADODB
 	public function MetaPrimaryKeys($tab,$owner=false,$intkey=false)
 	{
 		if (!$this->connection->IsConnected()) return array();
-		return $this->connection->MetaPrimaryKeys($this->TableNameWithNoNameQuote($tab), $owner, $intkey);
+		return $this->connection->MetaPrimaryKeys($tab, $owner, $intkey);
 	}
 
-	//NOTE: THIS FUNCTION PROMISES TO QUOTE THE TABLE NAME, BUT THE PROMISE IS KEPT BY THE CORE ADODB
 	public function MetaIndexes($table, $primary = false, $owner = false)
 	{
 		if (!$this->connection->IsConnected()) return array();
@@ -350,7 +348,7 @@ class ADODB_DataDict {
 			return $name;
 		}
 
-		$quote = $this->connection->nameQuote;
+		$quote = $this->nameQuote;
 
 		// if name is of the form `name`, quote it
 		if ( preg_match('/^`(.+)`$/', $name, $matches) ) {
@@ -365,6 +363,21 @@ class ADODB_DataDict {
 		}
 
 		return $name;
+	}
+
+	public function ForceNameQuote($pName = NULL)
+	{
+		if(!is_string($pName)) 
+			{return false;}
+
+		$vName = trim($pName);
+		$vMatches = null;
+
+		// if name is of the form `name`, remove ` and quote it
+		if(preg_match('/^`(.+)`$/', $vName, $vMatches))
+			{return $this->nameQuote.$vMatches[1].$this->nameQuote;}
+
+		return $this->nameQuote.$vName.$this->nameQuote;
 	}
 
 	public function TableName($name)
@@ -386,17 +399,6 @@ class ADODB_DataDict {
 		return $vName;
 	}
 	
-	//PRIVATE
-	public function TableNameWithNoNameQuote($pTableName)
-	{
-		if($this->schema)
-		{
-			return trim($this->schema).'.'.
-					$this->removeStandardAdodbDataDictNameQuotes($pTableName);
-		}
-		return $this->removeStandardAdodbDataDictNameQuotes($pTableName);
-	}
-
 	// Executes the sql array returned by GetTableSQL and GetIndexSQL
 	public function ExecuteSQLArray($sql, $continueOnError = true)
 	{
@@ -1101,7 +1103,7 @@ class ADODB_DataDict {
 		$this->connection = $pADOConnection;
 		$this->dataProvider = $pADOConnection->dataProvider;
 		$this->databaseType = $pADOConnection->databaseType;
-		$this->quote = $pADOConnection->nameQuote;
+		$pADOConnection->nameQuote = $this->nameQuote;
 
 		$pADOConnection->concat_operator = $this->sql_concatenateOperator;
 		$pADOConnection->sysDate = $this->sql_sysDate;

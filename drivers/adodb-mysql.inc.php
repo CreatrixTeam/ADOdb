@@ -44,7 +44,6 @@ class ADODB_mysql extends ADOConnection {
 	public  $clientFlags = 0;
 	public  $charSet = '';
 	public  $substr = "substring";
-	public  $nameQuote = '`';		/// string to use to quote identifiers and names
 	public  $compat323 = false; 		// true if compat with mysql 3.23
 
 	public function __construct()

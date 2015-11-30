@@ -24,7 +24,6 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	public  $metaTablesSQL   = "SELECT name FROM sqlite_master WHERE type='table'";
 	public  $sysDate         = 'current_date';
 	public  $sysTimeStamp    = 'current_timestamp';
-	public  $nameQuote       = '`';
 	public  $replaceQuote    = "''";
 	public  $hasGenID        = true;
 	public  $random='abs(random())';

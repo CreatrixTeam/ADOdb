@@ -48,33 +48,6 @@ class ADODB2_firebird extends ADODB_DataDict {
 		}
 	}
 
-	public function NameQuote($name = NULL)
-	{
-		if (!is_string($name)) {
-			return FALSE;
-		}
-
-		$name = trim($name);
-
-		if ( !is_object($this->connection) ) {
-			return $name;
-		}
-
-		$quote = $this->connection->nameQuote;
-
-		// if name is of the form `name`, quote it
-		if ( preg_match('/^`(.+)`$/', $name, $matches) ) {
-			return $quote . $matches[1] . $quote;
-		}
-
-		// if name contains special characters, quote it
-		if ( !preg_match('/^[' . $this->nameRegex . ']+$/', $name) ) {
-			return $quote . $name . $quote;
-		}
-
-		return $quote . $name . $quote;
-	}
-
 	public function CreateDatabase($dbname, $options=false)
 	{
 		$options = $this->_Options($options);

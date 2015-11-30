@@ -25,7 +25,6 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	public  $metaColumnsSQL = "SHOW COLUMNS FROM `%s`";
 	public  $hasGenID = true;
 	public  $fmtTimeStamp = "'Y-m-d, H:i:s'";
-	public  $nameQuote = '`';
 	public  $hasTransactions = false;
 	#protected  $_bindInputArray = false;
 	public  $hasInsertID = true;
