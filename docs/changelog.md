@@ -6,7 +6,9 @@ Older changelogs:
 [v2.x](changelog_v2.x.md).
 
 
-## 5.20 - ??-???-2015
+## 5.21 - ??-???-2015
+
+## 5.20.0 - 28-Nov-2015
 
 - adodb: Fix regression introduced in v5.19, causing queries to return empty rows. See Github #20, #93, #95
 - adodb: Fix regression introduced in v5.19 in GetAssoc() with ADODB_FETCH_ASSOC mode and '0' as data. See Github #102
@@ -28,6 +30,10 @@ Older changelogs:
 - adodb: Improve logic to build the assoc case bind array
 - adodb: Strict-standards compliance for function names. See Github #18, #142
 - adodb: Remove old PHP 4.x constructors for compatibility with PHP 7. See Github #139
+- adodb: Initialize charset in ADOConnection::SetCharSet. See Github #39
+- adodb: Fix incorrect handling of input array in Execute(). See Github #146
+- adodb: Release Recordset when raising exception. See Github #143
+- adodb: Added new setConnectionParameter() method, currently implemented in mssqlnative driver only. See Github #158.
 - adodb-lib: Optimize query pagination, thanks to Mike Benoit. See Github #110
 - memcache: use include_once() to avoid issues with PHPUnit. See http://phplens.com/lens/lensforum/msgs.php?id=19489
 - mssql_n: Allow use of prepared statements with driver. See Github #22
@@ -55,6 +61,7 @@ Older changelogs:
 - sqlite3: Fix wrong connection parameter in _connect(), thanks to diogotoscano. See Github #51
 - sqlite3: Fix FetchField, thanks to diogotoscano. See Github #53
 - sqlite3: Fix result-less SQL statements executed twice. See Github #99
+- sqlite3: use -1 for _numOfRows. See Github #151
 - xmlschema: Fix ExtractSchema() when given $prefix and $stripprefix parameters, thanks to peterdd. See Github #92
 - Convert languages files to UTF-8, thanks to Marc-Etienne Vargenau. See Github #32.
 

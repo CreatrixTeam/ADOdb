@@ -14,7 +14,9 @@
 /**
 	\mainpage
 
-	@version V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights reserved.
+	@version   v5.21dev  ??-???-2015
+	@copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
+	@copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
 
 	Released under both BSD license and Lesser GPL library license. You can choose which license
 	you prefer.
@@ -86,7 +88,7 @@ if (!defined('_ADODB_LAYER')) {
 	// ********************************************************
 
 
-
+	if (!$ADODB_EXTENSION || ADODB_EXTENSION < 4.0) {
 
 		define('ADODB_BAD_RS','<p>Bad $rs in %s. Connection or SQL invalid. Try using $connection->debug=true;</p>');
 
@@ -197,7 +199,7 @@ if (!defined('_ADODB_LAYER')) {
 		/**
 		 * ADODB version as a string.
 		 */
-		$ADODB_vers = 'V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights reserved. Released BSD & LGPL.';
+		$ADODB_vers = 'v5.21dev  ??-???-2015';
 
 		/**
 		 * Determines whether recordset->RecordCount() is used.
@@ -486,6 +488,31 @@ if (!defined('_ADODB_LAYER')) {
 	protected  $_transmode = ''; // transaction mode
 	protected  $_dataDict = '';  //ADODB_DataDict instance. Is to be used to eventually remove all SQL statement generation, but not execution, from the drivers.
 
+	/*
+	 * Additional parameters that may be passed to drivers in the connect string
+	 * Driver must be coded to accept the parameters
+	 */
+	protected $connectionParameters = array();
+
+	/**
+	* Adds a parameter to the connection string.
+	*
+	* These parameters are added to the connection string when connecting,
+	* if the driver is coded to use it.
+	*
+	* @param	string	$parameter	The name of the parameter to set
+	* @param	string	$value		The value of the parameter
+	*
+	* @return null
+	*
+	* @example, for mssqlnative driver ('CharacterSet','UTF-8')
+	*/
+	final public function setConnectionParameter($parameter,$value)
+	{
+
+		$this->connectionParameters[$parameter] = $value;
+
+	}
 
 	static function Version() {
 		global $ADODB_vers;
@@ -1072,8 +1099,21 @@ if (!defined('_ADODB_LAYER')) {
 			unset($element0);
 
 			if (!is_array($sql) && !$this->_bindInputArray) {
+				// @TODO this would consider a '?' within a string as a parameter...
 				$sqlarr = explode('?',$sql);
 				$nparams = sizeof($sqlarr)-1;
+
+				// Make sure the number of parameters provided in the input
+				// array matches what the query expects
+				if ($nparams != count($inputarr)) {
+					$this->outp_throw(
+						"Input array has " . count($inputarr) .
+						" params, does not match query: '" . htmlspecialchars($sql) . "'",
+						'Execute'
+					);
+					return false;
+				}
+
 				if (!$array_2d) {
 					$inputarr = array($inputarr);
 				}
@@ -2206,8 +2246,13 @@ if (!defined('_ADODB_LAYER')) {
 		return $blob;
 	}
 
+	public function GetCharSet() {
+		return $this->charSet;
+	}
+
 	public function SetCharSet($charset) {
-		return false;
+		$this->charSet = $charset;
+		return true;
 	}
 
 	public function IfNull( $field, $ifNull ) {
@@ -2229,10 +2274,6 @@ if (!defined('_ADODB_LAYER')) {
 			$this->_affected = false;
 		}
 		return $old;
-	}
-
-	public function GetCharSet() {
-		return false;
 	}
 
 	/**
@@ -3302,6 +3343,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 */
 	public function __construct($queryID) {
 		$this->_queryID = $queryID;
+	}
+
+	function __destruct() {
+		$this->Close();
 	}
 
 	public function getIterator() {
@@ -5070,3 +5115,5 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 		return _adodb_backtrace($printOrArr,$levels,0,$ishtml);
 	}
+
+}

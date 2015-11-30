@@ -11,11 +11,6 @@ import subprocess
 import sys
 
 
-# ADOdb Repository reference
-origin_repo = "git://git.code.sf.net/p/adodb/git adodb-git"
-release_branch = "master"
-release_prefix = "adodb"
-
 # Directories and files to exclude from release tarballs
 sf_files = "frs.sourceforge.net:/home/frs/project/adodb" \
            "/adodb-php5-only/adodb-{ver}-for-php5/"
@@ -71,10 +66,10 @@ def main():
             sys.exit(0)
 
         elif opt in ("-f", "--files"):
-            upload_files = False
+            upload_doc = False
 
         elif opt in ("-d", "--doc"):
-            upload_doc = False
+            upload_files = False
 
     # Mandatory parameters
     username = args[0]
@@ -85,19 +80,19 @@ def main():
     except IndexError:
         release_path = os.getcwd()
 
-    # Get the version number from the zip file to upload
-    try:
-        zipfile = glob.glob('*.zip')[0]
-    except IndexError:
-        print "ERROR: release zip file not found in '%s'    " % release_path
-        sys.exit(1)
-    version = zipfile[5:8]
-
-    # Start upload process
-    print "ADOdb release upload script"
-
     # Upload release files
     if upload_files:
+        # Get the version number from the zip file to upload
+        try:
+            zipfile = glob.glob('*.zip')[0]
+        except IndexError:
+            print "ERROR: release zip file not found in '%s'" % release_path
+            sys.exit(1)
+        version = zipfile[5:8]
+
+        # Start upload process
+        print "ADOdb release upload script"
+
         target = sf_files.format(ver=version)
         print
         print "Uploading release files..."
