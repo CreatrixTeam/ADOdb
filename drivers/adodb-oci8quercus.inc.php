@@ -28,10 +28,6 @@ class ADODB_oci8quercus extends ADODB_oci8 {
 	public  $databaseType = 'oci8quercus';
 	public  $dataProvider = 'oci8';
 
-	public function __construct()
-	{
-	}
-
 }
 
 /*--------------------------------------------------------------------------------------
@@ -41,11 +37,6 @@ class ADODB_oci8quercus extends ADODB_oci8 {
 class ADORecordset_oci8quercus extends ADORecordset_oci8 {
 
 	public  $databaseType = 'oci8quercus';
-
-	public function __construct($queryID,$mode=false)
-	{
-		parent::__construct($queryID,$mode);
-	}
 
 	protected function _FetchField($fieldOffset = -1)
 	{

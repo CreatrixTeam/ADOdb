@@ -1706,10 +1706,6 @@ class ADORecordset_oci8 extends ADORecordSet {
 }
 
 class ADORecordSet_ext_oci8 extends ADORecordSet_oci8 {
-	public function __construct($queryID,$mode=false)
-	{
-		parent::__construct($queryID, $mode);
-	}
 
 	public function MoveNext()
 	{

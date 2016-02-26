@@ -70,10 +70,6 @@ class  ADORecordSet_db2oci extends ADORecordSet_odbc {
 
 	public  $databaseType = "db2oci";
 
-	public function __construct($id,$mode=false)
-	{
-		return $this->ADORecordSet_db2($id,$mode);
-	}
 }
 
 } //define

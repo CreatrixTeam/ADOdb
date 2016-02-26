@@ -86,8 +86,4 @@ class  ADORecordSet_borland_ibase extends ADORecordSet_ibase {
 
 	public  $databaseType = "borland_ibase";
 
-	public function __construct($id,$mode=false)
-	{
-		parent::__construct($id,$mode);
-	}
 }

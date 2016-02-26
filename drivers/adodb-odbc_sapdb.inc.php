@@ -31,12 +31,6 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 	protected  $_bindInputArray = true;
 	public  $hasGenID = true;
 
-	public function __construct()
-	{
-		//if (strncmp(PHP_OS,'WIN',3) === 0) $this->curmode = SQL_CUR_USE_ODBC;
-		parent::__construct();
-	}
-
 	public function ServerInfo()
 	{
 		$info = ADODB_odbc::ServerInfo();
@@ -54,7 +48,7 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		return $this->GetCol("SELECT columnname FROM COLUMNS WHERE tablename=$table AND mode='KEY' ORDER BY pos");
 	}
 
- 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner = false)
+	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner = false)
 	{
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
@@ -67,44 +61,44 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
-        $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-        if ($this->fetchMode !== FALSE) {
-        	$savem = $this->SetFetchMode(FALSE);
-        }
+		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		if ($this->fetchMode !== FALSE) {
+			$savem = $this->SetFetchMode(FALSE);
+		}
 
-        $rs = $this->Execute($sql);
-        if (isset($savem)) {
-        	$this->SetFetchMode($savem);
-        }
-        $ADODB_FETCH_MODE = $save;
+		$rs = $this->Execute($sql);
+		if (isset($savem)) {
+			$this->SetFetchMode($savem);
+		}
+		$ADODB_FETCH_MODE = $save;
 
-        if (!is_object($rs)) {
-        	return FALSE;
-        }
+		if (!is_object($rs)) {
+			return FALSE;
+		}
 
 		$indexes = array();
 		while ($row = $rs->FetchRow()) {
-            $indexes[$row[0]]['unique'] = $row[1] == 'UNIQUE';
-            $indexes[$row[0]]['columns'][] = $row[2];
-    	}
+			$indexes[$row[0]]['unique'] = $row[1] == 'UNIQUE';
+			$indexes[$row[0]]['columns'][] = $row[2];
+		}
 		if ($primary) {
 			$indexes['SYSPRIMARYKEYINDEX'] = array(
 					'unique' => True,	// by definition
 					'columns' => $this->GetCol("SELECT columnname FROM COLUMNS WHERE tablename=$table AND mode='KEY' ORDER BY pos"),
 				);
 		}
-        return $indexes;
+		return $indexes;
 	}
 
  	protected function _MetaColumns ($pParsedTableName)
 	{
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
-        $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$table = $pParsedTableName['table']['name'];
-        if ($this->fetchMode !== FALSE) {
-        	$savem = $this->SetFetchMode(FALSE);
-        }
+		if ($this->fetchMode !== FALSE) {
+			$savem = $this->SetFetchMode(FALSE);
+		}
 		$table = $this->Quote(strtoupper($table));
 
 		$retarr = array();
@@ -137,10 +131,10 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 			}
 			$retarr[$fld->name] = $fld;
 		}
-        if (isset($savem)) {
-        	$this->SetFetchMode($savem);
-        }
-        $ADODB_FETCH_MODE = $save;
+		if (isset($savem)) {
+			$this->SetFetchMode($savem);
+		}
+		$ADODB_FETCH_MODE = $save;
 
 		return $retarr;
 	}
@@ -165,13 +159,13 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 	/*
 		SelectLimit implementation problems:
 
-	 	The following will return random 10 rows as order by performed after "WHERE rowno<10"
-	 	which is not ideal...
+		The following will return random 10 rows as order by performed after "WHERE rowno<10"
+		which is not ideal...
 
-	  		select * from table where rowno < 10 order by 1
+			select * from table where rowno < 10 order by 1
 
-	  	This means that we have to use the adoconnection base class SelectLimit when
-	  	there is an "order by".
+		This means that we have to use the adoconnection base class SelectLimit when
+		there is an "order by".
 
 		See http://listserv.sap.com/pipermail/sapdb.general/2002-January/010405.html
 	 */
@@ -179,14 +173,10 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 };
 
 
-class  ADORecordSet_odbc_sapdb extends ADORecordSet_odbc {
+class ADORecordSet_odbc_sapdb extends ADORecordSet_odbc {
 
 	public  $databaseType = "odbc_sapdb";
 
-	public function __construct($id,$mode=false)
-	{
-		parent::__construct($id,$mode);
-	}
 }
 
 } //define

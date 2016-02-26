@@ -22,10 +22,6 @@ class ADODB_sybase_ase extends ADODB_sybase {
 	 public  $metaColumnsSQL = "SELECT syscolumns.name AS field_name, systypes.name AS type, systypes.length AS width FROM sysobjects, syscolumns, systypes WHERE sysobjects.name='%s' AND syscolumns.id = sysobjects.id AND systypes.type=syscolumns.type";
 	 public  $metaDatabasesSQL ="SELECT a.name FROM master.dbo.sysdatabases a, master.dbo.syslogins b WHERE a.suid = b.suid and a.name like '%' and a.name != 'tempdb' and a.status3 != 256  order by 1";
 
-	public function __construct()
-	{
-	}
-
 	// split the Views, Tables and procedures.
 	public function MetaTables($ttype=false,$showSchema=false,$mask=false)
 	{
@@ -114,10 +110,5 @@ class ADODB_sybase_ase extends ADODB_sybase {
 }
 
 class adorecordset_sybase_ase extends ADORecordset_sybase {
-public  $databaseType = "sybase_ase";
-public function ADORecordset_sybase_ase($id,$mode=false)
-	{
-		$this->ADORecordSet_sybase($id,$mode);
-	}
-
+	public $databaseType = "sybase_ase";
 }

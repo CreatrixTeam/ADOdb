@@ -90,10 +90,6 @@ class ADODB_text extends ADOConnection {
 	protected  $_reznames;
 	protected  $_reztypes;
 
-	public function __construct()
-	{
-	}
-
 	public function RSRecordCount()
 	{
 		if (!empty($this->_rezarray)) return sizeof($this->_rezarray);

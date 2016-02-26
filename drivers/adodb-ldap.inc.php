@@ -45,10 +45,6 @@ class ADODB_ldap extends ADOConnection {
 	# error on binding, eg. "Binding: invalid credentials"
 	protected  $_bind_errmsg = "Binding: %s";
 
-	public function __construct()
-	{
-	}
-
 	// returns true or false
 
 	protected function _connect( $host, $username, $password, $ldapbase)

@@ -38,18 +38,14 @@ class ADODB_csv extends ADOConnection {
 	public  $hasTransactions = false;
 	protected  $_errorNo = false;
 
-	public function __construct()
-	{
-	}
-
 	protected function _insertid()
 	{
-			return $this->_insertid;
+		return $this->_insertid;
 	}
 
 	protected function _affectedrows()
 	{
-			return $this->_affectedrows;
+		return $this->_affectedrows;
 	}
 
   	public function MetaDatabases()
@@ -176,7 +172,7 @@ class ADODB_csv extends ADOConnection {
 	/*	Returns: the last error message from previous database operation	*/
 	public function ErrorMsg()
 	{
-			return $this->_errorMsg;
+		return $this->_errorMsg;
 	}
 
 	/*	Returns: the last error number from previous database operation	*/
@@ -193,10 +189,6 @@ class ADODB_csv extends ADOConnection {
 } // class
 
 class ADORecordset_csv extends ADORecordset {
-	public function __construct($id,$mode=false)
-	{
-		parent::__construct($id,$mode);
-	}
 
 	protected function _close()
 	{

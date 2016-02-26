@@ -46,12 +46,6 @@ class  ADODB_odbc_mssql extends ADODB_odbc {
 														  # concatenating a null value with a string yields a NULL result
 	public  $hasGenID = true;
 
-	public function __construct()
-	{
-		parent::__construct();
-		//$this->curmode = SQL_CUR_USE_ODBC;
-	}
-
 	// crashes php...
 	public function ServerInfo()
 	{
@@ -299,8 +293,4 @@ class  ADORecordSet_odbc_mssql extends ADORecordSet_odbc {
 
 	public  $databaseType = 'odbc_mssql';
 
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }

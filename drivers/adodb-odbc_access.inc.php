@@ -17,8 +17,9 @@ if (!defined('_ADODB_ODBC_LAYER')) {
 
 	include(ADODB_DIR."/drivers/adodb-odbc.inc.php");
 }
- if (!defined('_ADODB_ACCESS')) {
- 	define('_ADODB_ACCESS',1);
+
+if (!defined('_ADODB_ACCESS')) {
+	define('_ADODB_ACCESS',1);
 
 class  ADODB_odbc_access extends ADODB_odbc {
 	public  $databaseType = 'odbc_access';
@@ -79,9 +80,6 @@ class  ADORecordSet_odbc_access extends ADORecordSet_odbc {
 
 	public  $databaseType = "odbc_access";
 
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
-}// class
+} // class
+
 }

@@ -307,12 +307,6 @@ class ADORecordSet_postgres7 extends ADORecordSet_postgres64{
 
 	public  $databaseType = "postgres7";
 
-
-	public function __construct($queryID, $mode=false)
-	{
-		parent::__construct($queryID, $mode);
-	}
-
 	// 10% speedup to move MoveNext to child class
 	public function MoveNext()
 	{
@@ -338,11 +332,6 @@ class ADORecordSet_assoc_postgres7 extends ADORecordSet_postgres64{
 
 	public  $databaseType = "postgres7";
 
-
-	public function __construct($queryID, $mode=false)
-	{
-		parent::__construct($queryID, $mode);
-	}
 
 	protected function _fetch()
 	{

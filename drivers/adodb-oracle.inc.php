@@ -27,10 +27,6 @@ class ADODB_oracle extends ADOConnection {
 	public  $connectSID = true;
 	public  $hasGenID = true;
 
-	public function __construct()
-	{
-	}
-
 	// format and return date string in database date format
 	public function DBDate($d, $isfld = false)
 	{

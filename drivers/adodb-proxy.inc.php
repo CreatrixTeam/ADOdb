@@ -15,19 +15,16 @@
 if (!defined('ADODB_DIR')) die();
 
 if (! defined("_ADODB_PROXY_LAYER")) {
-	 define("_ADODB_PROXY_LAYER", 1 );
-	 include(ADODB_DIR."/drivers/adodb-csv.inc.php");
+	define("_ADODB_PROXY_LAYER", 1 );
+	include(ADODB_DIR."/drivers/adodb-csv.inc.php");
 
-	class ADODB_proxy extends ADODB_csv {
-		public  $databaseType = 'proxy';
-		public  $databaseProvider = 'csv';
-	}
-	class ADORecordset_proxy extends ADORecordset_csv {
+class ADODB_proxy extends ADODB_csv {
+	public  $databaseType = 'proxy';
+	public  $databaseProvider = 'csv';
+}
+
+class ADORecordset_proxy extends ADORecordset_csv {
 	public  $databaseType = "proxy";
+}
 
-		public function __construct($id,$mode=false)
-		{
-			$this->ADORecordset($id,$mode);
-		}
-	};
 } // define

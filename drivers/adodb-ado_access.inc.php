@@ -47,8 +47,4 @@ class  ADORecordSet_ado_access extends ADORecordSet_ado {
 
 	public  $databaseType = "ado_access";
 
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }

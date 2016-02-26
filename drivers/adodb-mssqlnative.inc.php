@@ -147,12 +147,18 @@ class ADODB_mssqlnative extends ADOConnection {
 			 * SQL Server 2012
 			 */
 			$this->mssql_version = 11;
+		} elseif (preg_match('/^12/',$data['version'])){
+			/*
+			 * SQL Server 2014
+			 */
+			$this->mssql_version = 12;
+		
 		} else
 			die("SQL SERVER VERSION {$data['version']} NOT SUPPORTED IN mssqlnative DRIVER");
 	}
 
 	public function ServerInfo() {
-    	global $ADODB_FETCH_MODE;
+		global $ADODB_FETCH_MODE;
 		static $arr = false;
 		if (is_array($arr))
 			return $arr;
@@ -201,6 +207,7 @@ class ADODB_mssqlnative extends ADOConnection {
 			return $this->GenID2008($seq, $start);
 			break;
 		case 11:
+		case 12:
 			return ADOConnection::GenID($seq, $start);
 			break;
 		}
@@ -217,6 +224,7 @@ class ADODB_mssqlnative extends ADOConnection {
 			return $this->CreateSequence2008($seq, $start);
 			break;
 		case 11:
+		case 12:
 			// Proper Sequences Only available to Server 2012 and up
 			return  ADOConnection::CreateSequence($seq, $start)
 			break;
@@ -356,10 +364,10 @@ class ADODB_mssqlnative extends ADOConnection {
 		$connectionInfo["Database"]=$argDatabasename;
 		$connectionInfo["UID"]=$argUsername;
 		$connectionInfo["PWD"]=$argPassword;
-		
+
 		foreach ($this->connectionParameters as $parameter=>$value)
-		    $connectionInfo[$parameter] = $value;
-		
+			$connectionInfo[$parameter] = $value;
+
 		if ($this->debug) ADOConnection::outp("<hr>connecting... hostname: $argHostname params: ".var_export($connectionInfo,true));
 		//if ($this->debug) ADOConnection::outp("<hr>_connectionID before: ".serialize($this->_connectionID));
 		if(!($this->_connectionID = sqlsrv_connect($argHostname,$connectionInfo))) {
@@ -470,8 +478,12 @@ class ADODB_mssqlnative extends ADOConnection {
 	// returns true or false
 	protected function _close()
 	{
-		if ($this->transCnt) $this->RollbackTrans();
-		$rez = @sqlsrv_close($this->_connectionID);
+		if ($this->transCnt) {
+			$this->RollbackTrans();
+		}
+		if($this->_connectionID) {
+			$rez = sqlsrv_close($this->_connectionID);
+		}
 		$this->_connectionID = false;
 		return $rez;
 	}
@@ -716,7 +728,7 @@ class ADODB_mssqlnative extends ADOConnection {
 }
 
 /*--------------------------------------------------------------------------------------
-	 Class Name: Recordset
+	Class Name: Recordset
 --------------------------------------------------------------------------------------*/
 
 class ADORecordset_mssqlnative extends ADORecordSet {
@@ -952,8 +964,11 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 		return $this->fields;
 	}
 
-	/*	close() only needs to be called if you are worried about using too much memory while your script
-		is running. All associated result memory for the specified result identifier will automatically be freed.	*/
+	/**
+	 * close() only needs to be called if you are worried about using too much
+	 * memory while your script is running. All associated result memory for
+	 * the specified result identifier will automatically be freed.
+	 */
 	protected function _close()
 	{
 		$rez = sqlsrv_free_stmt($this->_queryID);
@@ -980,7 +995,7 @@ class ADORecordSet_array_mssqlnative extends ADORecordSet_array {
 		parent::__construct($id,$mode);
 	}
 
-		// mssql uses a default date like Dec 30 2000 12:00AM
+	// mssql uses a default date like Dec 30 2000 12:00AM
 	static function UnixDate($v)
 	{
 
@@ -1020,8 +1035,8 @@ class ADORecordSet_array_mssqlnative extends ADORecordSet_array {
 		global $ADODB_mssql_mths,$ADODB_mssql_date_order;
 
 		//Dec 30 2000 12:00AM
-		 if ($ADODB_mssql_date_order == 'dmy') {
-			 if (!preg_match( "|^([0-9]{1,2})[-/\. ]+([A-Za-z]{3})[-/\. ]+([0-9]{4}) +([0-9]{1,2}):([0-9]{1,2}) *([apAP]{0,1})|"
+		if ($ADODB_mssql_date_order == 'dmy') {
+			if (!preg_match( "|^([0-9]{1,2})[-/\. ]+([A-Za-z]{3})[-/\. ]+([0-9]{4}) +([0-9]{1,2}):([0-9]{1,2}) *([apAP]{0,1})|"
 			,$v, $rr)) return parent::UnixTimeStamp($v);
 			if ($rr[3] <= TIMESTAMP_FIRST_YEAR) return 0;
 

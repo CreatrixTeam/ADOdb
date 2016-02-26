@@ -158,11 +158,6 @@ if (!defined('ADODB_SYBASE_SQLANYWHERE')){
 
   public  $databaseType = "sqlanywhere";
 
- public function __construct($id,$mode=false)
- {
-  parent::__construct($id,$mode);
- }
-
 
  }; //class
 

@@ -83,10 +83,6 @@ class ADODB_pdo extends ADOConnection {
 	public  $dsnType = '';
 	public  $stmt = false;
 
-	public function __construct()
-	{
-	}
-
 	// returns true or false
 	protected function _connect($argDSN, $argUsername, $argPassword, $argDatabasename, $persist=false)
 	{

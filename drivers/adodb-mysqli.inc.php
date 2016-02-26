@@ -12,7 +12,7 @@
   and non-transactional table types. You can use this as a drop-in replacement for both
   the mysql and mysqlt drivers. As of ADOdb Version 5.20.0, all other native MySQL drivers
   are deprecated
-  
+
   Requires mysql client. Works on Windows and Unix.
 
 21 October 2003: MySQLi extension implementation by Arjen de Rijke (a.de.rijke@xs4all.nl)
@@ -242,6 +242,13 @@ class ADODB_mysqli extends ADOConnection {
 
 	protected function _insertid()
 	{
+		/*
+		* mysqli_insert_id does not return the last_insert_id
+		* if called after execution of a stored procedure
+		* so we execute this instead.
+		*/
+		return ADOConnection::GetOne('SELECT LAST_INSERT_ID()');
+
 		$result = @mysqli_insert_id($this->_connectionID);
 		if ($result == -1) {
 			if ($this->debug) ADOConnection::outp("mysqli_insert_id() failed : "  . $this->ErrorMsg());
@@ -689,7 +696,9 @@ class ADODB_mysqli extends ADOConnection {
 	// returns true or false
 	protected function _close()
 	{
-		@mysqli_close($this->_connectionID);
+		if($this->_connectionID) {
+			mysqli_close($this->_connectionID);
+		}
 		$this->_connectionID = false;
 	}
 

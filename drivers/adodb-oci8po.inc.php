@@ -96,11 +96,6 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 
 	public  $databaseType = 'oci8po';
 
-	public function __construct($queryID,$mode=false)
-	{
-		parent::__construct($queryID,$mode);
-	}
-
 	public function Fields($colname)
 	{
 		if ($this->fetchMode & OCI_ASSOC) return $this->fields[$colname];

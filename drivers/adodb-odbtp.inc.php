@@ -35,10 +35,6 @@ class ADODB_odbtp extends ADOConnection{
 	protected  $_canPrepareSP = false;
 	protected  $_dontPoolDBC = true;
 
-	public function __construct()
-	{
-	}
-
 	public function ServerInfo()
 	{
 		return array('description' => @odbtp_get_attr( ODB_ATTR_DBMSNAME, $this->_connectionID),
@@ -795,48 +791,28 @@ class ADORecordSet_odbtp_mssql extends ADORecordSet_odbtp {
 
 	public  $databaseType = 'odbtp_mssql';
 
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }
 
 class ADORecordSet_odbtp_access extends ADORecordSet_odbtp {
 
 	public  $databaseType = 'odbtp_access';
 
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }
 
 class ADORecordSet_odbtp_vfp extends ADORecordSet_odbtp {
 
 	public  $databaseType = 'odbtp_vfp';
 
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }
 
 class ADORecordSet_odbtp_oci8 extends ADORecordSet_odbtp {
 
 	public  $databaseType = 'odbtp_oci8';
 
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }
 
 class ADORecordSet_odbtp_sybase extends ADORecordSet_odbtp {
 
 	public  $databaseType = 'odbtp_sybase';
 
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }

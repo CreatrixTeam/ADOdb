@@ -33,10 +33,6 @@ class ADODB_sqlite extends ADOConnection {
 	public  $sysTimeStamp = "adodb_date('Y-m-d H:i:s')";
 	public  $fmtTimeStamp = "'Y-m-d H:i:s'";
 
-	public function __construct()
-	{
-	}
-
 	public function ServerInfo()
 	{
 		$arr['version'] = sqlite_libversion();
