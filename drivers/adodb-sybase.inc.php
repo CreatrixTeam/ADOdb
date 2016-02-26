@@ -314,6 +314,10 @@ class ADORecordset_sybase extends ADORecordSet {
 }
 
 class ADORecordSet_array_sybase extends ADORecordSet_array {
+	public function __construct($id=-1)
+	{
+		parent::__construct($id);
+	}
 
 	// sybase/mssql uses a default date like Dec 30 2000 12:00AM
 	static function UnixDate($v)
