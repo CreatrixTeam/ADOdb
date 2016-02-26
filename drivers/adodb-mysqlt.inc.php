@@ -1,7 +1,7 @@
 <?php
 
 /*
-@version   v5.21dev  ??-???-2015
+@version   v5.21.0-dev  ??-???-2015
 @copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
 @copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
   Released under both BSD license and Lesser GPL library license.
@@ -121,11 +121,6 @@ class ADORecordSet_mysqlt extends ADORecordSet_mysql{
 }
 
 class ADORecordSet_ext_mysqlt extends ADORecordSet_mysqlt {
-
-	public function __construct($queryID,$mode=false)
-	{
-		parent::__construct($queryID,$mode);
-	}
 
 	public function MoveNext()
 	{
