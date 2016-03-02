@@ -1,6 +1,6 @@
 <?php
 /*
-@version   v5.21.0-dev  ??-???-2015
+@version   v5.21.0-dev  ??-???-2016
 @copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
 @copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
   Released under both BSD license and Lesser GPL library license.
@@ -104,6 +104,15 @@ class ADODB_mysqli extends ADOConnection {
 		*/
 		foreach($this->optionFlags as $arr) {
 			mysqli_options($this->_connectionID,$arr[0],$arr[1]);
+		}
+		
+		/*
+		* Now merge in the standard connection parameters setting
+		*/
+		foreach ($this->connectionParameters as $options)
+		{
+			foreach($options as $k=>$v)
+				$ok = mysqli_options($this->_connectionID,$k,$v);
 		}
 
 		//http ://php.net/manual/en/mysqli.persistconns.php
@@ -450,17 +459,25 @@ class ADODB_mysqli extends ADOConnection {
 	// "Innox - Juan Carlos Gonzalez" <jgonzalez#innox.com.mx>
 	public function MetaForeignKeys( $table, $owner = FALSE, $upper = FALSE, $associative = FALSE )
 	{
-	 global $ADODB_FETCH_MODE;
+	    
+		global $ADODB_FETCH_MODE;
 
-		if ($ADODB_FETCH_MODE == ADODB_FETCH_ASSOC || $this->fetchMode == ADODB_FETCH_ASSOC) $associative = true;
+		if ($ADODB_FETCH_MODE == ADODB_FETCH_ASSOC 
+		|| $this->fetchMode == ADODB_FETCH_ASSOC) 
+			$associative = true;
 
+		$savem = $ADODB_FETCH_MODE;
+		$this->setFetchMode(ADODB_FETCH_ASSOC);
+		
 		if ( !empty($owner) ) {
 			$table = "$owner.$table";
 		}
+		
 		$a_create_table = $this->getRow(sprintf('SHOW CREATE TABLE %s', $table));
-		if ($associative) {
-			$create_sql = isset($a_create_table["Create Table"]) ? $a_create_table["Create Table"] : $a_create_table["Create View"];
-		} else $create_sql = $a_create_table[1];
+		
+		$this->setFetchMode($savem);
+		
+		$create_sql = isset($a_create_table["Create Table"]) ? $a_create_table["Create Table"] : $a_create_table["Create View"];
 
 		$matches = array();
 
@@ -839,7 +856,13 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		// $o->blob = $o->flags & MYSQLI_BLOB_FLAG; /* not returned by MetaColumns */
 		$o->unsigned = $o->flags & MYSQLI_UNSIGNED_FLAG;
 
-		return $o;
+		/*
+		* Trivial method to cast class to ADOfieldObject
+		*/
+		$a = new ADOFieldObject;
+		foreach (get_object_vars($o) as $key => $name)
+			$a->$key = $name;
+		return $a;
 	}
 
 	public function GetRowAssoc($upper = ADODB_ASSOC_CASE)

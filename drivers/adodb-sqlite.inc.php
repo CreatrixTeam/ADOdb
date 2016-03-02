@@ -1,6 +1,6 @@
 <?php
 /*
-@version   v5.21.0-dev  ??-???-2015
+@version   v5.21.0-dev  ??-???-2016
 @copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
 @copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
   Released under both BSD license and Lesser GPL library license.
@@ -316,6 +316,28 @@ class ADODB_sqlite extends ADOConnection {
 			$ADODB_FETCH_MODE = $save;
 		}
 		return $indexes;
+	}
+	
+	/**
+	* Returns the maximum size of a MetaType C field. Because of the 
+	* database design, sqlite places no limits on the size of data inserted
+	*
+	* @return int
+	*/
+	function charMax()
+	{
+		return ADODB_STRINGMAX_NOLIMIT;
+	}
+
+	/**
+	* Returns the maximum size of a MetaType X field. Because of the 
+	* database design, sqlite places no limits on the size of data inserted
+	*
+	* @return int
+	*/
+	function textMax()
+	{
+		return ADODB_STRINGMAX_NOLIMIT;
 	}
 
 }

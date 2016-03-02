@@ -1,6 +1,6 @@
 <?php
 /*
-@version   v5.21.0-dev  ??-???-2015
+@version   v5.21.0-dev  ??-???-2016
 @copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
 @copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
   Released under both BSD license and Lesser GPL library license.
@@ -127,6 +127,60 @@ class ADODB_sqlite3 extends ADOConnection {
 		$ADODB_FETCH_MODE = $save;
 		return $arr;
 	}
+	
+	function metaForeignKeys( $table, $owner = FALSE, $upper = FALSE, $associative = FALSE )
+	{
+	    global $ADODB_FETCH_MODE;
+		if ($ADODB_FETCH_MODE == ADODB_FETCH_ASSOC 
+		|| $this->fetchMode == ADODB_FETCH_ASSOC) 
+		$associative = true;
+		
+	    /*
+		* Read sqlite master to find foreign keys
+		*/
+		$sql = "SELECT sql
+				 FROM (
+				SELECT sql sql, type type, tbl_name tbl_name, name name
+				  FROM sqlite_master
+			          )
+				WHERE type != 'meta'
+				  AND sql NOTNULL
+		          AND LOWER(name) ='" . strtolower($table) . "'";
+
+		$tableSql = $this->getOne($sql);
+
+		$fkeyList = array();
+		$ylist = preg_split("/,+/",$tableSql);
+		foreach ($ylist as $y)
+		{
+			if (!preg_match('/FOREIGN/',$y))
+				continue;
+			
+			$matches = false;
+			preg_match_all('/\((.+?)\)/i',$y,$matches);
+			$tmatches = false;
+			preg_match_all('/REFERENCES (.+?)\(/i',$y,$tmatches);
+			
+			if ($associative)
+			{
+				if (!isset($fkeyList[$tmatches[1][0]]))
+					$fkeyList[$tmatches[1][0]]	= array();
+				$fkeyList[$tmatches[1][0]][$matches[1][0]] = $matches[1][1];
+			}
+			else
+				$fkeyList[$tmatches[1][0]][] = $matches[1][0] . '=' . $matches[1][1];
+		}
+		
+		if ($associative)
+		{
+			if ($upper)
+				$fkeyList = array_change_key_case($fkeyList,CASE_UPPER);
+			else
+				$fkeyList = array_change_key_case($fkeyList,CASE_LOWER);
+		}
+		return $fkeyList;
+	}
+
 
 	protected function _insertid()
 	{
@@ -259,7 +313,7 @@ class ADODB_sqlite3 extends ADOConnection {
 		if ($this->fetchMode !== FALSE) {
 			$savem = $this->SetFetchMode(FALSE);
 		}
-		$SQL=sprintf("SELECT name,sql FROM sqlite_master WHERE type='index' AND tbl_name='%s'", strtolower($table));
+		$SQL=sprintf("SELECT name,sql FROM sqlite_master WHERE type='index' AND LOWER(tbl_name)='%s'", strtolower($table));
 		$rs = $this->Execute($SQL);
 		if (!is_object($rs)) {
 			if (isset($savem)) {
@@ -299,6 +353,28 @@ class ADODB_sqlite3 extends ADOConnection {
 			$ADODB_FETCH_MODE = $save;
 		}
 		return $indexes;
+	}
+	
+	/**
+	* Returns the maximum size of a MetaType C field. Because of the 
+	* database design, sqlite places no limits on the size of data inserted
+	*
+	* @return int
+	*/
+	function charMax()
+	{
+		return ADODB_STRINGMAX_NOLIMIT;
+	}
+
+	/**
+	* Returns the maximum size of a MetaType X field. Because of the 
+	* database design, sqlite places no limits on the size of data inserted
+	*
+	* @return int
+	*/
+	function textMax()
+	{
+		return ADODB_STRINGMAX_NOLIMIT;
 	}
 
 }

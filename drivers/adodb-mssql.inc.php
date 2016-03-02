@@ -1,6 +1,6 @@
 <?php
 /*
-@version   v5.21.0-dev  ??-???-2015
+@version   v5.21.0-dev  ??-???-2016
 @copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
 @copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
   Released under both BSD license and Lesser GPL library license.
@@ -970,8 +970,9 @@ class ADORecordset_mssql extends ADORecordSet {
 	protected function _close()
 	{
 		if($this->_queryID) {
+			$rez = mssql_free_result($this->_queryID);
 			$this->_queryID = false;
-			return mssql_free_result($this->_queryID);
+			return $rez;
 		}
 		return true;
 	}

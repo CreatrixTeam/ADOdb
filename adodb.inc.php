@@ -14,7 +14,7 @@
 /**
 	\mainpage
 
-	@version   v5.21.0-dev  ??-???-2015
+	@version   v5.21.0-dev  ??-???-2016
 	@copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
 	@copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
 
@@ -88,6 +88,14 @@ if (!defined('_ADODB_LAYER')) {
 	// ********************************************************
 
 
+	/**
+	 * Constants for returned values from the charMax and textMax methods.
+	 * If not specifically defined in the driver, methods return the NOTSET value.
+	 */
+	define ('ADODB_STRINGMAX_NOTSET', -1);
+	define ('ADODB_STRINGMAX_NOLIMIT',-2);
+	
+	
 	if (!$ADODB_EXTENSION || ADODB_EXTENSION < 4.0) {
 
 		define('ADODB_BAD_RS','<p>Bad $rs in %s. Connection or SQL invalid. Try using $connection->debug=true;</p>');
@@ -199,7 +207,7 @@ if (!defined('_ADODB_LAYER')) {
 		/**
 		 * ADODB version as a string.
 		 */
-		$ADODB_vers = 'v5.21.0-dev  ??-???-2015';
+		$ADODB_vers = 'v5.21.0-dev  ??-???-2016';
 
 		/**
 		 * Determines whether recordset->RecordCount() is used.
@@ -521,7 +529,7 @@ if (!defined('_ADODB_LAYER')) {
 	final public function setConnectionParameter($parameter,$value)
 	{
 
-		$this->connectionParameters[$parameter] = $value;
+		$this->connectionParameters[] = array($parameter=>$value);
 
 	}
 
@@ -1501,6 +1509,9 @@ if (!defined('_ADODB_LAYER')) {
 	 * @return		the recordset ($rs->databaseType == 'array')
 	 */
 	public function SelectLimit($sql,$nrows=-1,$offset=-1, $inputarr=false,$secs2cache=0) {
+		$nrows = (int)$nrows;
+		$offset = (int)$offset;
+
 		if ($this->hasTop && $nrows > 0) {
 			// suggested by Reinhard Balling. Access requires top after distinct
 			// Informix requires first before distinct - F Riosa
@@ -1512,32 +1523,47 @@ if (!defined('_ADODB_LAYER')) {
 			}
 
 			if ($offset <= 0) {
-					// access includes ties in result
-					if ($isaccess) {
-						$sql = preg_replace(
-						'/(^\s*select\s+(distinctrow|distinct)?)/i','\\1 '.$this->hasTop.' '.((integer)$nrows).' ',$sql);
+				// access includes ties in result
+				if ($isaccess) {
+					$sql = preg_replace(
+						'/(^\s*select\s+(distinctrow|distinct)?)/i',
+						'\\1 '.$this->hasTop.' '.$nrows.' ',
+						$sql
+					);
 
-						if ($secs2cache != 0) {
-							$ret = $this->CacheExecute($secs2cache, $sql,$inputarr);
-						} else {
-							$ret = $this->Execute($sql,$inputarr);
-						}
-						return $ret; // PHP5 fix
-					} else if ($ismssql){
-						$sql = preg_replace(
-						'/(^\s*select\s+(distinctrow|distinct)?)/i','\\1 '.$this->hasTop.' '.((integer)$nrows).' ',$sql);
+					if ($secs2cache != 0) {
+						$ret = $this->CacheExecute($secs2cache, $sql,$inputarr);
 					} else {
-						$sql = preg_replace(
-						'/(^\s*select\s)/i','\\1 '.$this->hasTop.' '.((integer)$nrows).' ',$sql);
+						$ret = $this->Execute($sql,$inputarr);
 					}
+					return $ret; // PHP5 fix
+				} else if ($ismssql){
+					$sql = preg_replace(
+						'/(^\s*select\s+(distinctrow|distinct)?)/i',
+						'\\1 '.$this->hasTop.' '.$nrows.' ',
+						$sql
+					);
+				} else {
+					$sql = preg_replace(
+						'/(^\s*select\s)/i',
+						'\\1 '.$this->hasTop.' '.$nrows.' ',
+						$sql
+					);
+				}
 			} else {
 				$nn = $nrows + $offset;
 				if ($isaccess || $ismssql) {
 					$sql = preg_replace(
-					'/(^\s*select\s+(distinctrow|distinct)?)/i','\\1 '.$this->hasTop.' '.$nn.' ',$sql);
+						'/(^\s*select\s+(distinctrow|distinct)?)/i',
+						'\\1 '.$this->hasTop.' '.$nn.' ',
+						$sql
+					);
 				} else {
 					$sql = preg_replace(
-					'/(^\s*select\s)/i','\\1 '.$this->hasTop.' '.$nn.' ',$sql);
+						'/(^\s*select\s)/i',
+						'\\1 '.$this->hasTop.' '.$nn.' ',
+						$sql
+					);
 				}
 			}
 		}
@@ -1632,10 +1658,30 @@ if (!defined('_ADODB_LAYER')) {
 	}
 
 	public function GetAssoc($sql, $inputarr=false,$force_array = false, $first2cols = false) {
+		
+		global $ADODB_FETCH_MODE;
+		$save  = $ADODB_FETCH_MODE;
+		$savem = $this->SetFetchMode(FALSE);
+		if ($save == ADODB_FETCH_BOTH || !$save || $savem == ADODB_FETCH_BOTH)
+		{
+			/*
+		    * Method does not work in ADODB_FETCH_BOTH mode
+			*/
+			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+			$this->SetFetchMode(ADODB_FETCH_NUM);
+		}
+		
+		
 		$rs = $this->Execute($sql, $inputarr);
 		if (!$rs) {
 			return false;
 		}
+		
+		if ($savem)
+			$this->SetFetchMode($savem);
+		
+		$ADODB_FETCH_MODE = $save;
+		
 		$arr = $rs->GetAssoc($force_array,$first2cols);
 		return $arr;
 	}
@@ -3097,6 +3143,28 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}*/
 		$rs = $this->PageExecute($sql,$nrows,$page,$inputarr,$secs2cache);
 		return $rs;
+	}
+	
+	/**
+	* Returns the maximum size of a MetaType C field. If the method
+	* is not defined in the driver returns ADODB_STRINGMAX_NOTSET
+	*
+	* @return int
+	*/
+	function charMax()
+	{
+		return ADODB_STRINGMAX_NOTSET;
+	}
+
+	/**
+	* Returns the maximum size of a MetaType X field. If the method
+	* is not defined in the driver returns ADODB_STRINGMAX_NOTSET
+	*
+	* @return int
+	*/
+	function textMax()
+	{
+		return ADODB_STRINGMAX_NOTSET;
 	}
 
 	/**
