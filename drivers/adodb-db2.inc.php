@@ -415,7 +415,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 			return 'L';
 
 		default:
-			return 'N';
+			return 'N'; //TODO: Correct usage of ADODB_DEFAULT_METATYPE. See commit https://github.com/ADOdb/ADOdb/commit/6005cb728243288093ea4c32112d350c138adf30
 		}
 	}
 
