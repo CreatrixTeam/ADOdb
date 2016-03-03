@@ -88,7 +88,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 				return 'F';
 
 			 default:
-			 	return 'N';
+			 	return ADODB_DEFAULT_METATYPE;
 		}
 	}
 
@@ -475,12 +475,30 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 		return $sql;
 	}
 
-	protected function _GetSize($ftype, $ty, $fsize, $fprec)
+	protected function _GetSize($ftype, $ty, $fsize, $fprec, $options=false)
 	{
 		if (strlen($fsize) && $ty != 'X' && $ty != 'B' && $ty  != 'I' && strpos($ftype,'(') === false) {
 			$ftype .= "(".$fsize;
 			if (strlen($fprec)) $ftype .= ",".$fprec;
 			$ftype .= ')';
+		}
+		
+		/*
+		* Handle additional options
+		*/
+		if (is_array($options))
+		{
+			foreach($options as $type=>$value)
+			{
+				switch ($type)
+				{
+					case 'ENUM':
+					$ftype .= '(' . $value . ')';
+					break;
+					
+					default:
+				}
+			}
 		}
 		return $ftype;
 	}

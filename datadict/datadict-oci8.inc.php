@@ -80,7 +80,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 			return 'I';
 
 		default:
-			return 'N';
+			return ADODB_DEFAULT_METATYPE;
 		}
 	}
 

@@ -94,7 +94,7 @@ class  ADORecordSet_odbc_vfp extends ADORecordSet_odbc {
 
 		case 'I': return 'I';
 
-		default: return 'N';
+		default: return ADODB_DEFAULT_METATYPE;
 		}
 	}
 }

@@ -333,7 +333,7 @@ class ADODB_DataDict {
 		if (!$this->connection->IsConnected()) {
 			$t = strtoupper($t);
 			if (isset($typeMap[$t])) return $typeMap[$t];
-			return 'N';
+			return ADODB_DEFAULT_METATYPE;
 		}
 		return $this->connection->MetaType($t,$len,$fieldobj);
 	}
@@ -693,12 +693,17 @@ class ADODB_DataDict {
 			$funsigned = false;
 			$findex = '';
 			$funiqueindex = false;
+			$fOptions	  = array();
 
 			//-----------------
 			// Parse attributes
 			foreach($fld as $attr => $v) {
-				if ($attr == 2 && is_numeric($v)) $attr = 'SIZE';
-				else if (is_numeric($attr) && $attr > 1 && !is_numeric($v)) $attr = strtoupper($v);
+				if ($attr == 2 && is_numeric($v)) 
+					$attr = 'SIZE';
+				elseif ($attr == 2 && strtoupper($ftype) == 'ENUM') 
+					$attr = 'ENUM';
+				else if (is_numeric($attr) && $attr > 1 && !is_numeric($v)) 
+					$attr = strtoupper($v);
 
 				switch($attr) {
 				case '0':
@@ -730,6 +735,8 @@ class ADODB_DataDict {
 				// let INDEX keyword create a 'very standard' index on column
 				case 'INDEX': $findex = $v; break;
 				case 'UNIQUE': $funiqueindex = true; break;
+				case 'ENUM':
+					$fOptions['ENUM'] = $v; break;
 				} //switch
 			} // foreach $fld
 
@@ -750,7 +757,7 @@ class ADODB_DataDict {
 				$ftype = strtoupper($ftype);
 			}
 
-			$ftype = $this->_GetSize($ftype, $ty, $fsize, $fprec);
+			$ftype = $this->_GetSize($ftype, $ty, $fsize, $fprec, $fOptions);
 
 			if ($ty == 'X' || $ty == 'X2' || $ty == 'B') $fnotnull = false; // some blob types do not accept nulls
 
@@ -839,13 +846,32 @@ class ADODB_DataDict {
 			$ftype is the actual type
 			$ty is the type defined originally in the DDL
 	*/
-	protected function _GetSize($ftype, $ty, $fsize, $fprec)
+	protected function _GetSize($ftype, $ty, $fsize, $fprec, $options=false)
 	{
 		if (strlen($fsize) && $ty != 'X' && $ty != 'B' && strpos($ftype,'(') === false) {
 			$ftype .= "(".$fsize;
 			if (strlen($fprec)) $ftype .= ",".$fprec;
 			$ftype .= ')';
 		}
+		
+		/*
+		* Handle additional options
+		*/
+		if (is_array($options))
+		{
+			foreach($options as $type=>$value)
+			{
+				switch ($type)
+				{
+					case 'ENUM':
+					$ftype .= '(' . $value . ')';
+					break;
+					
+					default:
+				}
+			}
+		}
+		
 		return $ftype;
 	}
 
