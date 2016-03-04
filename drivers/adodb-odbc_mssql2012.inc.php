@@ -17,12 +17,14 @@ include_once(ADODB_DIR."/drivers/adodb-odbc_mssql.inc.php");
 
 class  ADODB_odbc_mssql2012 extends ADODB_odbc_mssql
 {
+	public $databaseType = 'odbc_mssql2012';
 	/*
 	* Makes behavior similar to prior versions of SQL Server
 	*/
-	var $connectStmt = 'SET CONCAT_NULL_YIELDS_NULL ON';
+	public $connectStmt = 'SET CONCAT_NULL_YIELDS_NULL ON';
 }
 
 class  ADORecordSet_odbc_mssql2012 extends ADORecordSet_odbc_mssql
 {
+	public $databaseType = 'odbc_mssql2012';
 }

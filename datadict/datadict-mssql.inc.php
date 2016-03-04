@@ -60,7 +60,8 @@ class ADODB2_mssql extends ADODB_DataDict {
 	{
 		if($this->dataProvider === "mssqlnative")
 			{$this->dropIndex = 'DROP INDEX %1$s ON %2$s';}
-		if($this->databaseType === "odbc_mssql")
+		if(($this->databaseType === "odbc_mssql") ||
+				($this->databaseType === "odbc_mssql2012"))
 		{
 			$this->sql_sysDate = 'GetDate()';			
 			$pADOConnection->sysDate = $this->sql_sysDate;
@@ -479,7 +480,8 @@ CREATE TABLE
 	{
 		$vVersion = @intval($this->_serverInfoArray['version']);
 
-		if($this->databaseType === "odbc_mssql")
+		if(($this->databaseType === "odbc_mssql") ||
+				($this->databaseType === "odbc_mssql2012"))
 		{
 			$tStartID = $pStartID - 1;
 
@@ -521,6 +523,7 @@ CREATE TABLE
 		$vVersion = @intval($this->_serverInfoArray['version']);
 		
 		if(($vVersion < 11) || ($this->databaseType === "odbc_mssql") ||
+				($this->databaseType === "odbc_mssql2012") ||
 				($this->databaseType === "ado_mssql") ||
 				($this->databaseType === "mssql"))
 			{return array(sprintf("drop table %s", $pParsedSequenceName['name']));}
@@ -533,6 +536,7 @@ CREATE TABLE
 		$vVersion = @intval($this->_serverInfoArray['version']);
 
 		if(($vVersion < 11) || ($this->databaseType === "odbc_mssql") ||
+				($this->databaseType === "odbc_mssql2012") ||
 				($this->databaseType === "ado_mssql") ||
 				($this->databaseType === "mssql"))
 			{return array("select id from $pParsedSequenceName[name]");}
@@ -542,7 +546,8 @@ CREATE TABLE
 		
 	protected function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
 	{
-		if($this->databaseType === "odbc_mssql")
+		if(($this->databaseType === "odbc_mssql") ||
+				($this->databaseType === "odbc_mssql2012"))
 		{
 			$vNumber = (($pADORecordSet && !$pADORecordSet->EOF) ? reset($pADORecordSet->fields) :
 				0);

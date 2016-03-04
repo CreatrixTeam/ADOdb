@@ -5067,6 +5067,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 					if($tTemp === "oracle")
 						{return "oci8";}
+					elseif($tTemp === "mssql2012")
+						{return "mssql";}
 					return $tTemp;
 				}
 			case 'ado'  :
