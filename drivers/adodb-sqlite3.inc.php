@@ -78,73 +78,6 @@ class ADODB_sqlite3 extends ADOConnection {
 		return !empty($ret);
 	}
     
-	function metaType($t,$len=-1,$fieldobj=false)
-	{
-		
-		if (is_object($t))
-		{
-			$fieldobj = $t;
-			$t = $fieldobj->type;
-			$len = $fieldobj->max_length;
-		}
-		
-		$t = strtoupper($t);
-		
-		/*
-		* We are using the Sqlite affinity method here
-		* @link https://www.sqlite.org/datatype3.html
-		*/
-		$affinity = array( 
-		'INT'=>'INTEGER',
-		'INTEGER'=>'INTEGER',
-		'TINYINT'=>'INTEGER',
-		'SMALLINT'=>'INTEGER',
-		'MEDIUMINT'=>'INTEGER',
-		'BIGINT'=>'INTEGER',
-		'UNSIGNED BIG INT'=>'INTEGER',
-		'INT2'=>'INTEGER',
-		'INT8'=>'INTEGER',
-
-		'CHARACTER'=>'TEXT',
-		'VARCHAR'=>'TEXT',
-		'VARYING CHARACTER'=>'TEXT',
-		'NCHAR'=>'TEXT',
-		'NATIVE CHARACTER'=>'TEXT',
-		'NVARCHAR'=>'TEXT',
-		'TEXT'=>'TEXT',
-		'CLOB'=>'TEXT',
-
-		'BLOB'=>'BLOB',
-
-		'REAL'=>'REAL',
-		'DOUBLE'=>'REAL',
-		'DOUBLE PRECISION'=>'REAL',
-		'FLOAT'=>'REAL',
-
-		'NUMERIC'=>'NUMERIC',
-		'DECIMAL'=>'NUMERIC',
-		'BOOLEAN'=>'NUMERIC',
-		'DATE'=>'NUMERIC',
-		'DATETIME'=>'NUMERIC'
-		);
-		
-		if (!isset($affinity[$t]))
-			return ADODB_DEFAULT_METATYPE;
-		
-		$subt = $affinity[$t];
-		/*
-		* Now that we have subclassed the provided data down
-		* the sqlite 'affinity', we convert to ADOdb metatype
-		*/
-		
-		$subclass = array('INTEGER'=>'I',
-						  'TEXT'=>'X',
-						  'BLOB'=>'B',
-						  'REAL'=>'N',
-						  'NUMERIC'=>'N');
-		
-		return $subclass[$subt];
-	}
 	// mark newnham
 	protected function _MetaColumns($pParsedTableName)
 	{
@@ -500,6 +433,74 @@ class ADORecordset_sqlite3 extends ADORecordSet {
 		$fld->type = 'VARCHAR';
 		$fld->max_length = -1;
 		return $fld;
+	}
+
+	function MetaType($t,$len=-1,$fieldobj=false)
+	{
+		
+		if (is_object($t))
+		{
+			$fieldobj = $t;
+			$t = $fieldobj->type;
+			$len = $fieldobj->max_length;
+		}
+		
+		$t = strtoupper($t);
+		
+		/*
+		* We are using the Sqlite affinity method here
+		* @link https://www.sqlite.org/datatype3.html
+		*/
+		$affinity = array( 
+		'INT'=>'INTEGER',
+		'INTEGER'=>'INTEGER',
+		'TINYINT'=>'INTEGER',
+		'SMALLINT'=>'INTEGER',
+		'MEDIUMINT'=>'INTEGER',
+		'BIGINT'=>'INTEGER',
+		'UNSIGNED BIG INT'=>'INTEGER',
+		'INT2'=>'INTEGER',
+		'INT8'=>'INTEGER',
+
+		'CHARACTER'=>'TEXT',
+		'VARCHAR'=>'TEXT',
+		'VARYING CHARACTER'=>'TEXT',
+		'NCHAR'=>'TEXT',
+		'NATIVE CHARACTER'=>'TEXT',
+		'NVARCHAR'=>'TEXT',
+		'TEXT'=>'TEXT',
+		'CLOB'=>'TEXT',
+
+		'BLOB'=>'BLOB',
+
+		'REAL'=>'REAL',
+		'DOUBLE'=>'REAL',
+		'DOUBLE PRECISION'=>'REAL',
+		'FLOAT'=>'REAL',
+
+		'NUMERIC'=>'NUMERIC',
+		'DECIMAL'=>'NUMERIC',
+		'BOOLEAN'=>'NUMERIC',
+		'DATE'=>'NUMERIC',
+		'DATETIME'=>'NUMERIC'
+		);
+		
+		if (!isset($affinity[$t]))
+			return ADODB_DEFAULT_METATYPE;
+		
+		$subt = $affinity[$t];
+		/*
+		* Now that we have subclassed the provided data down
+		* the sqlite 'affinity', we convert to ADOdb metatype
+		*/
+		
+		$subclass = array('INTEGER'=>'I',
+						  'TEXT'=>'X',
+						  'BLOB'=>'B',
+						  'REAL'=>'N',
+						  'NUMERIC'=>'N');
+		
+		return $subclass[$subt];
 	}
 
 	protected function _initrs()
