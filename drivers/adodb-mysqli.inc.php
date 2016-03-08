@@ -42,7 +42,6 @@ class ADODB_mysqli extends ADOConnection {
 			CASE WHEN TABLE_TYPE = 'VIEW' THEN 'V' ELSE 'T' END
 		FROM INFORMATION_SCHEMA.TABLES
 		WHERE TABLE_SCHEMA=";
-<<<<<<< HEAD
 	public  $metaColumnsSQL = "SHOW COLUMNS FROM `%s`";
 	public  $fmtTimeStamp = "'Y-m-d H:i:s'";
 	public  $hasLimit = true;
@@ -62,37 +61,6 @@ class ADODB_mysqli extends ADOConnection {
 	public  $multiQuery = false;
 
 	public function __construct()
-=======
-	var $metaColumnsSQL = "SHOW COLUMNS FROM `%s`";
-	var $fmtTimeStamp = "'Y-m-d H:i:s'";
-	var $hasLimit = true;
-	var $hasMoveFirst = true;
-	var $hasGenID = true;
-	var $isoDates = true; // accepts dates in ISO format
-	var $sysDate = 'CURDATE()';
-	var $sysTimeStamp = 'NOW()';
-	var $hasTransactions = true;
-	var $forceNewConnect = false;
-	var $poorAffectedRows = true;
-	var $clientFlags = 0;
-	var $substr = "substring";
-	var $port = 3306; //Default to 3306 to fix HHVM bug
-	var $socket = ''; //Default to empty string to fix HHVM bug
-	var $_bindInputArray = false;
-	var $nameQuote = '`';		/// string to use to quote identifiers and names
-	var $optionFlags = array(array(MYSQLI_READ_DEFAULT_GROUP,0));
-	var $arrayClass = 'ADORecordSet_array_mysqli';
-	var $multiQuery = false;
-	
-	/*
-	* Tells the insert_id method how to obtain the last value, depending on whether
-	* we are using a stored procedure or not
-	*/
-	private $usePreparedStatement    = false;
-	private $useLastInsertStatement  = false;
-
-	function __construct()
->>>>>>> 0e3d95cc2c38906a39172fcbdf1f4f28c8c955bd
 	{
 		// if(!extension_loaded("mysqli"))
 		//trigger_error("You must have the mysqli extension installed.", E_USER_ERROR);
@@ -134,7 +102,6 @@ class ADODB_mysqli extends ADOConnection {
 		read connection options from the standard mysql configuration file
 		/etc/my.cnf - "Bastien Duclaux" <bduclaux#yahoo.com>
 		*/
-		$this->optionFlags = array();
 		foreach($this->optionFlags as $arr) {
 			mysqli_options($this->_connectionID,$arr[0],$arr[1]);
 		}
@@ -284,26 +251,13 @@ class ADODB_mysqli extends ADOConnection {
 
 	protected function _insertid()
 	{
-		/*
-		* mysqli_insert_id does not return the last_insert_id
-		* if called after execution of a stored procedure
-		* so we execute this instead.
-		*/
-		$result = false;
-		if ($this->useLastInsertStatement)
-			$result = ADOConnection::GetOne('SELECT LAST_INSERT_ID()');
-        else
-		    $result = @mysqli_insert_id($this->_connectionID);
-		
+		$result = @mysqli_insert_id($this->_connectionID);
 		if ($result == -1) {
-			if ($this->debug) 
-				ADOConnection::outp("mysqli_insert_id() failed : "  . $this->ErrorMsg());
+			if ($this->debug) ADOConnection::outp("mysqli_insert_id() failed : "  . $this->ErrorMsg());
 		}
-		/*
-		* reset prepared statement flags
-		*/
-		$this->usePreparedStatement   = false;
-		$this->useLastInsertStatement = false;
+		elseif ($result == 0) {
+			$result = ADOConnection::GetOne('SELECT LAST_INSERT_ID()');
+		}
 		return $result;
 	}
 
@@ -665,14 +619,6 @@ class ADODB_mysqli extends ADOConnection {
 
 	public function Prepare($sql)
 	{
-		/*
-		* Flag the insert_id method to use the correct retrieval method 
-		*/
-		$this->usePreparedStatement = true;
-		
-		/*
-		* Prepared statements are not yet handled correctly
-		*/
 		return $sql;
 		$stmt = $this->_connectionID->prepare($sql);
 		if (!$stmt) {
@@ -707,25 +653,10 @@ class ADODB_mysqli extends ADOConnection {
 				else $a .= 'd';
 			}
 
-			/*
-		     * set prepared statement flags
-		     */
-		    if ($this->usePreparedStatement)
-		        $this->useLastInsertStatement = true;
-			
 			$fnarr = array_merge( array($stmt,$a) , $inputarr);
 			$ret = call_user_func_array('mysqli_stmt_bind_param',$fnarr);
 			$ret = mysqli_stmt_execute($stmt);
 			return $ret;
-		}
-		else
-		{
-			/*
-			* reset prepared statement flags, in case we set them
-			* previously and didn't use them
-			*/
-			$this->usePreparedStatement   = false;
-			$this->useLastInsertStatement = false;
 		}
 
 		/*
@@ -1149,7 +1080,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		case 'FIXED':
 		default:
 			//if (!is_numeric($t)) echo "<p>--- Error in type matching $t -----</p>";
-			return 'N';
+			return ADODB_DEFAULT_METATYPE;
 		}
 	} // function
 
@@ -1255,7 +1186,7 @@ class ADORecordSet_array_mysqli extends ADORecordSet_array {
 		case 'FIXED':
 		default:
 			//if (!is_numeric($t)) echo "<p>--- Error in type matching $t -----</p>";
-			return 'N';
+			return ADODB_DEFAULT_METATYPE;
 		}
 	} // function
 
