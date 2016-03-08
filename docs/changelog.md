@@ -14,6 +14,7 @@ Older changelogs:
 - adodb: fix potential SQL injection vector in SelectLimit(). #190
 - adodb: addColumnSQL datadict function now supports ENUM data types. See #26
 - adodb: introduce user-defined default Metatype. #165
+- adodb: AutoExecute validates empty fields array. #154
 - mssqlnative: Query not returning id. #185
 - mssqlnative: support SQL Server 2014 databases. #186
 - mysql: setConnectionParameter() now allows multiple parameters with the same key value. #187
@@ -21,8 +22,10 @@ Older changelogs:
 - mysqli: Insert_ID() did not return correct value after executing stored procedure. #166
 - mysqli: method failed if $associative set true. #181
 - mysqli: return fields as ADOFieldObject objects. #175
+- odbc/mssql: fix null strings concatenation issue with SQL server 2012. #148
 - sqlite: _createSuffix is now compatible with parent. #178
 - sqlite: metaIndexes could not locate indexes on uppercase table name. #176
+- sqlite: Fix Metataypes mapping. #177
 - sqlite: driver did not support metaForeignKeys. #179
 - session: add 'httponly' flag to cookie. #190
 
