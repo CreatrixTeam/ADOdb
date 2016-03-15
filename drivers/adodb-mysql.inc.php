@@ -590,17 +590,8 @@ class ADORecordSet_mysql extends ADORecordSet{
 			global $ADODB_FETCH_MODE;
 			$mode = $ADODB_FETCH_MODE;
 		}
-		switch ($mode)
-		{
-		case ADODB_FETCH_NUM: $this->fetchMode = MYSQL_NUM; break;
-		case ADODB_FETCH_ASSOC:$this->fetchMode = MYSQL_ASSOC; break;
-		case ADODB_FETCH_DEFAULT:
-		case ADODB_FETCH_BOTH:
-		default:
-			$this->fetchMode = MYSQL_BOTH; break;
-		}
-		$this->adodbFetchMode = $mode;
-		parent::__construct($queryID);
+
+		parent::__construct($queryID, $mode);
 	}
 
 	protected function _initrs()
@@ -631,7 +622,7 @@ class ADORecordSet_mysql extends ADORecordSet{
 
 	public function GetRowAssoc($upper = ADODB_ASSOC_CASE)
 	{
-		if ($this->fetchMode == MYSQL_ASSOC && $upper == ADODB_ASSOC_CASE_LOWER) {
+		if ($this->fetchMode == ADODB_FETCH_ASSOC && $upper == ADODB_ASSOC_CASE_LOWER) {
 			$row = $this->fields;
 		}
 		else {
@@ -644,7 +635,7 @@ class ADORecordSet_mysql extends ADORecordSet{
 	public function Fields($colname)
 	{
 		// added @ by "Michael William Miller" <mille562@pilot.msu.edu>
-		if ($this->fetchMode != MYSQL_NUM) return @$this->fields[$colname];
+		if ($this->fetchMode != ADODB_FETCH_NUM) return @$this->fields[$colname];
 
 		if (!$this->bind) {
 			$this->bind = array();
@@ -666,7 +657,7 @@ class ADORecordSet_mysql extends ADORecordSet{
 	{
 		//return adodb_movenext($this);
 		//if (defined('ADODB_EXTENSION')) return adodb_movenext($this);
-		if (@$this->fields = mysql_fetch_array($this->_queryID,$this->fetchMode)) {
+		if (@$this->fields = mysql_fetch_array($this->_queryID,$this->mysql_getDriverFetchMode())) {
 			$this->_updatefields();
 			$this->_currentRow += 1;
 			return true;
@@ -680,7 +671,7 @@ class ADORecordSet_mysql extends ADORecordSet{
 
 	protected function _fetch()
 	{
-		$this->fields = @mysql_fetch_array($this->_queryID,$this->fetchMode);
+		$this->fields = @mysql_fetch_array($this->_queryID,$this->mysql_getDriverFetchMode());
 		$this->_updatefields();
 		return is_array($this->fields);
 	}
@@ -741,6 +732,21 @@ class ADORecordSet_mysql extends ADORecordSet{
 			else return 'I';
 
 		default: return ADODB_DEFAULT_METATYPE;
+		}
+	}
+
+	protected function mysql_getDriverFetchMode()
+	{
+		switch($this->fetchMode)
+		{
+			case ADODB_FETCH_NUM:
+				return MYSQL_NUM;
+			case ADODB_FETCH_ASSOC:
+				return MYSQL_ASSOC;
+			case ADODB_FETCH_DEFAULT:
+			case ADODB_FETCH_BOTH:
+			default:
+				return MYSQL_BOTH;
 		}
 	}
 

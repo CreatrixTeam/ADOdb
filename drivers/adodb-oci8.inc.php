@@ -1446,22 +1446,8 @@ class ADORecordset_oci8 extends ADORecordSet {
 			global $ADODB_FETCH_MODE;
 			$mode = $ADODB_FETCH_MODE;
 		}
-		switch ($mode) {
-			case ADODB_FETCH_ASSOC:
-				$this->fetchMode = OCI_ASSOC;
-				break;
-			case ADODB_FETCH_DEFAULT:
-			case ADODB_FETCH_BOTH:
-				$this->fetchMode = OCI_NUM + OCI_ASSOC;
-				break;
-			case ADODB_FETCH_NUM:
-			default:
-				$this->fetchMode = OCI_NUM;
-				break;
-		}
-		$this->fetchMode += OCI_RETURN_NULLS + OCI_RETURN_LOBS;
-		$this->adodbFetchMode = $mode;
-		$this->_queryID = $queryID;
+
+		parent::__construct($queryID, $mode);
 	}
 
 
@@ -1560,7 +1546,7 @@ class ADORecordset_oci8 extends ADORecordSet {
 
 	public function MoveNext()
 	{
-		if ($this->fields = @oci_fetch_array($this->_queryID,$this->fetchMode)) {
+		if ($this->fields = @oci_fetch_array($this->_queryID,$this->oci8_getDriverFetchAndOthersMode())) {
 			$this->_currentRow += 1;
 			$this->_updatefields();
 			return true;
@@ -1586,7 +1572,7 @@ class ADORecordset_oci8 extends ADORecordSet {
 			}
 		}
 
-		if (!$this->fields = @oci_fetch_array($this->_queryID,$this->fetchMode)) {
+		if (!$this->fields = @oci_fetch_array($this->_queryID,$this->oci8_getDriverFetchAndOthersMode())) {
 			return $arr;
 		}
 		$this->_updatefields();
@@ -1623,7 +1609,7 @@ class ADORecordset_oci8 extends ADORecordSet {
 
 	protected function _fetch()
 	{
-		$this->fields = @oci_fetch_array($this->_queryID,$this->fetchMode);
+		$this->fields = @oci_fetch_array($this->_queryID,$this->oci8_getDriverFetchAndOthersMode());
 		$this->_updatefields();
 
 		return $this->fields;
@@ -1703,6 +1689,29 @@ class ADORecordset_oci8 extends ADORecordSet {
 		default:
 			return ADODB_DEFAULT_METATYPE;
 		}
+	}
+
+	protected function oci8_getDriverFetchAndOthersMode()
+	{
+		$vReturn = NULL;
+
+		switch($this->fetchMode)
+		{
+			case ADODB_FETCH_NUM:
+				$vReturn = OCI_NUM;
+				break;
+			case ADODB_FETCH_ASSOC:
+				$vReturn = OCI_ASSOC;
+				break;
+			case ADODB_FETCH_DEFAULT:
+			case ADODB_FETCH_BOTH:
+			default:
+				$vReturn = OCI_NUM + OCI_ASSOC;
+				break;
+		}
+		$vReturn += OCI_RETURN_NULLS + OCI_RETURN_LOBS;
+
+		return $vReturn;
 	}
 }
 

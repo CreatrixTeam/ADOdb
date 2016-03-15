@@ -70,7 +70,7 @@ $ADODB_INCLUDED_CSV = 1;
 			$flds[] = $o;
 		}
 
-		$savefetch = isset($rs->adodbFetchMode) ? $rs->adodbFetchMode : $rs->fetchMode;
+		$savefetch = $rs->fetchMode;
 		$class = $rs->connection->arrayClass;
 		$rs2 = new $class();
 		$rs2->timeCreated = $rs->timeCreated; # memcache fix

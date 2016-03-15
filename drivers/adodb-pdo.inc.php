@@ -510,18 +510,8 @@ class ADORecordSet_pdo extends ADORecordSet {
 			global $ADODB_FETCH_MODE;
 			$mode = $ADODB_FETCH_MODE;
 		}
-		$this->adodbFetchMode = $mode;
-		switch($mode) {
-		case ADODB_FETCH_NUM: $mode = PDO::FETCH_NUM; break;
-		case ADODB_FETCH_ASSOC:  $mode = PDO::FETCH_ASSOC; break;
 
-		case ADODB_FETCH_BOTH:
-		default: $mode = PDO::FETCH_BOTH; break;
-		}
-		$this->fetchMode = $mode;
-
-		$this->_queryID = $id;
-		parent::__construct($id);
+		parent::__construct($id, $mode);
 	}
 
 
@@ -607,7 +597,7 @@ class ADORecordSet_pdo extends ADORecordSet {
 			return false;
 		}
 
-		$this->fields = $this->_queryID->fetch($this->fetchMode);
+		$this->fields = $this->_queryID->fetch($this->pdo_getDriverFetchMode());
 		return !empty($this->fields);
 	}
 
@@ -618,7 +608,7 @@ class ADORecordSet_pdo extends ADORecordSet {
 
 	public function Fields($colname)
 	{
-		if ($this->adodbFetchMode != ADODB_FETCH_NUM) {
+		if ($this->fetchMode != ADODB_FETCH_NUM) {
 			return @$this->fields[$colname];
 		}
 
@@ -630,6 +620,21 @@ class ADORecordSet_pdo extends ADORecordSet {
 			}
 		}
 		return $this->fields[$this->bind[strtoupper($colname)]];
+	}
+
+	protected function pdo_getDriverFetchMode()
+	{
+		switch($this->fetchMode)
+		{
+			case ADODB_FETCH_NUM:
+				return PDO::FETCH_NUM;
+			case ADODB_FETCH_ASSOC:
+				return PDO::FETCH_ASSOC;
+			case ADODB_FETCH_DEFAULT:
+			case ADODB_FETCH_BOTH:
+			default:
+				return PDO::FETCH_BOTH;
+		}
 	}
 
 }

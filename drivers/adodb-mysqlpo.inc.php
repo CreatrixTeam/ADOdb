@@ -71,30 +71,9 @@ class ADODB_mysqlt extends ADODB_mysql {
 class ADORecordSet_mysqlt extends ADORecordSet_mysql{
 	public  $databaseType = "mysqlt";
 
-	public function __construct($queryID,$mode=false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-
-		switch ($mode)
-		{
-		case ADODB_FETCH_NUM: $this->fetchMode = MYSQL_NUM; break;
-		case ADODB_FETCH_ASSOC:$this->fetchMode = MYSQL_ASSOC; break;
-
-		case ADODB_FETCH_DEFAULT:
-		case ADODB_FETCH_BOTH:
-		default: $this->fetchMode = MYSQL_BOTH; break;
-		}
-
-		$this->adodbFetchMode = $mode;
-		$this->ADORecordSet($queryID);
-	}
-
 	public function MoveNext()
 	{
-		if (@$this->fields = mysql_fetch_array($this->_queryID,$this->fetchMode)) {
+		if (@$this->fields = mysql_fetch_array($this->_queryID,$this->mysql_getDriverFetchMode())) {
 			$this->_currentRow += 1;
 			return true;
 		}

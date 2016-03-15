@@ -1652,7 +1652,7 @@ if (!defined('_ADODB_LAYER')) {
 		$rs2->sql = $rs->sql;
 		$rs2->dataProvider = $this->dataProvider;
 		$rs2->InitArrayFields($arr,$flds);
-		$rs2->fetchMode = isset($rs->adodbFetchMode) ? $rs->adodbFetchMode : $rs->fetchMode;
+		$rs2->fetchMode = $rs->fetchMode;
 		return $rs2;
 	}
 
@@ -3440,8 +3440,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @param queryID	this is the queryID returned by ADOConnection->_query()
 	 *
 	 */
-	public function __construct($queryID) {
+	public function __construct($queryID, $mode=false) {
 		$this->_queryID = $queryID;
+		$this->fetchMode = $mode;
 	}
 
 	function __destruct() {
@@ -4703,7 +4704,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 		/* Use associative array to get fields array */
 		public function Fields($colname) {
-			$mode = isset($this->adodbFetchMode) ? $this->adodbFetchMode : $this->fetchMode;
+			$mode = $this->fetchMode;
 
 			if ($mode & ADODB_FETCH_ASSOC) {
 				if (!isset($this->fields[$colname]) && !is_null($this->fields[$colname])) {

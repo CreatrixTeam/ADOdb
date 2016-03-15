@@ -786,21 +786,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 			$mode = $ADODB_FETCH_MODE;
 		}
 
-		switch ($mode) {
-			case ADODB_FETCH_NUM:
-				$this->fetchMode = MYSQLI_NUM;
-				break;
-			case ADODB_FETCH_ASSOC:
-				$this->fetchMode = MYSQLI_ASSOC;
-				break;
-			case ADODB_FETCH_DEFAULT:
-			case ADODB_FETCH_BOTH:
-			default:
-				$this->fetchMode = MYSQLI_BOTH;
-				break;
-		}
-		$this->adodbFetchMode = $mode;
-		parent::__construct($queryID);
+		parent::__construct($queryID, $mode);
 	}
 
 	protected function _initrs()
@@ -863,7 +849,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 
 	public function GetRowAssoc($upper = ADODB_ASSOC_CASE)
 	{
-		if ($this->fetchMode == MYSQLI_ASSOC && $upper == ADODB_ASSOC_CASE_LOWER) {
+		if ($this->fetchMode == ADODB_FETCH_ASSOC && $upper == ADODB_ASSOC_CASE_LOWER) {
 			return $this->fields;
 		}
 		$row = ADORecordSet::GetRowAssoc($upper);
@@ -873,7 +859,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 	/* Use associative array to get fields array */
 	public function Fields($colname)
 	{
-		if ($this->fetchMode != MYSQLI_NUM) {
+		if ($this->fetchMode != ADODB_FETCH_NUM) {
 			return @$this->fields[$colname];
 		}
 
@@ -932,7 +918,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 	{
 		if ($this->EOF) return false;
 		$this->_currentRow++;
-		$this->fields = @mysqli_fetch_array($this->_queryID,$this->fetchMode);
+		$this->fields = @mysqli_fetch_array($this->_queryID,$this->mysqli_getDriverFetchMode());
 
 		if (is_array($this->fields)) {
 			$this->_updatefields();
@@ -944,7 +930,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 
 	protected function _fetch()
 	{
-		$this->fields = mysqli_fetch_array($this->_queryID,$this->fetchMode);
+		$this->fields = mysqli_fetch_array($this->_queryID,$this->mysqli_getDriverFetchMode());
 		$this->_updatefields();
 		return is_array($this->fields);
 	}
@@ -1083,6 +1069,21 @@ class ADORecordSet_mysqli extends ADORecordSet{
 			return ADODB_DEFAULT_METATYPE;
 		}
 	} // function
+	
+	protected function mysqli_getDriverFetchMode()
+	{
+		switch($this->fetchMode)
+		{
+			case ADODB_FETCH_NUM:
+				return MYSQLI_NUM;
+			case ADODB_FETCH_ASSOC:
+				return MYSQLI_ASSOC;
+			case ADODB_FETCH_DEFAULT:
+			case ADODB_FETCH_BOTH:
+			default:
+				return MYSQLI_BOTH;
+		}
+	}
 
 
 } // rs class

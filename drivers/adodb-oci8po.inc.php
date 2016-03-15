@@ -98,7 +98,7 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 
 	public function Fields($colname)
 	{
-		if ($this->fetchMode & OCI_ASSOC) return $this->fields[$colname];
+		if ($this->fetchMode == ADODB_FETCH_ASSOC) return $this->fields[$colname];
 
 		if (!$this->bind) {
 			$this->bind = array();
@@ -133,7 +133,7 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 	// 10% speedup to move MoveNext to child class
 	public function MoveNext()
 	{
-		if(@OCIfetchinto($this->_queryID,$this->fields,$this->fetchMode)) {
+		if(@OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode())) {
 		global $ADODB_ANSI_PADDING_OFF;
 			$this->_currentRow++;
 			$this->_updatefields();
@@ -164,7 +164,7 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 				$arr = array();
 				return $arr;
 			}
-		if (!@OCIfetchinto($this->_queryID,$this->fields,$this->fetchMode)) {
+		if (!@OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode())) {
 			$arr = array();
 			return $arr;
 		}
@@ -183,7 +183,7 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 	{
 		global $ADODB_ANSI_PADDING_OFF;
 
-		$ret = @OCIfetchinto($this->_queryID,$this->fields,$this->fetchMode);
+		$ret = @OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode());
 		if ($ret) {
 			$this->_updatefields();
 

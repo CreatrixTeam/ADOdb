@@ -808,24 +808,14 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 			global $ADODB_FETCH_MODE;
 			$mode = $ADODB_FETCH_MODE;
 		}
-		switch ($mode)
-		{
-		case ADODB_FETCH_NUM: $this->fetchMode = PGSQL_NUM; break;
-		case ADODB_FETCH_ASSOC:$this->fetchMode = PGSQL_ASSOC; break;
-
-		case ADODB_FETCH_DEFAULT:
-		case ADODB_FETCH_BOTH:
-		default: $this->fetchMode = PGSQL_BOTH; break;
-		}
-		$this->adodbFetchMode = $mode;
 
 		// Parent's constructor
-		parent::__construct($queryID);
+		parent::__construct($queryID, $mode);
 	}
 
 	public function GetRowAssoc($upper = ADODB_ASSOC_CASE)
 	{
-		if ($this->fetchMode == PGSQL_ASSOC && $upper == ADODB_ASSOC_CASE_LOWER) {
+		if ($this->fetchMode == ADODB_FETCH_ASSOC && $upper == ADODB_ASSOC_CASE_LOWER) {
 			return $this->fields;
 		}
 		$row = ADORecordSet::GetRowAssoc($upper);
@@ -853,7 +843,7 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 		/* Use associative array to get fields array */
 	public function Fields($colname)
 	{
-		if ($this->fetchMode != PGSQL_NUM) return @$this->fields[$colname];
+		if ($this->fetchMode != ADODB_FETCH_NUM) return @$this->fields[$colname];
 
 		if (!$this->bind) {
 			$this->bind = array();
@@ -890,12 +880,17 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 
 	protected function _fixblobs()
 	{
-		if ($this->fetchMode == PGSQL_NUM || $this->fetchMode == PGSQL_BOTH) {
+		if ($this->fetchMode == ADODB_FETCH_NUM || 
+				$this->fetchMode == ADODB_FETCH_BOTH ||
+				$this->fetchMode == ADODB_FETCH_DEFAULT)
+		{
 			foreach($this->_blobArr as $k => $v) {
 				$this->fields[$k] = ADORecordSet_postgres64::_decode($this->fields[$k]);
 			}
 		}
-		if ($this->fetchMode == PGSQL_ASSOC || $this->fetchMode == PGSQL_BOTH) {
+		if ($this->fetchMode == ADODB_FETCH_ASSOC || 
+				$this->fetchMode == ADODB_FETCH_BOTH ||
+				$this->fetchMode == ADODB_FETCH_DEFAULT) {
 			foreach($this->_blobArr as $k => $v) {
 				$this->fields[$v] = ADORecordSet_postgres64::_decode($this->fields[$v]);
 			}
@@ -908,7 +903,7 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 		if (!$this->EOF) {
 			$this->_currentRow++;
 			if ($this->_numOfRows < 0 || $this->_numOfRows > $this->_currentRow) {
-				$this->fields = @pg_fetch_array($this->_queryID,$this->_currentRow,$this->fetchMode);
+				$this->fields = @pg_fetch_array($this->_queryID,$this->_currentRow,$this->postgres64_getDriverFetchMode());
 				if (is_array($this->fields) && $this->fields) {
 					if (isset($this->_blobArr)) $this->_fixblobs();
 					return true;
@@ -926,7 +921,7 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 		if ($this->_currentRow >= $this->_numOfRows && $this->_numOfRows >= 0)
 			return false;
 
-		$this->fields = @pg_fetch_array($this->_queryID,$this->_currentRow,$this->fetchMode);
+		$this->fields = @pg_fetch_array($this->_queryID,$this->_currentRow,$this->postgres64_getDriverFetchMode());
 
 		if ($this->fields && isset($this->_blobArr)) $this->_fixblobs();
 
@@ -999,6 +994,21 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 				default:
 					return ADODB_DEFAULT_METATYPE;
 			}
+	}
+
+	protected function postgres64_getDriverFetchMode()
+	{
+		switch($this->fetchMode)
+		{
+			case ADODB_FETCH_NUM:
+				return PGSQL_NUM;
+			case ADODB_FETCH_ASSOC:
+				return PGSQL_ASSOC;
+			case ADODB_FETCH_DEFAULT:
+			case ADODB_FETCH_BOTH:
+			default:
+				return PGSQL_BOTH;
+		}
 	}
 
 }

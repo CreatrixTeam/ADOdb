@@ -358,20 +358,9 @@ class ADORecordset_sqlite extends ADORecordSet {
 			global $ADODB_FETCH_MODE;
 			$mode = $ADODB_FETCH_MODE;
 		}
-		switch($mode) {
-			case ADODB_FETCH_NUM:
-				$this->fetchMode = SQLITE_NUM;
-				break;
-			case ADODB_FETCH_ASSOC:
-				$this->fetchMode = SQLITE_ASSOC;
-				break;
-			default:
-				$this->fetchMode = SQLITE_BOTH;
-				break;
-		}
-		$this->adodbFetchMode = $mode;
 
 		$this->_queryID = $queryID;
+		$this->fetchMode = $mode;
 
 		$this->_inited = true;
 		$this->fields = array();
@@ -406,7 +395,7 @@ class ADORecordset_sqlite extends ADORecordSet {
 
 	public function Fields($colname)
 	{
-		if ($this->fetchMode != SQLITE_NUM) {
+		if ($this->fetchMode != ADODB_FETCH_NUM) {
 			return $this->fields[$colname];
 		}
 		if (!$this->bind) {
@@ -427,12 +416,27 @@ class ADORecordset_sqlite extends ADORecordSet {
 
 	protected function _fetch($ignore_fields=false)
 	{
-		$this->fields = @sqlite_fetch_array($this->_queryID,$this->fetchMode);
+		$this->fields = @sqlite_fetch_array($this->_queryID,$this->sqlite_getDriverFetchMode());
 		return !empty($this->fields);
 	}
 
 	protected function _close()
 	{
+	}
+
+	protected function sqlite_getDriverFetchMode()
+	{
+		switch($this->fetchMode)
+		{
+			case ADODB_FETCH_NUM:
+				return SQLITE_NUM;
+			case ADODB_FETCH_ASSOC:
+				return SQLITE_ASSOC;
+			case ADODB_FETCH_DEFAULT:
+			case ADODB_FETCH_BOTH:
+			default:
+				return SQLITE_BOTH;
+		}
 	}
 
 }
