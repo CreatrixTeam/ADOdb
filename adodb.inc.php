@@ -121,7 +121,9 @@ if (!defined('_ADODB_LAYER')) {
 	 *
 	 * Set global variable $ADODB_FETCH_MODE to one of these constants or use
 	 * the SetFetchMode() method to control how recordset fields are returned
-	 * when fetching data.
+	 * when fetching data. $ADODB_FETCH_MODE controls the default fetch mode
+	 * of connection objects, while SetFetchMode() can be used to override
+	 * the fetch mode per object.
 	 *
 	 *   - NUM:     array()
 	 *   - ASSOC:   array('id' => 456, 'name' => 'john')
