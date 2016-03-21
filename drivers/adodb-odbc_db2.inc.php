@@ -194,9 +194,7 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-        if ($this->fetchMode !== FALSE) {
-               $savem = $this->SetFetchMode(FALSE);
-        }
+        $savem = $this->SetFetchMode2(FALSE);
 		$false = false;
 		// get index details
 		$table = strtoupper($table);
@@ -205,9 +203,9 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 			$SQL.= " AND UNIQUERULE='P'";
 		$rs = $this->Execute($SQL);
         if (!is_object($rs)) {
-			if (isset($savem))
-				$this->SetFetchMode($savem);
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
+
             return $false;
         }
 		$indexes = array ();
@@ -220,10 +218,9 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 			$cols = ltrim($row[2],'+');
 			$indexes[$row[0]]['columns'] = explode('+', $cols);
         }
-		if (isset($savem)) {
-            $this->SetFetchMode($savem);
-			$ADODB_FETCH_MODE = $save;
-		}
+		$this->SetFetchMode2($savem);
+		$ADODB_FETCH_MODE = $save;
+
         return $indexes;
 	}
 

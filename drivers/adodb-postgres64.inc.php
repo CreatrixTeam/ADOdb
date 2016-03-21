@@ -396,10 +396,10 @@ class ADODB_postgres64 extends ADOConnection{
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
+		$savem = $this->SetFetchMode2(false);
 
 		$rs = $this->Execute($this->_generateMetaColumnsSQL($table, $schema));
-		if (isset($savem)) $this->SetFetchMode($savem);
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if ($rs === false) {
@@ -412,11 +412,12 @@ class ADODB_postgres64 extends ADOConnection{
 			// not support OUTER JOINS. So here is the clumsy way.
 
 			$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+			$this->SetFetchMode2(false);
 
 			$rskey = $this->Execute(sprintf($this->metaKeySQL,($table)));
 			// fetch all result in once for performance.
 			$keys = $rskey->GetArray();
-			if (isset($savem)) $this->SetFetchMode($savem);
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
 
 			$rskey->Close();
@@ -426,9 +427,10 @@ class ADODB_postgres64 extends ADOConnection{
 		$rsdefa = array();
 		if (!empty($this->metaDefaultsSQL)) {
 			$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+			$this->SetFetchMode2(false);
 			$sql = sprintf($this->metaDefaultsSQL, ($table));
 			$rsdef = $this->Execute($sql);
-			if (isset($savem)) $this->SetFetchMode($savem);
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
 
 			if ($rsdef) {
@@ -541,14 +543,10 @@ class ADODB_postgres64 extends ADOConnection{
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
 
 		$rs = $this->Execute(sprintf($sql,$table,$table,$schema));
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {

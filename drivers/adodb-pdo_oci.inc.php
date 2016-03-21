@@ -73,11 +73,11 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-		if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
+		$savem = $this->SetFetchMode2(false);
 
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
 
-		if (isset($savem)) $this->SetFetchMode($savem);
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 		if (!$rs) {
 			return $false;
@@ -120,9 +120,7 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
 
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
 
 		// get index details
 		$table = strtoupper($table);
@@ -132,10 +130,9 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 
 		$rs = $this->Execute(sprintf("SELECT * FROM ALL_CONSTRAINTS WHERE UPPER(TABLE_NAME)='%s' AND CONSTRAINT_TYPE='P'",$table));
 		if (!is_object($rs)) {
-			if (isset($savem)) {
-				$this->SetFetchMode($savem);
-			}
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
+
 			return false;
 		}
 
@@ -144,10 +141,9 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 		}
 
 		if ($primary==TRUE && $primary_key=='') {
-			if (isset($savem)) {
-				$this->SetFetchMode($savem);
-			}
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
+
 			return false; //There is no primary key
 		}
 
@@ -155,10 +151,9 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 
 
 		if (!is_object($rs)) {
-			if (isset($savem)) {
-				$this->SetFetchMode($savem);
-			}
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
+
 			return false;
 		}
 
@@ -183,10 +178,9 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 			ksort ($indexes[$index]['columns']);
 		}
 
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-			$ADODB_FETCH_MODE = $save;
-		}
+		$this->SetFetchMode2($savem);
+		$ADODB_FETCH_MODE = $save;
+
 		return $indexes;
 	}
 }

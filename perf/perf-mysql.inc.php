@@ -134,11 +134,11 @@ class perf_mysql extends adodb_perf{
 	global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
+		$savem = $this->conn->SetFetchMode2(false);
 
 		$rs = $this->conn->Execute('show status');
 
-		if (isset($savem)) $this->conn->SetFetchMode($savem);
+		$this->conn->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!$rs) return 0;
@@ -163,11 +163,11 @@ class perf_mysql extends adodb_perf{
 	global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
+		$savem = $this->conn->SetFetchMode2(false);
 
 		$rs = $this->conn->Execute('show status');
 
-		if (isset($savem)) $this->conn->SetFetchMode($savem);
+		$this->conn->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!$rs) return 0;
@@ -199,11 +199,11 @@ class perf_mysql extends adodb_perf{
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
+		$savem = $this->conn->SetFetchMode2(false);
 
 		$rs = $this->conn->Execute('show table status');
 
-		if (isset($savem)) $this->conn->SetFetchMode($savem);
+		$this->conn->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!$rs) return '';
@@ -251,11 +251,11 @@ class perf_mysql extends adodb_perf{
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
+		$savem = $this->conn->SetFetchMode2(false);
 
 		$rs = $this->conn->Execute('show engine innodb status');
 
-		if (isset($savem)) $this->conn->SetFetchMode($savem);
+		$this->conn->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!$rs || $rs->EOF) return 0;

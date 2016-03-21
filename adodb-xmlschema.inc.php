@@ -1937,7 +1937,7 @@ class adoSchema {
 	* @return string Generated XML schema
 	*/
 	public function ExtractSchema( $data = FALSE ) {
-		$old_mode = $this->db->SetFetchMode( ADODB_FETCH_NUM );
+		$old_mode = $this->db->SetFetchMode2( ADODB_FETCH_NUM );
 
 		$schema = '<?xml version="1.0"?>' . "\n"
 				. '<schema version="' . $this->schemaVersion . '">' . "\n";
@@ -2027,7 +2027,7 @@ class adoSchema {
 			}
 		}
 
-		$this->db->SetFetchMode( $old_mode );
+		$this->db->SetFetchMode2( $old_mode );
 
 		$schema .= '</schema>';
 		return $schema;

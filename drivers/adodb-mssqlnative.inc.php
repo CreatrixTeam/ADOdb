@@ -162,16 +162,14 @@ class ADODB_mssqlnative extends ADOConnection {
 		static $arr = false;
 		if (is_array($arr))
 			return $arr;
-		if ($this->fetchMode === false) {
-			$savem = $ADODB_FETCH_MODE;
-			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		} elseif ($this->fetchMode >=0 && $this->fetchMode <=2) {
-			$savem = $this->fetchMode;
-		} else
-			$savem = $this->SetFetchMode(ADODB_FETCH_NUM);
+		
+		$save = $ADODB_FETCH_MODE;
+		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$arrServerInfo = sqlsrv_server_info($this->_connectionID);
-		$ADODB_FETCH_MODE = $savem;
+		$ADODB_FETCH_MODE = $save;
+		$this->SetFetchMode2($savem);
 		$arr['description'] = $arrServerInfo['SQLServerName'].' connected to '.$arrServerInfo['CurrentDatabase'];
 		$arr['version'] = $arrServerInfo['SQLServerVersion'];//ADOConnection::_findvers($arr['description']);
 		return $arr;
@@ -511,14 +509,11 @@ class ADODB_mssqlnative extends ADOConnection {
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
 
 		$rs = $this->Execute($sql);
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {
@@ -663,14 +658,14 @@ class ADODB_mssqlnative extends ADOConnection {
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-		if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
+		$savem = $this->SetFetchMode2(false);
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 
 		if ($schema) {
 			$this->SelectDB($dbName);
 		}
 
-		if (isset($savem)) $this->SetFetchMode($savem);
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 		if (!is_object($rs)) {
 			$false = false;
@@ -800,7 +795,7 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 			$mode = $ADODB_FETCH_MODE;
 
 		}
-		$this->fetchMode = $mode;
+
 		return parent::__construct($id,$mode);
 	}
 

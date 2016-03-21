@@ -389,7 +389,7 @@ Committed_AS:   348732 kB
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
+		$savem = $this->conn->SetFetchMode2(false);
 
 		$sqlq = $this->conn->qstr($sql);
 		$arr = $this->conn->GetArray(
@@ -405,7 +405,7 @@ Committed_AS:   348732 kB
 			}
 		}
 
-		if (isset($savem)) $this->conn->SetFetchMode($savem);
+		$this->conn->SetFetchMode2($savem);
 		$ADODB_CACHE_MODE = $save;
 		$this->conn->fnExecute = $saveE;
 		return $s;
@@ -461,7 +461,7 @@ Committed_AS:   348732 kB
 
 			$save = $ADODB_FETCH_MODE;
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-			if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
+			$savem = $this->conn->SetFetchMode2(false);
 			//$this->conn->debug=1;
 			$rs = $this->conn->SelectLimit(
 			"select avg(timer) as avg_timer,$sql1,count(*),max(timer) as max_timer,min(timer) as min_timer
@@ -470,7 +470,7 @@ Committed_AS:   348732 kB
 				and (tracer is null or tracer not like 'ERROR:%')
 				group by sql1
 				order by 1 desc",$numsql);
-			if (isset($savem)) $this->conn->SetFetchMode($savem);
+			$this->conn->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
 			$this->conn->fnExecute = $saveE;
 
@@ -540,7 +540,7 @@ Committed_AS:   348732 kB
 			$sql1 = $this->sql1;
 			$save = $ADODB_FETCH_MODE;
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-			if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
+			$savem = $this->conn->SetFetchMode2(false);
 
 			$rs = $this->conn->SelectLimit(
 			"select sum(timer) as total,$sql1,count(*),max(timer) as max_timer,min(timer) as min_timer
@@ -550,7 +550,7 @@ Committed_AS:   348732 kB
 				group by sql1
 				having count(*)>1
 				order by 1 desc",$numsql);
-			if (isset($savem)) $this->conn->SetFetchMode($savem);
+			$this->conn->SetFetchMode2($savem);
 			$this->conn->fnExecute = $saveE;
 			$ADODB_FETCH_MODE = $save;
 			if (!$rs) return "<p>$this->helpurl. ".$this->conn->ErrorMsg()."</p>";
@@ -618,11 +618,11 @@ Committed_AS:   348732 kB
 			$ret = false;
 			$save = $ADODB_FETCH_MODE;
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-			if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
+			$savem = $this->conn->SetFetchMode2(false);
 
 			$rs = $this->conn->Execute($sql1);
 
-			if (isset($savem)) $this->conn->SetFetchMode($savem);
+			$this->conn->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
 			if ($rs) {
 				while (!$rs->EOF) {

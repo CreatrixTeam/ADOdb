@@ -172,10 +172,10 @@ class ADODB_pdo extends ADOConnection {
 
 	public function SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false,$secs2cache=0)
 	{
-		$save = (($this->fetchMode !== false) ? $this->SetFetchMode(false) : false);
+		$save = $this->SetFetchMode2(false);
 		$ret = $this->SelectLimit($sql,$nrows,$offset,$inputarr,$secs2cache);
 
-		$this->SetFetchMode($save);
+		$this->SetFetchMode2($save);
 
 		return $ret;
 	}

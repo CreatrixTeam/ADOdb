@@ -449,15 +449,11 @@ class ADODB_Active_Record {
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-		if ($db->fetchMode !== false) {
-			$savem = $db->SetFetchMode(false);
-		}
+		$savem = $db->SetFetchMode2(false);
 
 		$cols = $db->MetaColumns($table);
 
-		if (isset($savem)) {
-			$db->SetFetchMode($savem);
-		}
+		$db->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!$cols) {
@@ -812,7 +808,7 @@ class ADODB_Active_Record {
 		}
 		$this->_where = $where;
 
-		$save = $db->SetFetchMode(ADODB_FETCH_NUM);
+		$save = $db->SetFetchMode2(ADODB_FETCH_NUM);
 		$qry = "select * from ".$this->_table;
 		$table =& $this->TableInfo();
 
@@ -850,7 +846,7 @@ class ADODB_Active_Record {
 			if(!$row) {
 				return false;
 			}
-			$db->SetFetchMode($save);
+			$db->SetFetchMode2($save);
 			return $this->Set($row);
 		}
 
@@ -859,7 +855,7 @@ class ADODB_Active_Record {
 		if(!$rows) {
 			return false;
 		}
-		$db->SetFetchMode($save);
+		$db->SetFetchMode2($save);
 		if(count($rows) < 1) {
 			return false;
 		}
@@ -1207,7 +1203,7 @@ function adodb_GetActiveRecordsClass(&$db, $class, $tableObj,$whereOrderBy,$bind
 		if (empty($extra['loading'])) {
 			$extra['loading'] = ADODB_LAZY_AR;
 		}
-		$save = $db->SetFetchMode(ADODB_FETCH_NUM);
+		$save = $db->SetFetchMode2(ADODB_FETCH_NUM);
 		$table = &$tableObj->_table;
 		$tableInfo =& $tableObj->TableInfo();
 		if(($k = reset($tableInfo->keys))) {
@@ -1284,7 +1280,7 @@ function adodb_GetActiveRecordsClass(&$db, $class, $tableObj,$whereOrderBy,$bind
 		} else
 			$rows = $db->GetAll($qry,$bindarr);
 
-		$db->SetFetchMode($save);
+		$db->SetFetchMode2($save);
 
 		$false = false;
 

@@ -1003,7 +1003,7 @@ class ADODB_DataDict {
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-		if ($this->connection->fetchMode !== false) $savem = $this->connection->SetFetchMode(false);
+		$savem = $this->connection->SetFetchMode2(false);
 
 		// check table exists
 		$save_handler = $this->connection->raiseErrorFn;
@@ -1011,7 +1011,7 @@ class ADODB_DataDict {
 		$cols = $this->MetaColumns($tablename);
 		$this->connection->raiseErrorFn = $save_handler;
 
-		if (isset($savem)) $this->connection->SetFetchMode($savem);
+		$this->connection->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if ( empty($cols)) {

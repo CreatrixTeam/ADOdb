@@ -294,11 +294,11 @@ class ADODB_odbtp extends ADOConnection{
 
 		$savem = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== false) $savefm = $this->SetFetchMode(false);
+		$savefm = $this->SetFetchMode2(false);
 
 		$arr = $this->GetArray("||SQLTables||||$ttype");
 
-		if (isset($savefm)) $this->SetFetchMode($savefm);
+		$this->SetFetchMode2($savefm);
 		$ADODB_FETCH_MODE = $savem;
 
 		$arr2 = array();
@@ -321,11 +321,11 @@ class ADODB_odbtp extends ADOConnection{
 
 		$savem = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== false) $savefm = $this->SetFetchMode(false);
+		$savefm = $this->SetFetchMode2(false);
 
 		$rs = $this->Execute( "||SQLColumns||$schema|$table" );
 
-		if (isset($savefm)) $this->SetFetchMode($savefm);
+		$this->SetFetchMode2($savefm);
 		$ADODB_FETCH_MODE = $savem;
 
 		if (!$rs || $rs->EOF) {
@@ -570,14 +570,10 @@ class ADODB_odbtp extends ADOConnection{
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
         $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-        if ($this->fetchMode !== FALSE) {
-        	$savem = $this->SetFetchMode(FALSE);
-        }
+        $savem = $this->SetFetchMode2(FALSE);
 
         $rs = $this->Execute($sql);
-        if (isset($savem)) {
-        	$this->SetFetchMode($savem);
-        }
+        $this->SetFetchMode2($savem);
         $ADODB_FETCH_MODE = $save;
 
         if (!is_object($rs)) {

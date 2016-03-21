@@ -207,9 +207,8 @@ class ADODB_ibase extends ADOConnection {
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-		if ($this->fetchMode !== FALSE) {
-				$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
+
 		$table = strtoupper($table);
 		$sql = "SELECT * FROM RDB\$INDICES WHERE RDB\$RELATION_NAME = '".$table."'";
 		if (!$primary) {
@@ -221,10 +220,9 @@ class ADODB_ibase extends ADOConnection {
 		$rs = $this->Execute($sql);
 		if (!is_object($rs)) {
 			// restore fetchmode
-			if (isset($savem)) {
-				$this->SetFetchMode($savem);
-			}
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
+
 			return $false;
 		}
 
@@ -247,9 +245,7 @@ class ADODB_ibase extends ADOConnection {
 			}
 		}
 		// restore fetchmode
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		return $indexes;
@@ -641,10 +637,9 @@ class ADORecordset_ibase extends ADORecordSet
 
 	public function __construct($id,$mode=false)
 	{
-	global $ADODB_FETCH_MODE;
+		global $ADODB_FETCH_MODE;
 
-			$this->fetchMode = ($mode === false) ? $ADODB_FETCH_MODE : $mode;
-			parent::__construct($id);
+		parent::__construct($id, (($mode === false) ? $ADODB_FETCH_MODE : $mode));
 	}
 
 	/*		Returns: an object containing field information.

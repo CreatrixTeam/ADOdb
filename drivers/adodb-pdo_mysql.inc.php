@@ -108,18 +108,14 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-		if ($this->fetchMode !== false) {
-			$savem = $this->SetFetchMode(false);
-		}
+		$savem = $this->SetFetchMode2(false);
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL, $table));
 
 		if ($schema) {
 			$this->SelectDB($dbName);
 		}
 
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 		if (!is_object($rs)) {
 			$false = false;
@@ -191,17 +187,13 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
 
 		// get index details
 		$rs = $this->Execute(sprintf('SHOW INDEX FROM `%s`',$table));
 
 		// restore fetchmode
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {

@@ -637,9 +637,8 @@ class ADORecordSet_db2 extends ADORecordSet {
 			global $ADODB_FETCH_MODE;
 			$mode = $ADODB_FETCH_MODE;
 		}
-		$this->fetchMode = $mode;
 
-		$this->_queryID = $id;
+		parent::__construct($id, $mode);
 	}
 
 

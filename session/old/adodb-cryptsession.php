@@ -212,9 +212,9 @@ public function adodb_sess_destroy($key)
 	if ($ADODB_SESSION_EXPIRE_NOTIFY) {
 		reset($ADODB_SESSION_EXPIRE_NOTIFY);
 		$fn = next($ADODB_SESSION_EXPIRE_NOTIFY);
-		$savem = $ADODB_SESS_CONN->SetFetchMode(ADODB_FETCH_NUM);
+		$savem = $ADODB_SESS_CONN->SetFetchMode2(ADODB_FETCH_NUM);
 		$rs = $ADODB_SESS_CONN->Execute("SELECT expireref,sesskey FROM $ADODB_SESSION_TBL WHERE sesskey='$key'");
-		$ADODB_SESS_CONN->SetFetchMode($savem);
+		$ADODB_SESS_CONN->SetFetchMode2($savem);
 		if ($rs) {
 			$ADODB_SESS_CONN->BeginTrans();
 			while (!$rs->EOF) {
@@ -240,10 +240,10 @@ public function adodb_sess_gc($maxlifetime) {
 	if ($ADODB_SESSION_EXPIRE_NOTIFY) {
 		reset($ADODB_SESSION_EXPIRE_NOTIFY);
 		$fn = next($ADODB_SESSION_EXPIRE_NOTIFY);
-		$savem = $ADODB_SESS_CONN->SetFetchMode(ADODB_FETCH_NUM);
+		$savem = $ADODB_SESS_CONN->SetFetchMode2(ADODB_FETCH_NUM);
 		$t = time();
 		$rs = $ADODB_SESS_CONN->Execute("SELECT expireref,sesskey FROM $ADODB_SESSION_TBL WHERE expiry < $t");
-		$ADODB_SESS_CONN->SetFetchMode($savem);
+		$ADODB_SESS_CONN->SetFetchMode2($savem);
 		if ($rs) {
 			$ADODB_SESS_CONN->BeginTrans();
 			while (!$rs->EOF) {

@@ -78,15 +78,13 @@ class ADODB_pdo_mssql extends ADODB_pdo {
 
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
+		$savem = $this->SetFetchMode2(FALSE);
+		
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
 
 		$rs = $this->Execute($sql);
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {

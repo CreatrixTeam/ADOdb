@@ -99,9 +99,7 @@ class ADODB2_sqlite extends ADODB_DataDict {
 		$vCurrentTableFields = NULL;
 
 		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-
-		if($this->connection->fetchMode !== false)
-			{$vPreviousFetchMode = $this->connection->SetFetchMode(false);}
+		$vPreviousFetchMode = $this->connection->SetFetchMode2(false);
 
 		// check table exists
 		$vRaiseErrorFn = $this->connection->raiseErrorFn;
@@ -109,8 +107,7 @@ class ADODB2_sqlite extends ADODB_DataDict {
 		$vCurrentTableFields = $this->MetaColumns($pTableName);
 		$this->connection->raiseErrorFn = $vRaiseErrorFn;
 
-		if($vPreviousFetchMode !== -1)
-			{$this->connection->SetFetchMode($vPreviousFetchMode);}
+		$this->connection->SetFetchMode2($vPreviousFetchMode);
 		$ADODB_FETCH_MODE = $vADODB_FETCH_MODE_old;
 
 		if(empty($vCurrentTableFields))

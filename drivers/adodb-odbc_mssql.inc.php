@@ -143,14 +143,14 @@ order by constraint_name, referenced_table_name, keyno";
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-		if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
+		$savem = $this->SetFetchMode2(false);
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 
 		if ($schema) {
 			$this->SelectDB($dbName);
 		}
 
-		if (isset($savem)) $this->SetFetchMode($savem);
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 		if (!is_object($rs)) {
 			$false = false;
@@ -208,14 +208,10 @@ order by constraint_name, referenced_table_name, keyno";
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
         $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-        if ($this->fetchMode !== FALSE) {
-        	$savem = $this->SetFetchMode(FALSE);
-        }
+        $savem = $this->SetFetchMode2(FALSE);
 
         $rs = $this->Execute($sql);
-        if (isset($savem)) {
-        	$this->SetFetchMode($savem);
-        }
+        $this->SetFetchMode2($savem);
         $ADODB_FETCH_MODE = $save;
 
         if (!is_object($rs)) {

@@ -169,14 +169,8 @@ class ADORecordSet_fbsql extends ADORecordSet{
 			global $ADODB_FETCH_MODE;
 			$mode = $ADODB_FETCH_MODE;
 		}
-		switch ($mode) {
-		case ADODB_FETCH_NUM: $this->fetchMode = FBSQL_NUM; break;
-		case ADODB_FETCH_ASSOC: $this->fetchMode = FBSQL_ASSOC; break;
-		case ADODB_FETCH_BOTH:
-		default:
-		$this->fetchMode = FBSQL_BOTH; break;
-		}
-		return parent::__construct($queryID);
+
+		return parent::__construct($queryID, $mode);
 	}
 
 	protected function _initrs()
@@ -210,7 +204,7 @@ class ADORecordSet_fbsql extends ADORecordSet{
 
 	protected function _fetch($ignore_fields=false)
 	{
-		$this->fields = @fbsql_fetch_array($this->_queryID,$this->fetchMode);
+		$this->fields = @fbsql_fetch_array($this->_queryID,$this->fbsql_getDriverFetchMode());
 		return ($this->fields == true);
 	}
 
@@ -259,6 +253,21 @@ class ADORecordSet_fbsql extends ADORecordSet{
 			else return 'I';
 
 		default: return ADODB_DEFAULT_METATYPE;
+		}
+	}
+
+	protected function fbsql_getDriverFetchMode()
+	{
+		switch($this->fetchMode)
+		{
+			case ADODB_FETCH_NUM:
+				return FBSQL_NUM;
+			case ADODB_FETCH_ASSOC:
+				return FBSQL_ASSOC;
+			case ADODB_FETCH_DEFAULT:
+			case ADODB_FETCH_BOTH:
+			default:
+				return FBSQL_BOTH;
 		}
 	}
 

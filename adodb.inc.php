@@ -909,7 +909,7 @@ if (!defined('_ADODB_LAYER')) {
 	* for easy porting :-)
 	*
 	* @param mode	The fetchmode ADODB_FETCH_ASSOC or ADODB_FETCH_NUM
-	* @returns		The previous fetch mode
+	* @returns		The previous effective fetch mode
 	*/
 	public function SetFetchMode($mode) {
 		$old = $this->fetchMode;
@@ -921,7 +921,43 @@ if (!defined('_ADODB_LAYER')) {
 		}
 		return $old;
 	}
+	
+	
+	/**
+	* PEAR DB Compat - do not use internally.
+	*
+	* The fetch modes for NUMERIC and ASSOC for PEAR DB and ADODB are identical
+	* for easy porting :-)
+	*
+	* @param mode	The fetchmode ADODB_FETCH_ASSOC or ADODB_FETCH_NUM
+	* @returns		The previous internal fetchMode  state
+	*/
+	public final function SetFetchMode2($mode) {
+		$old = $this->fetchMode;
+		$this->fetchMode = $mode;
 
+		return $old;
+	}
+
+
+	/**
+	* PEAR DB Compat - do not use internally.
+	*
+	* The fetch modes for NUMERIC and ASSOC for PEAR DB and ADODB are identical
+	* for easy porting :-)
+	*
+	* @returns		The effective fetch mode
+	*/
+	public final function GetFetchMode()
+	{
+		global $ADODB_FETCH_MODE;
+
+		if($this->fetchMode !== false)
+			{return $this->fetchMode;}
+
+		return $ADODB_FETCH_MODE;
+	}
+	
 
 	/**
 	* PEAR DB Compat - do not use internally.
@@ -1670,14 +1706,14 @@ if (!defined('_ADODB_LAYER')) {
 
 		global $ADODB_FETCH_MODE;
 		$save  = $ADODB_FETCH_MODE;
-		$savem = $this->SetFetchMode(FALSE);
+		$savem = $this->SetFetchMode2(FALSE);
 		if ($save == ADODB_FETCH_BOTH || !$save || $savem == ADODB_FETCH_BOTH)
 		{
 			/*
 		    * Method does not work in ADODB_FETCH_BOTH mode
 			*/
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-			$this->SetFetchMode(ADODB_FETCH_NUM);
+			$this->SetFetchMode2(ADODB_FETCH_NUM);
 		}
 
 
@@ -1686,9 +1722,7 @@ if (!defined('_ADODB_LAYER')) {
 			return false;
 		}
 
-		if ($savem)
-			$this->SetFetchMode($savem);
-
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		$arr = $rs->GetAssoc($force_array,$first2cols);
@@ -2044,12 +2078,8 @@ if (!defined('_ADODB_LAYER')) {
 	protected function _gencachename($sql,$createdir) {
 		global $ADODB_CACHE, $ADODB_CACHE_DIR;
 
-		if ($this->fetchMode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		} else {
-			$mode = $this->fetchMode;
-		}
+		$mode = $this->GetFetchMode();
+
 		$m = md5($sql.$this->databaseType.$this->database.$this->user.$mode);
 		if (!$ADODB_CACHE->createdir) {
 			return $m;
@@ -2556,14 +2586,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			$save = $ADODB_FETCH_MODE;
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-			if ($this->fetchMode !== false) {
-				$savem = $this->SetFetchMode(false);
-			}
+			$savem = $this->SetFetchMode2(false);
 
 			$arr = $this->GetCol($this->metaDatabasesSQL);
-			if (isset($savem)) {
-				$this->SetFetchMode($savem);
-			}
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
 
 			return $arr;
@@ -2614,14 +2640,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			$save = $ADODB_FETCH_MODE;
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-			if ($this->fetchMode !== false) {
-				$savem = $this->SetFetchMode(false);
-			}
+			$savem = $this->SetFetchMode2(false);
 
 			$rs = $this->Execute($this->metaTablesSQL);
-			if (isset($savem)) {
-				$this->SetFetchMode($savem);
-			}
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
 
 			if ($rs === false) {
@@ -2694,13 +2716,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 			$save = $ADODB_FETCH_MODE;
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-			if ($this->fetchMode !== false) {
-				$savem = $this->SetFetchMode(false);
-			}
+			$savem = $this->SetFetchMode2(false);
 			$rs = $this->Execute(sprintf($this->metaColumnsSQL,($normalize)?strtoupper($table):$table));
-			if (isset($savem)) {
-				$this->SetFetchMode($savem);
-			}
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
 			if ($rs === false || $rs->EOF) {
 				return false;

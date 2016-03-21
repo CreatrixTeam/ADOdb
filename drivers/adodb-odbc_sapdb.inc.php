@@ -62,14 +62,10 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
 
 		$rs = $this->Execute($sql);
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {
@@ -96,9 +92,8 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$table = $pParsedTableName['table']['name'];
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
+
 		$table = $this->Quote(strtoupper($table));
 
 		$retarr = array();
@@ -131,9 +126,7 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 			}
 			$retarr[$fld->name] = $fld;
 		}
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		return $retarr;

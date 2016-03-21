@@ -296,22 +296,8 @@ class ADORecordSet_ldap extends ADORecordSet{
 			global $ADODB_FETCH_MODE;
 			$mode = $ADODB_FETCH_MODE;
 		}
-		switch ($mode)
-		{
-		case ADODB_FETCH_NUM:
-			$this->fetchMode = LDAP_NUM;
-			break;
-		case ADODB_FETCH_ASSOC:
-			$this->fetchMode = LDAP_ASSOC;
-			break;
-		case ADODB_FETCH_DEFAULT:
-		case ADODB_FETCH_BOTH:
-		default:
-			$this->fetchMode = LDAP_BOTH;
-			break;
-		}
 
-		parent::__construct($queryID);
+		parent::__construct($queryID, $mode);
 	}
 
 	protected function _initrs()
@@ -399,15 +385,15 @@ class ADORecordSet_ldap extends ADORecordSet{
 
 		switch ( $this->fetchMode ) {
 
-			case LDAP_ASSOC:
+			case ADODB_FETCH_ASSOC:
 				$this->fields = $this->GetRowAssoc();
 				break;
 
-			case LDAP_NUM:
+			case ADODB_FETCH_NUM:
 				$this->fields = array_merge($this->GetRowNums(),$this->GetRowAssoc());
 				break;
 
-			case LDAP_BOTH:
+			case ADODB_FETCH_BOTH:
 			default:
 				$this->fields = $this->GetRowNums();
 				break;

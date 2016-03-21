@@ -785,11 +785,11 @@ class ADODB_Session {
 		if ($expire_notify) {
 			reset($expire_notify);
 			$fn = next($expire_notify);
-			$savem = $conn->SetFetchMode(ADODB_FETCH_NUM);
+			$savem = $conn->SetFetchMode2(ADODB_FETCH_NUM);
 			$sql = "SELECT expireref, sesskey FROM $table WHERE $binary sesskey = $qkey";
 			$rs = $conn->Execute($sql);
 			ADODB_Session::_dumprs($rs);
-			$conn->SetFetchMode($savem);
+			$conn->SetFetchMode2($savem);
 			if (!$rs) {
 				return false;
 			}
@@ -832,11 +832,11 @@ class ADODB_Session {
 		if ($expire_notify) {
 			reset($expire_notify);
 			$fn = next($expire_notify);
-			$savem = $conn->SetFetchMode(ADODB_FETCH_NUM);
+			$savem = $conn->SetFetchMode2(ADODB_FETCH_NUM);
 			$sql = "SELECT expireref, sesskey FROM $table WHERE expiry < $time";
 			$rs = $conn->Execute($sql);
 			ADODB_Session::_dumprs($rs);
-			$conn->SetFetchMode($savem);
+			$conn->SetFetchMode2($savem);
 			if ($rs) {
 				$conn->StartTrans();
 				$keys = array();

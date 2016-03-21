@@ -584,13 +584,13 @@ order by
 
 		$save = $ADODB_CACHE_MODE;
 		$ADODB_CACHE_MODE = ADODB_FETCH_NUM;
-		if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
+		$savem = $this->conn->SetFetchMode2(false);
 
 		$savelog = $this->conn->LogSQL(false);
 		$rs = $this->conn->SelectLimit($sql);
 		$this->conn->LogSQL($savelog);
 
-		if (isset($savem)) $this->conn->SetFetchMode($savem);
+		$this->conn->SetFetchMode2($savem);
 		$ADODB_CACHE_MODE = $save;
 		if ($rs) {
 			$s .= "\n<h3>Ixora Suspicious SQL</h3>";
@@ -659,13 +659,13 @@ order by
 		$s .= '<p>';
 		$save = $ADODB_CACHE_MODE;
 		$ADODB_CACHE_MODE = ADODB_FETCH_NUM;
-		if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
+		$savem = $this->conn->SetFetchMode2(false);
 
 		$savelog = $this->conn->LogSQL(false);
 		$rs = $this->conn->Execute($sql);
 		$this->conn->LogSQL($savelog);
 
-		if (isset($savem)) $this->conn->SetFetchMode($savem);
+		$this->conn->SetFetchMode2($savem);
 		$ADODB_CACHE_MODE = $save;
 
 		if ($rs) {

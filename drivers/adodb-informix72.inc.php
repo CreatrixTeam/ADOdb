@@ -154,10 +154,8 @@ class ADODB_informix72 extends ADOConnection {
         $false = false;
         $save = $ADODB_FETCH_MODE;
         $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-        if ($this->fetchMode !== FALSE) {
-               $savem = $this->SetFetchMode(FALSE);
+        $savem = $this->SetFetchMode2(FALSE);
 
-        }
         $procedures = array ();
 
         // get index details
@@ -183,9 +181,7 @@ class ADODB_informix72 extends ADOConnection {
 	    }
 
         // restore fetchmode
-        if (isset($savem)) {
-                $this->SetFetchMode($savem);
-        }
+        $this->SetFetchMode2($savem);
         $ADODB_FETCH_MODE = $save;
 
         return $procedures;
@@ -203,9 +199,9 @@ class ADODB_informix72 extends ADOConnection {
 			
 			$save = $ADODB_FETCH_MODE;
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-			if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
-          		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
-			if (isset($savem)) $this->SetFetchMode($savem);
+			$savem = $this->SetFetchMode2(false);
+          	$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
 			if ($rs === false) return $false;
 			$rspkey = $this->Execute(sprintf($this->metaPrimaryKeySQL,$table)); //Added to get primary key colno items
@@ -403,8 +399,8 @@ class ADORecordset_informix72 extends ADORecordSet {
 			global $ADODB_FETCH_MODE;
 			$mode = $ADODB_FETCH_MODE;
 		}
-		$this->fetchMode = $mode;
-		return parent::__construct($id);
+
+		return parent::__construct($id, $mode);
 	}
 
 

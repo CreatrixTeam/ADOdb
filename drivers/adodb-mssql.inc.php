@@ -102,22 +102,17 @@ class ADODB_mssql extends ADOConnection {
 
 	public function ServerInfo()
 	{
-	global $ADODB_FETCH_MODE;
+		global $ADODB_FETCH_MODE;
+		$save = $ADODB_FETCH_MODE;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
-
-		if ($this->fetchMode === false) {
-			$savem = $ADODB_FETCH_MODE;
-			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		} else
-			$savem = $this->SetFetchMode(ADODB_FETCH_NUM);
+		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
 		$row = $this->GetRow("execute sp_server_info 2");
 
 
-		if ($this->fetchMode === false) {
-			$ADODB_FETCH_MODE = $savem;
-		} else
-			$this->SetFetchMode($savem);
+		$this->SetFetchMode2($savem);
+		$ADODB_FETCH_MODE = $save;
 
 		$arr['description'] = $row[2];
 		$arr['version'] = ADOConnection::_findvers($arr['description']);
@@ -296,14 +291,14 @@ class ADODB_mssql extends ADOConnection {
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-		if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
+		$savem = $this->SetFetchMode2(false);
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 
 		if ($schema) {
 			$this->SelectDB($dbName);
 		}
 
-		if (isset($savem)) $this->SetFetchMode($savem);
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 		if (!is_object($rs)) {
 			$false = false;
@@ -359,14 +354,11 @@ class ADODB_mssql extends ADOConnection {
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
+
 
 		$rs = $this->Execute($sql);
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {
@@ -795,7 +787,7 @@ class ADORecordset_mssql extends ADORecordSet {
 			$mode = $ADODB_FETCH_MODE;
 
 		}
-		$this->fetchMode = $mode;
+
 		return parent::__construct($id,$mode);
 	}
 

@@ -93,9 +93,7 @@ class ADODB_mysql extends ADOConnection {
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
 
 		$procedures = array ();
 
@@ -133,9 +131,7 @@ class ADODB_mysql extends ADOConnection {
 		}
 
 		// restore fetchmode
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		return $procedures;
@@ -182,17 +178,13 @@ class ADODB_mysql extends ADOConnection {
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
 
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
 
 		// get index details
 		$rs = $this->Execute(sprintf('SHOW INDEX FROM `%s`',$table));
 
 		// restore fetchmode
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {
@@ -373,14 +365,14 @@ class ADODB_mysql extends ADOConnection {
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-		if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
+		$savem = $this->SetFetchMode2(false);
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 
 		if ($schema) {
 			$this->SelectDB($dbName);
 		}
 
-		if (isset($savem)) $this->SetFetchMode($savem);
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 		if (!is_object($rs)) {
 			$false = false;
@@ -528,7 +520,7 @@ class ADODB_mysql extends ADOConnection {
 	public function MetaForeignKeys( $table, $owner = FALSE, $upper = FALSE, $associative = FALSE )
 	{
 	 global $ADODB_FETCH_MODE;
-		if ($ADODB_FETCH_MODE == ADODB_FETCH_ASSOC || $this->fetchMode == ADODB_FETCH_ASSOC) $associative = true;
+		if ($ADODB_FETCH_MODE == ADODB_FETCH_ASSOC || $this->GetFetchMode() == ADODB_FETCH_ASSOC) $associative = true;
 
 		if ( !empty($owner) ) {
 			$table = "$owner.$table";

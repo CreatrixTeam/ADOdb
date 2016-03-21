@@ -123,11 +123,13 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	  $tab = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-	  if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
+	  $savem = $this->SetFetchMode2(false);
 	  $rs = $this->Execute("PRAGMA table_info('$tab')");
-	  if (isset($savem)) $this->SetFetchMode($savem);
+
 	  if (!$rs) {
+		$this->SetFetchMode2($savem);
 	    $ADODB_FETCH_MODE = $save;
+
 	    return $false;
 	  }
 	  $arr = array();
@@ -149,6 +151,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	    else $arr[strtoupper($fld->name)] = $fld;
 	  }
 	  $rs->Close();
+	  $this->SetFetchMode2($savem);
 	  $ADODB_FETCH_MODE = $save;
 	  return $arr;
 	}
@@ -158,7 +161,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	{
 	    global $ADODB_FETCH_MODE;
 		if ($ADODB_FETCH_MODE == ADODB_FETCH_ASSOC 
-		|| $this->fetchMode == ADODB_FETCH_ASSOC) 
+		|| $this->GetFetchMode() == ADODB_FETCH_ASSOC) 
 		$associative = true;
 		
 	    /*
@@ -235,16 +238,13 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
 		$SQL=sprintf("SELECT name,sql FROM sqlite_master WHERE type='index' AND LOWER(tbl_name)='%s'", strtolower($table));
 		$rs = $this->Execute($SQL);
 		if (!is_object($rs)) {
-			if (isset($savem)) {
-				$this->SetFetchMode($savem);
-			}
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
+
 			return $false;
 		}
 
@@ -273,10 +273,9 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 			array_pop($cols);
 			$indexes[$row[0]]['columns'] = $cols;
 		}
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-			$ADODB_FETCH_MODE = $save;
-		}
+		$this->SetFetchMode2($savem);
+		$ADODB_FETCH_MODE = $save;
+
 		return $indexes;
 	}
  

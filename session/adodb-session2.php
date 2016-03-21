@@ -812,11 +812,11 @@ class ADODB_Session {
 		if ($expire_notify) {
 			reset($expire_notify);
 			$fn = next($expire_notify);
-			$savem = $conn->SetFetchMode(ADODB_FETCH_NUM);
+			$savem = $conn->SetFetchMode2(ADODB_FETCH_NUM);
 			$sql = "SELECT expireref, sesskey FROM $table WHERE $binary sesskey = $qkey";
 			$rs = $conn->Execute($sql);
 			ADODB_Session::_dumprs($rs);
-			$conn->SetFetchMode($savem);
+			$conn->SetFetchMode2($savem);
 			if (!$rs) {
 				return false;
 			}
@@ -874,11 +874,11 @@ class ADODB_Session {
 			$fn = false;
 		}
 
-		$savem = $conn->SetFetchMode(ADODB_FETCH_NUM);
+		$savem = $conn->SetFetchMode2(ADODB_FETCH_NUM);
 		$sql = "SELECT expireref, sesskey FROM $table WHERE expiry < $time ORDER BY 2"; # add order by to prevent deadlock
 		$rs = $conn->SelectLimit($sql,1000);
 		if ($debug) ADODB_Session::_dumprs($rs);
-		$conn->SetFetchMode($savem);
+		$conn->SetFetchMode2($savem);
 		if ($rs) {
 			$tr = $conn->hasTransactions;
 			if ($tr) $conn->BeginTrans();

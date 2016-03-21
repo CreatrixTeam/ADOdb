@@ -123,11 +123,11 @@ select viewname,'V' from pg_views where viewname like $mask";
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
+		$savem = $this->SetFetchMode2(false);
 
 		if ($schema) $rs = $this->Execute(sprintf($this->metaColumnsSQL1,$table,$table,$schema));
 		else $rs = $this->Execute(sprintf($this->metaColumnsSQL,$table,$table));
-		if (isset($savem)) $this->SetFetchMode($savem);
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if ($rs === false) {
@@ -141,11 +141,12 @@ select viewname,'V' from pg_views where viewname like $mask";
 			// not support OUTER JOINS. So here is the clumsy way.
 
 			$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+			$this->SetFetchMode2(false);
 
 			$rskey = $this->Execute(sprintf($this->metaKeySQL,($table)));
 			// fetch all result in once for performance.
 			$keys = $rskey->GetArray();
-			if (isset($savem)) $this->SetFetchMode($savem);
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
 
 			$rskey->Close();
@@ -155,9 +156,10 @@ select viewname,'V' from pg_views where viewname like $mask";
 		$rsdefa = array();
 		if (!empty($this->metaDefaultsSQL)) {
 			$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+			$this->SetFetchMode2(false);
 			$sql = sprintf($this->metaDefaultsSQL, ($table));
 			$rsdef = $this->Execute($sql);
-			if (isset($savem)) $this->SetFetchMode($savem);
+			$this->SetFetchMode2($savem);
 			$ADODB_FETCH_MODE = $save;
 
 			if ($rsdef) {
@@ -261,14 +263,10 @@ select viewname,'V' from pg_views where viewname like $mask";
 
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== FALSE) {
-			$savem = $this->SetFetchMode(FALSE);
-		}
+		$savem = $this->SetFetchMode2(FALSE);
 
 		$rs = $this->Execute(sprintf($sql,$table,$table,$schema));
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
+		$this->SetFetchMode2($savem);
 		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {

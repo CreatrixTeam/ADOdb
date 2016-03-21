@@ -82,7 +82,7 @@ class ADODB_csv extends ADOConnection {
 	global $ADODB_FETCH_MODE;
 
 		$url = $this->_url.'?sql='.urlencode($sql)."&nrows=$nrows&fetch=".
-			(($this->fetchMode !== false)?$this->fetchMode : $ADODB_FETCH_MODE).
+			$this->GetFetchMode().
 			"&offset=$offset";
 		$err = false;
 		$rs = csv2rs($url,$err,false);
@@ -105,7 +105,7 @@ class ADODB_csv extends ADOConnection {
 		if (is_object($rs)) {
 
 			$rs->databaseType='csv';
-			$rs->fetchMode = ($this->fetchMode !== false) ?  $this->fetchMode : $ADODB_FETCH_MODE;
+			$rs->fetchMode = $this->GetFetchMode();
 			$rs->connection = $this;
 		}
 		return $rs;
@@ -139,7 +139,7 @@ class ADODB_csv extends ADOConnection {
 		}
 
 		$url =  $this->_url.'?sql='.urlencode($sql)."&fetch=".
-			(($this->fetchMode !== false)?$this->fetchMode : $ADODB_FETCH_MODE);
+			$this->GetFetchMode();
 		$err = false;
 
 
@@ -159,7 +159,7 @@ class ADODB_csv extends ADOConnection {
 				$fn($this->databaseType,'EXECUTE',$this->ErrorNo(),$this->ErrorMsg(),$sql,$inputarr);
 			}
 		if (is_object($rs)) {
-			$rs->fetchMode = ($this->fetchMode !== false) ?  $this->fetchMode : $ADODB_FETCH_MODE;
+			$rs->fetchMode = $this->GetFetchMode();
 
 			$this->_affectedrows = $rs->affectedrows;
 			$this->_insertid = $rs->insertid;
