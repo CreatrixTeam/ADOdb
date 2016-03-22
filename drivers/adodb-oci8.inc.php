@@ -1430,17 +1430,6 @@ class ADORecordset_oci8 extends ADORecordSet {
 	public  $bind=false;
 	protected  $_fieldobjs;
 
-	public function __construct($queryID,$mode=false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-
-		parent::__construct($queryID, $mode);
-	}
-
-
 	public function Init()
 	{
 		if ($this->_inited) {

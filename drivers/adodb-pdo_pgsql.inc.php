@@ -296,9 +296,4 @@ select viewname,'V' from pg_views where viewname like $mask";
 class  ADORecordSet_pdo_pgsql extends ADORecordSet_pdo {
 
 	public  $databaseType = 'pdo_pgsql';
-
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }

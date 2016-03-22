@@ -785,20 +785,6 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 			 93  => 'datetime'
 			);
 	
-	
-	
-	
-	public function __construct($id,$mode=false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-
-		}
-
-		return parent::__construct($id,$mode);
-	}
-
 
 	protected function _initrs()
 	{

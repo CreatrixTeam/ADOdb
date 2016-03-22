@@ -188,9 +188,4 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 class  ADORecordSet_pdo_oci extends ADORecordSet_pdo {
 
 	public  $databaseType = 'pdo_oci';
-
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }

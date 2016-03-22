@@ -105,9 +105,4 @@ class ADODB_pdo_mssql extends ADODB_pdo {
 class  ADORecordSet_pdo_mssql extends ADORecordSet_pdo {
 
 	public  $databaseType = 'pdo_mssql';
-
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }

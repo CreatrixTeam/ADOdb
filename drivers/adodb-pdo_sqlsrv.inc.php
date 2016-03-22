@@ -93,9 +93,4 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 class  ADORecordSet_pdo_sqlsrv extends ADORecordSet_pdo {
 
 	public  $databaseType = 'pdo_sqlsrv';
-
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }

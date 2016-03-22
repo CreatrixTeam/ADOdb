@@ -504,17 +504,6 @@ class ADORecordSet_pdo extends ADORecordSet {
 	public  $databaseType = "pdo";
 	public  $dataProvider = "pdo";
 
-	public function __construct($id,$mode=false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-
-		parent::__construct($id, $mode);
-	}
-
-
 	public function Init()
 	{
 		if ($this->_inited) {

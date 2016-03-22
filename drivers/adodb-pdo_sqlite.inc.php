@@ -306,11 +306,6 @@ class  ADORecordSet_pdo_sqlite extends ADORecordSet_pdo {
 
 	public  $databaseType = 'pdo_sqlite';
 	protected $_datadict = NULL;
-
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 	
 	public function MetaType($t,$len=-1,$fieldobj=false)
 	{

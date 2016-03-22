@@ -782,12 +782,6 @@ class ADORecordset_mssql extends ADORecordSet {
 		// freedts check...
 		$this->hasFetchAssoc = function_exists('mssql_fetch_assoc');
 
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-
-		}
-
 		return parent::__construct($id,$mode);
 	}
 

@@ -771,16 +771,6 @@ class ADORecordSet_mysqli extends ADORecordSet{
 	public  $databaseType = "mysqli";
 	public  $canSeek = true;
 
-	public function __construct($queryID, $mode = false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-
-		parent::__construct($queryID, $mode);
-	}
-
 	protected function _initrs()
 	{
 	global $ADODB_COUNTRECS;

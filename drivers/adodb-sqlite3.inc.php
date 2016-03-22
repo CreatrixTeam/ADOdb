@@ -388,14 +388,7 @@ class ADORecordset_sqlite3 extends ADORecordSet {
 
 	public function __construct($queryID,$mode=false)
 	{
-
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-
-		$this->_queryID = $queryID;
-		$this->fetchMode = $mode;
+		parent::__construct($queryID,$mode);
 
 		$this->_inited = true;
 		$this->fields = array();

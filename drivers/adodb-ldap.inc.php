@@ -290,16 +290,6 @@ class ADORecordSet_ldap extends ADORecordSet{
 	public  $canSeek = false;
 	protected  $_entryID; /* keeps track of the entry resource identifier */
 
-	public function __construct($queryID,$mode=false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-
-		parent::__construct($queryID, $mode);
-	}
-
 	protected function _initrs()
 	{
 		/*

@@ -664,16 +664,6 @@ class ADORecordSet_odbtp extends ADORecordSet {
 	public  $databaseType = 'odbtp';
 	public  $canSeek = true;
 
-	public function __construct($queryID,$mode=false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-		$this->fetchMode = $mode;
-		parent::__construct($queryID);
-	}
-
 	protected function _initrs()
 	{
 		$this->_numOfFields = @odbtp_num_fields($this->_queryID);

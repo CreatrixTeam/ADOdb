@@ -378,17 +378,6 @@ class ADORecordSet_ado extends ADORecordSet {
 	public  $canSeek = true;
   	public  $hideErrors = true;
 
-	public function __construct($id,$mode=false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-
-		return parent::__construct($id,$mode);
-	}
-
-
 	// returns the field object
 	public function FetchField($fieldOffset = -1) {
 		$off=$fieldOffset+1; // offsets begin at 1

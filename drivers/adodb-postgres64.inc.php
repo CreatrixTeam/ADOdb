@@ -800,17 +800,6 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 	public  $databaseType = "postgres64";
 	public  $canSeek = true;
 
-	public function __construct($queryID, $mode=false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-
-		// Parent's constructor
-		parent::__construct($queryID, $mode);
-	}
-
 	public function GetRowAssoc($upper = ADODB_ASSOC_CASE)
 	{
 		if ($this->fetchMode == ADODB_FETCH_ASSOC && $upper == ADODB_ASSOC_CASE_LOWER) {

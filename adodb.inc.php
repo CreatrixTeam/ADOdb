@@ -3461,8 +3461,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *
 	 */
 	public function __construct($queryID, $mode=false) {
+		global $ADODB_FETCH_MODE;
+
 		$this->_queryID = $queryID;
-		$this->fetchMode = $mode;
+		$this->fetchMode = (($mode === false) ? $ADODB_FETCH_MODE : $mode);
 	}
 
 	function __destruct() {

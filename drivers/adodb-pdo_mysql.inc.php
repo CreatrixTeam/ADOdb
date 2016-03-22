@@ -258,9 +258,4 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 class  ADORecordSet_pdo_mysql extends ADORecordSet_pdo {
 
 	public  $databaseType = 'pdo_mysql';
-
-	public function __construct($id,$mode=false)
-	{
-		return parent::__construct($id,$mode);
-	}
 }
