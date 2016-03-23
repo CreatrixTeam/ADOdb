@@ -290,16 +290,11 @@ class ADODB_odbtp extends ADOConnection{
 
 	public function MetaTables($ttype='',$showSchema=false,$mask=false)
 	{
-	global $ADODB_FETCH_MODE;
-
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savefm = $this->SetFetchMode2(false);
+		$savefm = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$arr = $this->GetArray("||SQLTables||||$ttype");
 
 		$this->SetFetchMode2($savefm);
-		$ADODB_FETCH_MODE = $savem;
 
 		$arr2 = array();
 		for ($i=0; $i < sizeof($arr); $i++) {
@@ -312,21 +307,16 @@ class ADODB_odbtp extends ADOConnection{
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-	global $ADODB_FETCH_MODE;
-
 		$table = $pParsedTableName['table']['name'];
 		$upper = $pParsedTableName['table']['isToNormalize'];
 		$schema = @$pParsedTableName['schema']['name'];
 		if ($upper) $table = strtoupper($table);
 
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savefm = $this->SetFetchMode2(false);
+		$savefm = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->Execute( "||SQLColumns||$schema|$table" );
 
 		$this->SetFetchMode2($savefm);
-		$ADODB_FETCH_MODE = $savem;
 
 		if (!$rs || $rs->EOF) {
 			$false = false;
@@ -359,13 +349,10 @@ class ADODB_odbtp extends ADOConnection{
 
 	protected function _MetaPrimaryKeys($pParsedTableName, $owner='')
 	{
-	global $ADODB_FETCH_MODE;
-
 		$table = $pParsedTableName['table']['name'];
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$arr = $this->GetArray("||SQLPrimaryKeys||$owner|$table");
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 
 		//print_r($arr);
 		$arr2 = array();
@@ -377,12 +364,9 @@ class ADODB_odbtp extends ADOConnection{
 
 	public function MetaForeignKeys($table, $owner='', $upper=false)
 	{
-	global $ADODB_FETCH_MODE;
-
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$constraints = $this->GetArray("||SQLForeignKeys|||||$owner|$table");
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 
 		$arr = false;
 		foreach($constraints as $constr) {
@@ -567,14 +551,10 @@ class ADODB_odbtp extends ADOConnection{
 			WHERE LEFT(i.name, 8) <> '_WA_Sys_' AND o.status >= 0 AND lower(O.Name) = $table
 			ORDER BY O.name, I.Name, K.keyno";
 
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-        $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-        $savem = $this->SetFetchMode2(FALSE);
+        $savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
         $rs = $this->Execute($sql);
         $this->SetFetchMode2($savem);
-        $ADODB_FETCH_MODE = $save;
 
         if (!is_object($rs)) {
         	return FALSE;

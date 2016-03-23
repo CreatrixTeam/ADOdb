@@ -84,17 +84,15 @@ class ADODB_sqlite extends ADOConnection {
 		global $ADODB_FETCH_MODE;
 		$false = false;
 		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-		$savem = $this->SetFetchMode2(false);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
 
 		$rs = $this->Execute("PRAGMA table_info('$table')");
 
 		if (!$rs) {
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			return $false;
 		}
@@ -124,7 +122,7 @@ class ADODB_sqlite extends ADOConnection {
 		}
 		$rs->Close();
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
+
 		return $arr;
 	}
 
@@ -266,20 +264,15 @@ class ADODB_sqlite extends ADOConnection {
 	protected function _MetaIndexes($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		$false = false;
-		// save old fetch mode
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$SQL=sprintf("SELECT name,sql FROM sqlite_master WHERE type='index' AND LOWER(tbl_name)='%s'", strtolower($table));
 		$rs = $this->Execute($SQL);
 		if (!is_object($rs)) {
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			return $false;
 		}
@@ -311,7 +304,6 @@ class ADODB_sqlite extends ADOConnection {
 		}
 
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		return $indexes;
 	}

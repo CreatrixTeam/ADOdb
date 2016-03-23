@@ -66,14 +66,10 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 			WHERE LEFT(i.name, 8) <> '_WA_Sys_' AND o.status >= 0 AND O.Name LIKE $table
 			ORDER BY O.name, I.Name, K.keyno";
 
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->Execute($sql);
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {
 			return FALSE;

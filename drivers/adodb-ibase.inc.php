@@ -199,15 +199,11 @@ class ADODB_ibase extends ADOConnection {
 
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
-		// save old fetch mode
-		global $ADODB_FETCH_MODE;
 		$false = false;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$table = strtoupper($table);
 		$sql = "SELECT * FROM RDB\$INDICES WHERE RDB\$RELATION_NAME = '".$table."'";
@@ -221,7 +217,6 @@ class ADODB_ibase extends ADOConnection {
 		if (!is_object($rs)) {
 			// restore fetchmode
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			return $false;
 		}
@@ -246,7 +241,6 @@ class ADODB_ibase extends ADOConnection {
 		}
 		// restore fetchmode
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		return $indexes;
 	}
@@ -438,17 +432,15 @@ class ADODB_ibase extends ADOConnection {
 	// returns array of ADOFieldObjects for current table
 	protected function _MetaColumns($pParsedTableName)
 	{
-	global $ADODB_FETCH_MODE;
-
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		global $ADODB_FETCH_MODE;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 					$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 					$pParsedTableName['table']['name']);
 		
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
 
-		$ADODB_FETCH_MODE = $save;
+		$this->SetFetchMode2($savem);
 		$false = false;
 		if ($rs === false) {
 			return $false;

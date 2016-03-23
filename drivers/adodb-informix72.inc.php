@@ -148,13 +148,8 @@ class ADODB_informix72 extends ADOConnection {
 
 	public function MetaProcedures($NamePattern = false, $catalog  = null, $schemaPattern  = null)
     {
-        // save old fetch mode
-        global $ADODB_FETCH_MODE;
-
         $false = false;
-        $save = $ADODB_FETCH_MODE;
-        $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-        $savem = $this->SetFetchMode2(FALSE);
+        $savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
         $procedures = array ();
 
@@ -182,27 +177,21 @@ class ADODB_informix72 extends ADOConnection {
 
         // restore fetchmode
         $this->SetFetchMode2($savem);
-        $ADODB_FETCH_MODE = $save;
 
         return $procedures;
     }
 
     protected function _MetaColumns($pParsedTableName)
 	{
-	global $ADODB_FETCH_MODE;
-
 		$false = false;
 		if (!empty($this->metaColumnsSQL)) {
 			$table = (array_key_exists('schema', $pParsedTableName) ? 
 					$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 					$pParsedTableName['table']['name']);
 			
-			$save = $ADODB_FETCH_MODE;
-			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-			$savem = $this->SetFetchMode2(false);
+			$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
           	$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 			if ($rs === false) return $false;
 			$rspkey = $this->Execute(sprintf($this->metaPrimaryKeySQL,$table)); //Added to get primary key colno items
 

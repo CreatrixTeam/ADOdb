@@ -158,17 +158,13 @@ class ADODB_mssqlnative extends ADOConnection {
 	}
 
 	public function ServerInfo() {
-		global $ADODB_FETCH_MODE;
 		static $arr = false;
 		if (is_array($arr))
 			return $arr;
 		
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$arrServerInfo = sqlsrv_server_info($this->_connectionID);
-		$ADODB_FETCH_MODE = $save;
 		$this->SetFetchMode2($savem);
 		$arr['description'] = $arrServerInfo['SQLServerName'].' connected to '.$arrServerInfo['CurrentDatabase'];
 		$arr['version'] = $arrServerInfo['SQLServerVersion'];//ADOConnection::_findvers($arr['description']);
@@ -506,15 +502,11 @@ class ADODB_mssqlnative extends ADOConnection {
 			WHERE LEFT(i.name, 8) <> '_WA_Sys_' AND o.status >= 0 AND O.Name LIKE $table
 			ORDER BY O.name, I.Name, K.keyno";
 
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->Execute($sql);
 
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {
 			return FALSE;
@@ -532,10 +524,7 @@ class ADODB_mssqlnative extends ADOConnection {
 
 	public function MetaForeignKeys($table, $owner=false, $upper=false)
 	{
-		global $ADODB_FETCH_MODE;
-
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2($ADODB_FETCH_NUM);
 		$table = $this->qstr(strtoupper($table));
 
 		$sql =
@@ -549,7 +538,7 @@ class ADODB_mssqlnative extends ADOConnection {
 
 		$constraints = $this->GetArray($sql);
 
-		$ADODB_FETCH_MODE = $save;
+		$this->SetFetchMode2($savem);
 
 		$arr = false;
 		foreach($constraints as $constr) {
@@ -590,8 +579,6 @@ class ADODB_mssqlnative extends ADOConnection {
 	// tested with MSSQL 2000
 	protected function _MetaPrimaryKeys($pParsedTableName, $owner=false)
 	{
-		global $ADODB_FETCH_MODE;
-
 		$table = $pParsedTableName['table']['name'];
 		$schema = @$pParsedTableName['schema']['name'];
 		if (!$schema) $schema = $this->database;
@@ -602,10 +589,9 @@ class ADODB_mssqlnative extends ADOConnection {
 		where tc.constraint_name = k.constraint_name and tc.constraint_type =
 		'PRIMARY KEY' and k.table_name = '$table' $schema order by ordinal_position ";
 
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$a = $this->GetCol($sql);
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 
 		if ($a && sizeof($a)>0) return $a;
 		$false = false;
@@ -656,9 +642,8 @@ class ADODB_mssqlnative extends ADOConnection {
 		}
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-		$savem = $this->SetFetchMode2(false);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 
 		if ($schema) {
@@ -666,7 +651,7 @@ class ADODB_mssqlnative extends ADOConnection {
 		}
 
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
+
 		if (!is_object($rs)) {
 			$false = false;
 			return $false;

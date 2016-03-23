@@ -405,7 +405,7 @@ class ADODB_Active_Record {
 	public function UpdateActiveTable($pkeys=false,$forceUpdate=false)
 	{
 	global $ADODB_ASSOC_CASE,$_ADODB_ACTIVE_DBS , $ADODB_CACHE_DIR, $ADODB_ACTIVE_CACHESECS;
-	global $ADODB_ACTIVE_DEFVALS, $ADODB_FETCH_MODE;
+	global $ADODB_ACTIVE_DEFVALS;
 
 		$activedb = $_ADODB_ACTIVE_DBS[$this->_dbat];
 
@@ -447,14 +447,11 @@ class ADODB_Active_Record {
 		$activetab = new ADODB_Active_Table();
 		$activetab->name = $table;
 
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-		$savem = $db->SetFetchMode2(false);
+		$savem = $db->SetFetchMode2(ADODB_FETCH_ASSOC);
 
 		$cols = $db->MetaColumns($table);
 
 		$db->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!$cols) {
 			$this->Error("Invalid table name: $table",'UpdateActiveTable');

@@ -92,14 +92,9 @@ class ADODB2_sqlite extends ADODB_DataDict {
 	public function ChangeTableSQL($pTableName, $pTableFields, $pTableOptions = false, 
 			$pIsToDropOldFields = false)
 	{
-		global $ADODB_FETCH_MODE;
-		$vADODB_FETCH_MODE_old = $ADODB_FETCH_MODE;
-		$vPreviousFetchMode = -1;
+		$vPreviousFetchMode = $this->connection->SetFetchMode2(ADODB_FETCH_ASSOC);
 		$vRaiseErrorFn = NULL;
 		$vCurrentTableFields = NULL;
-
-		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-		$vPreviousFetchMode = $this->connection->SetFetchMode2(false);
 
 		// check table exists
 		$vRaiseErrorFn = $this->connection->raiseErrorFn;
@@ -108,7 +103,6 @@ class ADODB2_sqlite extends ADODB_DataDict {
 		$this->connection->raiseErrorFn = $vRaiseErrorFn;
 
 		$this->connection->SetFetchMode2($vPreviousFetchMode);
-		$ADODB_FETCH_MODE = $vADODB_FETCH_MODE_old;
 
 		if(empty($vCurrentTableFields))
 			{return $this->CreateTableSQL($pTableName, $pTableFields, $pTableOptions);}

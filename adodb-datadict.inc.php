@@ -999,11 +999,7 @@ class ADODB_DataDict {
 	*/
 	public function ChangeTableSQL($tablename, $flds, $tableoptions = false, $dropOldFlds=false)
 	{
-	global $ADODB_FETCH_MODE;
-
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-		$savem = $this->connection->SetFetchMode2(false);
+		$savem = $this->connection->SetFetchMode2(ADODB_FETCH_ASSOC);
 
 		// check table exists
 		$save_handler = $this->connection->raiseErrorFn;
@@ -1012,7 +1008,6 @@ class ADODB_DataDict {
 		$this->connection->raiseErrorFn = $save_handler;
 
 		$this->connection->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if ( empty($cols)) {
 			return $this->CreateTableSQL($tablename, $flds, $tableoptions);

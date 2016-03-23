@@ -119,16 +119,14 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 
 	  $false = false;
 	  $save = $ADODB_FETCH_MODE;
-	  $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
 	  $tab = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-	  $savem = $this->SetFetchMode2(false);
+	  $savem = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
 	  $rs = $this->Execute("PRAGMA table_info('$tab')");
 
 	  if (!$rs) {
 		$this->SetFetchMode2($savem);
-	    $ADODB_FETCH_MODE = $save;
 
 	    return $false;
 	  }
@@ -152,16 +150,14 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	  }
 	  $rs->Close();
 	  $this->SetFetchMode2($savem);
-	  $ADODB_FETCH_MODE = $save;
+
 	  return $arr;
 	}
 	
 	//Verbatim copy from "adodb-sqlite3.inc.php". This might not work on older Sqlite (<3) however.
 	function metaForeignKeys( $table, $owner = FALSE, $upper = FALSE, $associative = FALSE )
 	{
-	    global $ADODB_FETCH_MODE;
-		if ($ADODB_FETCH_MODE == ADODB_FETCH_ASSOC 
-		|| $this->GetFetchMode() == ADODB_FETCH_ASSOC) 
+		if ($this->GetFetchMode() == ADODB_FETCH_ASSOC) 
 		$associative = true;
 		
 	    /*
@@ -231,19 +227,14 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	protected function _MetaIndexes($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		$false = false;
-		// save old fetch mode
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$SQL=sprintf("SELECT name,sql FROM sqlite_master WHERE type='index' AND LOWER(tbl_name)='%s'", strtolower($table));
 		$rs = $this->Execute($SQL);
 		if (!is_object($rs)) {
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			return $false;
 		}
@@ -274,7 +265,6 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 			$indexes[$row[0]]['columns'] = $cols;
 		}
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		return $indexes;
 	}

@@ -65,20 +65,18 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-	global $ADODB_FETCH_MODE;
+		global $ADODB_FETCH_MODE;
 
 		$false = false;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-		$savem = $this->SetFetchMode2(false);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
 
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
+
 		if (!$rs) {
 			return $false;
 		}
@@ -111,16 +109,11 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 	//VERBATIM COPY FROM "adodb-oci8.inc.php"
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
-		// save old fetch mode
-		global $ADODB_FETCH_MODE;
-
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
 
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		// get index details
 		$table = strtoupper($table);
@@ -131,7 +124,6 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 		$rs = $this->Execute(sprintf("SELECT * FROM ALL_CONSTRAINTS WHERE UPPER(TABLE_NAME)='%s' AND CONSTRAINT_TYPE='P'",$table));
 		if (!is_object($rs)) {
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			return false;
 		}
@@ -142,7 +134,6 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 
 		if ($primary==TRUE && $primary_key=='') {
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			return false; //There is no primary key
 		}
@@ -152,7 +143,6 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 
 		if (!is_object($rs)) {
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			return false;
 		}
@@ -179,7 +169,6 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 		}
 
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		return $indexes;
 	}

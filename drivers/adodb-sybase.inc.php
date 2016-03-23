@@ -235,11 +235,7 @@ class ADORecordset_sybase extends ADORecordSet {
 
 	public function __construct($id,$mode=false)
 	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-		if (!$mode) $mode = ADODB_FETCH_ASSOC;
+		if (!$mode && ($mode !== false)) $mode = ADODB_FETCH_ASSOC;
 
 		parent::__construct($id,$mode);
 	}

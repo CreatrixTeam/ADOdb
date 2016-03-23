@@ -143,15 +143,12 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 
 	public function MetaTables($ttype=false,$showSchema=false, $qtable="%", $qschema="%")
 	{
-	global $ADODB_FETCH_MODE;
-
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = odbc_tables($this->_connectionID, "", $qschema, $qtable, "");
 
 		$rs = new ADORecordSet_odbc($qid);
 
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 		if (!$rs) {
 			$false = false;
 			return $false;
@@ -187,14 +184,10 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
-        // save old fetch mode
-        global $ADODB_FETCH_MODE;
-        $save = $ADODB_FETCH_MODE;
-        $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-        $savem = $this->SetFetchMode2(FALSE);
+        $savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$false = false;
 		// get index details
 		$table = strtoupper($table);
@@ -204,7 +197,6 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 		$rs = $this->Execute($SQL);
         if (!is_object($rs)) {
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
             return $false;
         }
@@ -219,7 +211,6 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 			$indexes[$row[0]]['columns'] = explode('+', $cols);
         }
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
         return $indexes;
 	}

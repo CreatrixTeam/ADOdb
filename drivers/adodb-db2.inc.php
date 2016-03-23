@@ -235,8 +235,6 @@ class ADODB_db2 extends ADOConnection {
 
 	protected function _MetaPrimaryKeys($pParsedTableName, $owner = false)
 	{
-	global $ADODB_FETCH_MODE;
-
 		$table = $pParsedTableName['table']['name'];
 		$schema = @$pParsedTableName['schema']['name'];
 		
@@ -245,16 +243,15 @@ class ADODB_db2 extends ADOConnection {
 			$schema = strtoupper($schema);
 		}
 
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = @db2_primarykeys($this->_connectionID,'',$schema,$table);
 
 		if (!$qid) {
-			$ADODB_FETCH_MODE = $savem;
+			$this->SetFetchMode2($savem);
 			return false;
 		}
 		$rs = new ADORecordSet_db2($qid);
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 
 		if (!$rs) return false;
 
@@ -269,23 +266,20 @@ class ADODB_db2 extends ADOConnection {
 
 	public function MetaForeignKeys($table, $owner = FALSE, $upper = FALSE, $asociative = FALSE )
 	{
-	global $ADODB_FETCH_MODE;
-
 		if ($this->uCaseTables) $table = strtoupper($table);
 		$vParsedTableName = $this->_dataDict->ParseTableName($table);
 		$table = $vParsedTableName['table']['name'];
 		$schema = @$vParsedTableName['schema']['name'];
 
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = @db2_foreign_keys($this->_connectionID,'',$schema,$table);
 		if (!$qid) {
-			$ADODB_FETCH_MODE = $savem;
+			$this->SetFetchMode2($savem);
 			return false;
 		}
 		$rs = new ADORecordSet_db2($qid);
 
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 		/*
 		$rs->fields indices
 		0 PKTABLE_CAT
@@ -316,15 +310,12 @@ class ADODB_db2 extends ADOConnection {
 
 	public function MetaTables($ttype = false, $schema = false, $mask = false)
 	{
-	global $ADODB_FETCH_MODE;
-
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = db2_tables($this->_connectionID);
 
 		$rs = new ADORecordSet_db2($qid);
 
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 		if (!$rs) {
 			$false = false;
 			return $false;
@@ -421,22 +412,19 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-	global $ADODB_FETCH_MODE;
-
 		$false = false;		
 		$table = $pParsedTableName['table']['name'];
 		$schema = @$pParsedTableName['schema']['name'];
 		if ($this->uCaseTables) $table = strtoupper($table);
 
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
         	$colname = "%";
 	        $qid = db2_columns($this->_connectionID, "", $schema, $table, $colname);
 		if (empty($qid)) return $false;
 
 		$rs = new ADORecordSet_db2($qid);
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 
 		if (!$rs) return $false;
 		$rs->_fetch();
@@ -488,7 +476,6 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		if (empty($qid)) return $false;
 
 		$rs = new ADORecordSet_db2($qid);
-		$ADODB_FETCH_MODE = $savem;
 
 		if (!$rs) return $retarr;
 		$rs->_fetch();

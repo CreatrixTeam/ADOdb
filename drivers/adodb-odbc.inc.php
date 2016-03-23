@@ -211,8 +211,6 @@ class ADODB_odbc extends ADOConnection {
 
 	protected function _MetaPrimaryKeys($pParsedTableName,$owner=false)
 	{
-	global $ADODB_FETCH_MODE;
-
 		$table = $pParsedTableName['table']['name'];
 		$schema = @$pParsedTableName['schema']['name'];
 		
@@ -221,16 +219,15 @@ class ADODB_odbc extends ADOConnection {
 			$schema = strtoupper($schema);
 		}
 
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = @odbc_primarykeys($this->_connectionID,'',$schema,$table);
 
 		if (!$qid) {
-			$ADODB_FETCH_MODE = $savem;
+			$this->SetFetchMode2($savem);
 			return false;
 		}
 		$rs = new ADORecordSet_odbc($qid);
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 
 		if (!$rs) return false;
 		$rs->_has_stupid_odbc_fetch_api_change = $this->_has_stupid_odbc_fetch_api_change;
@@ -249,15 +246,12 @@ class ADODB_odbc extends ADOConnection {
 
 	public function MetaTables($ttype=false,$showSchema=false,$mask=false)
 	{
-	global $ADODB_FETCH_MODE;
-
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = odbc_tables($this->_connectionID);
 
 		$rs = new ADORecordSet_odbc($qid);
 
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 		if (!$rs) {
 			$false = false;
 			return $false;
@@ -355,15 +349,12 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-	global $ADODB_FETCH_MODE;
-
 		$false = false;
 		$table = $pParsedTableName['table']['name'];
 		$schema = @$pParsedTableName['schema']['name'];
 		if ($this->uCaseTables) $table = strtoupper($table);
 
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		/*if (false) { // after testing, confirmed that the following does not work becoz of a bug
 			$qid2 = odbc_tables($this->_connectionID);
@@ -406,7 +397,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 		if (empty($qid)) return $false;
 
 		$rs = new ADORecordSet_odbc($qid);
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 
 		if (!$rs) return $false;
 		$rs->_has_stupid_odbc_fetch_api_change = $this->_has_stupid_odbc_fetch_api_change;

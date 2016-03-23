@@ -59,14 +59,10 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 			" WHERE TABLENAME=$table".
 			" ORDER BY INDEXNAME,COLUMNNO";
 
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->Execute($sql);
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {
 			return FALSE;
@@ -88,11 +84,8 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 
  	protected function _MetaColumns ($pParsedTableName)
 	{
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$table = $pParsedTableName['table']['name'];
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$table = $this->Quote(strtoupper($table));
 
@@ -127,7 +120,6 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 			$retarr[$fld->name] = $fld;
 		}
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		return $retarr;
 	}

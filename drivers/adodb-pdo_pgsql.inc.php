@@ -113,22 +113,18 @@ select viewname,'V' from pg_views where viewname like $mask";
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-	global $ADODB_FETCH_MODE;
-
+		global $ADODB_FETCH_MODE;
 		$table = $pParsedTableName['table']['name'];
 		$normalize = $pParsedTableName['table']['isToNormalize'];
 		$schema = @$pParsedTableName['schema']['name'];
 
 		if ($normalize) $table = strtolower($table);
 
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->SetFetchMode2(false);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		if ($schema) $rs = $this->Execute(sprintf($this->metaColumnsSQL1,$table,$table,$schema));
 		else $rs = $this->Execute(sprintf($this->metaColumnsSQL,$table,$table));
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if ($rs === false) {
 			$false = false;
@@ -140,14 +136,12 @@ select viewname,'V' from pg_views where viewname like $mask";
 			// LEFT JOIN would have been much more elegant, but postgres does
 			// not support OUTER JOINS. So here is the clumsy way.
 
-			$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-			$this->SetFetchMode2(false);
+			$savem = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
 
 			$rskey = $this->Execute(sprintf($this->metaKeySQL,($table)));
 			// fetch all result in once for performance.
 			$keys = $rskey->GetArray();
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			$rskey->Close();
 			unset($rskey);
@@ -155,12 +149,10 @@ select viewname,'V' from pg_views where viewname like $mask";
 
 		$rsdefa = array();
 		if (!empty($this->metaDefaultsSQL)) {
-			$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-			$this->SetFetchMode2(false);
+			$savem = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
 			$sql = sprintf($this->metaDefaultsSQL, ($table));
 			$rsdef = $this->Execute($sql);
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			if ($rsdef) {
 				while (!$rsdef->EOF) {
@@ -232,8 +224,6 @@ select viewname,'V' from pg_views where viewname like $mask";
 	//VERBATIM COPY FROM "adodb-postgres64.inc.php"
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner = false)
 	{
-		global $ADODB_FETCH_MODE;
-
 		$table = $pParsedTableName['table']['name'];
 		$schema = @$pParsedTableName['schema']['name'];
 
@@ -261,13 +251,10 @@ select viewname,'V' from pg_views where viewname like $mask";
 			$sql .= ' AND i.indisprimary=false;';
 		}
 
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->Execute(sprintf($sql,$table,$table,$schema));
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {
 			$false = false;

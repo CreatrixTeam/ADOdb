@@ -505,8 +505,6 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 	public function ChangeTableSQL($pTableName, $pTableFields, $pTableOptions = false, 
 			$pIsToDropOldFields = false)
 	{
-		global $ADODB_FETCH_MODE;
-		$vADODB_FETCH_MODE_old = $ADODB_FETCH_MODE;
 		$vPreviousFetchMode = -1;
 		$vRaiseErrorFn = NULL;
 		$vCurrentTableFields = NULL;
@@ -520,8 +518,7 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 			return array();
 		}	
 
-		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-		$vPreviousFetchMode = $this->connection->SetFetchMode2(false);
+		$vPreviousFetchMode = $this->connection->SetFetchMode2(ADODB_FETCH_ASSOC);
 
 		// check table exists
 		$vRaiseErrorFn = $this->connection->raiseErrorFn;
@@ -530,7 +527,6 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 		$this->connection->raiseErrorFn = $vRaiseErrorFn;
 
 		$this->connection->SetFetchMode2($vPreviousFetchMode);
-		$ADODB_FETCH_MODE = $vADODB_FETCH_MODE_old;
 
 		if(empty($vCurrentTableFields))
 			{return $this->CreateTableSQL($pTableName, $pTableFields, $pTableOptions);}

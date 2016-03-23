@@ -141,15 +141,12 @@ class ADODB_db2oci extends ADODB_db2 {
 
 	public function MetaTables($ttype = false, $schema = false, $mask = false)
 	{
-	global $ADODB_FETCH_MODE;
-
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = db2_tables($this->_connectionID);
 
 		$rs = new ADORecordSet_db2($qid);
 
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 		if (!$rs) {
 			$false = false;
 			return $false;

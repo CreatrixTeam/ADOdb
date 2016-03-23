@@ -385,7 +385,6 @@ class ADODB_postgres64 extends ADOConnection{
 	protected function _MetaColumns($pParsedTableName)
 	{
 		global $ADODB_FETCH_MODE;
-
 		$false = false;
 		$table = $pParsedTableName['table']['name'];
 		$normalize = $pParsedTableName['table']['isToNormalize'];
@@ -394,13 +393,10 @@ class ADODB_postgres64 extends ADOConnection{
 
 		if ($normalize) $table = strtolower($table);
 
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->SetFetchMode2(false);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->Execute($this->_generateMetaColumnsSQL($table, $schema));
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if ($rs === false) {
 			return $false;
@@ -411,14 +407,12 @@ class ADODB_postgres64 extends ADOConnection{
 			// LEFT JOIN would have been much more elegant, but postgres does
 			// not support OUTER JOINS. So here is the clumsy way.
 
-			$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-			$this->SetFetchMode2(false);
+			$savem = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
 
 			$rskey = $this->Execute(sprintf($this->metaKeySQL,($table)));
 			// fetch all result in once for performance.
 			$keys = $rskey->GetArray();
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			$rskey->Close();
 			unset($rskey);
@@ -426,12 +420,10 @@ class ADODB_postgres64 extends ADOConnection{
 
 		$rsdefa = array();
 		if (!empty($this->metaDefaultsSQL)) {
-			$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-			$this->SetFetchMode2(false);
+			$savem = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
 			$sql = sprintf($this->metaDefaultsSQL, ($table));
 			$rsdef = $this->Execute($sql);
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			if ($rsdef) {
 				while (!$rsdef->EOF) {
@@ -512,8 +504,6 @@ class ADODB_postgres64 extends ADOConnection{
 
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner = false)
 	{
-		global $ADODB_FETCH_MODE;
-
 		$table = $pParsedTableName['table']['name'];
 		$schema = @$pParsedTableName['schema']['name'];
 
@@ -541,13 +531,10 @@ class ADODB_postgres64 extends ADOConnection{
 			$sql .= ' AND i.indisprimary=false;';
 		}
 
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->Execute(sprintf($sql,$table,$table,$schema));
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {
 			$false = false;

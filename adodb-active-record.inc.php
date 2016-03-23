@@ -384,7 +384,7 @@ class ADODB_Active_Record {
 	public function UpdateActiveTable($pkeys=false,$forceUpdate=false)
 	{
 	global $ADODB_ASSOC_CASE,$_ADODB_ACTIVE_DBS , $ADODB_CACHE_DIR, $ADODB_ACTIVE_CACHESECS;
-	global $ADODB_ACTIVE_DEFVALS,$ADODB_FETCH_MODE;
+	global $ADODB_ACTIVE_DEFVALS;
 
 		$activedb = $_ADODB_ACTIVE_DBS[$this->_dbat];
 
@@ -435,15 +435,12 @@ class ADODB_Active_Record {
 		$activetab = new ADODB_Active_Table();
 		$activetab->name = $table;
 
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-		$savem = $db->SetFetchMode2(false);
+		$savem = $db->SetFetchMode2(ADODB_FETCH_ASSOC);
 
 
 		$cols = $db->MetaColumns($this->getTableName()); //$cols = $db->MetaColumns($table);
 
 		$db->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!$cols) {
 			$this->Error("Invalid table name: ".$this->getTableName(),'UpdateActiveTable'); //$this->Error("Invalid table name: $table",'UpdateActiveTable');
@@ -780,17 +777,13 @@ class ADODB_Active_Record {
 
 	public function Load($where=null,$bindarr=false, $lock = false)
 	{
-	global $ADODB_FETCH_MODE;
-
 		$db = $this->DB();
 		if (!$db) {
 			return false;
 		}
 		$this->_where = $where;
 
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $db->SetFetchMode2(false);
+		$savem = $db->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$qry = "select * from ".$this->GetTableName(); //$qry = "select * from ".$this->_table;
 
@@ -804,7 +797,6 @@ class ADODB_Active_Record {
 		$row = $db->GetRow($qry,$bindarr);
 
 		$db->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		return $this->Set($row);
 	}

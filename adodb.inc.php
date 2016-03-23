@@ -2580,17 +2580,11 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @return an array of database names.
 	 */
 	public function MetaDatabases() {
-		global $ADODB_FETCH_MODE;
-
 		if ($this->metaDatabasesSQL) {
-			$save = $ADODB_FETCH_MODE;
-			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-
-			$savem = $this->SetFetchMode2(false);
+			$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 			$arr = $this->GetCol($this->metaDatabasesSQL);
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			return $arr;
 		}
@@ -2631,20 +2625,14 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @return  array of tables for current database.
 	 */
 	public function MetaTables($ttype=false,$showSchema=false,$mask=false) {
-		global $ADODB_FETCH_MODE;
-
 		if ($mask) {
 			return false;
 		}
 		if ($this->metaTablesSQL) {
-			$save = $ADODB_FETCH_MODE;
-			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-
-			$savem = $this->SetFetchMode2(false);
+			$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 			$rs = $this->Execute($this->metaTablesSQL);
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			if ($rs === false) {
 				return false;
@@ -2714,12 +2702,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			$normalize = $pParsedTableName['table']['isToNormalize'];
 			$schema = @$pParsedTableName['schema']['name'];
 
-			$save = $ADODB_FETCH_MODE;
-			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-			$savem = $this->SetFetchMode2(false);
+			$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 			$rs = $this->Execute(sprintf($this->metaColumnsSQL,($normalize)?strtoupper($table):$table));
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
+
 			if ($rs === false || $rs->EOF) {
 				return false;
 			}

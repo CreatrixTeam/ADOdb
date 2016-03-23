@@ -108,8 +108,7 @@ class ADODB_oci8 extends ADOConnection {
 		$schema = @$pParsedTableName['schema']['name'];
 
 		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->SetFetchMode2(false);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		if ($schema){
 			$rs = $this->Execute(sprintf($this->metaColumnsSQL2, strtoupper($schema), strtoupper($table)));
@@ -119,7 +118,6 @@ class ADODB_oci8 extends ADOConnection {
 		}
 
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 		if (!$rs) {
 			return false;
 		}
@@ -397,16 +395,10 @@ class ADODB_oci8 extends ADOConnection {
 	// Mark Newnham
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
-		// save old fetch mode
-		global $ADODB_FETCH_MODE;
-
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		// get index details
 		$table = strtoupper($table);
@@ -417,7 +409,6 @@ class ADODB_oci8 extends ADOConnection {
 		$rs = $this->Execute(sprintf("SELECT * FROM ALL_CONSTRAINTS WHERE UPPER(TABLE_NAME)='%s' AND CONSTRAINT_TYPE='P'",$table));
 		if (!is_object($rs)) {
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			return false;
 		}
@@ -428,7 +419,6 @@ class ADODB_oci8 extends ADOConnection {
 
 		if ($primary==TRUE && $primary_key=='') {
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			return false; //There is no primary key
 		}
@@ -438,7 +428,6 @@ class ADODB_oci8 extends ADOConnection {
 
 		if (!is_object($rs)) {
 			$this->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 
 			return false;
 		}
@@ -465,7 +454,6 @@ class ADODB_oci8 extends ADOConnection {
 		}
 
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		return $indexes;
 	}
@@ -1336,10 +1324,7 @@ SELECT /*+ RULE */ distinct b.column_name
 	 */
 	public function MetaForeignKeys($table, $owner=false, $upper=false)
 	{
-		global $ADODB_FETCH_MODE;
-
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$table = $this->qstr(strtoupper($table));
 		if (!$owner) {
 			$owner = $this->user;
@@ -1368,7 +1353,7 @@ SELECT /*+ RULE */ distinct b.column_name
 					$arr[$tabcol[$i][0]] = $cols[$i][0].'='.$tabcol[$i][1];
 				}
 		}
-		$ADODB_FETCH_MODE = $save;
+		$this->SetFetchMode2($savem);
 
 		return $arr;
 	}

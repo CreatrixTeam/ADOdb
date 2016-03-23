@@ -86,14 +86,9 @@ class ADODB_mysql extends ADOConnection {
 
 	public function MetaProcedures($NamePattern = false, $catalog = null, $schemaPattern = null)
 	{
-		// save old fetch mode
-		global $ADODB_FETCH_MODE;
-
 		$false = false;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$procedures = array ();
 
@@ -132,7 +127,6 @@ class ADODB_mysql extends ADOConnection {
 
 		// restore fetchmode
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		return $procedures;
 	}
@@ -168,24 +162,18 @@ class ADODB_mysql extends ADOConnection {
 
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
-		// save old fetch mode
-		global $ADODB_FETCH_MODE;
-
 		$false = false;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
 
-		$savem = $this->SetFetchMode2(FALSE);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		// get index details
 		$rs = $this->Execute(sprintf('SHOW INDEX FROM `%s`',$table));
 
 		// restore fetchmode
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!is_object($rs)) {
 			return $false;
@@ -363,9 +351,8 @@ class ADODB_mysql extends ADOConnection {
 		}
 		global $ADODB_FETCH_MODE;
 		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-		$savem = $this->SetFetchMode2(false);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 
 		if ($schema) {
@@ -373,7 +360,7 @@ class ADODB_mysql extends ADOConnection {
 		}
 
 		$this->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
+
 		if (!is_object($rs)) {
 			$false = false;
 			return $false;
@@ -519,8 +506,7 @@ class ADODB_mysql extends ADOConnection {
 	// "Innox - Juan Carlos Gonzalez" <jgonzalez#innox.com.mx>
 	public function MetaForeignKeys( $table, $owner = FALSE, $upper = FALSE, $associative = FALSE )
 	{
-	 global $ADODB_FETCH_MODE;
-		if ($ADODB_FETCH_MODE == ADODB_FETCH_ASSOC || $this->GetFetchMode() == ADODB_FETCH_ASSOC) $associative = true;
+		if ($this->GetFetchMode() == ADODB_FETCH_ASSOC) $associative = true;
 
 		if ( !empty($owner) ) {
 			$table = "$owner.$table";

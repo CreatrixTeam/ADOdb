@@ -329,16 +329,13 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 
   public function &MetaColumns($pTableName, $normalize = true)
   {
-  global $ADODB_FETCH_MODE;
-
     $false = false;
     if ($this->uCaseTables) $pTableName = strtoupper($pTableName);
 	$vParsedTableName = $this->ParseTableName($pTableName);
 	$table = $vParsedTableName['table']['name'];
     $schema = @$vParsedTableName['schema']['name'];
 
-    $savem = $ADODB_FETCH_MODE;
-    $ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+    $savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
     /*if (false) { // after testing, confirmed that the following does not work becoz of a bug
       $qid2 = ads_tables($this->_connectionID);
@@ -381,7 +378,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
     if (empty($qid)) return $false;
 
     $rs = new ADORecordSet_ads($qid);
-    $ADODB_FETCH_MODE = $savem;
+    $this->SetFetchMode2($savem);
 
     if (!$rs) return $false;
     $rs->_has_stupid_odbc_fetch_api_change = $this->_has_stupid_odbc_fetch_api_change;
