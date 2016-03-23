@@ -144,7 +144,7 @@ class ADODB_db2oci extends ADODB_db2 {
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = db2_tables($this->_connectionID);
 
-		$rs = new ADORecordSet_db2($qid);
+		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
 
 		$this->SetFetchMode2($savem);
 		if (!$rs) {

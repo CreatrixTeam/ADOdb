@@ -146,7 +146,7 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = odbc_tables($this->_connectionID, "", $qschema, $qtable, "");
 
-		$rs = new ADORecordSet_odbc($qid);
+		$rs = new ADORecordSet_odbc($qid, $this->GetFetchMode());
 
 		$this->SetFetchMode2($savem);
 		if (!$rs) {

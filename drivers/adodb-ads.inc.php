@@ -377,7 +377,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
     }
     if (empty($qid)) return $false;
 
-    $rs = new ADORecordSet_ads($qid);
+    $rs = new ADORecordSet_ads($qid, $this->GetFetchMode());
     $this->SetFetchMode2($savem);
 
     if (!$rs) return $false;
@@ -704,7 +704,7 @@ class ADORecordSet_ads extends ADORecordSet {
     return false;
   }
 
-  protected function _fetch()
+  public function _fetch()
   {
     $this->fields = false;
     if ($this->_has_stupid_odbc_fetch_api_change)

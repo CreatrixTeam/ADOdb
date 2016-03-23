@@ -250,7 +250,7 @@ class ADODB_db2 extends ADOConnection {
 			$this->SetFetchMode2($savem);
 			return false;
 		}
-		$rs = new ADORecordSet_db2($qid);
+		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
 		$this->SetFetchMode2($savem);
 
 		if (!$rs) return false;
@@ -277,7 +277,7 @@ class ADODB_db2 extends ADOConnection {
 			$this->SetFetchMode2($savem);
 			return false;
 		}
-		$rs = new ADORecordSet_db2($qid);
+		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
 
 		$this->SetFetchMode2($savem);
 		/*
@@ -313,7 +313,7 @@ class ADODB_db2 extends ADOConnection {
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = db2_tables($this->_connectionID);
 
-		$rs = new ADORecordSet_db2($qid);
+		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
 
 		$this->SetFetchMode2($savem);
 		if (!$rs) {
@@ -423,7 +423,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	        $qid = db2_columns($this->_connectionID, "", $schema, $table, $colname);
 		if (empty($qid)) return $false;
 
-		$rs = new ADORecordSet_db2($qid);
+		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
 		$this->SetFetchMode2($savem);
 
 		if (!$rs) return $false;
@@ -475,7 +475,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	      $qid = db2_primary_keys($this->_connectionID, "", $schema, $table);
 		if (empty($qid)) return $false;
 
-		$rs = new ADORecordSet_db2($qid);
+		$rs = new ADORecordSet_db2($qid, ADODB_FETCH_NUM);
 
 		if (!$rs) return $retarr;
 		$rs->_fetch();
