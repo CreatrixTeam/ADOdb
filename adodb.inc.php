@@ -1705,24 +1705,16 @@ if (!defined('_ADODB_LAYER')) {
 	public function GetAssoc($sql, $inputarr=false,$force_array = false, $first2cols = false) {
 		global $ADODB_FETCH_MODE;
 
-		$save  = $ADODB_FETCH_MODE;
-		$savem = $this->SetFetchMode(NULL);
+		$savem = $this->fetchMode;
 
 		// Method does not work in ADODB_FETCH_BOTH mode
-		if ($save == ADODB_FETCH_ASSOC || $savem == ADODB_FETCH_ASSOC) {
-			$switchMode = ADODB_FETCH_ASSOC;
-		} else {
-			$switchMode = ADODB_FETCH_NUM;
+		if ($this->GetFetchMode() !== ADODB_FETCH_ASSOC) {
+			$this->SetFetchMode2(ADODB_FETCH_NUM);
 		}
-
-		$ADODB_FETCH_MODE = $switchMode;
-		$this->SetFetchMode($switchMode);
 
 		$rs = $this->Execute($sql, $inputarr);
 
-		// Revert modes back to original
-		$this->SetFetchMode($savem);
-		$ADODB_FETCH_MODE = $save;
+		$this->SetFetchMode2($savem);
 		
 		if (!$rs) {
 			// Execution failure
