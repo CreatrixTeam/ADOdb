@@ -217,7 +217,11 @@ class ADODB_ado extends ADOConnection {
 					$fld->name = $c->Value;
 					$fld->type = 'CHAR'; // cannot discover type in ADO!
 					$fld->max_length = -1;
-					$arr[strtoupper($fld->name)]=$fld;
+					
+					if($this->GetFetchMode() == ADODB_FETCH_NUM)
+						{$arr[] = $fld;}
+					else
+						{$arr[strtoupper($fld->name)]=$fld;}
 				}
 
 				$adors->MoveNext();

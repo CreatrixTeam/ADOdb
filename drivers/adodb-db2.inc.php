@@ -477,29 +477,42 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 
 		$rs = new ADORecordSet_db2($qid, ADODB_FETCH_NUM);
 
-		if (!$rs) return $retarr;
-		$rs->_fetch();
+		if(!(!$rs))
+		{
+			$rs->_fetch();
 
-		/*
-		$rs->fields indices
-		0 TABLE_CAT
-		1 TABLE_SCHEM
-		2 TABLE_NAME
-		3 COLUMN_NAME
-		4 KEY_SEQ
-		5 PK_NAME
-		*/
-		while (!$rs->EOF) {
-			if (strtoupper(trim($rs->fields[2])) == $table && (!$schema || strtoupper($rs->fields[1]) == $schema)) {
-				$retarr[strtoupper($rs->fields[3])]->primary_key = true;
-			} else if (sizeof($retarr)>0)
-				break;
-			$rs->MoveNext();
+			/*
+			$rs->fields indices
+			0 TABLE_CAT
+			1 TABLE_SCHEM
+			2 TABLE_NAME
+			3 COLUMN_NAME
+			4 KEY_SEQ
+			5 PK_NAME
+			*/
+			while (!$rs->EOF) {
+				if (strtoupper(trim($rs->fields[2])) == $table && (!$schema || strtoupper($rs->fields[1]) == $schema)) {
+					$retarr[strtoupper($rs->fields[3])]->primary_key = true;
+				} else if (sizeof($retarr)>0)
+					break;
+				$rs->MoveNext();
+			}
+			$rs->Close();
 		}
-		$rs->Close();
 
-		if (empty($retarr)) $retarr = false;
-		return $retarr;
+		if(empty($retarr))
+			{return false;}
+		elseif($this->GetFetchMode() == ADODB_FETCH_NUM)
+		{
+			$tRetarr = array();
+			
+			foreach($retarr as $tKey => $tValue)
+				{$tRetarr[] = $tValue;}
+
+			return $tRetarr;
+		}
+		else
+			{return $retarr;}
 	}
 
 

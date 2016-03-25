@@ -107,7 +107,11 @@ class ADODB_fbsql extends ADOConnection {
 				$fld->auto_increment = (strpos($rs->fields[5], 'auto_increment') !== false);
 				$fld->binary = (strpos($fld->type,'blob') !== false);
 
-				$retarr[strtoupper($fld->name)] = $fld;
+				if($this->GetFetchMode() == ADODB_FETCH_NUM)
+					{$retarr[] = $fld;}
+				else
+					{$retarr[strtoupper($fld->name)] = $fld;}
+
 				$rs->MoveNext();
 			}
 			$rs->Close();

@@ -440,7 +440,11 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 					$fld->max_length = $rs->fields[7];
 				$fld->not_null = !empty($rs->fields[10]);
 				$fld->scale = $rs->fields[8];
-				$retarr[strtoupper($fld->name)] = $fld;
+				
+				if($this->GetFetchMode() == ADODB_FETCH_NUM)
+					{$retarr[] = $fld;}
+				else
+					{$retarr[strtoupper($fld->name)] = $fld;}
 			} else if (sizeof($retarr)>0)
 				break;
 			$rs->MoveNext();

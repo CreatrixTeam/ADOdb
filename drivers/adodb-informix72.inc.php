@@ -220,7 +220,11 @@ class ADODB_informix72 extends ADOConnection {
 					$fld->has_default = 0;
 				}
 
-                $retarr[strtolower($fld->name)] = $fld;
+				if($this->GetFetchMode() == ADODB_FETCH_NUM)
+					{$retarr[] = $fld;}
+				else
+					{$retarr[strtoupper($fld->name)] = $fld;}
+
 				$rs->MoveNext();
 			}
 

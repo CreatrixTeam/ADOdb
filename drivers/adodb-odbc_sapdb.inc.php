@@ -117,7 +117,11 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 					}
 				}
 			}
-			$retarr[$fld->name] = $fld;
+			
+			if($this->GetFetchMode() == ADODB_FETCH_NUM)
+				{$retarr[] = $fld;}
+			else
+				{$retarr[strtoupper($fld->name)] = $fld;}
 		}
 		$this->SetFetchMode2($savem);
 

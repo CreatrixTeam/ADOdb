@@ -86,7 +86,12 @@ class ADODB_sybase_ase extends ADODB_sybase {
 				$fld->name = $rs->Fields('field_name');
 				$fld->type = $rs->Fields('type');
 				$fld->max_length = $rs->Fields('width');
-				$retarr[strtoupper($fld->name)] = $fld;
+
+				if($this->GetFetchMode() == ADODB_FETCH_NUM)
+					{$retarr[] = $fld;}
+				else
+					{$retarr[strtoupper($fld->name)] = $fld;}
+
 				$rs->MoveNext();
 			}
 			$rs->Close();

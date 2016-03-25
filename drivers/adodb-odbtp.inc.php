@@ -337,7 +337,11 @@ class ADODB_odbtp extends ADOConnection{
 	 					$fld->has_default = true;
 	 					$fld->default_value = $rs->fields[12];
 					}
-				$retarr[strtoupper($fld->name)] = $fld;
+
+				if($this->GetFetchMode() == ADODB_FETCH_NUM)
+					{$retarr[] = $fld;}
+				else
+					{$retarr[strtoupper($fld->name)] = $fld;}
 			} else if (!empty($retarr))
 				break;
 			$rs->MoveNext();
