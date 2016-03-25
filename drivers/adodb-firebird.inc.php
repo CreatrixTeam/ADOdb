@@ -18,34 +18,31 @@ Set tabs to 4 for best viewing.
 if (!defined('ADODB_DIR')) die();
 
 class ADODB_firebird extends ADOConnection {
-	var $databaseType = "firebird";
-	var $dataProvider = "firebird";
-	var $replaceQuote = "''"; // string to use to replace quotes
-	var $fbird_datefmt = '%Y-%m-%d'; // For hours,mins,secs change to '%Y-%m-%d %H:%M:%S';
-	var $fmtDate = "'Y-m-d'";
-	var $fbird_timestampfmt = "%Y-%m-%d %H:%M:%S";
-	var $fbird_timefmt = "%H:%M:%S";
-	var $fmtTimeStamp = "'Y-m-d, H:i:s'";
-	var $concat_operator='||';
-	var $_transactionID;
-	var $metaTablesSQL = "select lower(rdb\$relation_name) from rdb\$relations where rdb\$relation_name not like 'RDB\$%'";
+	public $databaseType = "firebird";
+	public $dataProvider = "firebird";
+	public $replaceQuote = "''"; // string to use to replace quotes
+	public $fbird_datefmt = '%Y-%m-%d'; // For hours,mins,secs change to '%Y-%m-%d %H:%M:%S';
+	public $fmtDate = "'Y-m-d'";
+	public $fbird_timestampfmt = "%Y-%m-%d %H:%M:%S";
+	public $fbird_timefmt = "%H:%M:%S";
+	public $fmtTimeStamp = "'Y-m-d, H:i:s'";
+	public $_transactionID;
+	public $metaTablesSQL = "select lower(rdb\$relation_name) from rdb\$relations where rdb\$relation_name not like 'RDB\$%'";
 	//OPN STUFF start
-	var $metaColumnsSQL = "select lower(a.rdb\$field_name), a.rdb\$null_flag, a.rdb\$default_source, b.rdb\$field_length, b.rdb\$field_scale, b.rdb\$field_sub_type, b.rdb\$field_precision, b.rdb\$field_type from rdb\$relation_fields a, rdb\$fields b where a.rdb\$field_source = b.rdb\$field_name and a.rdb\$relation_name = '%s' order by a.rdb\$field_position asc";
+	public $metaColumnsSQL = "select lower(a.rdb\$field_name), a.rdb\$null_flag, a.rdb\$default_source, b.rdb\$field_length, b.rdb\$field_scale, b.rdb\$field_sub_type, b.rdb\$field_precision, b.rdb\$field_type from rdb\$relation_fields a, rdb\$fields b where a.rdb\$field_source = b.rdb\$field_name and a.rdb\$relation_name = '%s' order by a.rdb\$field_position asc";
 	//OPN STUFF end
-	var $ibasetrans;
-	var $hasGenID = true;
-	var $_bindInputArray = true;
-	var $buffers = 0;
-	var $dialect = 3;
-	var $sysDate = "cast('TODAY' as timestamp)";
-	var $ansiOuter = true;
-	var $hasAffectedRows = true;
-	var $poorAffectedRows = false;
-	var $blobEncodeType = 'C';
-	var $role = false;
-	var $nameQuote = '';		/// string to use to quote identifiers and names
+	public $ibasetrans;
+	public $hasGenID = true;
+	protected $_bindInputArray = true;
+	public $buffers = 0;
+	public $dialect = 3;
+	public $ansiOuter = true;
+	public $hasAffectedRows = true;
+	public $poorAffectedRows = false;
+	public $blobEncodeType = 'C';
+	public $role = false;
 
-	function __construct()
+	public function __construct()
 	{
 	// Ignore IBASE_DEFAULT we want a more practical transaction!
 	//	if (defined('IBASE_DEFAULT')) $this->ibasetrans = IBASE_DEFAULT;
@@ -55,7 +52,7 @@ class ADODB_firebird extends ADOConnection {
 
 
 	// returns true or false
-	function _connect($argHostname, $argUsername, $argPassword, $argDatabasename,$persist=false)
+	protected function _connect($argHostname, $argUsername, $argPassword, $argDatabasename,$persist=false)
 	{
 		if (!function_exists('fbird_pconnect')) return null;
 		if ($argDatabasename) $argHostname .= ':'.$argDatabasename;
@@ -94,18 +91,18 @@ class ADODB_firebird extends ADOConnection {
 	}
 
 	// returns true or false
-	function _pconnect($argHostname, $argUsername, $argPassword, $argDatabasename)
+	protected function _pconnect($argHostname, $argUsername, $argPassword, $argDatabasename)
 	{
 		return $this->_connect($argHostname, $argUsername, $argPassword, $argDatabasename,true);
 	}
 
 
-	function MetaPrimaryKeys($table,$owner_notused=false,$internalKey=false)
+	protected function _MetaPrimaryKeys($pParsedTableName,$owner_notused=false,$internalKey=false)
 	{
 		if ($internalKey) {
 			return array('RDB$DB_KEY');
 		}
-
+		$table = $pParsedTableName['table']['name'];
 		$table = strtoupper($table);
 
 		$sql = 'SELECT S.RDB$FIELD_NAME AFIELDNAME
@@ -118,10 +115,6 @@ class ADODB_firebird extends ADOConnection {
 		return false;
 	}
 
-	function ServerInfo()
-	{
-		parent::__construct();
-	}
 
 	public function ServerInfo()
 	{
@@ -138,7 +131,7 @@ class ADODB_firebird extends ADOConnection {
 		return $arr;
 	}
 
-	function BeginTrans()
+	public function BeginTrans()
 	{
 		if ($this->transOff) return true;
 		$this->transCnt += 1;
@@ -147,7 +140,7 @@ class ADODB_firebird extends ADOConnection {
 		return $this->_transactionID;
 	}
 
-	function CommitTrans($ok=true)
+	public function CommitTrans($ok=true)
 	{
 		if (!$ok) {
 			return $this->RollbackTrans();
@@ -168,14 +161,14 @@ class ADODB_firebird extends ADOConnection {
 		return $ret;
 	}
 
-	function _affectedrows()
+	protected function _affectedrows()
 	{
 			return fbird_affected_rows( $this->_transactionID ? $this->_transactionID : $this->_connectionID );
 	}
 
 	// there are some compat problems with ADODB_COUNTRECS=false and $this->_logsql currently.
 	// it appears that ibase extension cannot support multiple concurrent queryid's
-	function _Execute($sql,$inputarr=false) {
+	protected function _Execute($sql,$inputarr=false) {
 	global $ADODB_COUNTRECS;
 
 		if ($this->_logsql) {
@@ -189,7 +182,7 @@ class ADODB_firebird extends ADOConnection {
 		return $ret;
 	}
 
-	function RollbackTrans()
+	public function RollbackTrans()
 	{
 		if ($this->transOff) return true;
 		if ($this->transCnt) $this->transCnt -= 1;
@@ -203,16 +196,14 @@ class ADODB_firebird extends ADOConnection {
 		return $ret;
 	}
 
-	function &MetaIndexes ($table, $primary = FALSE, $owner=false)
+	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
-		// save old fetch mode
-		global $ADODB_FETCH_MODE;
 		$false = false;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== FALSE) {
-				$savem = $this->SetFetchMode(FALSE);
-		}
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+				$pParsedTableName['table']['name']);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
+
 		$table = strtoupper($table);
 		$sql = "SELECT * FROM RDB\$INDICES WHERE RDB\$RELATION_NAME = '".$table."'";
 		if (!$primary) {
@@ -224,10 +215,8 @@ class ADODB_firebird extends ADOConnection {
 		$rs = $this->Execute($sql);
 		if (!is_object($rs)) {
 			// restore fetchmode
-			if (isset($savem)) {
-				$this->SetFetchMode($savem);
-			}
-			$ADODB_FETCH_MODE = $save;
+			$this->SetFetchMode2($savem);
+
 			return $false;
 		}
 
@@ -250,84 +239,40 @@ class ADODB_firebird extends ADOConnection {
 			}
 		}
 		// restore fetchmode
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
-		$ADODB_FETCH_MODE = $save;
+		$this->SetFetchMode2($savem);
 
 		return $indexes;
 	}
 
 
 	// See http://community.borland.com/article/0,1410,25844,00.html
-	function RowLock($tables,$where,$col=false)
+	public function RowLock($tables,$where,$col=false)
 	{
 		if ($this->autoCommit) {
 			$this->BeginTrans();
 		}
-		$this->Execute("UPDATE $table SET $col=$col WHERE $where "); // is this correct - jlim?
+		$vSQL = $this->_dataDict->RowLockSQL($tables,$where,$col);
+		$this->Execute($vSQL[0]);
 		return 1;
 	}
 
-
-	function CreateSequence($seqname = 'adodbseq', $startID = 1)
-	{
-		$ok = $this->Execute(("CREATE GENERATOR $seqname" ));
-		if (!$ok) return false;
-		return $this->Execute("SET GENERATOR $seqname TO ".($startID-1));
-	}
-
-	function DropSequence($seqname = 'adodbseq')
-	{
-		$seqname = strtoupper($seqname);
-		return $this->Execute("DROP GENERATOR $seqname");
-	}
-
-	function GenID($seqname='adodbseq',$startID=1)
-	{
-		$getnext = ("SELECT Gen_ID($seqname,1) FROM RDB\$DATABASE");
-		$rs = @$this->Execute($getnext);
-		if (!$rs) {
-			$this->Execute(("CREATE GENERATOR $seqname" ));
-			$this->Execute("SET GENERATOR $seqname TO ".($startID-1).';');
-			$rs = $this->Execute($getnext);
-		}
-		if ($rs && !$rs->EOF) {
-			$this->genID = (integer) reset($rs->fields);
-		}
-		else {
-			$this->genID = 0; // false
-		}
-
-		if ($rs) {
-			$rs->Close();
-		}
-
-		return $this->genID;
-	}
-
-	function SelectDB($dbName)
-	{
-		return false;
-	}
-
-	function _handleerror()
+	protected function _handleerror()
 	{
 		$this->_errorMsg = fbird_errmsg();
 	}
 
-	function ErrorNo()
+	public function ErrorNo()
 	{
 		if (preg_match('/error code = ([\-0-9]*)/i', $this->_errorMsg,$arr)) return (integer) $arr[1];
 		else return 0;
 	}
 
-	function ErrorMsg()
+	public function ErrorMsg()
 	{
 			return $this->_errorMsg;
 	}
 
-	function Prepare($sql)
+	public function Prepare($sql)
 	{
 		$stmt = fbird_prepare($this->_connectionID,$sql);
 		if (!$stmt) return false;
@@ -336,7 +281,7 @@ class ADODB_firebird extends ADOConnection {
 
 	   // returns query ID if successful, otherwise false
 	   // there have been reports of problems with nested queries - the code is probably not re-entrant?
-	function _query($sql,$iarr=false)
+	public function _query($sql,$iarr=false)
 	{
 		if ( !$this->isConnected() ) return false;
 		if (!$this->autoCommit && $this->_transactionID) {
@@ -350,44 +295,17 @@ class ADODB_firebird extends ADOConnection {
 			$fn = 'fbird_execute';
 			$sql = $sql[1];
 			if (is_array($iarr)) {
-				if  (ADODB_PHPVER >= 0x4050) { // actually 4.0.4
-					if ( !isset($iarr[0]) ) $iarr[0] = ''; // PHP5 compat hack
-					$fnarr = array_merge( array($sql) , $iarr);
-					$ret = call_user_func_array($fn,$fnarr);
-				} else {
-					switch(sizeof($iarr)) {
-					case 1: $ret = $fn($sql,$iarr[0]); break;
-					case 2: $ret = $fn($sql,$iarr[0],$iarr[1]); break;
-					case 3: $ret = $fn($sql,$iarr[0],$iarr[1],$iarr[2]); break;
-					case 4: $ret = $fn($sql,$iarr[0],$iarr[1],$iarr[2],$iarr[3]); break;
-					case 5: $ret = $fn($sql,$iarr[0],$iarr[1],$iarr[2],$iarr[3],$iarr[4]); break;
-					case 6: $ret = $fn($sql,$iarr[0],$iarr[1],$iarr[2],$iarr[3],$iarr[4],$iarr[5]); break;
-					case 7: $ret = $fn($sql,$iarr[0],$iarr[1],$iarr[2],$iarr[3],$iarr[4],$iarr[5],$iarr[6]); break;
-					default: ADOConnection::outp( "Too many parameters to ibase query $sql");
-					case 8: $ret = $fn($sql,$iarr[0],$iarr[1],$iarr[2],$iarr[3],$iarr[4],$iarr[5],$iarr[6],$iarr[7]); break;
-					}
-				}
+				if ( !isset($iarr[0]) ) $iarr[0] = ''; // PHP5 compat hack
+				$fnarr = array_merge( array($sql) , $iarr);
+				$ret = call_user_func_array($fn,$fnarr);
 			} else $ret = $fn($sql);
 		} else {
 			$fn = 'fbird_query';
 			if (is_array($iarr)) {
-				if (ADODB_PHPVER >= 0x4050) { // actually 4.0.4
-					if (sizeof($iarr) == 0) $iarr[0] = ''; // PHP5 compat hack
-					$fnarr = array_merge( array($conn,$sql) , $iarr);
-					$ret = call_user_func_array($fn,$fnarr);
-				} else {
-					switch(sizeof($iarr)) {
-					case 1: $ret = $fn($conn,$sql,$iarr[0]); break;
-					case 2: $ret = $fn($conn,$sql,$iarr[0],$iarr[1]); break;
-					case 3: $ret = $fn($conn,$sql,$iarr[0],$iarr[1],$iarr[2]); break;
-					case 4: $ret = $fn($conn,$sql,$iarr[0],$iarr[1],$iarr[2],$iarr[3]); break;
-					case 5: $ret = $fn($conn,$sql,$iarr[0],$iarr[1],$iarr[2],$iarr[3],$iarr[4]); break;
-					case 6: $ret = $fn($conn,$sql,$iarr[0],$iarr[1],$iarr[2],$iarr[3],$iarr[4],$iarr[5]); break;
-					case 7: $ret = $fn($conn,$sql,$iarr[0],$iarr[1],$iarr[2],$iarr[3],$iarr[4],$iarr[5],$iarr[6]); break;
-					default: ADOConnection::outp( "Too many parameters to ibase query $sql");
-					case 8: $ret = $fn($conn,$sql,$iarr[0],$iarr[1],$iarr[2],$iarr[3],$iarr[4],$iarr[5],$iarr[6],$iarr[7]); break;
-					}
-				}
+				if (sizeof($iarr) == 0) $iarr[0] = ''; // PHP5 compat hack
+				$fnarr = array_merge( array($conn,$sql) , $iarr);
+				$ret = call_user_func_array($fn,$fnarr);
+
 			} else $ret = $fn($conn,$sql);
 		}
 		if ($docommit && $ret === true) {
@@ -399,7 +317,7 @@ class ADODB_firebird extends ADOConnection {
 	}
 
 	// returns true or false
-	function _close()
+	protected function _close()
 	{
 		if (!$this->autoCommit) {
 			@fbird_rollback($this->_connectionID);
@@ -408,7 +326,7 @@ class ADODB_firebird extends ADOConnection {
 	}
 
 	//OPN STUFF start
-	function _ConvertFieldType(&$fld, $ftype, $flen, $fscale, $fsubtype, $fprecision, $dialect3)
+	protected function _ConvertFieldType(&$fld, $ftype, $flen, $fscale, $fsubtype, $fprecision, $dialect3)
 	{
 		$fscale = abs($fscale);
 		$fld->max_length = $flen;
@@ -506,16 +424,16 @@ class ADODB_firebird extends ADOConnection {
 	//OPN STUFF end
 
 	// returns array of ADOFieldObjects for current table
-	function MetaColumns($table, $normalize=true)
+	protected function _MetaColumns($pParsedTableName)
 	{
-	global $ADODB_FETCH_MODE;
-
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
+		$table = (array_key_exists('schema', $pParsedTableName) ? 
+					$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+					$pParsedTableName['table']['name']);
 
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
 
-		$ADODB_FETCH_MODE = $save;
+		$this->SetFetchMode2($save);
 		$false = false;
 		if ($rs === false) {
 			return $false;
@@ -557,7 +475,7 @@ class ADODB_firebird extends ADOConnection {
 				$fld->sub_type = null;
 			}
 			//OPN STUFF end
-			if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM) $retarr[] = $fld;
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) $retarr[] = $fld;
 			else $retarr[strtoupper($fld->name)] = $fld;
 
 			$rs->MoveNext();
@@ -567,7 +485,7 @@ class ADODB_firebird extends ADOConnection {
 		else return $retarr;
 	}
 
-	function BlobEncode( $blob )
+	public function BlobEncode( $blob )
 	{
 		$blobid = fbird_blob_create( $this->_connectionID);
 		fbird_blob_add( $blobid, $blob );
@@ -576,14 +494,14 @@ class ADODB_firebird extends ADOConnection {
 
 	// since we auto-decode all blob's since 2.42,
 	// BlobDecode should not do any transforms
-	function BlobDecode($blob)
+	public function BlobDecode($blob)
 	{
 		return $blob;
 	}
 
 	// old blobdecode function
 	// still used to auto-decode all blob's
-	function _BlobDecode_old( $blob )
+	protected function _BlobDecode_old( $blob )
 	{
 		$blobid = fbird_blob_open($this->_connectionID, $blob );
 		$realblob = fbird_blob_get( $blobid,$this->maxblobsize); // 2nd param is max size of blob -- Kevin Boillet <kevinboillet@yahoo.fr>
@@ -595,15 +513,10 @@ class ADODB_firebird extends ADOConnection {
 		return( $realblob );
 	}
 
-	function _BlobDecode( $blob )
+	protected function _BlobDecode( $blob )
 	{
-		if  (ADODB_PHPVER >= 0x5000) {
-			$blob_data = fbird_blob_info($this->_connectionID, $blob );
-			$blobid = fbird_blob_open($this->_connectionID, $blob );
-		} else {
-			$blob_data = fbird_blob_info( $blob );
-			$blobid = fbird_blob_open( $blob );
-		}
+		$blob_data = fbird_blob_info($this->_connectionID, $blob );
+		$blobid = fbird_blob_open($this->_connectionID, $blob );
 
 		if( $blob_data[0] > $this->maxblobsize ) {
 			$realblob = fbird_blob_get($blobid, $this->maxblobsize);
@@ -619,7 +532,7 @@ class ADODB_firebird extends ADOConnection {
 		return( $realblob );
 	}
 
-	function UpdateBlobFile($table,$column,$path,$where,$blobtype='BLOB')
+	public function UpdateBlobFile($table,$column,$path,$where,$blobtype='BLOB')
 	{
 		$fd = fopen($path,'rb');
 		if ($fd === false) return false;
@@ -647,7 +560,7 @@ class ADODB_firebird extends ADOConnection {
 		$conn->Execute('INSERT INTO blobtable (id, blobcol) VALUES (1, null)');
 		$conn->UpdateBlob('blobtable','blobcol',$blob,'id=1');
 	*/
-	function UpdateBlob($table,$column,$val,$where,$blobtype='BLOB')
+	public function UpdateBlob($table,$column,$val,$where,$blobtype='BLOB')
 	{
 	$blob_id = fbird_blob_create($this->_connectionID);
 
@@ -681,7 +594,7 @@ class ADODB_firebird extends ADOConnection {
 	}
 
 
-	function OldUpdateBlob($table,$column,$val,$where,$blobtype='BLOB')
+	public function OldUpdateBlob($table,$column,$val,$where,$blobtype='BLOB')
 	{
 		$blob_id = fbird_blob_create($this->_connectionID);
 		fbird_blob_add($blob_id, $val);
@@ -689,70 +602,10 @@ class ADODB_firebird extends ADOConnection {
 		return $this->Execute("UPDATE $table SET $column=(?) WHERE $where",array($blob_id_str)) != false;
 	}
 
-	// Format date column in sql string given an input format that understands Y M D
-	// Only since Interbase 6.0 - uses EXTRACT
-	// problem - does not zero-fill the day and month yet
-	function SQLDate($fmt, $col=false)
-	{
-		if (!$col) $col = $this->sysDate;
-		$s = '';
-
-		$len = strlen($fmt);
-		for ($i=0; $i < $len; $i++) {
-			if ($s) $s .= '||';
-			$ch = $fmt[$i];
-			switch($ch) {
-			case 'Y':
-			case 'y':
-				$s .= "extract(year from $col)";
-				break;
-			case 'M':
-			case 'm':
-				$s .= "extract(month from $col)";
-				break;
-			case 'W':
-			case 'w':
-				// The more accurate way of doing this is with a stored procedure
-				// See http://wiki.firebirdsql.org/wiki/index.php?page=DATE+Handling+Functions for details
-				$s .= "((extract(yearday from $col) - extract(weekday from $col - 1) + 7) / 7)";
-				break;
-			case 'Q':
-			case 'q':
-				$s .= "cast(((extract(month from $col)+2) / 3) as integer)";
-				break;
-			case 'D':
-			case 'd':
-				$s .= "(extract(day from $col))";
-				break;
-			case 'H':
-			case 'h':
-				$s .= "(extract(hour from $col))";
-				break;
-			case 'I':
-			case 'i':
-				$s .= "(extract(minute from $col))";
-				break;
-			case 'S':
-			case 's':
-				$s .= "CAST((extract(second from $col)) AS INTEGER)";
-				break;
-
-			default:
-				if ($ch == '\\') {
-					$i++;
-					$ch = substr($fmt,$i,1);
-				}
-				$s .= $this->qstr($ch);
-				break;
-			}
-		}
-		return $s;
-	}
-
 	// Note that Interbase 6.5 uses this ROWS instead - don't you love forking wars!
 	// 		SELECT col1, col2 FROM table ROWS 5 -- get 5 rows
 	//		SELECT col1, col2 FROM TABLE ORDER BY col1 ROWS 3 TO 7 -- first 5 skip 2
-	function &SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false, $secs=0)
+	public function &SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false, $secs=0)
 	{
 		$nrows = (integer) $nrows;
 		$offset = (integer) $offset;
@@ -779,16 +632,9 @@ class  ADORecordset_firebird extends ADORecordSet
 {
 
 	public  $databaseType = "firebird";
-	var $bind=false;
-	var $_cacheType;
+	public  $bind=false;
+	protected $_cacheType;
 
-	function __construct($id,$mode=false)
-	{
-	global $ADODB_FETCH_MODE;
-
-			$this->fetchMode = ($mode === false) ? $ADODB_FETCH_MODE : $mode;
-			parent::__construct($id);
-	}
 
 	/**
 	 * Get column information in the Recordset object.
@@ -797,7 +643,7 @@ class  ADORecordset_firebird extends ADORecordSet
 	 * field that wasn't yet retrieved by fetchField() is retrieved.
 	 * @return object containing field information.
 	*/
-	function FetchField($fieldOffset = -1)
+	public function FetchField($fieldOffset = -1)
 	{
 			$fld = new ADOFieldObject;
 			 $ibf = fbird_field_info($this->_queryID,$fieldOffset);
@@ -827,7 +673,7 @@ class  ADORecordset_firebird extends ADORecordSet
 			return $fld;
 	}
 
-	function _initrs()
+	protected function _initrs()
 	{
 		$this->_numOfRows = -1;
 		$this->_numOfFields = @fbird_num_fields($this->_queryID);
@@ -839,12 +685,12 @@ class  ADORecordset_firebird extends ADORecordSet
 		}
 	}
 
-	function _seek($row)
+	protected function _seek($row)
 	{
 		return false;
 	}
 
-	function _fetch()
+	protected function _fetch()
 	{
 		$f = @fbird_fetch_row($this->_queryID);
 		if ($f === false) {
@@ -885,7 +731,7 @@ class  ADORecordset_firebird extends ADORecordSet
 	}
 
 	/* Use associative array to get fields array */
-	function Fields($colname)
+	public function Fields($colname)
 	{
 		if ($this->fetchMode & ADODB_FETCH_ASSOC) return $this->fields[$colname];
 		if (!$this->bind) {
@@ -901,12 +747,12 @@ class  ADORecordset_firebird extends ADORecordSet
 	}
 
 
-	function _close()
+	protected function _close()
 	{
 			return @fbird_free_result($this->_queryID);
 	}
 
-	function MetaType($t,$len=-1,$fieldobj=false)
+	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;

@@ -21,10 +21,13 @@ class ADODB2_firebird extends ADODB_DataDict {
 	public  $seqField = false;
 	public  $seqPrefix = 's_';
 	public  $blobSize = 40000;
+	public  $sql_concatenateOperator = '||';
+	public  $sql_sysDate = "cast('TODAY' as timestamp)";
 	public  $sql_sysTimeStamp = "CURRENT_TIMESTAMP"; //"cast('NOW' as timestamp)";
-	var $renameColumn = 'ALTER TABLE %s ALTER %s TO %s';
-	var $alterCol = ' ALTER';
-	var $dropCol = ' DROP';
+	public $renameColumn = 'ALTER TABLE %s ALTER %s TO %s';
+	public $alterCol = ' ALTER';
+	public $dropCol = ' DROP';
+	public $nameQuote = '';
 
 	public function ActualType($meta)
 	{
@@ -95,7 +98,7 @@ class ADODB2_firebird extends ADODB_DataDict {
 	/**
 	 Generate the SQL to create table. Returns an array of sql strings.
 	*/
-	function CreateTableSQL($tabname, $flds, $tableoptions=array())
+	public function CreateTableSQL($tabname, $flds, $tableoptions=array())
 	{
 		list($lines,$pkey,$idxs) = $this->_GenFields($flds, true);
 		// genfields can return FALSE at times
@@ -176,7 +179,7 @@ end;
 	 * @param array/string $tableoptions='' options for the new table see CreateTableSQL, default ''
 	 * @return array with SQL strings
 	 */
-	function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		$tabname = $this->TableName ($tabname);
 		$sql = array();
@@ -197,4 +200,91 @@ end;
 		return $sql;
 	}
 
+	// Format date column in sql string given an input format that understands Y M D
+	// Only since Interbase 6.0 - uses EXTRACT
+	// problem - does not zero-fill the day and month yet
+	protected function _FormatDateSQL($fmt, $pParsedColumnName=false)
+	{
+		$col = false;
+
+		if($pParsedColumnName)
+			{$col = $pParsedColumnName['name'];}
+
+		if (!$col) $col = $this->sql_sysDate;
+		$s = '';
+
+		$len = strlen($fmt);
+		for ($i=0; $i < $len; $i++) {
+			if ($s) $s .= '||';
+			$ch = $fmt[$i];
+			switch($ch) {
+			case 'Y':
+			case 'y':
+				$s .= "extract(year from $col)";
+				break;
+			case 'M':
+			case 'm':
+				$s .= "extract(month from $col)";
+				break;
+			case 'W':
+			case 'w':
+				// The more accurate way of doing this is with a stored procedure
+				// See http://wiki.firebirdsql.org/wiki/index.php?page=DATE+Handling+Functions for details
+				$s .= "((extract(yearday from $col) - extract(weekday from $col - 1) + 7) / 7)";
+				break;
+			case 'Q':
+			case 'q':
+				$s .= "cast(((extract(month from $col)+2) / 3) as integer)";
+				break;
+			case 'D':
+			case 'd':
+				$s .= "(extract(day from $col))";
+				break;
+			case 'H':
+			case 'h':
+				$s .= "(extract(hour from $col))";
+				break;
+			case 'I':
+			case 'i':
+				$s .= "(extract(minute from $col))";
+				break;
+			case 'S':
+			case 's':
+				$s .= "CAST((extract(second from $col)) AS INTEGER)";
+				break;
+
+			default:
+				if ($ch == '\\') {
+					$i++;
+					$ch = substr($fmt,$i,1);
+				}
+				$s .= $this->qstr($ch);
+				break;
+			}
+		}
+		return (empty($s) ? array() : array($s));
+	}
+	
+	public function RowLockSQL($table,$where,$col=false)
+	{
+		return array("UPDATE $table SET $col=$col WHERE $where "); // is this correct - jlim?
+	}
+	
+	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
+	{
+		return array
+		(
+			"CREATE GENERATOR $pParsedSequenceName[name]",
+			"SET GENERATOR $pParsedSequenceName[name] TO ".($pStartID-1).';'
+		);
+	}
+	
+	protected function _DropSequenceSQL($pParsedSequenceName)
+	{
+		return array("DROP GENERATOR ".
+				strtoupper($pParsedSequenceName['name']));
+	}
+	
+	protected function _GenIDSQL($pParsedSequenceName)
+		{return array ("SELECT Gen_ID($pParsedSequenceName[name],1) FROM RDB\$DATABASE");}
 }
