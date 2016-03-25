@@ -65,8 +65,6 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-		global $ADODB_FETCH_MODE;
-
 		$false = false;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
@@ -95,7 +93,7 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 			$fld->binary = (strpos($fld->type,'BLOB') !== false);
 			$fld->default_value = $rs->fields[6];
 
-			if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM) $retarr[] = $fld;
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) $retarr[] = $fld;
 			else $retarr[strtoupper($fld->name)] = $fld;
 			$rs->MoveNext();
 		}

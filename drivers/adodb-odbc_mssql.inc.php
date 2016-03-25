@@ -134,8 +134,7 @@ order by constraint_name, referenced_table_name, keyno";
 			$dbName = $this->database;
 			$this->SelectDB($schema);
 		}
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
+
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 
@@ -168,7 +167,7 @@ order by constraint_name, referenced_table_name, keyno";
 				$fld->max_length = $rs->fields[2];
 
 
-			if ($save == ADODB_FETCH_NUM) {
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) {
 				$retarr[] = $fld;
 			} else {
 				$retarr[strtoupper($fld->name)] = $fld;

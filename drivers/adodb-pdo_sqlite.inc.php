@@ -115,10 +115,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
     // mark newnham
 	protected function _MetaColumns($pParsedTableName)
 	{
-	  global $ADODB_FETCH_MODE;
-
 	  $false = false;
-	  $save = $ADODB_FETCH_MODE;
 	  $tab = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
@@ -145,7 +142,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	    $fld->primary_key = $r['pk'];
 	    $fld->default_value = $r['dflt_value'];
 	    $fld->scale = 0;
-	    if ($save == ADODB_FETCH_NUM) $arr[] = $fld;
+	    if ($this->GetFetchMode() == ADODB_FETCH_NUM) $arr[] = $fld;
 	    else $arr[strtoupper($fld->name)] = $fld;
 	  }
 	  $rs->Close();

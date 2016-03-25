@@ -94,13 +94,11 @@ class perf_mssql extends adodb_perf{
 		$s = '<p><b>Explain</b>: '.htmlspecialchars($sql).'</p>';
 		$this->conn->Execute("SET SHOWPLAN_ALL ON;");
 		$sql = str_replace('?',"''",$sql);
-		global $ADODB_FETCH_MODE;
 
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$save = $this->conn->SetFetchMode2(ADODB_FETCH_NUM);
 		$rs = $this->conn->Execute($sql);
 		//adodb_printr($rs);
-		$ADODB_FETCH_MODE = $save;
+		$this->conn->SetFetchMode2($save);
 		if ($rs && !$rs->EOF) {
 			$rs->MoveNext();
 			$s .= '<table bgcolor=white border=0 cellpadding="1" callspacing=0><tr><td nowrap align=center> Rows<td nowrap align=center> IO<td nowrap align=center> CPU<td align=left> &nbsp; &nbsp; Plan</tr>';
@@ -114,17 +112,14 @@ class perf_mssql extends adodb_perf{
 		}
 
 		$this->conn->Execute("SET SHOWPLAN_ALL OFF;");
-		$this->conn->LogSQL($save);
+		$this->conn->LogSQL($this->conn->GetFetchMode());
 		$s .= $this->Tracer($sql);
 		return $s;
 	}
 
 	public function Tables($orderby='1')
 	{
-	global $ADODB_FETCH_MODE;
-
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$save = $this->conn->SetFetchMode2(ADODB_FETCH_NUM);
 		//$this->conn->debug=1;
 		$s = '<table border=1 bgcolor=white><tr><td><b>tablename</b></td><td><b>size_in_k</b></td><td><b>index size</b></td><td><b>reserved size</b></td></tr>';
 		$rs1 = $this->conn->Execute("select distinct name from sysobjects where xtype='U'");
@@ -141,7 +136,7 @@ class perf_mssql extends adodb_perf{
 			}
 			$rs1->Close();
 		}
-		$ADODB_FETCH_MODE = $save;
+		$this->conn->SetFetchMode2($save);
 		return $s.'</table>';
 	}
 

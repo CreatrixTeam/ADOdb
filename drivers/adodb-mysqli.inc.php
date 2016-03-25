@@ -487,12 +487,10 @@ class ADODB_mysqli extends ADOConnection {
 		if (!$this->metaColumnsSQL)
 			return $false;
 
-		global $ADODB_FETCH_MODE;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
 		$normalize = $pParsedTableName['table']['isToNormalize'];
-		$save = $ADODB_FETCH_MODE;
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 		$this->SetFetchMode2($savem);
@@ -541,7 +539,7 @@ class ADODB_mysqli extends ADOConnection {
 				}
 			}
 
-			if ($save == ADODB_FETCH_NUM) {
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) {
 				$retarr[] = $fld;
 			} else {
 				$retarr[strtoupper($fld->name)] = $fld;

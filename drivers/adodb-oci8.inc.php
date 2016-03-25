@@ -102,12 +102,8 @@ class ADODB_oci8 extends ADOConnection {
 	/*  function MetaColumns($table, $normalize=true) added by smondino@users.sourceforge.net*/
 	protected function _MetaColumns($pParsedTableName)
 	{
-	global $ADODB_FETCH_MODE;
-		
 		$table = $pParsedTableName['table']['name'];
 		$schema = @$pParsedTableName['schema']['name'];
-
-		$save = $ADODB_FETCH_MODE;
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		if ($schema){
@@ -138,7 +134,7 @@ class ADODB_oci8 extends ADOConnection {
 			$fld->binary = (strpos($fld->type,'BLOB') !== false);
 			$fld->default_value = $rs->fields[6];
 
-			if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM) {
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) {
 				$retarr[] = $fld;
 			}
 			else {

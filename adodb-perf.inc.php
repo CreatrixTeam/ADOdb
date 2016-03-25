@@ -386,10 +386,7 @@ Committed_AS:   348732 kB
 		$saveE = $this->conn->fnExecute;
 		$this->conn->fnExecute = false;
 
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->conn->SetFetchMode2(false);
+		$savem = $this->conn->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$sqlq = $this->conn->qstr($sql);
 		$arr = $this->conn->GetArray(
@@ -406,7 +403,6 @@ Committed_AS:   348732 kB
 		}
 
 		$this->conn->SetFetchMode2($savem);
-		$ADODB_CACHE_MODE = $save;
 		$this->conn->fnExecute = $saveE;
 		return $s;
 	}
@@ -445,8 +441,6 @@ Committed_AS:   348732 kB
 	*/
 	protected function _SuspiciousSQL($numsql = 10)
 	{
-		global $ADODB_FETCH_MODE;
-
             $perf_table = adodb_perf::table();
 			$saveE = $this->conn->fnExecute;
 			$this->conn->fnExecute = false;
@@ -459,9 +453,7 @@ Committed_AS:   348732 kB
 			if (isset($_GET['sql'])) return;
 			$sql1 = $this->sql1;
 
-			$save = $ADODB_FETCH_MODE;
-			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-			$savem = $this->conn->SetFetchMode2(false);
+			$savem = $this->conn->SetFetchMode2(ADODB_FETCH_NUM);
 			//$this->conn->debug=1;
 			$rs = $this->conn->SelectLimit(
 			"select avg(timer) as avg_timer,$sql1,count(*),max(timer) as max_timer,min(timer) as min_timer
@@ -471,7 +463,6 @@ Committed_AS:   348732 kB
 				group by sql1
 				order by 1 desc",$numsql);
 			$this->conn->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
 			$this->conn->fnExecute = $saveE;
 
 			if (!$rs) return "<p>$this->helpurl. ".$this->conn->ErrorMsg()."</p>";
@@ -524,8 +515,6 @@ Committed_AS:   348732 kB
 	*/
 	protected function _ExpensiveSQL($numsql = 10)
 	{
-		global $ADODB_FETCH_MODE;
-
             $perf_table = adodb_perf::table();
 			$saveE = $this->conn->fnExecute;
 			$this->conn->fnExecute = false;
@@ -538,9 +527,7 @@ Committed_AS:   348732 kB
 			if (isset($_GET['sql'])) return;
 
 			$sql1 = $this->sql1;
-			$save = $ADODB_FETCH_MODE;
-			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-			$savem = $this->conn->SetFetchMode2(false);
+			$savem = $this->conn->SetFetchMode2(ADODB_FETCH_NUM);
 
 			$rs = $this->conn->SelectLimit(
 			"select sum(timer) as total,$sql1,count(*),max(timer) as max_timer,min(timer) as min_timer
@@ -552,7 +539,6 @@ Committed_AS:   348732 kB
 				order by 1 desc",$numsql);
 			$this->conn->SetFetchMode2($savem);
 			$this->conn->fnExecute = $saveE;
-			$ADODB_FETCH_MODE = $save;
 			if (!$rs) return "<p>$this->helpurl. ".$this->conn->ErrorMsg()."</p>";
 			$s = "<h3>Expensive SQL</h3>
 <font size=1>Tuning the following SQL could reduce the server load substantially</font><br>
@@ -607,8 +593,6 @@ Committed_AS:   348732 kB
 	{
 		$savelog = $this->conn->LogSQL(false);
 		if (is_array($sql)) {
-		global $ADODB_FETCH_MODE;
-
 			$sql1 = $sql[0];
 			$key = $sql[1];
 			if (sizeof($sql)>2) $pos = $sql[2];
@@ -616,14 +600,12 @@ Committed_AS:   348732 kB
 			if (sizeof($sql)>3) $coef = $sql[3];
 			else $coef = false;
 			$ret = false;
-			$save = $ADODB_FETCH_MODE;
-			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-			$savem = $this->conn->SetFetchMode2(false);
+			$savem = $this->conn->SetFetchMode2(ADODB_FETCH_NUM);
 
 			$rs = $this->conn->Execute($sql1);
 
 			$this->conn->SetFetchMode2($savem);
-			$ADODB_FETCH_MODE = $save;
+
 			if ($rs) {
 				while (!$rs->EOF) {
 					$keyf = reset($rs->fields);

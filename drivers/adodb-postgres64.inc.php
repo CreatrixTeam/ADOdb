@@ -384,7 +384,6 @@ class ADODB_postgres64 extends ADOConnection{
 	// see http://phplens.com/lens/lensforum/msgs.php?id=14018 for more info
 	protected function _MetaColumns($pParsedTableName)
 	{
-		global $ADODB_FETCH_MODE;
 		$false = false;
 		$table = $pParsedTableName['table']['name'];
 		$normalize = $pParsedTableName['table']['isToNormalize'];
@@ -478,7 +477,7 @@ class ADODB_postgres64 extends ADOConnection{
 				}
 			}
 
-			if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM) $retarr[] = $fld;
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) $retarr[] = $fld;
 			else $retarr[strtoupper($fld->name)] = $fld;
 
 			$rs->MoveNext();

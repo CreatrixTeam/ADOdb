@@ -131,15 +131,11 @@ class perf_mysql extends adodb_perf{
 
 	public function GetReads()
 	{
-	global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->conn->SetFetchMode2(false);
+		$savem = $this->conn->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->conn->Execute('show status');
 
 		$this->conn->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!$rs) return 0;
 		$val = 0;
@@ -160,15 +156,11 @@ class perf_mysql extends adodb_perf{
 
 	public function GetWrites()
 	{
-	global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->conn->SetFetchMode2(false);
+		$savem = $this->conn->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->conn->Execute('show status');
 
 		$this->conn->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!$rs) return 0;
 		$val = 0.0;
@@ -196,15 +188,11 @@ class perf_mysql extends adodb_perf{
 		// first find out type of table
 		//$this->conn->debug=1;
 
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->conn->SetFetchMode2(false);
+		$savem = $this->conn->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->conn->Execute('show table status');
 
 		$this->conn->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!$rs) return '';
 		$type = strtoupper($rs->fields[1]);
@@ -247,16 +235,11 @@ class perf_mysql extends adodb_perf{
 	*/
 	public function GetInnoDBHitRatio()
 	{
-	global $ADODB_FETCH_MODE;
-
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$savem = $this->conn->SetFetchMode2(false);
+		$savem = $this->conn->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->conn->Execute('show engine innodb status');
 
 		$this->conn->SetFetchMode2($savem);
-		$ADODB_FETCH_MODE = $save;
 
 		if (!$rs || $rs->EOF) return 0;
 		$stat = $rs->fields[0];

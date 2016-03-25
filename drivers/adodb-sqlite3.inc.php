@@ -81,9 +81,7 @@ class ADODB_sqlite3 extends ADOConnection {
 	// mark newnham
 	protected function _MetaColumns($pParsedTableName)
 	{
-		global $ADODB_FETCH_MODE;
 		$false = false;
-		$save = $ADODB_FETCH_MODE;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
@@ -114,7 +112,7 @@ class ADODB_sqlite3 extends ADOConnection {
 			if (isset($r['pk']) && $r['pk']) {
 				$fld->primary_key=1;
 			}
-			if ($save == ADODB_FETCH_NUM) {
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) {
 				$arr[] = $fld;
 			} else {
 				$arr[strtoupper($fld->name)] = $fld;

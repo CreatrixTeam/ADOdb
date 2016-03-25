@@ -1703,8 +1703,6 @@ if (!defined('_ADODB_LAYER')) {
 	}
 
 	public function GetAssoc($sql, $inputarr=false,$force_array = false, $first2cols = false) {
-		global $ADODB_FETCH_MODE;
-
 		$savem = $this->fetchMode;
 
 		// Method does not work in ADODB_FETCH_BOTH mode
@@ -2690,8 +2688,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @return  array of ADOFieldObjects for current table.
 	 */
 	protected function _MetaColumns($pParsedTableName) {
-		global $ADODB_FETCH_MODE;
-
 		if (!empty($this->metaColumnsSQL)) {
 			$table = $pParsedTableName['table']['name'];
 			$normalize = $pParsedTableName['table']['isToNormalize'];
@@ -2722,7 +2718,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 					$fld->max_length = $rs->fields[2];
 				}
 
-				if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM) {
+				if ($this->GetFetchMode() == ADODB_FETCH_NUM) {
 					$retarr[] = $fld;
 				} else {
 					$retarr[strtoupper($fld->name)] = $fld;

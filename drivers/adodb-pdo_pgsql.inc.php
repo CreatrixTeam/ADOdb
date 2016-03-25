@@ -113,7 +113,6 @@ select viewname,'V' from pg_views where viewname like $mask";
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-		global $ADODB_FETCH_MODE;
 		$table = $pParsedTableName['table']['name'];
 		$normalize = $pParsedTableName['table']['isToNormalize'];
 		$schema = @$pParsedTableName['schema']['name'];
@@ -208,7 +207,7 @@ select viewname,'V' from pg_views where viewname like $mask";
 				}
 			}
 
-			if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM) $retarr[] = $fld;
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) $retarr[] = $fld;
 			else $retarr[strtoupper($fld->name)] = $fld;
 
 			$rs->MoveNext();

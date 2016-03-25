@@ -53,7 +53,6 @@ class ADODB_netezza extends ADODB_postgres64 {
 	// Changed this function to support Netezza which has no concept of keys
 	// could posisbly work on other things from the system table later.
 
-	global $ADODB_FETCH_MODE;
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
@@ -111,7 +110,7 @@ class ADODB_netezza extends ADODB_postgres64 {
 			 break;
 			}
 
-			if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM) $retarr[] = $fld;
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) $retarr[] = $fld;
 			else $retarr[strtoupper($fld->name)] = $fld;
 
 			$rs->MoveNext();

@@ -640,8 +640,6 @@ class ADODB_mssqlnative extends ADOConnection {
 			$dbName = $this->database;
 			$this->SelectDB($schema);
 		}
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
@@ -685,7 +683,7 @@ class ADODB_mssqlnative extends ADOConnection {
 				$fld->auto_increment= $rs->fields['is_identity'];
 			}
 
-			if ($save == ADODB_FETCH_NUM)
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM)
 				$retarr[] = $fld;
 			else
 				$retarr[strtoupper($fld->name)] = $fld;
