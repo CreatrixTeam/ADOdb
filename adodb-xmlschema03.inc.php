@@ -543,7 +543,7 @@ class dbTable extends dbObject {
 
 			// drop any existing fields not in schema
 			foreach( $legacy_fields as $field_id => $field ) {
-				if( !isset( $this->fields[$field_id] ) ) {
+				if( !isset( $this->fields[strtoupper($field->name)] ) ) {
 					$sql[] = $xmls->dict->DropColumnSQL( $this->name, $field->name );
 				}
 			}
