@@ -1720,12 +1720,16 @@ if (!defined('_ADODB_LAYER')) {
 	public function GetAssoc($sql, $inputarr=false,$force_array = false, $first2cols = false) {
 		$savem = $this->fetchMode;
 
+		// Method does not work in ADODB_FETCH_BOTH mode
+		if ($this->GetFetchMode() !== ADODB_FETCH_ASSOC) {
+			$this->SetFetchMode2(ADODB_FETCH_NUM);
+		}
+
 		$rs = $this->Execute($sql, $inputarr);
 
+		$this->SetFetchMode2($savem);
 		if (!$rs) {
-			/*
-			* Execution failure
-			*/
+			// Execution failure
 			return false;
 		}
 		return $rs->GetAssoc($force_array, $first2cols);
@@ -3623,19 +3627,54 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		return $arr;
 	}
 
-	function vGetAssoc($force_array = false, $first2cols = false)
-	{
-	global $ADODB_EXTENSION;
-
-		print_r($this);
-		exit;
+	/**
+	 * return whole recordset as a 2-dimensional associative array if
+	 * there are more than 2 columns. The first column is treated as the
+	 * key and is not included in the array. If there is only 2 columns,
+	 * it will return a 1 dimensional array of key-value pairs unless
+	 * $force_array == true. This recordset method is currently part of
+	 * the API, but may not be in later versions of ADOdb. By preference, use
+	 * ADOconnnection::getAssoc()
+	 *
+	 * @param bool	$force_array	(optional) Has only meaning if we have 2 data
+	 *								columns. If false, a 1 dimensional
+	 * 								array is returned, otherwise a 2 dimensional
+	 *								array is returned. If this sounds confusing,
+	 * 								read the source.
+	 *
+	 * @param bool	$first2cols 	(optional) Means if there are more than
+	 *								2 cols, ignore the remaining cols and
+	 * 								instead of returning
+	 *								array[col0] => array(remaining cols),
+	 *								return array[col0] => col1
+	 *
+	 * @return mixed
+	 *
+	 */
+	public function GetAssoc($force_array = false, $first2cols = false) {
+		global $ADODB_EXTENSION;
 
 		$cols = $this->_numOfFields;
 		if ($cols < 2) {
-			$false = false;
-			return $false;
+			return false;
 		}
-		$numIndex = is_array($this->fields) && array_key_exists(0, $this->fields);
+
+		// Empty recordset
+		if (!$this->fields) {
+			return array();
+		}
+
+		// Determine whether the array is associative or 0-based numeric
+		$numIndex = $this->CheckIfCurrentRowIsNumeric();
+		
+		if($numIndex === -1)
+		{
+			ADOConnection::outp("ADORecordSet::GetAssoc(): Overlap of associative and numeric ".
+					"keys. Use either ADODB_FETCH_NUM or ADODB_FETCH_ASSOC, or use non numeric ".
+					"names for table columns");
+			die();
+		}
+
 		$results = array();
 
 		if (!$first2cols && ($cols > 2 || $force_array)) {
@@ -3719,161 +3758,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 		$ref = $results; # workaround accelerator incompat with PHP 4.4 :(
 		return $ref;
-	}
-	/**
-	 * return whole recordset as a 2-dimensional associative array if
-	 * there are more than 2 columns. The first column is treated as the
-	 * key and is not included in the array. If there is only 2 columns,
-	 * it will return a 1 dimensional array of key-value pairs unless
-	 * $force_array == true. This recordset method is currently part of
-	 * the API, but may not be in later versions of ADOdb. By preference, use
-	 * ADOconnnection::getAssoc()
-	 *
-	 * @param bool	$force_array	(optional) Has only meaning if we have 2 data
-	 *								columns. If false, a 1 dimensional
-	 * 								array is returned, otherwise a 2 dimensional
-	 *								array is returned. If this sounds confusing,
-	 * 								read the source.
-	 *
-	 * @param bool	$first2cols 	(optional) Means if there are more than
-	 *								2 cols, ignore the remaining cols and
-	 * 								instead of returning
-	 *								array[col0] => array(remaining cols),
-	 *								return array[col0] => col1
-	 *
-	 * @return mixed
-	 *
-	 */
-	function getAssoc($force_array = false, $first2cols = false)
-	{
-
-		global $ADODB_EXTENSION;
-
-		/*
-		* Insufficient rows to show data
-		*/
-		if ($this->_numOfFields < 2)
-			  return;
-
-		/*
-		* Empty recordset
-		*/
-		if (!$this->fields) {
-			return array();
-		}
-
-		$numberOfFields = $this->_numOfFields;
-		$fetchMode      = $this->fetchMode;
-
-		if ($fetchMode == ADODB_FETCH_BOTH)
-		{
-			/*
-			* build a template of numeric keys. you could improve the
-			* speed by caching this, indexed by number of keys
-			*/
-			$testKeys = array_fill(0,$numberOfFields,0);
-
-			/*
-			* We use the associative method if ADODB_FETCH_BOTH
-			*/
-			$fetchMode = ADODB_FETCH_ASSOC;
-		}
-
-		$showArrayMethod = 0;
-
-		if ($numberOfFields == 2)
-			/*
-			* Key is always value of first element
-			* Value is alway value of second element
-			*/
-			$showArrayMethod = 1;
-
-		if ($force_array)
-			$showArrayMethod = 0;
-
-		if ($first2cols)
-			$showArrayMethod = 1;
-
-		$results  = array();
-
-		while (!$this->EOF){
-
-			$myFields = $this->fields;
-
-			if ($this->fetchMode == ADODB_FETCH_BOTH)
-			{
-				/*
-				* extract the associative keys
-				*/
-				$myFields = array_diff_key($myFields,$testKeys);
-			}
-
-			/*
-			* key is value of first element, rest is data,
-			* casing is already handled by the driver (but see below)
-			*/
-			$key = array_shift($myFields);
-			if (ADODB_ASSOC_CASE == ADODB_ASSOC_CASE_UPPER)
-				$key = strtoupper($key);
-			elseif (ADODB_ASSOC_CASE == ADODB_ASSOC_CASE_LOWER)
-				$key = strtolower($key);
-
-			switch ($showArrayMethod)
-			{
-			case 0:
-
-				if ($fetchMode == ADODB_FETCH_ASSOC)
-				{
-					/*
-					* The driver should have already handled the key
-					* casing, but in case it did not. We will check and force
-					* this in later versions of ADOdb
-					*/
-					if (ADODB_ASSOC_CASE == ADODB_ASSOC_CASE_UPPER)
-						$myFields = array_change_key_case($myFields,CASE_UPPER);
-
-					elseif (ADODB_ASSOC_CASE == ADODB_ASSOC_CASE_LOWER)
-						$myFields = array_change_key_case($myFields,CASE_LOWER);
-
-					/*
-					* We have already shifted the key off
-					* the front, so the rest is the value
-					*/
-					$results[$key] = $myFields;
-
-				}
-				else
-					/*
-					 * I want the values in a numeric array,
-					 * nicely re-indexed from zero
-					 */
-					$results[$key] = array_values($myFields);
-				break;
-
-			case 1:
-
-				/*
-				 * Don't care how long the array is,
-				 * I just want value of second column, and it doesn't
-				 * matter whether the array is associative or numeric
-				 */
-				$results[$key] = array_shift($myFields);
-				break;
-			}
-
-			if ($ADODB_EXTENSION)
-				/*
-				 * Don't really need this either except for
-				 * old version compatibility
-				 */
-				adodb_movenext($this);
-			else
-			   $this->MoveNext();
-		}
-		/*
-		 * Done
-		 */
-		return $results;
 	}
 
 	/**
@@ -4661,17 +4545,15 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 	/**
-	 * returns true if current row is at least numericaly indexed or false otherwise.
-	 * warning: can return true if the associative keys happens to be exactly named as the
-	 *		numeric keys. Solving this is logically impossible from just examining
-	 *		the $this->fields array.
-	 * note: can return false when the array is both associative and numerically indexed, but 
-	 *		the numericaly indexed portion is corrupt. This happens when the original array is
-	 *		created with numeric indices, then associative indices, and some of the associative
-	 *		indices are the same as the numeric indices.
+	 * returns 1 if current row is at least numericaly indexed. 0, if associative. -1, if
+	 *			associative and numeric keys overlap.
 	 */
-	public function IsCurrentRowNumeric()
+	public function CheckIfCurrentRowIsNumeric()
 	{
+		if(($this->fetchMode === ADODB_FETCH_NUM) || 
+				($this->fetchMode === ADODB_FETCH_ASSOC))
+			{return ($this->fetchMode === ADODB_FETCH_NUM);}
+
 		$vAssociativeKeys = array();
 		$vNumericKeys = array();
 		$vAssociativeSubset = array();
@@ -4681,7 +4563,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 		foreach($this->fields as $tKey => $tValue)
 		{
-			if(ctype_digit(trim($tKey)))
+			if(ctype_digit(trim($tKey)) && ($tKey >= 0) &&
+					($tKey < $this->_numOfFields))
 			{
 				$vNumericKeys[] = $tKey;
 				$vNumericSubset[$tValue] = $tValue;
@@ -4696,22 +4579,15 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		$vAssociativeKeysCount = count($vAssociativeKeys);
 		$vNumericKeysCount = count($vNumericKeys);
 
-		if(($vNumericKeysCount === $this->_numOfFields) && 
-				($vNumericKeysCount === $vAssociativeKeysCount))
-			{return true;}
-		else if($vNumericKeysCount > $vAssociativeKeysCount)
+		if($vNumericKeysCount === $this->_numOfFields)
 		{
-			if($vNumericKeys != range(0, $this->_numOfFields - 1))
-				{return false;}
-			foreach($vAssociativeSubset as $tValue)
-			{
-				if(!array_key_exists($tValue, $vNumericSubset))
-					{return false;}
-			}
-			return true;
+			if($vNumericKeysCount === $vAssociativeKeysCount)
+				{return 1;}
+			else
+				{return -1;}
 		}
 		else
-			{return false;}
+			{return 0;}
 	}
 } // end class ADORecordSet
 
