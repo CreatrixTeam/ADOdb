@@ -105,7 +105,7 @@ class ADODB_mysqli extends ADOConnection {
 		foreach($this->optionFlags as $arr) {
 			mysqli_options($this->_connectionID,$arr[0],$arr[1]);
 		}
-		
+
 		/*
 		* Now merge in the standard connection parameters setting
 		*/
@@ -439,15 +439,15 @@ class ADODB_mysqli extends ADOConnection {
 			$associative = true;
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
-		
+
 		if ( !empty($owner) ) {
 			$table = "$owner.$table";
 		}
-		
+
 		$a_create_table = $this->getRow(sprintf('SHOW CREATE TABLE %s', $table));
-		
+
 		$this->SetFetchMode2($savem);
-		
+
 		$create_sql = isset($a_create_table["Create Table"]) ? $a_create_table["Create Table"] : $a_create_table["Create View"];
 
 		$matches = array();

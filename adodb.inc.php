@@ -1176,20 +1176,35 @@ if (!defined('_ADODB_LAYER')) {
 				$sqlarr = explode('?',$sql);
 				$nparams = sizeof($sqlarr)-1;
 
+				if (!$array_2d) {
+					// When not Bind Bulk - convert to array of arguments list
+					$inputarr = array($inputarr);
+				} else {
+					// Bulk bind - Make sure all list of params have the same number of elements
+					$countElements = array_map('count', $inputarr);
+					if (1 != count(array_unique($countElements))) {
+						$this->outp_throw(
+							"[bulk execute] Input array has different number of params  [" . print_r($countElements, true) .  "].",
+							'Execute'
+						);
+						return false;
+					}
+					unset($countElements);
+				}
 				// Make sure the number of parameters provided in the input
 				// array matches what the query expects
-				if ($nparams != count($inputarr)) {
+				$element0 = reset($inputarr);
+				if ($nparams != count($element0)) {
 					$this->outp_throw(
-						"Input array has " . count($inputarr) .
+						"Input array has " . count($element0) .
 						" params, does not match query: '" . htmlspecialchars($sql) . "'",
 						'Execute'
 					);
 					return false;
 				}
-
-				if (!$array_2d) {
-					$inputarr = array($inputarr);
-				}
+				
+				// clean memory
+				unset($element0);
 
 				foreach($inputarr as $arr) {
 					$sql = ''; $i = 0;
@@ -3614,24 +3629,23 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 	/**
 	 * return whole recordset as a 2-dimensional associative array if
-	 * there are more than 2 columns. The first column is treated as the 
-	 * key and is not included in the array. If there is only 2 columns, 
-	 * it will return a 1 dimensional array of key-value pairs unless 
+	 * there are more than 2 columns. The first column is treated as the
+	 * key and is not included in the array. If there is only 2 columns,
+	 * it will return a 1 dimensional array of key-value pairs unless
 	 * $force_array == true. This recordset method is currently part of
 	 * the API, but may not be in later versions of ADOdb. By preference, use
-     * ADOconnnection::getAssoc()	 
-	 * 
+	 * ADOconnnection::getAssoc()
 	 *
-	 * @param bool	$force_array	(optional) Has only meaning if we have 2 data 
+	 * @param bool	$force_array	(optional) Has only meaning if we have 2 data
 	 *								columns. If false, a 1 dimensional
-	 * 								array is returned, otherwise a 2 dimensional 
+	 * 								array is returned, otherwise a 2 dimensional
 	 *								array is returned. If this sounds confusing,
 	 * 								read the source.
 	 *
-	 * @param bool	$first2cols 	(optional) Means if there are more than 
+	 * @param bool	$first2cols 	(optional) Means if there are more than
 	 *								2 cols, ignore the remaining cols and
-	 * 								instead of returning 
-	 *								array[col0] => array(remaining cols), 
+	 * 								instead of returning
+	 *								array[col0] => array(remaining cols),
 	 *								return array[col0] => col1
 	 *
 	 * @param int	$fetchMode		(optional) The fetch mode, if available
@@ -3642,13 +3656,13 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	function getAssoc($force_array = false, $first2cols = false, $fetchMode=-1)
 	{
 
-        global $ADODB_EXTENSION;
+		global $ADODB_EXTENSION;
 
-        /*
+		/*
 		* Insufficient rows to show data
 		*/
 		if ($this->_numOfFields < 2)
-              return;
+			  return;
 
 		/*
 		* Empty recordset
@@ -3657,27 +3671,27 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			return array();
 		}
 
-        $showArrayMethod = 0;
+		$showArrayMethod = 0;
 
-        if ($this->_numOfFields == 2)
-            /*
-            * Key is always value of first element
-            * Value is alway value of second element
-            */
-            $showArrayMethod = 1;
+		if ($this->_numOfFields == 2)
+			/*
+			* Key is always value of first element
+			* Value is alway value of second element
+			*/
+			$showArrayMethod = 1;
 
-        if ($force_array)
-            $showArrayMethod = 0;
+		if ($force_array)
+			$showArrayMethod = 0;
 
-        if ($first2cols)
-            $showArrayMethod = 1;
+		if ($first2cols)
+			$showArrayMethod = 1;
 
 		$results  = array();
 
-        while (!$this->EOF){
+		while (!$this->EOF){
 
-            $myFields = $this->fields;
-			
+			$myFields = $this->fields;
+
 			/*
 			* If we have used the recordset method as an API, we don't have
 			* true access to the fetch mode. This only affects the presentation
@@ -3695,9 +3709,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				* 0=>0,1=>1,2=>2....n=>n,
 				* i.e. the keys and values would be exactly the same
 				*/
-				$testKeys = array_keys($myFields); 
-				
-				$walkKeys = array_fill(0,$this->_numOfFields,0); 
+				$testKeys = array_keys($myFields);
+
+				$walkKeys = array_fill(0,$this->_numOfFields,0);
 				array_walk($walkKeys,array($this,'walkGetAssocKeys'));
 				/*
 				* If the array is numeric, then the md5 of $testKeys
@@ -3707,19 +3721,19 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 					$fetchMode = ADODB_FETCH_NUM;
 				else
 					$fetchMode = ADODB_FETCH_ASSOC;
-				
-			} 
-			 
+
+			}
+
 			/*
-            * key is value of first element, rest is data,
-            * casing is already handled by the driver
-            */
-            $key = array_shift($myFields);
+			* key is value of first element, rest is data,
+			* casing is already handled by the driver
+			*/
+			$key = array_shift($myFields);
 
 			switch ($showArrayMethod){
-            case 0:
+			case 0:
 
-                if ($fetchMode == ADODB_FETCH_ASSOC)
+				if ($fetchMode == ADODB_FETCH_ASSOC)
 				{
 					/*
 					* The driver should have already handled the key
@@ -3728,7 +3742,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 					*/
 					if (ADODB_ASSOC_CASE == ADODB_ASSOC_CASE_UPPER)
 						$myFields = array_change_key_case($myFields,CASE_UPPER);
-					
+
 					elseif (ADODB_ASSOC_CASE == ADODB_ASSOC_CASE_LOWER)
 						$myFields = array_change_key_case($myFields,CASE_LOWER);
 
@@ -3737,7 +3751,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 					* the front, so the rest is the value
 					*/
 					$results[$key] = $myFields;
-					
+
 				}
 				else
 					/*
@@ -3745,34 +3759,34 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 					 * nicely re-indexed from zero
 					 */
 					$results[$key] = array_values($myFields);
-                break;
+				break;
 
-            case 1:
+			case 1:
 
-                /*
-                 * Don't care how long the array is,
-                 * I just want value of second column, and it doesn't
+				/*
+				 * Don't care how long the array is,
+				 * I just want value of second column, and it doesn't
 				 * matter whether the array is associative or numeric
-                 */
-                $results[$key] = array_shift($myFields);
-                break;
-            }
+				 */
+				$results[$key] = array_shift($myFields);
+				break;
+			}
 
-            if ($ADODB_EXTENSION)
-                /*
-                 * Don't really need this either except for 
-                 * old version compatibility
-                 */
-                adodb_movenext($this);
-            else
-               $this->MoveNext();
-        }        
-        /*
-         * Done
-         */
-        return $results;
-    }
-	
+			if ($ADODB_EXTENSION)
+				/*
+				 * Don't really need this either except for
+				 * old version compatibility
+				 */
+				adodb_movenext($this);
+			else
+			   $this->MoveNext();
+		}
+		/*
+		 * Done
+		 */
+		return $results;
+	}
+
 	/**
 	* Creates a numeric array where the keys and values are exactly the same
 	*
@@ -3785,7 +3799,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	{
 		$item = $key;
 	}
-	
+
 	/**
 	 *
 	 * @param v		is the character timestamp in YYYY-MM-DD hh:mm:ss format
