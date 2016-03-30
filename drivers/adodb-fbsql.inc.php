@@ -187,6 +187,15 @@ class ADORecordSet_fbsql extends ADORecordSet{
 			$o = @fbsql_fetch_field($this->_queryID);// fbsql returns the max length less spaces -- so it is unrealiable
 			//$o->max_length = -1;
 		}
+		
+		if($o)
+		{
+			$tADOFieldObject = new ADOFieldObject();
+			
+			$tADOFieldObject->FillFromObject($o);
+
+			return $tADOFieldObject;
+		}
 
 		return $o;
 	}

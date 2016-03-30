@@ -836,6 +836,11 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 		$o->name = @pg_field_name($this->_queryID,$off);
 		$o->type = @pg_field_type($this->_queryID,$off);
 		$o->max_length = @pg_fieldsize($this->_queryID,$off);
+		
+		if(($o->name === false) && ($o->type === false) &&
+				($o->max_length === false))
+			{return false;}
+
 		return $o;
 	}
 

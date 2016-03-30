@@ -546,12 +546,7 @@ class ADORecordSet_pdo extends ADORecordSet {
 		$o= new ADOFieldObject();
 		$arr = @$this->_queryID->getColumnMeta($fieldOffset);
 		if (!$arr) {
-			$o->name = 'bad getColumnMeta()';
-			$o->max_length = -1;
-			$o->type = 'VARCHAR';
-			$o->precision = 0;
-	#		$false = false;
-			return $o;
+			return false;
 		}
 		//adodb_pr($arr);
 		$o->name = $arr['name'];
@@ -564,14 +559,6 @@ class ADORecordSet_pdo extends ADORecordSet {
 		$o->max_length = $arr['len'];
 		$o->precision = $arr['precision'];
 
-		switch(ADODB_ASSOC_CASE) {
-			case ADODB_ASSOC_CASE_LOWER:
-				$o->name = strtolower($o->name);
-				break;
-			case ADODB_ASSOC_CASE_UPPER:
-				$o->name = strtoupper($o->name);
-				break;
-		}
 		return $o;
 	}
 

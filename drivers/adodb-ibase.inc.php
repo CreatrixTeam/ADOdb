@@ -627,30 +627,21 @@ class ADORecordset_ibase extends ADORecordSet
 	protected  $_cacheType;
 
 	/*		Returns: an object containing field information.
-			Get column information in the Recordset object. fetchField() can be used in order to obtain information about
+			Get column information in the Recordset object. FetchField() can be used in order to obtain information about
 			fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by
-			fetchField() is retrieved.		*/
+			FetchField() is retrieved.		*/
 
 	public function FetchField($fieldOffset = -1)
 	{
 			$fld = new ADOFieldObject;
 			$ibf = ibase_field_info($this->_queryID,$fieldOffset);
+			
+			if($ibf === false)
+				{return false;}
 
 			$name = empty($ibf['alias']) ? $ibf['name'] : $ibf['alias'];
 
-			switch (ADODB_ASSOC_CASE) {
-				case ADODB_ASSOC_CASE_UPPER:
-					$fld->name = strtoupper($name);
-					break;
-				case ADODB_ASSOC_CASE_LOWER:
-					$fld->name = strtolower($name);
-					break;
-				case ADODB_ASSOC_CASE_NATIVE:
-				default:
-					$fld->name = $name;
-					break;
-			}
-
+			$fld->name = $name;
 			$fld->type = $ibf['type'];
 			$fld->max_length = $ibf['length'];
 

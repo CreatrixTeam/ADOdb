@@ -1461,9 +1461,9 @@ class ADORecordset_oci8 extends ADORecordSet {
 
 	/**
 	 * Get column information in the Recordset object.
-	 * fetchField() can be used in order to obtain information about fields
+	 * FetchField() can be used in order to obtain information about fields
 	 * in a certain query result. If the field offset isn't specified, the next
-	 * field that wasn't yet retrieved by fetchField() is retrieved
+	 * field that wasn't yet retrieved by FetchField() is retrieved
 	 *
 	 * @return object containing field information
 	 */
@@ -1472,11 +1472,12 @@ class ADORecordset_oci8 extends ADORecordSet {
 		$fld = new ADOFieldObject;
 		$fieldOffset += 1;
 		$fld->name =oci_field_name($this->_queryID, $fieldOffset);
-		if (ADODB_ASSOC_CASE == ADODB_ASSOC_CASE_LOWER) {
-			$fld->name = strtolower($fld->name);
-		}
 		$fld->type = oci_field_type($this->_queryID, $fieldOffset);
 		$fld->max_length = oci_field_size($this->_queryID, $fieldOffset);
+
+		if(($fld->name === false) && ($fld->type === false) &&
+				($fld->max_length === false))
+			{return false;}
 
 		switch($fld->type) {
 			case 'NUMBER':

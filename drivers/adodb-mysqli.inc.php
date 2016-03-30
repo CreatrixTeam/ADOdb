@@ -802,8 +802,8 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		* Trivial method to cast class to ADOfieldObject
 		*/
 		$a = new ADOFieldObject;
-		foreach (get_object_vars($o) as $key => $name)
-			$a->$key = $name;
+		$a->FillFromObject($o);
+		
 		return $a;
 	}
 

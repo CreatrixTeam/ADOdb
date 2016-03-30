@@ -675,8 +675,11 @@ class ADORecordSet_odbtp extends ADORecordSet {
 		$o->name = @odbtp_field_name($this->_queryID,$off);
 		$o->type = @odbtp_field_type($this->_queryID,$off);
         $o->max_length = @odbtp_field_length($this->_queryID,$off);
-		if (ADODB_ASSOC_CASE == 0) $o->name = strtolower($o->name);
-		else if (ADODB_ASSOC_CASE == 1) $o->name = strtoupper($o->name);
+
+		if(($o->name === false) && ($o->type === false) &&
+				($o->max_length === false))
+			{return false;}
+
 		return $o;
 	}
 

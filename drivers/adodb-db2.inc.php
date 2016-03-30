@@ -638,8 +638,11 @@ class ADORecordSet_db2 extends ADORecordSet {
 		$o->name = @db2_field_name($this->_queryID,$offset);
 		$o->type = @db2_field_type($this->_queryID,$offset);
 		$o->max_length = db2_field_width($this->_queryID,$offset);
-		if (ADODB_ASSOC_CASE == 0) $o->name = strtolower($o->name);
-		else if (ADODB_ASSOC_CASE == 1) $o->name = strtoupper($o->name);
+
+		if(($o->name === false) && ($o->type === false) &&
+				($o->max_length === false))
+			{return false;}
+
 		return $o;
 	}
 

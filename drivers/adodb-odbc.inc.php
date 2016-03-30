@@ -620,8 +620,11 @@ class ADORecordSet_odbc extends ADORecordSet {
 		$o->name = @odbc_field_name($this->_queryID,$off);
 		$o->type = @odbc_field_type($this->_queryID,$off);
 		$o->max_length = @odbc_field_len($this->_queryID,$off);
-		if (ADODB_ASSOC_CASE == 0) $o->name = strtolower($o->name);
-		else if (ADODB_ASSOC_CASE == 1) $o->name = strtoupper($o->name);
+
+		if(($o->name === false) && ($o->type === false) &&
+				($o->max_length === false))
+			{return false;}
+
 		return $o;
 	}
 

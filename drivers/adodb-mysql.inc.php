@@ -582,6 +582,15 @@ class ADORecordSet_mysql extends ADORecordSet{
 			//if ($o) $o->max_length = @mysql_field_len($this->_queryID); // suggested by: Jim Nicholson (jnich#att.com)
 			$o->max_length = -1; // mysql returns the max length less spaces -- so it is unrealiable
 		}
+		
+		if($o)
+		{
+			$tADOFieldObject = new ADOFieldObject();
+			
+			$tADOFieldObject->FillFromObject($o);
+
+			return $tADOFieldObject;
+		}
 
 		return $o;
 	}

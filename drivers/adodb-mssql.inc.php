@@ -804,9 +804,9 @@ class ADORecordset_mssql extends ADORecordSet {
 	}
 
 	/*	Returns: an object containing field information.
-		Get column information in the Recordset object. fetchField() can be used in order to obtain information about
+		Get column information in the Recordset object. FetchField() can be used in order to obtain information about
 		fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by
-		fetchField() is retrieved.	*/
+		FetchField() is retrieved.	*/
 
 	public function FetchField($fieldOffset = -1)
 	{
@@ -817,8 +817,17 @@ class ADORecordset_mssql extends ADORecordSet {
 			$f = @mssql_fetch_field($this->_queryID);
 		}
 		$false = false;
-		if (empty($f)) return $false;
-		return $f;
+
+		if(!empty($f))
+		{
+			$tADOFieldObject = new ADOFieldObject();
+			
+			$tADOFieldObject->FillFromObject($f);
+
+			return $tADOFieldObject;
+		}
+
+		return $false;
 	}
 
 	protected function _seek($row)

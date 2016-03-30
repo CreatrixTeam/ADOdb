@@ -251,6 +251,16 @@ if (!defined('_ADODB_LAYER')) {
 		public  $name = '';
 		public  $max_length=0;
 		public  $type="";
+
+		//Temporary method untill drivers explicitly and correctly create the ADOFieldObject objects.
+		public function FillFromObject($pObject)
+		{
+			if(!$pObject)
+				{return;}
+
+			foreach(get_object_vars($pObject) as $tKey => $tValue)
+				{$this->$tKey = $tValue;}
+		}
 /*
 		// additional fields by dannym... (danny_milo@yahoo.com)
 		public  $not_null = false;

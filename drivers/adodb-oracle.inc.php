@@ -237,9 +237,9 @@ class ADORecordset_oracle extends ADORecordSet {
 
 
 	   /*		Returns: an object containing field information.
-			   Get column information in the Recordset object. fetchField() can be used in order to obtain information about
+			   Get column information in the Recordset object. FetchField() can be used in order to obtain information about
 			   fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by
-			   fetchField() is retrieved.		*/
+			   FetchField() is retrieved.		*/
 
 	   public function FetchField($fieldOffset = -1)
 	   {
@@ -247,6 +247,11 @@ class ADORecordset_oracle extends ADORecordSet {
 			$fld->name = ora_columnname($this->_queryID, $fieldOffset);
 			$fld->type = ora_columntype($this->_queryID, $fieldOffset);
 			$fld->max_length = ora_columnsize($this->_queryID, $fieldOffset);
+			
+			if(($fld->name === false) && ($fld->type === false) &&
+					($fld->max_length === false))
+				{return false;}
+
 			return $fld;
 	   }
 

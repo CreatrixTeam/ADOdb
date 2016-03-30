@@ -777,7 +777,7 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 		/*
 		* Cache the metadata right now
 		 */
-		$this->_fetchField();
+		$this->_FetchField();
 
 	}
 
@@ -812,10 +812,10 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 	/**
 	* Returns: an object containing field information.
 	*
-	* Get column information in the Recordset object. fetchField() 
+	* Get column information in the Recordset object. FetchField() 
 	* can be used in order to obtain information about fields in a 
 	* certain query result. If the field offset isn't specified, 
-	* the next field that wasn't yet retrieved by fetchField() 
+	* the next field that wasn't yet retrieved by FetchField() 
 	* is retrieved.
 	*
 	* $param int $fieldOffset (optional default=-1 for all

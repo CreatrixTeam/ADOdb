@@ -366,6 +366,10 @@ class ADORecordset_sqlite extends ADORecordSet {
 		$fld->name = sqlite_field_name($this->_queryID, $fieldOffset);
 		$fld->type = 'VARCHAR';
 		$fld->max_length = -1;
+
+		if($fld->name === false)
+			{return false;}
+
 		return $fld;
 	}
 

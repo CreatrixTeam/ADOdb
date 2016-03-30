@@ -241,9 +241,9 @@ class ADORecordset_sybase extends ADORecordSet {
 	}
 
 	/*	Returns: an object containing field information.
-		Get column information in the Recordset object. fetchField() can be used in order to obtain information about
+		Get column information in the Recordset object. FetchField() can be used in order to obtain information about
 		fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by
-		fetchField() is retrieved.	*/
+		FetchField() is retrieved.	*/
 	public function FetchField($fieldOffset = -1)
 	{
 		if ($fieldOffset != -1) {
@@ -254,6 +254,16 @@ class ADORecordset_sybase extends ADORecordSet {
 		}
 		// older versions of PHP did not support type, only numeric
 		if ($o && !isset($o->type)) $o->type = ($o->numeric) ? 'float' : 'varchar';
+
+		if($o)
+		{
+			$tADOFieldObject = new ADOFieldObject();
+			
+			$tADOFieldObject->FillFromObject($o);
+
+			return $tADOFieldObject;
+		}
+
 		return $o;
 	}
 
