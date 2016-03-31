@@ -816,23 +816,6 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		return $row;
 	}
 
-	/* Use associative array to get fields array */
-	public function Fields($colname)
-	{
-		if ($this->fetchMode != ADODB_FETCH_NUM) {
-			return @$this->fields[$colname];
-		}
-
-		if (!$this->bind) {
-			$this->bind = array();
-			for ($i = 0; $i < $this->_numOfFields; $i++) {
-				$o = $this->FetchField($i);
-				$this->bind[strtoupper($o->name)] = $i;
-			}
-		}
-		return $this->fields[$this->bind[strtoupper($colname)]];
-	}
-
 	protected function _seek($row)
 	{
 		if ($this->_numOfRows == 0 || $row < 0) {

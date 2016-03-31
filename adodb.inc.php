@@ -4019,14 +4019,30 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 	/**
 	 * Get the value of a field in the current row by column name.
-	 * Will not work if ADODB_FETCH_MODE is set to ADODB_FETCH_NUM.
+	 * Might not work if ADODB_FETCH_MODE is set to ADODB_FETCH_NUM.
+	 * 
+	 * Warning: This is the default implementation which assumes the driver
+	 *		natively supports ADODB_FETCH_ASSOC mode. Drivers that only offer
+	 *		emulated support, or no support at all, must override this function.
 	 *
 	 * @param colname  is the field to access
 	 *
 	 * @return the value of $colname column
 	 */
 	public function Fields($colname) {
-		return $this->fields[$colname];
+		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
+			return @$this->fields[$colname];
+		}
+
+		if (!$this->bind) {
+			$this->bind = array();
+			for ($i=0; $i < $this->_numOfFields; $i++) {
+				$o = $this->FetchField($i);
+				$this->bind[strtoupper($o->name)] = $i;
+			}
+		}
+
+		 return $this->fields[$this->bind[strtoupper($colname)]];
 	}
 
 	/**

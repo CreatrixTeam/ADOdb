@@ -96,31 +96,18 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 
 	public  $databaseType = 'oci8po';
 
-	public function Fields($colname)
-	{
-		if ($this->fetchMode == ADODB_FETCH_ASSOC) return $this->fields[$colname];
-
-		if (!$this->bind) {
-			$this->bind = array();
-			for ($i=0; $i < $this->_numOfFields; $i++) {
-				$o = $this->FetchField($i);
-				$this->bind[strtoupper($o->name)] = $i;
-			}
-		}
-		 return $this->fields[$this->bind[strtoupper($colname)]];
-	}
-
-	// lowercase field names...
 	protected function _FetchField($fieldOffset = -1)
 	{
 		$fld = new ADOFieldObject;
 		$fieldOffset += 1;
 		$fld->name = OCIcolumnname($this->_queryID, $fieldOffset);
-		if (ADODB_ASSOC_CASE == ADODB_ASSOC_CASE_LOWER) {
-			$fld->name = strtolower($fld->name);
-		}
 		$fld->type = OCIcolumntype($this->_queryID, $fieldOffset);
 		$fld->max_length = OCIcolumnsize($this->_queryID, $fieldOffset);
+
+		if(($fld->name === false) && ($fld->type === false) &&
+				($fld->max_length === false))
+			{return false;}
+
 		if ($fld->type == 'NUMBER') {
 			$sc = OCIColumnScale($this->_queryID, $fieldOffset);
 			if ($sc == 0) {

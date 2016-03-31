@@ -788,21 +788,6 @@ class ADORecordset_mssql extends ADORecordSet {
 		return true;
 	}
 
-	/* Use associative array to get fields array */
-	public function Fields($colname)
-	{
-		if ($this->fetchMode != ADODB_FETCH_NUM) return $this->fields[$colname];
-		if (!$this->bind) {
-			$this->bind = array();
-			for ($i=0; $i < $this->_numOfFields; $i++) {
-				$o = $this->FetchField($i);
-				$this->bind[strtoupper($o->name)] = $i;
-			}
-		}
-
-		return $this->fields[$this->bind[strtoupper($colname)]];
-	}
-
 	/*	Returns: an object containing field information.
 		Get column information in the Recordset object. FetchField() can be used in order to obtain information about
 		fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by

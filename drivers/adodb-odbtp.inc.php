@@ -688,20 +688,6 @@ class ADORecordSet_odbtp extends ADORecordSet {
 		return @odbtp_data_seek($this->_queryID, $row);
 	}
 
-	public function fields($colname)
-	{
-		if ($this->fetchMode & ADODB_FETCH_ASSOC) return $this->fields[$colname];
-
-		if (!$this->bind) {
-			$this->bind = array();
-			for ($i=0; $i < $this->_numOfFields; $i++) {
-				$name = @odbtp_field_name( $this->_queryID, $i );
-				$this->bind[strtoupper($name)] = $i;
-			}
-		}
-		return $this->fields[$this->bind[strtoupper($colname)]];
-	}
-
 	protected function _fetch_odbtp($type=0)
 	{
 		switch ($this->fetchMode) {
