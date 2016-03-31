@@ -617,7 +617,6 @@ class ADORecordSet_mysql extends ADORecordSet{
 		//return adodb_movenext($this);
 		//if (defined('ADODB_EXTENSION')) return adodb_movenext($this);
 		if (@$this->fields = mysql_fetch_array($this->_queryID,$this->mysql_getDriverFetchMode())) {
-			$this->_updatefields();
 			$this->_currentRow += 1;
 			return true;
 		}
@@ -631,7 +630,6 @@ class ADORecordSet_mysql extends ADORecordSet{
 	protected function _fetch()
 	{
 		$this->fields = @mysql_fetch_array($this->_queryID,$this->mysql_getDriverFetchMode());
-		$this->_updatefields();
 		return is_array($this->fields);
 	}
 

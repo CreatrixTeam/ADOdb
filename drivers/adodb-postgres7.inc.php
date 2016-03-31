@@ -343,7 +343,6 @@ class ADORecordSet_assoc_postgres7 extends ADORecordSet_postgres64{
 
 		if ($this->fields) {
 			if (isset($this->_blobArr)) $this->_fixblobs();
-			$this->_updatefields();
 		}
 
 		return (is_array($this->fields));
@@ -360,7 +359,6 @@ class ADORecordSet_assoc_postgres7 extends ADORecordSet_postgres64{
 					if ($this->fields) {
 						if (isset($this->_blobArr)) $this->_fixblobs();
 
-						$this->_updatefields();
 					}
 					return true;
 				}

@@ -123,7 +123,6 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 		if(@OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode())) {
 		global $ADODB_ANSI_PADDING_OFF;
 			$this->_currentRow++;
-			$this->_updatefields();
 
 			if (!empty($ADODB_ANSI_PADDING_OFF)) {
 				foreach($this->fields as $k => $v) {
@@ -155,7 +154,7 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 			$arr = array();
 			return $arr;
 		}
-		$this->_updatefields();
+
 		$results = array();
 		$cnt = 0;
 		while (!$this->EOF && $nrows != $cnt) {
@@ -172,8 +171,6 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 
 		$ret = @OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode());
 		if ($ret) {
-			$this->_updatefields();
-
 			if (!empty($ADODB_ANSI_PADDING_OFF)) {
 				foreach($this->fields as $k => $v) {
 					if (is_string($v)) $this->fields[$k] = rtrim($v);

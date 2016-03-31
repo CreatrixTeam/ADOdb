@@ -864,7 +864,6 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		$this->fields = @mysqli_fetch_array($this->_queryID,$this->mysqli_getDriverFetchMode());
 
 		if (is_array($this->fields)) {
-			$this->_updatefields();
 			return true;
 		}
 		$this->EOF = true;
@@ -874,7 +873,6 @@ class ADORecordSet_mysqli extends ADORecordSet{
 	protected function _fetch()
 	{
 		$this->fields = mysqli_fetch_array($this->_queryID,$this->mysqli_getDriverFetchMode());
-		$this->_updatefields();
 		return is_array($this->fields);
 	}
 
