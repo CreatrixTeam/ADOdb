@@ -4065,7 +4065,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 		$this->bind = array();
 		
-		if(!($this->fetchMode & ADODB_FETCH_ASSOC))
+		if(!($this->fetchMode & ADODB_FETCH_ASSOC) ||
+				(isset($this->fields[1]) && //heuristic for performance
+				(array_keys($this->fields) == range(0, $this->_numOfFields - 1))))
 		{
 			for ($i=0; $i < $this->_numOfFields; $i++) {
 				$o = $this->FetchField($i);
