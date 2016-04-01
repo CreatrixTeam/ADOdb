@@ -288,7 +288,7 @@ class ADORecordset_sybase extends ADORecordSet {
 			$this->fields = @sybase_fetch_assoc($this->_queryID);
 
 			if (is_array($this->fields)) {
-				$this->fields = $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
+				$this->fields = $this->GetEmulatedRowAssoc();
 				return true;
 			}
 			return false;

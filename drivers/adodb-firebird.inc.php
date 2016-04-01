@@ -716,9 +716,9 @@ class  ADORecordset_firebird extends ADORecordSet
 
 		$this->fields = $f;
 		if ($this->fetchMode == ADODB_FETCH_ASSOC) {
-			$this->fields = $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
+			$this->fields = $this->GetEmulatedRowAssoc();
 		} else if ($this->fetchMode == ADODB_FETCH_BOTH) {
-			$this->fields = array_merge($this->fields,$this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE));
+			$this->fields = array_merge($this->fields,$this->GetEmulatedRowAssoc());
 		}
 		return true;
 	}

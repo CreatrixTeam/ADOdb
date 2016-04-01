@@ -649,8 +649,10 @@ class ADORecordSet_ado extends ADORecordSet {
 		if ($this->hideErrors) error_reporting($olde);
 		@$rs->MoveNext(); // @ needed for some versions of PHP!
 
-		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-			$this->fields = $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
+		if ($this->fetchMode == ADODB_FETCH_ASSOC) {
+			$this->fields = $this->GetEmulatedRowAssoc();
+		} else if ($this->fetchMode == ADODB_FETCH_BOTH) {
+			$this->fields = array_merge($this->fields,$this->GetEmulatedRowAssoc());
 		}
 		return true;
 	}

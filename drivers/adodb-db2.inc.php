@@ -673,9 +673,10 @@ class ADORecordSet_db2 extends ADORecordSet {
 		$this->Move($offset);
 		$this->fetchMode = $savem;
 
-		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-			$this->bind = false;
-			$this->fields = $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
+		if ($this->fetchMode == ADODB_FETCH_ASSOC) {
+			$this->fields = $this->GetEmulatedRowAssoc();
+		} else if ($this->fetchMode == ADODB_FETCH_BOTH) {
+			$this->fields = array_merge($this->fields,$this->GetEmulatedRowAssoc());
 		}
 
 		$results = array();
@@ -697,8 +698,10 @@ class ADORecordSet_db2 extends ADORecordSet {
 
 			$this->fields = @db2_fetch_array($this->_queryID);
 			if ($this->fields) {
-				if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-					$this->fields = $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
+				if ($this->fetchMode == ADODB_FETCH_ASSOC) {
+					$this->fields = $this->GetEmulatedRowAssoc();
+				} else if ($this->fetchMode == ADODB_FETCH_BOTH) {
+					$this->fields = array_merge($this->fields,$this->GetEmulatedRowAssoc());
 				}
 				return true;
 			}
@@ -713,8 +716,10 @@ class ADORecordSet_db2 extends ADORecordSet {
 		$this->bind = false;
 		$this->fields = db2_fetch_array($this->_queryID);
 		if ($this->fields) {
-			if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-				$this->fields = $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
+			if ($this->fetchMode == ADODB_FETCH_ASSOC) {
+				$this->fields = $this->GetEmulatedRowAssoc();
+			} else if ($this->fetchMode == ADODB_FETCH_BOTH) {
+				$this->fields = array_merge($this->fields,$this->GetEmulatedRowAssoc());
 			}
 			return true;
 		}

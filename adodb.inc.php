@@ -3460,6 +3460,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	protected  $_lastPageNo = -1;
 	protected  $_maxRecordCount = 0;
 	public  $datetime = false;
+	protected $_associativeKeyingMode = 2; /*Defines the support type for the associative fetch mode, whether '1'=no support, '2'=native, '3'=emulated*/
 
 	/**
 	 * Constructor
@@ -4023,8 +4024,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * Might not work if ADODB_FETCH_MODE is set to ADODB_FETCH_NUM.
 	 * 
 	 * Warning: This is the default implementation which assumes the driver
-	 *		natively supports ADODB_FETCH_ASSOC mode. Drivers that only offer
-	 *		emulated support, or no support at all, must override this function.
+	 *		supports ADODB_FETCH_ASSOC mode natively, or emulated. Drivers
+	 *		that offer no support at all must override this function.
 	 *
 	 * @param colname  is the field to access
 	 *
@@ -4065,9 +4066,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 		$this->bind = array();
 		
-		if(!($this->fetchMode & ADODB_FETCH_ASSOC) ||
-				(isset($this->fields[1]) && //heuristic for performance
-				(array_keys($this->fields) == range(0, $this->_numOfFields - 1))))
+		if(!($this->fetchMode & ADODB_FETCH_ASSOC))
 		{
 			for ($i=0; $i < $this->_numOfFields; $i++) {
 				$o = $this->FetchField($i);
@@ -4133,6 +4132,42 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				{return array_change_key_case($record, CASE_UPPER);}
 			else
 				{return array_change_key_case($record, CASE_LOWER);}
+		}
+		return $record;
+	}
+
+	/**
+	 * Warning: to be used by drivers only, those that offer emulated support for the
+	 * 	associative fetch mode.
+	 *
+	 * Use associative array to get fields array for databases that do not support
+	 * associative arrays. With credit to Paolo S. Asioli paolo.asioli#libero.it
+	 * Will also rebuild the bind array associating keys to recordset fields regardless of its
+	 * state. This is because it assumes its output will be used to rebuild $fields.
+	 *
+	 *
+	 * @param int $upper Case for the array keys, defaults to uppercase
+	 *                   (see ADODB_ASSOC_CASE_xxx constants)
+	 */
+	protected function GetEmulatedRowAssoc()
+	{
+		$record = array();
+		
+		$this->bind = array();		
+		for ($i=0; $i < $this->_numOfFields; $i++) {
+			$o = $this->FetchField($i);
+			$this->bind[strtoupper($o->name)] = $i;
+			$this->fromBindKeysToColumnNames[strtoupper($o->name)] = $o->name;
+		}
+
+		foreach($this->bind as $k => $v) {
+			if( array_key_exists( $v, $this->fields ) ) {
+				$record[$this->fromBindKeysToColumnNames[$k]] = $this->fields[$v];
+				$this->bind[$k] = $this->fromBindKeysToColumnNames[$k];
+			} else {
+				# This should not happen... trigger error ?
+				$record[$this->fromBindKeysToColumnNames[$k]] = null;
+			}
 		}
 		return $record;
 	}

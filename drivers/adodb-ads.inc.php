@@ -663,10 +663,11 @@ class ADORecordSet_ads extends ADORecordSet {
     $this->Move($offset);
     $this->fetchMode = $savem;
 
-    if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-	  $this->bind = false;
-      $this->fields =& $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
-    }
+	if ($this->fetchMode == ADODB_FETCH_ASSOC) {
+	  $this->fields = $this->GetEmulatedRowAssoc();
+	} else if ($this->fetchMode == ADODB_FETCH_BOTH) {
+	  $this->fields = array_merge($this->fields,$this->GetEmulatedRowAssoc());
+	}
 
     $results = array();
     $cnt = 0;
@@ -704,9 +705,11 @@ class ADORecordSet_ads extends ADORecordSet {
       $rez = @ads_fetch_into($this->_queryID,$row,$this->fields);
     }
     if ($rez) {
-      if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-        $this->fields =& $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
-      }
+	  if ($this->fetchMode == ADODB_FETCH_ASSOC) {
+		$this->fields = $this->GetEmulatedRowAssoc();
+	  } else if ($this->fetchMode == ADODB_FETCH_BOTH) {
+		$this->fields = array_merge($this->fields,$this->GetEmulatedRowAssoc());
+	  }
       return true;
     }
     return false;
