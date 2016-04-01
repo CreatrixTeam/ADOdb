@@ -425,6 +425,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 
    public function MoveLast()
    {
+	  $this->bind = false;
 	  $this->fields = @ifx_fetch_row($this->_queryID, "LAST");
 	  if ($this->fields) $this->EOF = false;
 	  $this->_currentRow = -1;
@@ -441,6 +442,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 
    public function MoveFirst()
 	{
+	  $this->bind = false;
 	  $this->fields = @ifx_fetch_row($this->_queryID, "FIRST");
 	  if ($this->fields) $this->EOF = false;
 	  $this->_currentRow = 0;
@@ -457,7 +459,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 
    protected function _fetch($ignore_fields=false)
    {
-
+		$this->bind = false;
 		$this->fields = @ifx_fetch_row($this->_queryID);
 
 		if (!is_array($this->fields)) return false;

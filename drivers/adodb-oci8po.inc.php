@@ -120,6 +120,7 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 	// 10% speedup to move MoveNext to child class
 	public function MoveNext()
 	{
+		$this->bind = false;
 		if(@OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode())) {
 		global $ADODB_ANSI_PADDING_OFF;
 			$this->_currentRow++;
@@ -150,6 +151,7 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 				$arr = array();
 				return $arr;
 			}
+		$this->bind = false;
 		if (!@OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode())) {
 			$arr = array();
 			return $arr;
@@ -169,6 +171,7 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 	{
 		global $ADODB_ANSI_PADDING_OFF;
 
+		$this->bind = false;
 		$ret = @OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode());
 		if ($ret) {
 			if (!empty($ADODB_ANSI_PADDING_OFF)) {

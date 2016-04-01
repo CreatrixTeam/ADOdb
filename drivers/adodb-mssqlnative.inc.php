@@ -788,7 +788,6 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 	{
 		if (!sqlsrv_next_result($this->_queryID)) return false;
 		$this->_inited = false;
-		$this->bind = false;
 		$this->_currentRow = -1;
 		$this->Init();
 		return true;
@@ -903,21 +902,12 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 
 	protected function _fetch($ignore_fields=false)
 	{
+		$this->bind = false;
 		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
 			if ($this->fetchMode & ADODB_FETCH_NUM)
 				$this->fields = @sqlsrv_fetch_array($this->_queryID,SQLSRV_FETCH_BOTH);
 			else 
 				$this->fields = @sqlsrv_fetch_array($this->_queryID,SQLSRV_FETCH_ASSOC);
-			
-			if (is_array($this->fields)) 
-			{
-
-				if (ADODB_ASSOC_CASE == ADODB_ASSOC_CASE_LOWER) 
-					$this->fields = array_change_key_case($this->fields,CASE_LOWER);
-				else if (ADODB_ASSOC_CASE == ADODB_ASSOC_CASE_UPPER)
-					$this->fields = array_change_key_case($this->fields,CASE_UPPER);
-				
-			}
 		} 
 		else 
 			$this->fields = @sqlsrv_fetch_array($this->_queryID,SQLSRV_FETCH_NUMERIC);

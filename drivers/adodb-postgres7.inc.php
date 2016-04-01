@@ -311,6 +311,7 @@ class ADORecordSet_postgres7 extends ADORecordSet_postgres64{
 	public function MoveNext()
 	{
 		if (!$this->EOF) {
+			$this->bind = false;
 			$this->_currentRow++;
 			if ($this->_numOfRows < 0 || $this->_numOfRows > $this->_currentRow) {
 				$this->fields = @pg_fetch_array($this->_queryID,$this->_currentRow,$this->postgres64_getDriverFetchMode());
@@ -335,6 +336,7 @@ class ADORecordSet_assoc_postgres7 extends ADORecordSet_postgres64{
 
 	protected function _fetch()
 	{
+		$this->bind = false;
 		if ($this->_currentRow >= $this->_numOfRows && $this->_numOfRows >= 0) {
 			return false;
 		}
@@ -351,6 +353,7 @@ class ADORecordSet_assoc_postgres7 extends ADORecordSet_postgres64{
 	public function MoveNext()
 	{
 		if (!$this->EOF) {
+			$this->bind = false;
 			$this->_currentRow++;
 			if ($this->_numOfRows < 0 || $this->_numOfRows > $this->_currentRow) {
 				$this->fields = @pg_fetch_array($this->_queryID,$this->_currentRow,$this->postgres64_getDriverFetchMode());

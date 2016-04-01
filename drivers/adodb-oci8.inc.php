@@ -1408,7 +1408,6 @@ SELECT /*+ RULE */ distinct b.column_name
 class ADORecordset_oci8 extends ADORecordSet {
 
 	public  $databaseType = 'oci8';
-	public  $bind=false;
 	protected  $_fieldobjs;
 
 	public function Init()
@@ -1438,9 +1437,11 @@ class ADORecordset_oci8 extends ADORecordSet {
 
 			if (!is_array($this->fields)) {
 				$this->_numOfRows = 0;
+				$this->bind = false;
 				$this->fields = array();
 			}
 		} else {
+			$this->bind = false;
 			$this->fields = array();
 			$this->_numOfRows = 0;
 			$this->_numOfFields = 0;
@@ -1507,6 +1508,7 @@ class ADORecordset_oci8 extends ADORecordSet {
 
 	public function MoveNext()
 	{
+		$this->bind = false;
 		if ($this->fields = @oci_fetch_array($this->_queryID,$this->oci8_getDriverFetchAndOthersMode())) {
 			$this->_currentRow += 1;
 
@@ -1533,6 +1535,7 @@ class ADORecordset_oci8 extends ADORecordSet {
 			}
 		}
 
+		$this->bind = false;
 		if (!$this->fields = @oci_fetch_array($this->_queryID,$this->oci8_getDriverFetchAndOthersMode())) {
 			return $arr;
 		}
@@ -1547,21 +1550,6 @@ class ADORecordset_oci8 extends ADORecordSet {
 	}
 
 
-	// Use associative array to get fields array
-	public function Fields($colname)
-	{
-		if (!$this->bind) {
-			$this->bind = array();
-			for ($i=0; $i < $this->_numOfFields; $i++) {
-				$o = $this->FetchField($i);
-				$this->bind[strtoupper($o->name)] = $i;
-			}
-		}
-
-		return $this->fields[$this->bind[strtoupper($colname)]];
-	}
-
-
 	protected function _seek($row)
 	{
 		return false;
@@ -1569,6 +1557,7 @@ class ADORecordset_oci8 extends ADORecordSet {
 
 	protected function _fetch()
 	{
+		$this->bind = false;
 		$this->fields = @oci_fetch_array($this->_queryID,$this->oci8_getDriverFetchAndOthersMode());
 
 		return $this->fields;

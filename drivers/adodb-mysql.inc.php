@@ -595,17 +595,6 @@ class ADORecordSet_mysql extends ADORecordSet{
 		return $o;
 	}
 
-	public function GetRowAssoc($upper = ADODB_ASSOC_CASE)
-	{
-		if ($this->fetchMode == ADODB_FETCH_ASSOC && $upper == ADODB_ASSOC_CASE_LOWER) {
-			$row = $this->fields;
-		}
-		else {
-			$row = ADORecordSet::GetRowAssoc($upper);
-		}
-		return $row;
-	}
-
 	protected function _seek($row)
 	{
 		if ($this->_numOfRows == 0) return false;
@@ -614,6 +603,7 @@ class ADORecordSet_mysql extends ADORecordSet{
 
 	public function MoveNext()
 	{
+		$this->bind = false;
 		//return adodb_movenext($this);
 		//if (defined('ADODB_EXTENSION')) return adodb_movenext($this);
 		if (@$this->fields = mysql_fetch_array($this->_queryID,$this->mysql_getDriverFetchMode())) {
@@ -629,6 +619,7 @@ class ADORecordSet_mysql extends ADORecordSet{
 
 	protected function _fetch()
 	{
+		$this->bind = false;
 		$this->fields = @mysql_fetch_array($this->_queryID,$this->mysql_getDriverFetchMode());
 		return is_array($this->fields);
 	}

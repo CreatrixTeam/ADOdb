@@ -73,6 +73,7 @@ class ADORecordSet_mysqlt extends ADORecordSet_mysql{
 
 	public function MoveNext()
 	{
+		$this->bind = false;
 		if (@$this->fields = mysql_fetch_array($this->_queryID,$this->mysql_getDriverFetchMode())) {
 			$this->_currentRow += 1;
 			return true;

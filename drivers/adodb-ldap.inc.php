@@ -360,6 +360,7 @@ class ADORecordSet_ldap extends ADORecordSet{
 
 	protected function _fetch()
 	{
+		$this->bind = false;
 		if ( $this->_currentRow >= $this->_numOfRows && $this->_numOfRows >= 0 ) {
 			return false;
 		}

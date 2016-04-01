@@ -807,15 +807,6 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		return $a;
 	}
 
-	public function GetRowAssoc($upper = ADODB_ASSOC_CASE)
-	{
-		if ($this->fetchMode == ADODB_FETCH_ASSOC && $upper == ADODB_ASSOC_CASE_LOWER) {
-			return $this->fields;
-		}
-		$row = ADORecordSet::GetRowAssoc($upper);
-		return $row;
-	}
-
 	protected function _seek($row)
 	{
 		if ($this->_numOfRows == 0 || $row < 0) {
@@ -848,7 +839,6 @@ class ADORecordSet_mysqli extends ADORecordSet{
 			return false;
 		}
 		$this->_inited = false;
-		$this->bind = false;
 		$this->_currentRow = -1;
 		$this->Init();
 		return true;
@@ -861,6 +851,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 	{
 		if ($this->EOF) return false;
 		$this->_currentRow++;
+		$this->bind = false;
 		$this->fields = @mysqli_fetch_array($this->_queryID,$this->mysqli_getDriverFetchMode());
 
 		if (is_array($this->fields)) {
@@ -872,6 +863,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 
 	protected function _fetch()
 	{
+		$this->bind = false;
 		$this->fields = mysqli_fetch_array($this->_queryID,$this->mysqli_getDriverFetchMode());
 		return is_array($this->fields);
 	}

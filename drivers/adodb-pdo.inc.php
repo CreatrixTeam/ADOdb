@@ -500,7 +500,6 @@ class ADOPDOStatement {
 
 class ADORecordSet_pdo extends ADORecordSet {
 
-	public  $bind = false;
 	public  $databaseType = "pdo";
 	public  $dataProvider = "pdo";
 
@@ -569,7 +568,9 @@ class ADORecordSet_pdo extends ADORecordSet {
 
 	protected function _fetch()
 	{
+		$this->bind = false;
 		if (!$this->_queryID) {
+			$this->fields = false;
 			return false;
 		}
 

@@ -488,6 +488,7 @@ class ADORecordset_sqlite3 extends ADORecordSet {
 
 	protected function _fetch($ignore_fields=false)
 	{
+		$this->bind = false;
 		$this->fields = $this->_queryID->fetchArray($this->sqlite3_getDriverFetchMode());
 		return !empty($this->fields);
 	}

@@ -386,6 +386,7 @@ class ADORecordset_sqlite extends ADORecordSet {
 
 	protected function _fetch($ignore_fields=false)
 	{
+		$this->bind = false;
 		$this->fields = @sqlite_fetch_array($this->_queryID,$this->sqlite_getDriverFetchMode());
 		return !empty($this->fields);
 	}

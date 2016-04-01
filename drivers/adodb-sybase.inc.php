@@ -281,13 +281,14 @@ class ADORecordset_sybase extends ADORecordSet {
 
 	protected function _fetch($ignore_fields=false)
 	{
+		$this->bind = false;
 		if ($this->fetchMode == ADODB_FETCH_NUM) {
 			$this->fields = @sybase_fetch_row($this->_queryID);
 		} else if ($this->fetchMode == ADODB_FETCH_ASSOC) {
 			$this->fields = @sybase_fetch_assoc($this->_queryID);
 
 			if (is_array($this->fields)) {
-				$this->fields = $this->GetRowAssoc();
+				$this->fields = $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
 				return true;
 			}
 			return false;

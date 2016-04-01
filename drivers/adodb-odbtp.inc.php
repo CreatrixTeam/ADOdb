@@ -690,6 +690,7 @@ class ADORecordSet_odbtp extends ADORecordSet {
 
 	protected function _fetch_odbtp($type=0)
 	{
+		$this->bind = false;
 		switch ($this->fetchMode) {
 			case ADODB_FETCH_NUM:
 				$this->fields = @odbtp_fetch_row($this->_queryID, $type);
@@ -711,6 +712,7 @@ class ADORecordSet_odbtp extends ADORecordSet {
 
 	protected function _fetch()
 	{
+		$this->bind = false;
 		return $this->_fetch_odbtp();
 	}
 
@@ -734,7 +736,6 @@ class ADORecordSet_odbtp extends ADORecordSet {
 	{
 		if (!@odbtp_next_result($this->_queryID)) return false;
 		$this->_inited = false;
-		$this->bind = false;
 		$this->_currentRow = -1;
 		$this->Init();
 		return true;

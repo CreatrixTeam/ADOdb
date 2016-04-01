@@ -3425,7 +3425,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * public variables
 	 */
 	public  $dataProvider = "native";
-	public  $fields = false;	/// holds the current row data
+	public  $fields = false;	/// holds the current row data. Note: When accessing fields using associative keys, use Fetch() instead.
 	public  $blobSize = 100;	/// any varchar/char field this size or greater is treated as a blob
 							/// in other words, we use a text area for editing.
 	public  $canSeek = false;	/// indicates that seek is supported
@@ -3437,8 +3437,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	public  $debug = false;
 	public  $timeCreated=0;		/// datetime in Unix format rs created -- for cached recordsets
 
-	public  $bind = false;		/// used by Fields() to hold array - should be private?
-	public  $fetchMode;			/// default fetch mode
+	public  $bind = false;		/// associates normalized associative keys to the entries of $fields which may or may not be keyed associatively. Note: Must be set to false whenever $fields is changed.
+	protected $fromBindKeysToColumnNames; /// associates the keys of bind, which are normalized, to the original column names. Invalid if $bind is false.
+	public  $fetchMode;			/// default fetch mode. Valid values are ADODB_FETCH_NUM, ADODB_FETCH_ASSOC and ADODB_FETCH_BOTH only;do not confuse with ADOConnection::fetchMode.
 	public  $connection = false; /// the parent connection
 
 	/**
@@ -4030,19 +4031,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @return the value of $colname column
 	 */
 	public function Fields($colname) {
-		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-			return @$this->fields[$colname];
-		}
+		GetAssocKeys();
 
-		if (!$this->bind) {
-			$this->bind = array();
-			for ($i=0; $i < $this->_numOfFields; $i++) {
-				$o = $this->FetchField($i);
-				$this->bind[strtoupper($o->name)] = $i;
-			}
-		}
-
-		 return $this->fields[$this->bind[strtoupper($colname)]];
+		return @$this->fields[$this->bind[strtoupper($colname)]];
 	}
 
 	/**
@@ -4068,33 +4059,49 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @param int $upper Case for the array keys, defaults to uppercase
 	 *                   (see ADODB_ASSOC_CASE_xxx constants)
 	 */
-	public function GetAssocKeys($upper = ADODB_ASSOC_CASE) {
+	public function GetAssocKeys() {
 		if ($this->bind) {
 			return;
 		}
 		$this->bind = array();
-
-		// Define case conversion function for ASSOC fetch mode
-		$fn_change_case = $this->AssocCaseConvertFunction($upper);
-
-		// Build the bind array
-		for ($i=0; $i < $this->_numOfFields; $i++) {
-			$o = $this->FetchField($i);
-
-			// Set the array's key
-			if(is_numeric($o->name)) {
-				// Just use the field ID
-				$key = $i;
+		
+		if(!($this->fetchMode & ADODB_FETCH_ASSOC))
+		{
+			for ($i=0; $i < $this->_numOfFields; $i++) {
+				$o = $this->FetchField($i);
+				$this->bind[strtoupper($o->name)] = $i;
+				$this->fromBindKeysToColumnNames[strtoupper($o->name)] = $o->name;
 			}
-			elseif( $fn_change_case ) {
-				// Convert the key's case
-				$key = $fn_change_case($o->name);
+		}
+		else
+		{
+			if($this->fetchMode == ADODB_FETCH_ASSOC)
+			{
+				foreach ($this->fields as $tKey => $tValue) {
+					$this->bind[strtoupper($tKey)] = $tKey;
+					$this->fromBindKeysToColumnNames[strtoupper($tKey)] = $tKey;
+				}
 			}
-			else {
-				$key = $o->name;
-			}
+			else
+			{
+				foreach($this->fields as $tKey => $tValue)
+				{
+					if(!(ctype_digit(trim($tKey)) && ($tKey >= 0) &&
+							($tKey < $this->_numOfFields)))
+					{
+						$this->bind[strtoupper($tKey)] = $tKey;
+						$this->fromBindKeysToColumnNames[strtoupper($tKey)] = $tKey;
+					}
+				}
 
-			$this->bind[$key] = $i;
+				if(count($this->bind) != $this->_numOfFields)
+				{
+					ADOConnection::outp("ADORecordSet::GetAssocKeys(): Overlap of ".
+							"associative and numeric keys. Use either ADODB_FETCH_NUM or ".
+							"ADODB_FETCH_ASSOC, or use non numeric names for table columns");
+					die();
+				}
+			}
 		}
 	}
 
@@ -4107,17 +4114,23 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 */
 	public function GetRowAssoc($upper = ADODB_ASSOC_CASE) {
 		$record = array();
-		$this->GetAssocKeys($upper);
+		$this->GetAssocKeys();
 
 		foreach($this->bind as $k => $v) {
 			if( array_key_exists( $v, $this->fields ) ) {
-				$record[$k] = $this->fields[$v];
-			} elseif( array_key_exists( $k, $this->fields ) ) {
-				$record[$k] = $this->fields[$k];
+				$record[$this->fromBindKeysToColumnNames[$k]] = $this->fields[$v];
 			} else {
 				# This should not happen... trigger error ?
-				$record[$k] = null;
+				$record[$this->fromBindKeysToColumnNames[$k]] = null;
 			}
+		}
+
+		if($upper != ADODB_ASSOC_CASE_NATIVE)
+		{
+			if($upper == ADODB_ASSOC_CASE_UPPER)
+				{return array_change_key_case($record, CASE_UPPER);}
+			else
+				{return array_change_key_case($record, CASE_LOWER);}
 		}
 		return $record;
 	}

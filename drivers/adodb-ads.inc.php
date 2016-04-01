@@ -601,7 +601,6 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 
 class ADORecordSet_ads extends ADORecordSet {
 
-  public  $bind = false;
   public  $databaseType = "ads";
   public  $dataProvider = "ads";
   public  $useFetchArray;
@@ -665,7 +664,8 @@ class ADORecordSet_ads extends ADORecordSet {
     $this->fetchMode = $savem;
 
     if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-      $this->fields =& $this->GetRowAssoc();
+	  $this->bind = false;
+      $this->fields =& $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
     }
 
     $results = array();
@@ -681,6 +681,7 @@ class ADORecordSet_ads extends ADORecordSet {
 
   public function MoveNext()
   {
+	$this->bind = false;
     if ($this->_numOfRows != 0 && !$this->EOF) {
       $this->_currentRow++;
       if( $this->_fetch() ) {
@@ -694,6 +695,7 @@ class ADORecordSet_ads extends ADORecordSet {
 
   public function _fetch()
   {
+	$this->bind = false;
     $this->fields = false;
     if ($this->_has_stupid_odbc_fetch_api_change)
       $rez = @ads_fetch_into($this->_queryID,$this->fields);
@@ -703,7 +705,7 @@ class ADORecordSet_ads extends ADORecordSet {
     }
     if ($rez) {
       if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-        $this->fields =& $this->GetRowAssoc();
+        $this->fields =& $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
       }
       return true;
     }

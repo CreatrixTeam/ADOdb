@@ -213,7 +213,6 @@ class ADODB_oracle extends ADOConnection {
 class ADORecordset_oracle extends ADORecordSet {
 
 	public  $databaseType = "oracle";
-	public  $bind = false;
 
 	public function __construct($queryID,$mode=false)
 	{
@@ -255,20 +254,6 @@ class ADORecordset_oracle extends ADORecordSet {
 			return $fld;
 	   }
 
-	/* Use associative array to get fields array */
-	public function Fields($colname)
-	{
-		if (!$this->bind) {
-			$this->bind = array();
-			for ($i=0; $i < $this->_numOfFields; $i++) {
-				$o = $this->FetchField($i);
-				$this->bind[strtoupper($o->name)] = $i;
-			}
-		}
-
-		 return $this->fields[$this->bind[strtoupper($colname)]];
-	}
-
    protected function _initrs()
    {
 		   $this->_numOfRows = -1;
@@ -282,6 +267,7 @@ class ADORecordset_oracle extends ADORecordSet {
    }
 
    protected function _fetch($ignore_fields=false) {
+		$this->bind = false;
 // should remove call by reference, but ora_fetch_into requires it in 4.0.3pl1
 		if ($this->fetchMode & ADODB_FETCH_ASSOC)
 			return @ora_fetch_into($this->_queryID,$this->fields,ORA_FETCHINTO_NULLS|ORA_FETCHINTO_ASSOC);

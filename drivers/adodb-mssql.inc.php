@@ -782,7 +782,6 @@ class ADORecordset_mssql extends ADORecordSet {
 	{
 		if (!mssql_next_result($this->_queryID)) return false;
 		$this->_inited = false;
-		$this->bind = false;
 		$this->_currentRow = -1;
 		$this->Init();
 		return true;
@@ -825,6 +824,7 @@ class ADORecordset_mssql extends ADORecordSet {
 	{
 		if ($this->EOF) return false;
 
+		$this->bind = false;
 		$this->_currentRow++;
 
 		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
@@ -882,6 +882,7 @@ class ADORecordset_mssql extends ADORecordSet {
 	// also the date format has been changed from YYYY-mm-dd to dd MMM YYYY in 4.0.4. Idiot!
 	protected function _fetch($ignore_fields=false)
 	{
+		$this->bind = false;
 		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
 			if ($this->fetchMode & ADODB_FETCH_NUM) {
 				//ADODB_FETCH_BOTH mode
@@ -902,24 +903,6 @@ class ADORecordset_mssql extends ADORecordSet {
 				}
 			}
 
-			if (!$this->fields) {
-			} else if (ADODB_ASSOC_CASE == 0) {
-				foreach($this->fields as $k=>$v) {
-					$kn = strtolower($k);
-					if ($kn <> $k) {
-						unset($this->fields[$k]);
-						$this->fields[$kn] = $v;
-					}
-				}
-			} else if (ADODB_ASSOC_CASE == 1) {
-				foreach($this->fields as $k=>$v) {
-					$kn = strtoupper($k);
-					if ($kn <> $k) {
-						unset($this->fields[$k]);
-						$this->fields[$kn] = $v;
-					}
-				}
-			}
 		} else {
 			$this->fields = @mssql_fetch_row($this->_queryID);
 		}

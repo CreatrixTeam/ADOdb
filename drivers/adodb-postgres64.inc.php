@@ -786,16 +786,6 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 	public  $databaseType = "postgres64";
 	public  $canSeek = true;
 
-	public function GetRowAssoc($upper = ADODB_ASSOC_CASE)
-	{
-		if ($this->fetchMode == ADODB_FETCH_ASSOC && $upper == ADODB_ASSOC_CASE_LOWER) {
-			return $this->fields;
-		}
-		$row = ADORecordSet::GetRowAssoc($upper);
-		return $row;
-	}
-
-
 	protected function _initrs()
 	{
 	global $ADODB_COUNTRECS;
@@ -864,6 +854,7 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 	public function MoveNext()
 	{
 		if (!$this->EOF) {
+			$this->bind = false;
 			$this->_currentRow++;
 			if ($this->_numOfRows < 0 || $this->_numOfRows > $this->_currentRow) {
 				$this->fields = @pg_fetch_array($this->_queryID,$this->_currentRow,$this->postgres64_getDriverFetchMode());
@@ -880,7 +871,7 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 
 	protected function _fetch()
 	{
-
+		$this->bind = false;
 		if ($this->_currentRow >= $this->_numOfRows && $this->_numOfRows >= 0)
 			return false;
 

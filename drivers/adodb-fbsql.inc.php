@@ -207,6 +207,7 @@ class ADORecordSet_fbsql extends ADORecordSet{
 
 	protected function _fetch($ignore_fields=false)
 	{
+		$this->bind = false;
 		$this->fields = @fbsql_fetch_array($this->_queryID,$this->fbsql_getDriverFetchMode());
 		return ($this->fields == true);
 	}

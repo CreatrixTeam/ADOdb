@@ -671,6 +671,7 @@ class ADORecordset_ibase extends ADORecordSet
 
 	protected function _fetch()
 	{
+		$this->bind = false;
 		$f = @ibase_fetch_row($this->_queryID);
 		if ($f === false) {
 			$this->fields = false;
@@ -702,9 +703,9 @@ class ADORecordset_ibase extends ADORecordSet
 
 		$this->fields = $f;
 		if ($this->fetchMode == ADODB_FETCH_ASSOC) {
-			$this->fields = $this->GetRowAssoc();
+			$this->fields = $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
 		} else if ($this->fetchMode == ADODB_FETCH_BOTH) {
-			$this->fields = array_merge($this->fields,$this->GetRowAssoc());
+			$this->fields = array_merge($this->fields,$this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE));
 		}
 		return true;
 	}

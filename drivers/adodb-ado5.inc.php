@@ -374,7 +374,6 @@ class ADODB_ado extends ADOConnection {
 
 class ADORecordSet_ado extends ADORecordSet {
 
-	public  $bind = false;
 	public  $databaseType = "ado";
 	public  $dataProvider = "ado";
 	protected  $_tarr = false; // caches the types
@@ -564,6 +563,7 @@ class ADORecordSet_ado extends ADORecordSet {
 	// time stamp not supported yet
 	protected function _fetch()
 	{
+		$this->bind = false;
 		$rs = $this->_queryID;
 		if (!$rs or $rs->EOF) {
 			$this->fields = false;
@@ -650,7 +650,7 @@ class ADORecordSet_ado extends ADORecordSet {
 		@$rs->MoveNext(); // @ needed for some versions of PHP!
 
 		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-			$this->fields = $this->GetRowAssoc();
+			$this->fields = $this->GetRowAssoc(ADODB_ASSOC_CASE_NATIVE);
 		}
 		return true;
 	}
