@@ -1011,7 +1011,6 @@ class ADORecordSet_mysqli extends ADORecordSet{
 				return MYSQLI_NUM;
 			case ADODB_FETCH_ASSOC:
 				return MYSQLI_ASSOC;
-			case ADODB_FETCH_DEFAULT:
 			case ADODB_FETCH_BOTH:
 			default:
 				return MYSQLI_BOTH;

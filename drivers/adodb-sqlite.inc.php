@@ -403,7 +403,6 @@ class ADORecordset_sqlite extends ADORecordSet {
 				return SQLITE_NUM;
 			case ADODB_FETCH_ASSOC:
 				return SQLITE_ASSOC;
-			case ADODB_FETCH_DEFAULT:
 			case ADODB_FETCH_BOTH:
 			default:
 				return SQLITE_BOTH;

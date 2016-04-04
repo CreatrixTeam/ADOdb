@@ -834,16 +834,14 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 	protected function _fixblobs()
 	{
 		if ($this->fetchMode == ADODB_FETCH_NUM || 
-				$this->fetchMode == ADODB_FETCH_BOTH ||
-				$this->fetchMode == ADODB_FETCH_DEFAULT)
+				$this->fetchMode == ADODB_FETCH_BOTH)
 		{
 			foreach($this->_blobArr as $k => $v) {
 				$this->fields[$k] = ADORecordSet_postgres64::_decode($this->fields[$k]);
 			}
 		}
 		if ($this->fetchMode == ADODB_FETCH_ASSOC || 
-				$this->fetchMode == ADODB_FETCH_BOTH ||
-				$this->fetchMode == ADODB_FETCH_DEFAULT) {
+				$this->fetchMode == ADODB_FETCH_BOTH) {
 			foreach($this->_blobArr as $k => $v) {
 				$this->fields[$v] = ADORecordSet_postgres64::_decode($this->fields[$v]);
 			}
@@ -958,7 +956,6 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 				return PGSQL_NUM;
 			case ADODB_FETCH_ASSOC:
 				return PGSQL_ASSOC;
-			case ADODB_FETCH_DEFAULT:
 			case ADODB_FETCH_BOTH:
 			default:
 				return PGSQL_BOTH;

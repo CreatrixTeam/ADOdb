@@ -134,9 +134,10 @@ if (!defined('_ADODB_LAYER')) {
 	 *   - NUM:     array()
 	 *   - ASSOC:   array('id' => 456, 'name' => 'john')
 	 *   - BOTH:    array(0 => 456, 'id' => 456, 1 => 'john', 'name' => 'john')
-	 *   - DEFAULT: driver-dependent
+	 *   - DEFAULT: alias for ADODB_FETCH_BOTH. Do not reference within ADODB's
+	 *				code. Kept for backward compatibility.
 	 */
-		define('ADODB_FETCH_DEFAULT', 0);
+		define('ADODB_FETCH_DEFAULT', 3);
 		define('ADODB_FETCH_NUM', 1);
 		define('ADODB_FETCH_ASSOC', 2);
 		define('ADODB_FETCH_BOTH', 3);
@@ -201,7 +202,7 @@ if (!defined('_ADODB_LAYER')) {
 		if (empty($ADODB_CACHE_CLASS)) {
 			$ADODB_CACHE_CLASS =  'ADODB_Cache_File' ;
 		}
-		$ADODB_FETCH_MODE = ADODB_FETCH_DEFAULT;
+		$ADODB_FETCH_MODE = ADODB_FETCH_BOTH;
 		$ADODB_FORCE_TYPE = ADODB_FORCE_VALUE;
 		$ADODB_GETONE_EOF = null;
 
@@ -498,7 +499,7 @@ if (!defined('_ADODB_LAYER')) {
 	public  $transOff = 0;			/// temporarily disable transactions
 	public  $transCnt = 0;			/// count of nested transactions
 
-	public  $fetchMode=false;
+	public  $fetchMode=false;	/// valid values are false, ADODB_FETCH_NUM, ADODB_FETCH_ASSOC and ADODB_FETCH_BOTH only.
 
 	public  $null2null = 'null'; // in autoexecute/getinsertsql/getupdatesql, this value will be converted to a null
 	public  $bulkBind = false; // enable 2D Execute array
@@ -3460,7 +3461,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	protected  $_lastPageNo = -1;
 	protected  $_maxRecordCount = 0;
 	public  $datetime = false;
-	protected $_associativeKeyingMode = 2; /*Defines the support type for the associative fetch mode, whether '1'=no support, '2'=native, '3'=emulated*/
 
 	/**
 	 * Constructor
@@ -4035,23 +4035,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		GetAssocKeys();
 
 		return @$this->fields[$this->bind[strtoupper($colname)]];
-	}
-
-	/**
-	 * Defines the function to use for table fields case conversion
-	 * depending on ADODB_ASSOC_CASE
-	 * @return string strtolower/strtoupper or false if no conversion needed
-	 */
-	protected function AssocCaseConvertFunction($case = ADODB_ASSOC_CASE) {
-		switch($case) {
-			case ADODB_ASSOC_CASE_UPPER:
-				return 'strtoupper';
-			case ADODB_ASSOC_CASE_LOWER:
-				return 'strtolower';
-			case ADODB_ASSOC_CASE_NATIVE:
-			default:
-				return false;
-		}
 	}
 
 	/**

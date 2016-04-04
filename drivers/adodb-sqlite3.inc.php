@@ -505,7 +505,6 @@ class ADORecordset_sqlite3 extends ADORecordSet {
 				return SQLITE3_NUM;
 			case ADODB_FETCH_ASSOC:
 				return SQLITE3_ASSOC;
-			case ADODB_FETCH_DEFAULT:
 			case ADODB_FETCH_BOTH:
 			default:
 				return SQLITE3_BOTH;

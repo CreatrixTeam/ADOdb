@@ -233,13 +233,6 @@ class ADORecordset_sybase extends ADORecordSet {
 	// _mths works only in non-localised system
 	protected   $_mths = array('JAN'=>1,'FEB'=>2,'MAR'=>3,'APR'=>4,'MAY'=>5,'JUN'=>6,'JUL'=>7,'AUG'=>8,'SEP'=>9,'OCT'=>10,'NOV'=>11,'DEC'=>12);
 
-	public function __construct($id,$mode=false)
-	{
-		if (!$mode && ($mode !== false)) $mode = ADODB_FETCH_ASSOC;
-
-		parent::__construct($id,$mode);
-	}
-
 	/*	Returns: an object containing field information.
 		Get column information in the Recordset object. FetchField() can be used in order to obtain information about
 		fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by

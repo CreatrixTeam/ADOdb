@@ -268,7 +268,6 @@ class ADORecordSet_fbsql extends ADORecordSet{
 				return FBSQL_NUM;
 			case ADODB_FETCH_ASSOC:
 				return FBSQL_ASSOC;
-			case ADODB_FETCH_DEFAULT:
 			case ADODB_FETCH_BOTH:
 			default:
 				return FBSQL_BOTH;

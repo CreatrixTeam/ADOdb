@@ -1651,7 +1651,6 @@ class ADORecordset_oci8 extends ADORecordSet {
 			case ADODB_FETCH_ASSOC:
 				$vReturn = OCI_ASSOC;
 				break;
-			case ADODB_FETCH_DEFAULT:
 			case ADODB_FETCH_BOTH:
 			default:
 				$vReturn = OCI_NUM + OCI_ASSOC;

@@ -691,7 +691,6 @@ class ADORecordSet_mysql extends ADORecordSet{
 				return MYSQL_NUM;
 			case ADODB_FETCH_ASSOC:
 				return MYSQL_ASSOC;
-			case ADODB_FETCH_DEFAULT:
 			case ADODB_FETCH_BOTH:
 			default:
 				return MYSQL_BOTH;

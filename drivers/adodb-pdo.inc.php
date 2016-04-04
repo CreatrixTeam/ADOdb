@@ -591,7 +591,6 @@ class ADORecordSet_pdo extends ADORecordSet {
 				return PDO::FETCH_NUM;
 			case ADODB_FETCH_ASSOC:
 				return PDO::FETCH_ASSOC;
-			case ADODB_FETCH_DEFAULT:
 			case ADODB_FETCH_BOTH:
 			default:
 				return PDO::FETCH_BOTH;
