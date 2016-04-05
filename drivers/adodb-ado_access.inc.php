@@ -34,6 +34,9 @@ class  ADODB_ado_access extends ADODB_ado {
 		parent::__construct();
 	}
 
+	protected function _connect($pHostName, $pUserName, $pPassword, $pDataBase, $p_ = '')
+		{return parent::_connect($pHostName, $pUserName, $pPassword, $pDataBase, 'access');}
+
 	/*function BeginTrans() { return false;}
 
 	public function CommitTrans() { return false;}

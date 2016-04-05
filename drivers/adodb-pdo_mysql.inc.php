@@ -160,7 +160,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 				}
 			}
 
-			if ($save == ADODB_FETCH_NUM) {
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) {
 				$retarr[] = $fld;
 			} else {
 				$retarr[strtoupper($fld->name)] = $fld;

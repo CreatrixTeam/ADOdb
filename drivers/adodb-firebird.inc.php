@@ -433,7 +433,7 @@ class ADODB_firebird extends ADOConnection {
 
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
 
-		$this->SetFetchMode2($save);
+		$this->SetFetchMode2($savem);
 		$false = false;
 		if ($rs === false) {
 			return $false;

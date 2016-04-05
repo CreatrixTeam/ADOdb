@@ -56,6 +56,10 @@ class  ADODB_ado_mssql extends ADODB_ado {
 		return $arr;
 	}
 	
+
+	protected function _connect($pHostName, $pUserName, $pPassword, $pDataBase, $p_ = '')
+		{return parent::_connect($pHostName, $pUserName, $pPassword, $pDataBase, 'mssql');}
+
 	protected function _insertid()
 	{
 		return $this->GetOne('select SCOPE_IDENTITY()');

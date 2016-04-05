@@ -112,7 +112,10 @@ class ADODB_mssqlnative extends ADOConnection {
 	public $identitySQL = 'select SCOPE_IDENTITY()'; // 'select SCOPE_IDENTITY'; # for mssql 2000
 	public $uniqueOrderBy = true;
 	protected $_bindInputArray = true;
-	public $connectionInfo = array();
+	
+	public $connectionInfo    = array('ReturnDatesAsStrings'=>true);
+	public $cachedSchemaFlush = false;
+	
 	public $mssql_version = '';
 
 	public function __construct()
@@ -218,7 +221,7 @@ class ADODB_mssqlnative extends ADOConnection {
 		case 11:
 		case 12:
 			// Proper Sequences Only available to Server 2012 and up
-			return  ADOConnection::CreateSequence($seq, $start)
+			return  ADOConnection::CreateSequence($seq, $start);
 			break;
 		}
 
@@ -622,7 +625,7 @@ class ADODB_mssqlnative extends ADOConnection {
 		$table = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
 				$pParsedTableName['table']['name']);
-		$schema = (!empty(@$pParsedTableName['schema']['name']) ? 
+		$schema = (!empty($pParsedTableName['schema']['name']) ? 
 				$pParsedTableName['schema']['name'] : false);
 		if ($this->cachedSchemaFlush)
 			$cached_columns = array();
@@ -635,7 +638,7 @@ class ADODB_mssqlnative extends ADOConnection {
 		if (!$this->mssql_version)
 			$this->ServerVersion();
 
-		$table = $tParsedTableName['table']['name'];
+		$table = $pParsedTableName['table']['name'];
 		if ($schema) {
 			$dbName = $this->database;
 			$this->SelectDB($schema);

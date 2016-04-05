@@ -546,35 +546,37 @@ CREATE TABLE
 		
 	protected function _event_GenID_calculateAndSetGenID($pParsedSequenceName, $pADORecordSet)
 	{
+		$vVersion = @intval($this->_serverInfoArray['version']);
+
 		if(($this->databaseType === "odbc_mssql") ||
 				($this->databaseType === "odbc_mssql2012"))
 		{
-			$vNumber = (($pADORecordSet && !$pADORecordSet->EOF) ? reset($pADORecordSet->fields) :
+			$tNumber = (($pADORecordSet && !$pADORecordSet->EOF) ? reset($pADORecordSet->fields) :
 				0);
-			$vADORecordSet = $this->connection->Execute(
-					"update $pParsedSequenceName[name] set id=id+1 where id=$vNumber");
+			$tADORecordSet = $this->connection->Execute(
+					"update $pParsedSequenceName[name] set id=id+1 where id=$tNumber");
 
 			if($this->connection->affected_rows() > 0)
-				{$this->connection->genID = $vNumber + 1;}
+				{$this->connection->genID = $tNumber + 1;}
 		}
 		elseif(($vVersion < 11) || ($this->databaseType === "ado_mssql") ||
 				($this->databaseType === "mssql"))
 		{
-			$vNumber = (($pADORecordSet && !$pADORecordSet->EOF) ? reset($pADORecordSet->fields) :
+			$tNumber = (($pADORecordSet && !$pADORecordSet->EOF) ? reset($pADORecordSet->fields) :
 					0);
-			$vADORecordSet = $this->connection->Execute(
+			$tADORecordSet = $this->connection->Execute(
 					"update $pParsedSequenceName[name] with (tablock,holdlock) set id = id + 1");
 
 			if($this->connection->affected_rows() > 0)
-				{$this->connection->genID = $vNumber + 1;}
+				{$this->connection->genID = $tNumber + 1;}
 		}
 		else
 		{
-			$vNumber = (($pADORecordSet && !$pADORecordSet->EOF) ? 
+			$tNumber = (($pADORecordSet && !$pADORecordSet->EOF) ? 
 					reset($pADORecordSet->fields) : 0);
 
-			if($vNumber > 0)
-				{$this->connection->genID = $vNumber;}
+			if($tNumber > 0)
+				{$this->connection->genID = $tNumber;}
 		}
 	}
 
