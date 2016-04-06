@@ -692,12 +692,12 @@ function _adodb_getupdatesql(&$zthis,&$rs, $arrFields,$forceUpdate=false,$magicq
 					if ((strpos($upperfname,' ') !== false) || ($ADODB_QUOTE_FIELDNAMES)) {
 						switch ($ADODB_QUOTE_FIELDNAMES) {
 						case 'LOWER':
-							$fnameq = $zthis->nameQuote.strtolower($field->name).$zthis->nameQuote;break;
+							$fnameq = $zthis->ForceNameQuote(strtolower($field->name));break;
 						case 'NATIVE':
-							$fnameq = $zthis->nameQuote.$field->name.$zthis->nameQuote;break;
+							$fnameq = $zthis->ForceNameQuote($field->name);break;
 						case 'UPPER':
 						default:
-							$fnameq = $zthis->nameQuote.$upperfname.$zthis->nameQuote;break;
+							$fnameq = $zthis->ForceNameQuote($upperfname);break;
 						}
 					} else
 						$fnameq = $upperfname;
@@ -861,12 +861,12 @@ static $cacheCols;
 			if ((strpos($upperfname,' ') !== false) || ($ADODB_QUOTE_FIELDNAMES)) {
 				switch ($ADODB_QUOTE_FIELDNAMES) {
 				case 'LOWER':
-					$fnameq = $zthis->nameQuote.strtolower($field->name).$zthis->nameQuote;break;
+					$fnameq = $zthis->ForceNameQuote(strtolower($field->name));break;
 				case 'NATIVE':
-					$fnameq = $zthis->nameQuote.$field->name.$zthis->nameQuote;break;
+					$fnameq = $zthis->ForceNameQuote($field->name);break;
 				case 'UPPER':
 				default:
-					$fnameq = $zthis->nameQuote.$upperfname.$zthis->nameQuote;break;
+					$fnameq = $zthis->ForceNameQuote($upperfname);break;
 				}
 			} else
 				$fnameq = $upperfname;

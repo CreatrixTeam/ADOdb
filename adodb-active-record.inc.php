@@ -770,7 +770,7 @@ class ADODB_Active_Record {
 				return false;
 			}
 		}
-		return $db->nameQuote.$n.$db->nameQuote;
+		return $db->ForceNameQuote($n);
 	}
 
 	//------------------------------------------------------------ Public functions below

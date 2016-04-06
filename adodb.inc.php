@@ -3232,6 +3232,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		if($tBackTrace[1]['function'] === "ADONewConnection")
 			{$this->_dataDict = $pADODB_DataDict;}
 	}
+
+	public function ForceNameQuote($pName = NULL)
+		{return $this->_dataDict->ForceNameQuote($pName);}
 } // end class ADOConnection
 
 
@@ -4877,6 +4880,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 			case 'ifx':
 			case 'maxsql':
+			case 'mysqlpo':
 				$class = $db = 'mysqlt';
 				break;
 

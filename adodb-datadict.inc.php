@@ -354,7 +354,7 @@ class ADODB_DataDict {
 
 		// if name is of the form `name`, quote it
 		if ( preg_match('/^`(.+)`$/', $name, $matches) ) {
-			return $quote . $matches[1] . $quote;
+			return $this->ForceNameQuote($matches[1]);
 		}
 
 		// if name contains special characters, quote it
@@ -375,10 +375,8 @@ class ADODB_DataDict {
 		$vName = trim($pName);
 		$vMatches = null;
 
-		// if name is of the form `name`, remove ` and quote it
-		if(preg_match('/^`(.+)`$/', $vName, $vMatches))
-			{return $this->nameQuote.$vMatches[1].$this->nameQuote;}
-
+		if($this->nameQuote === '[')
+			{return '['.$vName.']';}
 		return $this->nameQuote.$vName.$this->nameQuote;
 	}
 
