@@ -343,7 +343,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
       $ADODB_FETCH_MODE = $savem;
       if (!$rs) return false;
       $rs->_has_stupid_odbc_fetch_api_change = $this->_has_stupid_odbc_fetch_api_change;
-      $rs->_fetch();
+      $rs->ads__fetch();
 
       while (!$rs->EOF) {
         if ($table == strtoupper($rs->fields[2])) {
@@ -382,7 +382,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 
     if (!$rs) return $false;
     $rs->_has_stupid_odbc_fetch_api_change = $this->_has_stupid_odbc_fetch_api_change;
-    $rs->_fetch();
+    $rs->ads__fetch();
 
     $retarr = array();
 
@@ -694,7 +694,7 @@ class ADORecordSet_ads extends ADORecordSet {
     return false;
   }
 
-  public function _fetch()
+  protected function _fetch()
   {
 	$this->bind = false;
     $this->fields = false;
@@ -714,6 +714,9 @@ class ADORecordSet_ads extends ADORecordSet {
     }
     return false;
   }
+
+  public function ads__fetch()
+	{return $this->_fetch();}
 
   protected function _close()
   {

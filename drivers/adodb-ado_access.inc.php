@@ -35,7 +35,45 @@ class  ADODB_ado_access extends ADODB_ado {
 	}
 
 	protected function _connect($pHostName, $pUserName, $pPassword, $pDataBase, $p_ = '')
-		{return parent::_connect($pHostName, $pUserName, $pPassword, $pDataBase, 'access');}
+	{
+		try
+		{
+			$tCOM = NULL;
+			$tConnectionString = "";
+			$u = 'UID';
+			$p = 'PWD';
+
+			if(!empty($this->charPage))
+				{$tCOM = new COM('ADODB.Connection',null,$this->charPage);}
+			else
+				{$tCOM = new COM('ADODB.Connection');}
+
+			if(!$tCOM)
+				{return false;}
+
+			$tCOM->Provider = "Microsoft.Jet.OLEDB.4.0"; // Microsoft Jet Provider
+
+			$tConnectionString .= "PROVIDER=".$tCOM->Provider.";DATA SOURCE=$pHostName";
+			if(!empty($pUserName))
+				{$tConnectionString .= ";User Id=$pUserName";}
+			if(!empty($pPassword))
+				{$tConnectionString .= ";Password=$pPassword";}
+
+			$tCOM->Open((string)$pHostName);
+			$this->_connectionID = $tCOM;
+			$tCOM->CursorLocation = $this->_cursor_location;
+
+			return  ($tCOM->State > 0);
+
+		}
+		catch(exception $tE)
+		{
+			if($this->debug)
+				{echo "<pre>",$tConnectionString,"\n",$tE,"</pre>\n";}
+		}
+
+		return false;
+	}
 
 	/*function BeginTrans() { return false;}
 
