@@ -185,8 +185,7 @@ class ADODB_informix72 extends ADOConnection {
 	{
 		$false = false;
 		if (!empty($this->metaColumnsSQL)) {
-			$table = (array_key_exists('schema', $pParsedTableName) ? 
-					$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+			$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 					$pParsedTableName['table']['name']);
 			
 			$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);

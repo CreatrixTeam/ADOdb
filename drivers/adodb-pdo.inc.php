@@ -100,11 +100,12 @@ class ADODB_pdo extends ADOConnection {
 				case 'sqlsrv':
 					$argDSN .= ';database='.$argDatabasename;
 					break;
+				case 'sqlite':
+					break;
 				case 'mssql':
 				case 'mysql':
 				case 'oci':
 				case 'pgsql':
-				case 'sqlite':
 				default:
 					$argDSN .= ';dbname='.$argDatabasename;
 			}

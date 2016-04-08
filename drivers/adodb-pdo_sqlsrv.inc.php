@@ -52,9 +52,9 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 	//VERBATIM COPY FROM "adodb-mssqlnative.inc.php"/"adodb-odbc_mssql.inc.php"
 	protected function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $this->BuildTableName($this->NormaliseIdentifierNameIf(
+				$pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']), @$pParsedTableName['schema']['name']);
 		$table = $this->qstr($table);
 
 		$sql = "SELECT i.name AS ind_name, C.name AS col_name, USER_NAME(O.uid) AS Owner, c.colid, k.Keyno,
@@ -69,6 +69,7 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$rs = $this->Execute($sql);
+
 		$this->SetFetchMode2($savem);
 
 		if (!is_object($rs)) {

@@ -519,6 +519,8 @@ class dbTable extends dbObject {
 	*/
 	public function create( &$xmls ) {
 		$sql = array();
+		$savem = NULL;
+		$legacy_fields = NULL;
 
 		// drop any existing indexes
 		if( is_array( $legacy_indexes = $xmls->dict->MetaIndexes( $this->name ) ) ) {
@@ -532,8 +534,11 @@ class dbTable extends dbObject {
 			unset( $this->fields[$field] );
 		}
 
+		$savem = $xmls->db->SetFetchMode2(ADODB_FETCH_ASSOC);
+		$legacy_fields = $xmls->dict->MetaColumns( $this->name );
+		$xmls->db->SetFetchMode2($savem);
 		// if table exists
-		if( is_array( $legacy_fields = $xmls->dict->MetaColumns( $this->name ) ) ) {
+		if( is_array( $legacy_fields ) ) {
 			// drop table
 			if( $this->drop_table ) {
 				$sql[] = $xmls->dict->DropTableSQL( $this->name );

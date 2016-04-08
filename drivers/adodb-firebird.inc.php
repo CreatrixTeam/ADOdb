@@ -29,7 +29,7 @@ class ADODB_firebird extends ADOConnection {
 	public $_transactionID;
 	public $metaTablesSQL = "select lower(rdb\$relation_name) from rdb\$relations where rdb\$relation_name not like 'RDB\$%'";
 	//OPN STUFF start
-	public $metaColumnsSQL = "select lower(a.rdb\$field_name), a.rdb\$null_flag, a.rdb\$default_source, b.rdb\$field_length, b.rdb\$field_scale, b.rdb\$field_sub_type, b.rdb\$field_precision, b.rdb\$field_type from rdb\$relation_fields a, rdb\$fields b where a.rdb\$field_source = b.rdb\$field_name and a.rdb\$relation_name = '%s' order by a.rdb\$field_position asc";
+	public $metaColumnsSQL = "select lower(a.rdb\$field_name), a.rdb\$null_flag, a.rdb\$default_source, b.rdb\$field_length, b.rdb\$field_scale, b.rdb\$field_sub_type, b.rdb\$field_precision, b.rdb\$field_type from rdb\$relation_fields a, rdb\$fields b where a.rdb\$field_source = b.rdb\$field_name and UPPER(a.rdb\$relation_name) = '%s' order by a.rdb\$field_position asc";
 	//OPN STUFF end
 	public $ibasetrans;
 	public $hasGenID = true;
@@ -107,7 +107,7 @@ class ADODB_firebird extends ADOConnection {
 
 		$sql = 'SELECT S.RDB$FIELD_NAME AFIELDNAME
 	FROM RDB$INDICES I JOIN RDB$INDEX_SEGMENTS S ON I.RDB$INDEX_NAME=S.RDB$INDEX_NAME
-	WHERE I.RDB$RELATION_NAME=\''.$table.'\' and I.RDB$INDEX_NAME like \'RDB$PRIMARY%\'
+	WHERE UPPER(I.RDB$RELATION_NAME)=\''.$table.'\' and I.RDB$INDEX_NAME like \'RDB$PRIMARY%\'
 	ORDER BY I.RDB$INDEX_NAME,S.RDB$FIELD_POSITION';
 
 		$a = $this->GetCol($sql,false,true);
@@ -199,13 +199,11 @@ class ADODB_firebird extends ADOConnection {
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		$false = false;
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$table = strtoupper($table);
-		$sql = "SELECT * FROM RDB\$INDICES WHERE RDB\$RELATION_NAME = '".$table."'";
+		$sql = "SELECT * FROM RDB\$INDICES WHERE UPPER(RDB\$RELATION_NAME) = '".$table."'";
 		if (!$primary) {
 			$sql .= " AND RDB\$INDEX_NAME NOT LIKE 'RDB\$%'";
 		} else {
@@ -427,9 +425,7 @@ class ADODB_firebird extends ADOConnection {
 	protected function _MetaColumns($pParsedTableName)
 	{
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-					$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-					$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
 
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
 
@@ -513,7 +509,7 @@ class ADODB_firebird extends ADOConnection {
 		return( $realblob );
 	}
 
-	protected function _BlobDecode( $blob )
+	public function _BlobDecode( $blob )
 	{
 		$blob_data = fbird_blob_info($this->_connectionID, $blob );
 		$blobid = fbird_blob_open($this->_connectionID, $blob );

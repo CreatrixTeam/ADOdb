@@ -288,16 +288,20 @@ class ADODB_mysqli extends ADOConnection {
 	}
 
 
-	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner = false)
+	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		$false = false;
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+		$vSchema = @$pParsedTableName['schema']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 				$pParsedTableName['table']['name']);
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
+		$rs = NULL;
 
 		// get index details
-		$rs = $this->Execute(sprintf('SHOW INDEXES FROM `%s`',$table));
+		if(empty($vSchema))
+			{$rs = $this->Execute(sprintf('SHOW INDEX FROM `%s`',$table));}
+		else
+			{$rs = $this->Execute(sprintf('SHOW INDEX FROM `%s`.`%s`', $vSchema, $table));}
 
 		// restore fetchmode
 		$this->SetFetchMode2($savem);
@@ -481,24 +485,33 @@ class ADODB_mysqli extends ADOConnection {
 		return $foreign_keys;
 	}
 
+	//verbatim from adodb-mysql.inc.php
 	protected function _MetaColumns($pParsedTableName)
 	{
-		$false = false;
-		if (!$this->metaColumnsSQL)
-			return $false;
-
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 				$pParsedTableName['table']['name']);
-		$normalize = $pParsedTableName['table']['isToNormalize'];
+		$schema = @$pParsedTableName['schema']['name'];
+		if ($schema) {
+			$dbName = $this->database;
+			$this->SelectDB($schema);
+		}
+
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
+
+		if ($schema) {
+			$this->SelectDB($dbName);
+		}
+
 		$this->SetFetchMode2($savem);
-		if (!is_object($rs))
+
+		if (!is_object($rs)) {
+			$false = false;
 			return $false;
+		}
 
 		$retarr = array();
-		while (!$rs->EOF) {
+		while (!$rs->EOF){
 			$fld = new ADOFieldObject();
 			$fld->name = $rs->fields[0];
 			$type = $rs->fields[1];
@@ -525,7 +538,7 @@ class ADODB_mysqli extends ADOConnection {
 			$fld->not_null = ($rs->fields[2] != 'YES');
 			$fld->primary_key = ($rs->fields[3] == 'PRI');
 			$fld->auto_increment = (strpos($rs->fields[5], 'auto_increment') !== false);
-			$fld->binary = (strpos($type,'blob') !== false);
+			$fld->binary = (strpos($type,'blob') !== false || strpos($type,'binary') !== false);
 			$fld->unsigned = (strpos($type,'unsigned') !== false);
 			$fld->zerofill = (strpos($type,'zerofill') !== false);
 

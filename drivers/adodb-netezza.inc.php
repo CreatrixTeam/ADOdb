@@ -31,7 +31,7 @@ class ADODB_netezza extends ADODB_postgres64 {
     public  $metaTablesSQL = "select objname from _v_object_data where objtype='table' order by 1";
 	public  $isoDates = true; // accepts dates in ISO format
 	public  $blobEncodeType = 'C';
-	public  $metaColumnsSQL = "SELECT attname, atttype FROM _v_relation_column_def WHERE name = '%s' AND attnum > 0 ORDER BY attnum";
+	public  $metaColumnsSQL = "SELECT attname, atttype FROM _v_relation_column_def WHERE LOWER(name) = '%s' AND attnum > 0 ORDER BY attnum";
 	public  $metaColumnsSQL1 = "SELECT attname, atttype FROM _v_relation_column_def WHERE name = '%s' AND attnum > 0 ORDER BY attnum";
 	// netezza doesn't have keys. it does have distributions, so maybe this is
 	// something that can be pulled from the system tables
@@ -53,9 +53,7 @@ class ADODB_netezza extends ADODB_postgres64 {
 	// Changed this function to support Netezza which has no concept of keys
 	// could posisbly work on other things from the system table later.
 
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
 
 		$table = strtolower($table);
 

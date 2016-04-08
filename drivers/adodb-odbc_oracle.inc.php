@@ -52,11 +52,11 @@ class  ADODB_odbc_oracle extends ADODB_odbc {
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+		$table = $this->NormaliseIdentifierNameIf((!$pParsedTableName['table']['isToQuote'] ||
+				$pParsedTableName['table']['isToNormalize']),
 				$pParsedTableName['table']['name']);
 
-		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
+		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 		if ($rs === false) {
 			$false = false;
 			return $false;

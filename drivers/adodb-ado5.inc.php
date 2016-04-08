@@ -196,9 +196,7 @@ class ADODB_ado extends ADOConnection {
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
 		$table = strtoupper($table);
 		$arr = array();
 		$dbc = $this->_connectionID;

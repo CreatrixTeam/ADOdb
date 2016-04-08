@@ -228,7 +228,8 @@ class ADODB_odbc extends ADOConnection {
 
 	protected function _MetaPrimaryKeys($pParsedTableName,$owner=false)
 	{
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
 		
 		if ($this->uCaseTables) {
@@ -367,7 +368,8 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 	protected function _MetaColumns($pParsedTableName)
 	{
 		$false = false;
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
 		if ($this->uCaseTables) $table = strtoupper($table);
 
@@ -437,6 +439,8 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 		10 NULLABLE
 		11 REMARKS
 		*/
+		$table = strtoupper($table);
+		$schema = strtoupper($schema);
 		while (!$rs->EOF) {
 		//	adodb_pr($rs->fields);
 			if (strtoupper(trim($rs->fields[2])) == $table && (!$schema || strtoupper($rs->fields[1]) == $schema)) {

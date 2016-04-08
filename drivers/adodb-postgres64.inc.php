@@ -385,12 +385,10 @@ class ADODB_postgres64 extends ADOConnection{
 	protected function _MetaColumns($pParsedTableName)
 	{
 		$false = false;
-		$table = $pParsedTableName['table']['name'];
-		$normalize = $pParsedTableName['table']['isToNormalize'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$schema = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'] : false);
-
-		if ($normalize) $table = strtolower($table);
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 

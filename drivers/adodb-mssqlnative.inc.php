@@ -491,8 +491,7 @@ class ADODB_mssqlnative extends ADOConnection {
 
 	protected function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 				$pParsedTableName['table']['name']);
 		$table = $this->qstr($table);
 
@@ -582,7 +581,8 @@ class ADODB_mssqlnative extends ADOConnection {
 	// tested with MSSQL 2000
 	protected function _MetaPrimaryKeys($pParsedTableName, $owner=false)
 	{
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
 		if (!$schema) $schema = $this->database;
 		if ($schema) $schema = "and k.table_catalog like '$schema%'";
@@ -622,9 +622,9 @@ class ADODB_mssqlnative extends ADOConnection {
 		* A simple caching mechanism, to be replaced in ADOdb V6
 		*/
 		static $cached_columns = array();
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $this->BuildTableName($this->NormaliseIdentifierNameIf(
+				$pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']), @$pParsedTableName['schema']['name']);
 		$schema = (!empty($pParsedTableName['schema']['name']) ? 
 				$pParsedTableName['schema']['name'] : false);
 		if ($this->cachedSchemaFlush)
@@ -638,7 +638,8 @@ class ADODB_mssqlnative extends ADOConnection {
 		if (!$this->mssql_version)
 			$this->ServerVersion();
 
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		if ($schema) {
 			$dbName = $this->database;
 			$this->SelectDB($schema);
@@ -695,6 +696,9 @@ class ADODB_mssqlnative extends ADOConnection {
 
 		}
 		$rs->Close();
+		$table = $this->BuildTableName($this->NormaliseIdentifierNameIf(
+				$pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']), @$pParsedTableName['schema']['name']);
 		$cached_columns[$table] = $retarr;
 		
 		return $retarr;

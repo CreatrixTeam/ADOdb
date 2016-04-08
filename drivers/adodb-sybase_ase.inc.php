@@ -73,10 +73,9 @@ class ADODB_sybase_ase extends ADODB_sybase {
 	{
 		$false = false;
 		if (!empty($this->metaColumnsSQL)) {
-
-			$table = (array_key_exists('schema', $pParsedTableName) ? 
-					$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-					$pParsedTableName['table']['name']);
+			$table = $this->BuildTableName($this->NormaliseIdentifierNameIf(
+					$pParsedTableName['table']['isToNormalize'],
+					$pParsedTableName['table']['name']), @$pParsedTableName['schema']['name']);
 			$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 			if ($rs === false) return $false;
 

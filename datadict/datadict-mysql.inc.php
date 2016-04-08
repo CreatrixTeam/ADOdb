@@ -363,6 +363,9 @@ class ADODB2_mysql extends ADODB_DataDict {
 		}
 	}
 
+	public function NormaliseIdentifierName($pIdentifierName)
+		{return strtolower($pIdentifierName);}
+
 	public function RowLockSQL($tables,$where='',$col='1 as adodbignore')
 	{
 		if ($where) $where = ' where '.$where;

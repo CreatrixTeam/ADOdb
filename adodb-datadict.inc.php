@@ -1271,6 +1271,16 @@ class ADODB_DataDict {
 
 	/**
 	*	ACCESS: PUBLIC
+	*	Upper cases or lower cases the identifier name and returns it.
+	*	
+	*	Note: The case change must match that of the database normalization behavior (think of 
+	*		internal storage). If the database does not normalize, keep as uppercase.
+	*/	
+	public function NormaliseIdentifierName($pIdentifierName)
+		{return strtoupper($pIdentifierName);}
+
+	/**
+	*	ACCESS: PUBLIC
 	*	Returns the sql required for locking a row. Refer to ADOConnection::RowLock() for 
 	*		specification
 	*/	

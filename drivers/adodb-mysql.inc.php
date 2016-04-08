@@ -163,14 +163,17 @@ class ADODB_mysql extends ADOConnection {
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		$false = false;
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+		$vSchema = @$pParsedTableName['schema']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 				$pParsedTableName['table']['name']);
-
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
+		$rs = NULL;
 
 		// get index details
-		$rs = $this->Execute(sprintf('SHOW INDEX FROM `%s`',$table));
+		if(empty($vSchema))
+			{$rs = $this->Execute(sprintf('SHOW INDEX FROM `%s`',$table));}
+		else
+			{$rs = $this->Execute(sprintf('SHOW INDEX FROM `%s`.`%s`', $vSchema, $table));}
 
 		// restore fetchmode
 		$this->SetFetchMode2($savem);
@@ -343,7 +346,8 @@ class ADODB_mysql extends ADOConnection {
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
 		if ($schema) {
 			$dbName = $this->database;
@@ -411,11 +415,11 @@ class ADODB_mysql extends ADOConnection {
 			} else {
 				$retarr[strtoupper($fld->name)] = $fld;
 			}
-				$rs->MoveNext();
-			}
+			$rs->MoveNext();
+		}
 
-			$rs->Close();
-			return $retarr;
+		$rs->Close();
+		return $retarr;
 	}
 
 	// returns true or false

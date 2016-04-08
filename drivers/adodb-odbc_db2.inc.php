@@ -184,14 +184,12 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
         $savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$false = false;
 		// get index details
 		$table = strtoupper($table);
-		$SQL="SELECT NAME, UNIQUERULE, COLNAMES FROM SYSIBM.SYSINDEXES WHERE TBNAME='$table'";
+		$SQL="SELECT NAME, UNIQUERULE, COLNAMES FROM SYSIBM.SYSINDEXES WHERE UPPER(TBNAME)='$table'";
         if ($primary)
 			$SQL.= " AND UNIQUERULE='P'";
 		$rs = $this->Execute($SQL);

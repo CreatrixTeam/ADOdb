@@ -102,18 +102,24 @@ class ADODB_oci8 extends ADOConnection {
 	/*  function MetaColumns($table, $normalize=true) added by smondino@users.sourceforge.net*/
 	protected function _MetaColumns($pParsedTableName)
 	{
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf((!$pParsedTableName['table']['isToQuote'] ||
+				$pParsedTableName['table']['isToNormalize']),
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		if ($schema){
-			$rs = $this->Execute(sprintf($this->metaColumnsSQL2, strtoupper($schema), strtoupper($table)));
+			$schema = $this->NormaliseIdentifierNameIf((!$pParsedTableName['schema']['isToQuote'] ||
+					$pParsedTableName['schema']['isToNormalize']),
+					$pParsedTableName['schema']['name']);
+			$rs = $this->Execute(sprintf($this->metaColumnsSQL2, $schema, $table));
 		}
 		else {
-			$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
+			$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 		}
 
 		$this->SetFetchMode2($savem);
+
 		if (!$rs) {
 			return false;
 		}
@@ -391,9 +397,8 @@ class ADODB_oci8 extends ADOConnection {
 	// Mark Newnham
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
+
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		// get index details

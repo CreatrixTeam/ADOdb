@@ -652,6 +652,9 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 		return array($s. "')");
 	}
 
+	public function NormaliseIdentifierName($pIdentifierName)
+		{return strtolower($pIdentifierName);}
+
 	public function RowLockSQL($tables,$where,$col='1 as adodbignore')
 		{return array("select $col from $tables where $where for update");}
 

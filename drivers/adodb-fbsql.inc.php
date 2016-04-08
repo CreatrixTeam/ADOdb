@@ -21,7 +21,7 @@ class ADODB_fbsql extends ADOConnection {
 	public  $hasInsertID = true;
 	public  $hasAffectedRows = true;
 	public  $metaTablesSQL = "SHOW TABLES";
-	public  $metaColumnsSQL = "SHOW COLUMNS FROM %s";
+	public  $metaColumnsSQL = "SHOW COLUMNS FROM \"%s\"";
 	public  $fmtTimeStamp = "'Y-m-d H:i:s'";
 	public  $hasLimit = false;
 
@@ -81,8 +81,7 @@ class ADODB_fbsql extends ADOConnection {
  	protected function _MetaColumns($pParsedTableName)
 	{
 		if ($this->metaColumnsSQL) {			
-			$table = (array_key_exists('schema', $pParsedTableName) ? 
-					$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+			$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 					$pParsedTableName['table']['name']);
 
 			$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));

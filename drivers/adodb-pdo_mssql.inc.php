@@ -60,10 +60,9 @@ class ADODB_pdo_mssql extends ADODB_pdo {
 	}
 
 	//VERBATIM COPY FROM "adodb-mssqlnative.inc.php"/"adodb-odbc_mssql.inc.php"
-	protected function _MetaIndexes($pParsedTableName,$primary=false, $owner = false)
+	protected function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 				$pParsedTableName['table']['name']);
 		$table = $this->qstr($table);
 

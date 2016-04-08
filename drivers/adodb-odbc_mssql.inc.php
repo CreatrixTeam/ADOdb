@@ -125,9 +125,11 @@ order by constraint_name, referenced_table_name, keyno";
 		return $ret;
 	}
 
+	//verbatim copy from adodb-mssql.inc.php
 	protected function _MetaColumns($pParsedTableName)
 	{
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
 
 		if ($schema) {
@@ -181,10 +183,10 @@ order by constraint_name, referenced_table_name, keyno";
 	}
 
 
+	//VERBATIM COPY FROM "adodb-mssqlnative.inc.php"/"adodb-odbc_mssql.inc.php"
 	protected function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 				$pParsedTableName['table']['name']);
 		$table = $this->qstr($table);
 
@@ -200,6 +202,7 @@ order by constraint_name, referenced_table_name, keyno";
         $savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
         $rs = $this->Execute($sql);
+
         $this->SetFetchMode2($savem);
 
         if (!is_object($rs)) {
@@ -235,9 +238,11 @@ order by constraint_name, referenced_table_name, keyno";
 
 	// "Stein-Aksel Basma" <basma@accelero.no>
 	// tested with MSSQL 2000
-	protected function _MetaPrimaryKeys($pParsedTableName, $owner = false)
+	// (almost)verbatim copy from adodb-mssql.inc.php/adodb-mssqlnative.inc.php
+	protected function _MetaPrimaryKeys($pParsedTableName, $owner=false)
 	{
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
 		//if (!$schema) $schema = $this->database;
 		if ($schema) $schema = "and k.table_catalog like '$schema%'";
@@ -249,7 +254,7 @@ order by constraint_name, referenced_table_name, keyno";
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
 		$a = $this->GetCol($sql);
-		$this->SetFetchMode2(savem);
+		$this->SetFetchMode2($savem);
 
 		if ($a && sizeof($a)>0) return $a;
 		$false = false;

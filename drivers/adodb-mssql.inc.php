@@ -273,11 +273,10 @@ class ADODB_mssql extends ADOConnection {
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-//		$arr = ADOConnection::MetaColumns($table);
-//		return $arr;
-
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
+
 		if ($schema) {
 			$dbName = $this->database;
 			$this->SelectDB($schema);
@@ -306,12 +305,14 @@ class ADODB_mssql extends ADOConnection {
 			$fld->not_null = (!$rs->fields[3]);
 			$fld->auto_increment = ($rs->fields[4] == 128);		// sys.syscolumns status field. 0x80 = 128 ref: http://msdn.microsoft.com/en-us/library/ms186816.aspx
 
+
 			if (isset($rs->fields[5]) && $rs->fields[5]) {
 				if ($rs->fields[5]>0) $fld->max_length = $rs->fields[5];
 				$fld->scale = $rs->fields[6];
 				if ($fld->scale>0) $fld->max_length += 1;
 			} else
 				$fld->max_length = $rs->fields[2];
+
 
 			if ($this->GetFetchMode() == ADODB_FETCH_NUM) {
 				$retarr[] = $fld;
@@ -327,10 +328,10 @@ class ADODB_mssql extends ADOConnection {
 	}
 
 
+	//VERBATIM COPY FROM "adodb-mssqlnative.inc.php"/"adodb-odbc_mssql.inc.php"
 	protected function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 				$pParsedTableName['table']['name']);
 		$table = $this->qstr($table);
 
@@ -345,8 +346,8 @@ class ADODB_mssql extends ADOConnection {
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
-
 		$rs = $this->Execute($sql);
+
 		$this->SetFetchMode2($savem);
 
 		if (!is_object($rs)) {
@@ -355,7 +356,7 @@ class ADODB_mssql extends ADOConnection {
 
 		$indexes = array();
 		while ($row = $rs->FetchRow()) {
-			if ($primary && !$row[5]) continue;
+			if (!$primary && $row[5]) continue;
 
 			$indexes[$row[0]]['unique'] = $row[6];
 			$indexes[$row[0]]['columns'][] = $row[1];
@@ -427,7 +428,8 @@ order by constraint_name, referenced_table_name, keyno";
 	// tested with MSSQL 2000
 	protected function _MetaPrimaryKeys($pParsedTableName, $owner=false)
 	{
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
 		if (!$schema) $schema = $this->database;
 		if ($schema) $schema = "and k.table_catalog like '$schema%'";

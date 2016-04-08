@@ -27,7 +27,7 @@ class ADODB2_firebird extends ADODB_DataDict {
 	public $renameColumn = 'ALTER TABLE %s ALTER %s TO %s';
 	public $alterCol = ' ALTER';
 	public $dropCol = ' DROP';
-	public $nameQuote = '';
+	public $nameQuote = '"';
 
 	public function ActualType($meta)
 	{

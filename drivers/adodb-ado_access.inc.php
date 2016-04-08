@@ -40,8 +40,6 @@ class  ADODB_ado_access extends ADODB_ado {
 		{
 			$tCOM = NULL;
 			$tConnectionString = "";
-			$u = 'UID';
-			$p = 'PWD';
 
 			if(!empty($this->charPage))
 				{$tCOM = new COM('ADODB.Connection',null,$this->charPage);}

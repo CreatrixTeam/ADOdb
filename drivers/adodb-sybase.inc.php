@@ -204,7 +204,8 @@ class ADODB_sybase extends ADOConnection {
 	# to convert similar Microsoft SQL*Server (mssql) API into Sybase compatible version
 	protected function _MetaPrimaryKeys($pParsedTableName, $owner = false)
 	{
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$sql = "SELECT c.column_name " .
 			   "FROM syscolumn c, systable t " .
 			   "WHERE t.table_name='$table' AND c.table_id=t.table_id " .

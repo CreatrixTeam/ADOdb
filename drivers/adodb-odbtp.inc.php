@@ -323,6 +323,7 @@ class ADODB_odbtp extends ADOConnection{
 			return $false;
 		}
 		$retarr = array();
+		$table = strtoupper($table);
 		while (!$rs->EOF) {
 			//print_r($rs->fields);
 			if (strtoupper($rs->fields[2]) == $table) {
@@ -353,7 +354,8 @@ class ADODB_odbtp extends ADOConnection{
 
 	protected function _MetaPrimaryKeys($pParsedTableName, $owner='')
 	{
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$arr = $this->GetArray("||SQLPrimaryKeys||$owner|$table");
 		$this->SetFetchMode2($savem);
@@ -541,9 +543,7 @@ class ADODB_odbtp extends ADOConnection{
 
 	protected function _MetaIndexes_mssql($pParsedTableName,$primary=false, $owner = false)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
 		$table = strtolower($this->qstr($table));
 
 		$sql = "SELECT i.name AS ind_name, C.name AS col_name, USER_NAME(O.uid) AS Owner, c.colid, k.Keyno,

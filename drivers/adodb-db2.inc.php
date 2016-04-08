@@ -235,9 +235,11 @@ class ADODB_db2 extends ADOConnection {
 
 	protected function _MetaPrimaryKeys($pParsedTableName, $owner = false)
 	{
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf((!$pParsedTableName['table']['isToQuote'] ||
+				$pParsedTableName['table']['isToNormalize']),
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
-		
+
 		if ($this->uCaseTables) {
 			$table = strtoupper($table);
 			$schema = strtoupper($schema);
@@ -266,10 +268,12 @@ class ADODB_db2 extends ADOConnection {
 
 	public function MetaForeignKeys($table, $owner = FALSE, $upper = FALSE, $asociative = FALSE )
 	{
-		if ($this->uCaseTables) $table = strtoupper($table);
 		$vParsedTableName = $this->_dataDict->ParseTableName($table);
-		$table = $vParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf((!$pParsedTableName['table']['isToQuote'] ||
+				$pParsedTableName['table']['isToNormalize']),
+				$pParsedTableName['table']['name']);
 		$schema = @$vParsedTableName['schema']['name'];
+		if ($this->uCaseTables) $table = strtoupper($table);
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = @db2_foreign_keys($this->_connectionID,'',$schema,$table);
@@ -294,6 +298,8 @@ class ADODB_db2 extends ADOConnection {
 		if (!$rs) return false;
 
 		$foreign_keys = array();
+		$table = strtoupper($table);
+		$schema = strtoupper($schema);
 		while (!$rs->EOF) {
 			if (strtoupper(trim($rs->fields[2])) == $table && (!$schema || strtoupper($rs->fields[1]) == $schema)) {
 				if (!is_array($foreign_keys[$rs->fields[5].'.'.$rs->fields[6]]))
@@ -413,7 +419,9 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	protected function _MetaColumns($pParsedTableName)
 	{
 		$false = false;		
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf((!$pParsedTableName['table']['isToQuote'] ||
+				$pParsedTableName['table']['isToNormalize']),
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
 		if ($this->uCaseTables) $table = strtoupper($table);
 
@@ -447,7 +455,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		11 REMARKS
 		*/
 		while (!$rs->EOF) {
-			if (strtoupper(trim($rs->fields[2])) == $table && (!$schema || strtoupper($rs->fields[1]) == $schema)) {
+			if (strtoupper(trim($rs->fields[2])) == strtoupper($table) && (!$schema || strtoupper($rs->fields[1]) == strtoupper($schema))) {
 				$fld = new ADOFieldObject();
 				$fld->name = $rs->fields[3];
 				$fld->type = $this->DB2Types($rs->fields[4]);
@@ -490,6 +498,8 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 			4 KEY_SEQ
 			5 PK_NAME
 			*/
+			$table = strtoupper($table);
+			$schema = strtoupper($schema);
 			while (!$rs->EOF) {
 				if (strtoupper(trim($rs->fields[2])) == $table && (!$schema || strtoupper($rs->fields[1]) == $schema)) {
 					$retarr[strtoupper($rs->fields[3])]->primary_key = true;

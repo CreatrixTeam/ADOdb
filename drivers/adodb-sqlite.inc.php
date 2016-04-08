@@ -82,9 +82,7 @@ class ADODB_sqlite extends ADOConnection {
 	protected function _MetaColumns($pParsedTableName)
 	{
 		$false = false;
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
 		$savem = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
 
 		$rs = $this->Execute("PRAGMA table_info('$table')");
@@ -262,9 +260,7 @@ class ADODB_sqlite extends ADOConnection {
 	protected function _MetaIndexes($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		$false = false;
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 		$SQL=sprintf("SELECT name,sql FROM sqlite_master WHERE type='index' AND LOWER(tbl_name)='%s'", strtolower($table));

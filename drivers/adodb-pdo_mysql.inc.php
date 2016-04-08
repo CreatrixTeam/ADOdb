@@ -96,9 +96,11 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		$this->Execute('SET SESSION TRANSACTION ' . $transaction_mode);
 	}
 
+	//verbatim from adodb-mysql.inc.php
 	protected function _MetaColumns($pParsedTableName)
 	{
-		$table = $pParsedTableName['table']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
 		$schema = @$pParsedTableName['schema']['name'];
 		if ($schema) {
 			$dbName = $this->database;
@@ -106,7 +108,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		}
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
-		$rs = $this->Execute(sprintf($this->metaColumnsSQL, $table));
+		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 
 		if ($schema) {
 			$this->SelectDB($dbName);
@@ -147,8 +149,9 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 			$fld->not_null = ($rs->fields[2] != 'YES');
 			$fld->primary_key = ($rs->fields[3] == 'PRI');
 			$fld->auto_increment = (strpos($rs->fields[5], 'auto_increment') !== false);
-			$fld->binary = (strpos($type, 'blob') !== false);
+			$fld->binary = (strpos($type,'blob') !== false || strpos($type,'binary') !== false);
 			$fld->unsigned = (strpos($type, 'unsigned') !== false);
+			$fld->zerofill = (strpos($type,'zerofill') !== false);
 
 			if (!$fld->binary) {
 				$d = $rs->fields[4];
@@ -172,17 +175,21 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		return $retarr;
 	}
 
-	//Verbatim copy from "adodb-mysql.inc.php"
+	//Verbatim copy from "adodb-mysql.inc.php"/adodb-mysqli.inc.php
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		$false = false;
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+		$vSchema = @$pParsedTableName['schema']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 				$pParsedTableName['table']['name']);
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
+		$rs = NULL;
 
 		// get index details
-		$rs = $this->Execute(sprintf('SHOW INDEX FROM `%s`',$table));
+		if(empty($vSchema))
+			{$rs = $this->Execute(sprintf('SHOW INDEX FROM `%s`',$table));}
+		else
+			{$rs = $this->Execute(sprintf('SHOW INDEX FROM `%s`.`%s`', $vSchema, $table));}
 
 		// restore fetchmode
 		$this->SetFetchMode2($savem);

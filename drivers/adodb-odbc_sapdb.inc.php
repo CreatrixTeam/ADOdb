@@ -45,18 +45,16 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		$table = $pParsedTableName['table']['name'];
 		$table = $this->Quote(strtoupper($table));
 
-		return $this->GetCol("SELECT columnname FROM COLUMNS WHERE tablename=$table AND mode='KEY' ORDER BY pos");
+		return $this->GetCol("SELECT columnname FROM COLUMNS WHERE UPPER(tablename)=$table AND mode='KEY' ORDER BY pos");
 	}
 
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner = false)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
 		$table = $this->Quote(strtoupper($table));
 
 		$sql = "SELECT INDEXNAME,TYPE,COLUMNNAME FROM INDEXCOLUMNS ".
-			" WHERE TABLENAME=$table".
+			" WHERE UPPER(TABLENAME)=$table".
 			" ORDER BY INDEXNAME,COLUMNNO";
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
@@ -76,7 +74,7 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		if ($primary) {
 			$indexes['SYSPRIMARYKEYINDEX'] = array(
 					'unique' => True,	// by definition
-					'columns' => $this->GetCol("SELECT columnname FROM COLUMNS WHERE tablename=$table AND mode='KEY' ORDER BY pos"),
+					'columns' => $this->GetCol("SELECT columnname FROM COLUMNS WHERE UPPER(tablename)=$table AND mode='KEY' ORDER BY pos"),
 				);
 		}
 		return $indexes;
@@ -90,7 +88,7 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		$table = $this->Quote(strtoupper($table));
 
 		$retarr = array();
-		foreach($this->GetAll("SELECT COLUMNNAME,DATATYPE,LEN,DEC,NULLABLE,MODE,\"DEFAULT\",CASE WHEN \"DEFAULT\" IS NULL THEN 0 ELSE 1 END AS HAS_DEFAULT FROM COLUMNS WHERE tablename=$table ORDER BY pos") as $column)
+		foreach($this->GetAll("SELECT COLUMNNAME,DATATYPE,LEN,DEC,NULLABLE,MODE,\"DEFAULT\",CASE WHEN \"DEFAULT\" IS NULL THEN 0 ELSE 1 END AS HAS_DEFAULT FROM COLUMNS WHERE UPPER(tablename)=$table ORDER BY pos") as $column)
 		{
 			$fld = new ADOFieldObject();
 			$fld->name = $column[0];
@@ -128,15 +126,12 @@ class ADODB_odbc_sapdb extends ADODB_odbc {
 		return $retarr;
 	}
 
-	protected function _MetaColumnNames($pParsedTableName, $numIndexes = false, $useattnum = false))
+	protected function _MetaColumnNames($pParsedTableName, $numIndexes = false, $useattnum = false)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".
-				$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
 		$table = $this->Quote(strtoupper($table));
 
-		return $this->GetCol("SELECT columnname FROM COLUMNS WHERE tablename=$table ORDER BY pos");
+		return $this->GetCol("SELECT columnname FROM COLUMNS WHERE UPPER(tablename)=$table ORDER BY pos");
 	}
 
 	// unlike it seems, this depends on the db-session and works in a multiuser environment

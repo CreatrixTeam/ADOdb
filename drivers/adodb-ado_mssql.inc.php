@@ -89,16 +89,15 @@ class  ADODB_ado_mssql extends ADODB_ado {
 
 	protected function _MetaColumns($pParsedTableName)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 				$pParsedTableName['table']['name']);
-		$table = strtoupper($table);
 		$arr= array();
 		$dbc = $this->_connectionID;
 
 		$osoptions = array();
 		$osoptions[0] = null;
-		$osoptions[1] = null;
+		$osoptions[1] = (@$pParsedTableName['schema']['name'] ? 
+				@$pParsedTableName['schema']['name'] : null);
 		$osoptions[2] = $table;
 		$osoptions[3] = null;
 

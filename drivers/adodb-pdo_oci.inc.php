@@ -25,6 +25,11 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 	public  $random = "abs(mod(DBMS_RANDOM.RANDOM,10000001)/10000000)";
 	public  $metaTablesSQL = "select table_name,table_type from cat where table_type in ('TABLE','VIEW')";
 	public  $metaColumnsSQL = "select cname,coltype,width, SCALE, PRECISION, NULLS, DEFAULTVAL from col where tname='%s' order by colno";
+	public  $metaColumnsSQL2 = "select column_name,data_type,data_length, data_scale, data_precision,
+    case when nullable = 'Y' then 'NULL'
+    else 'NOT NULL' end as nulls,
+    data_default from all_tab_cols
+  where owner='%s' and table_name='%s' order by column_id"; // when there is a schema
 	protected  $_bindInputArray = true;
 	protected  $_nestedSQL = true;
 	public  $hasGenID = true;
@@ -63,20 +68,29 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 		return $ret;
 	}
 
+	//VERBATIM COPY FROM "adodb-oci8.inc.php"
 	protected function _MetaColumns($pParsedTableName)
 	{
-		$false = false;
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
+		$table = $this->NormaliseIdentifierNameIf((!$pParsedTableName['table']['isToQuote'] ||
+				$pParsedTableName['table']['isToNormalize']),
 				$pParsedTableName['table']['name']);
+		$schema = @$pParsedTableName['schema']['name'];
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
-		$rs = $this->Execute(sprintf($this->metaColumnsSQL,strtoupper($table)));
+		if ($schema){
+			$schema = $this->NormaliseIdentifierNameIf((!$pParsedTableName['schema']['isToQuote'] ||
+					$pParsedTableName['schema']['isToNormalize']),
+					$pParsedTableName['schema']['name']);
+			$rs = $this->Execute(sprintf($this->metaColumnsSQL2, $schema, $table));
+		}
+		else {
+			$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
+		}
 
 		$this->SetFetchMode2($savem);
 
 		if (!$rs) {
-			return $false;
+			return false;
 		}
 		$retarr = array();
 		while (!$rs->EOF) { //print_r($rs->fields);
@@ -85,31 +99,35 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 	   		$fld->type = $rs->fields[1];
 	   		$fld->max_length = $rs->fields[2];
 			$fld->scale = $rs->fields[3];
-			if ($rs->fields[1] == 'NUMBER' && $rs->fields[3] == 0) {
-				$fld->type ='INT';
-	     		$fld->max_length = $rs->fields[4];
-	    	}
+			if ($rs->fields[1] == 'NUMBER') {
+				if ($rs->fields[3] == 0) {
+					$fld->type = 'INT';
+				}
+				$fld->max_length = $rs->fields[4];
+			}
 		   	$fld->not_null = (strncmp($rs->fields[5], 'NOT',3) === 0);
 			$fld->binary = (strpos($fld->type,'BLOB') !== false);
 			$fld->default_value = $rs->fields[6];
 
-			if ($this->GetFetchMode() == ADODB_FETCH_NUM) $retarr[] = $fld;
-			else $retarr[strtoupper($fld->name)] = $fld;
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) {
+				$retarr[] = $fld;
+			}
+			else {
+				$retarr[strtoupper($fld->name)] = $fld;
+			}
 			$rs->MoveNext();
 		}
 		$rs->Close();
-		if (empty($retarr))
-			return  $false;
-		else
-			return $retarr;
+		if (empty($retarr)) {
+			return false;
+		}
+		return $retarr;
 	}
 
 	//VERBATIM COPY FROM "adodb-oci8.inc.php"
 	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
-		$table = (array_key_exists('schema', $pParsedTableName) ? 
-				$pParsedTableName['schema']['name'].".".$pParsedTableName['table']['name'] :
-				$pParsedTableName['table']['name']);
+		$table = $pParsedTableName['table']['name'];
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 

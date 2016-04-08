@@ -3235,6 +3235,15 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 	public function ForceNameQuote($pName = NULL)
 		{return $this->_dataDict->ForceNameQuote($pName);}
+
+	public final function NormaliseIdentifierNameIf($pCondition, $pIdentifierName)
+	{
+		return ($pCondition ? $this->_dataDict->NormaliseIdentifierName($pIdentifierName) : 
+				$pIdentifierName);
+	}
+
+	public function BuildTableName($pTableName, $pSchemaName = NULL)
+		{return ($pSchemaName ? ($pSchemaName.".".$pTableName) : $pTableName);}
 } // end class ADOConnection
 
 
