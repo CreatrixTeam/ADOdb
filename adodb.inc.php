@@ -251,7 +251,7 @@ if (!defined('_ADODB_LAYER')) {
 	class ADOFieldObject {
 		public  $name = '';
 		public  $max_length=0;
-		public  $type="";
+		public  $type=""; //a value understandable by ADORecordSet::MetaType()
 
 		//Temporary method untill drivers explicitly and correctly create the ADOFieldObject objects.
 		public function FillFromObject($pObject)

@@ -80,61 +80,19 @@ class ADODB2_mssql extends ADODB_DataDict {
 			$len = $fieldobj->max_length;
 		}
 
-		if($this->dataProvider !== "mssqlnative")
-		{
-			$len = -1; // mysql max_length is not accurate
-			switch (strtoupper($t)) {
-				case 'R':
-				case 'INT':
-				case 'INTEGER': return  'I';
-				case 'BIT':
-				case 'TINYINT': return  'I1';
-				case 'SMALLINT': return 'I2';
-				case 'BIGINT':  return  'I8';
-				case 'SMALLDATETIME': return 'T';
-				case 'REAL':
-				case 'FLOAT': return 'F';
-				default: return parent::MetaType($t,$len,$fieldobj);
-			}
-		}
-		else
-		{//WARNING: THIS IMPLEMENTATION DOES NOT APPEAR TO HOLD TO APPARANT SPECIFICATION.
-			$_typeConversion = array(
-				-155 => 'D',
-				  93 => 'D',
-				-154 => 'D',
-				  -2 => 'D',
-				  91 => 'D',
-
-				  12 => 'C',
-				   1 => 'C',
-				  -9 => 'C',
-				  -8 => 'C',
-
-				  -7 => 'L',
-				  -6 => 'I2',
-				  -5 => 'I8',
-				 -11 => 'I',
-				   4 => 'I',
-				   5 => 'I4',
-
-				  -1 => 'X',
-				 -10 => 'X',
-
-				   2 => 'N',
-				   3 => 'N',
-				   6 => 'N',
-				   7 => 'N',
-
-				-152 => 'X',
-				-151 => 'X',
-				  -4 => 'X',
-				  -3 => 'X'
-				);
-
-			if(isset($_typeConversion[$t]))
-				{return $_typeConversion[$t];}
-			return ADODB_DEFAULT_METATYPE;
+		$len = -1; // mysql max_length is not accurate
+		switch (strtoupper($t)) {
+			case 'R':
+			case 'INT':
+			case 'INTEGER': return  'I';
+			case 'BIT':
+			case 'TINYINT': return  'I1';
+			case 'SMALLINT': return 'I2';
+			case 'BIGINT':  return  'I8';
+			case 'SMALLDATETIME': return 'T';
+			case 'REAL':
+			case 'FLOAT': return 'F';
+			default: return parent::MetaType($t,$len,$fieldobj);
 		}
 	}
 

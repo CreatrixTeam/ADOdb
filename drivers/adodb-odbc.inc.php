@@ -17,21 +17,8 @@ if (!defined('ADODB_DIR')) die();
 
   define("_ADODB_ODBC_LAYER", 2 );
 
-/*
- * These constants are used to set define MetaColumns() method's behavior.
- * - METACOLUMNS_RETURNS_ACTUAL makes the driver return the actual type, 
- *   like all other drivers do (default)
- * - METACOLUMNS_RETURNS_META is provided for legacy compatibility (makes
- *   driver behave as it did prior to v5.21)
- *
- * @see $metaColumnsReturnType
- */
-DEFINE('METACOLUMNS_RETURNS_ACTUAL', 0);
-DEFINE('METACOLUMNS_RETURNS_META', 1);
-	
 /*--------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------*/
-
 
 class ADODB_odbc extends ADOConnection {
 	public  $databaseType = "odbc";
@@ -52,11 +39,6 @@ class ADODB_odbc extends ADOConnection {
 	protected  $_lastAffectedRows = 0;
 	public  $uCaseTables = true; // for meta* functions, uppercase table names
 	
-	/*
-	 * Tells the metaColumns feature whether to return actual or meta type
-	 */
-	public $metaColumnsReturnType = METACOLUMNS_RETURNS_ACTUAL;
-
 	public function __construct()
 	{
 		$this->_haserrorfunctions = true;
@@ -361,7 +343,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 			return 'L';
 
 		default:
-			return 'N'; //TODO: Correct usage of ADODB_DEFAULT_METATYPE. See commit https://github.com/ADOdb/ADOdb/commit/6005cb728243288093ea4c32112d350c138adf30
+			return ADODB_DEFAULT_METATYPE;
 		}
 	}
 
@@ -446,16 +428,16 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 			if (strtoupper(trim($rs->fields[2])) == $table && (!$schema || strtoupper($rs->fields[1]) == $schema)) {
 				$fld = new ADOFieldObject();
 				$fld->name = $rs->fields[3];
-				if ($this->metaColumnsReturnType == METACOLUMNS_RETURNS_META)
-					/* 
-				    * This is the broken, original value
-					*/
-					$fld->type = $this->ODBCTypes($rs->fields[4]);
-				else
-					/*
-				    * This is the correct new value
-					*/
-				    $fld->type = $rs->fields[4];
+
+				switch ($this->databaseType)
+				{
+					case 'odbc_access':
+					case 'odbc_vfp':
+						$fld->type = $this->ODBCTypes($rs->fields[4]);
+						break;
+					default:
+					    $fld->type = $rs->fields[4];
+				}
 
 				// ref: http://msdn.microsoft.com/library/default.asp?url=/archive/en-us/dnaraccgen/html/msdn_odk.asp
 				// access uses precision to store length for char/varchar
