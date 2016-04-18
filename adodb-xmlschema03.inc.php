@@ -525,7 +525,7 @@ class dbTable extends dbObject {
 		// drop any existing indexes
 		if( is_array( $legacy_indexes = $xmls->dict->MetaIndexes( $this->name ) ) ) {
 			foreach( $legacy_indexes as $index => $index_details ) {
-				$sql[] = $xmls->dict->DropIndexSQL( $index, $this->name );
+				$sql[] = $xmls->dict->DropIndexSQL( "`".$index."`", $this->name );
 			}
 		}
 

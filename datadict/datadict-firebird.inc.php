@@ -200,6 +200,89 @@ end;
 		return $sql;
 	}
 
+	public function ChangeTableSQL($pTableName, $pTableFields, $pTableOptions = false, 
+			$pIsToDropOldFields = false)
+	{
+		$vPreviousFetchMode = $this->connection->SetFetchMode2(ADODB_FETCH_ASSOC);
+		$vRaiseErrorFn = NULL;
+		$vCurrentTableFields = NULL;
+
+		// check table exists
+		$vRaiseErrorFn = $this->connection->raiseErrorFn;
+		$this->connection->raiseErrorFn = '';
+		$vCurrentTableFields = $this->MetaColumns($pTableName);
+		$this->connection->raiseErrorFn = $vRaiseErrorFn;
+
+		$this->connection->SetFetchMode2($vPreviousFetchMode);
+
+		if(empty($vCurrentTableFields))
+			{return $this->CreateTableSQL($pTableName, $pTableFields, $pTableOptions);}
+		else
+		{
+			$tSQLs = array();
+			$t_GenFields_lines = NULL;
+			$tFieldsToAlter = array();
+			$tFieldsToAdd = array();
+			$tFieldsToDrop = NULL;
+			$tSQL2 = "";
+			$tSQL3 = "";
+			$tIsFirstColumn = true;
+			
+			list($t_GenFields_lines, $pkey, $idxs) = $this->_GenFields($pTableFields);
+			if($t_GenFields_lines == null)
+				{$t_GenFields_lines = array();}
+			
+			foreach($t_GenFields_lines as $tID => $tV) 
+			{
+				if(isset($vCurrentTableFields[$tID]) && is_object($vCurrentTableFields[$tID]))
+					{$tFieldsToAlter[$tID] = $pTableFields[$tID];}
+				else
+					{$tFieldsToAdd[$tID] = $pTableFields[$tID];}
+			}
+			if($pIsToDropOldFields)
+			{
+				$tFieldsToDrop = array();
+				foreach($vCurrentTableFields as $tID => $tV)
+				{
+					if(!isset($t_GenFields_lines[$tID]))
+						{$tFieldsToDrop[$tID] = $tID;}
+				}
+			}
+
+			$tSQLs = array_merge($tSQLs, 
+					$this->CreateTableSQL('`tempdfdfkjueb3`', $pTableFields, $pTableOptions));
+			foreach($pTableFields as $tTableField)
+			{
+				if($tIsFirstColumn)
+					{$tIsFirstColumn = false;}
+				else
+				{
+					$tSQL2 .= " ,";
+					$tSQL3 .= " ,";
+				}
+				$tSQL2 .= $this->NameQuote($tTableField['NAME']);
+				$tSQL3 .= "CAST(".$this->NameQuote($tTableField['NAME'])." AS ".
+						$this->ActualType(strtoupper($tTableField['TYPE']));
+				
+				if($tTableField['SIZE'])
+					{$tSQL3 .= "(".$tTableField['SIZE'].")";}
+
+				$tSQL3 .= ")";
+			}
+			$tSQLs[] = "INSERT INTO ".$this->TableName('`tempdfdfkjueb3`')."(".$tSQL2.") ".
+					"SELECT $tSQL3 FROM ".$this->TableName($pTableName);
+			$tSQLs[] = "DROP TABLE ".$this->TableName($pTableName);
+			$tSQLs = array_merge($tSQLs, 
+					$this->CreateTableSQL($pTableName, $pTableFields, $pTableOptions));
+			$tSQLs[] = "INSERT INTO ".$this->TableName($pTableName)." SELECT * FROM ".
+					$this->TableName('`tempdfdfkjueb3`');
+			$tSQLs[] = "DROP TABLE ".$this->TableName('`tempdfdfkjueb3`');
+			//$tSQLs[] = "COMMIT";
+			//echo("<pre>");print_r($tSQLs);echo("</pre>");
+			return $tSQLs;
+		}
+	}
+
 	// Format date column in sql string given an input format that understands Y M D
 	// Only since Interbase 6.0 - uses EXTRACT
 	// problem - does not zero-fill the day and month yet

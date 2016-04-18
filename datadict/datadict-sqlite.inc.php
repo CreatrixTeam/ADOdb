@@ -113,6 +113,9 @@ class ADODB2_sqlite extends ADODB_DataDict {
 			$tFieldsToAlter = array();
 			$tFieldsToAdd = array();
 			$tFieldsToDrop = NULL;
+			$tSQL2 = "";
+			$tSQL3 = "";
+			$tIsFirstColumn = true;
 			
 			list($t_GenFields_lines, $pkey, $idxs) = $this->_GenFields($pTableFields);
 			if($t_GenFields_lines == null)
@@ -140,23 +143,25 @@ class ADODB2_sqlite extends ADODB_DataDict {
 			$tSQLs = array_merge($tSQLs, 
 					$this->CreateTableSQL($pTableName, $pTableFields, $pTableOptions));
 			$tSQLs[] = "BEGIN TRANSACTION";
-			$tSQL2 = "";
-			$tIsFirstColumn = true;
 			foreach($pTableFields as $tTableField)
 			{
 				if($tIsFirstColumn)
-				{
-					$tSQL2 .= $this->NameQuote($tTableField['NAME']);
-					$tIsFirstColumn = false;
-				}
+					{$tIsFirstColumn = false;}
 				else
-					{$tSQL2 .= " ,".$this->NameQuote($tTableField['NAME']);}
+				{
+					$tSQL2 .= " ,";
+					$tSQL3 .= " ,";
+				}
+				$tSQL2 .= $this->NameQuote($tTableField['NAME']);
+				$tSQL3 .= "CAST(".$this->NameQuote($tTableField['NAME'])." AS ".
+						$this->ActualType(strtoupper($tTableField['TYPE'])).")";
+				$tIsFirstColumn = false;
 			}
 			$tSQLs[] = "INSERT INTO ".$this->TableName($pTableName)."(".$tSQL2.") ".
-					"SELECT $tSQL2 FROM ".$this->TableName("`tempdfdfkjueb3`");
+					"SELECT $tSQL3 FROM ".$this->TableName("`tempdfdfkjueb3`");
 			$tSQLs[] = "DROP TABLE ".$this->TableName("`tempdfdfkjueb3`");
 			$tSQLs[] = "COMMIT";
-			//print_r($tSQLs);die();
+
 			return $tSQLs;
 			// $tSQLs = array_merge($tSQLs, $this->AddColumnSQL($pTableName, $tFieldsToAdd));
 			// if($pIsToDropOldFields)
