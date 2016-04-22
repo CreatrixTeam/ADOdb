@@ -30,7 +30,6 @@ if (!defined('ADODB_DIR')) die();
 
 class ADODB_ibase extends ADOConnection {
 	public  $databaseType = "ibase";
-	public  $dataProvider = "ibase";
 	public  $replaceQuote = "''"; // string to use to replace quotes
 	public  $ibase_datefmt = '%Y-%m-%d'; // For hours,mins,secs change to '%Y-%m-%d %H:%M:%S';
 	public  $fmtDate = "'Y-m-d'";

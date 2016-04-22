@@ -252,6 +252,7 @@ if (!defined('_ADODB_LAYER')) {
 		public  $name = '';
 		public  $max_length=0;
 		public  $type=""; //a value understandable by ADORecordSet::MetaType()
+		public  $scale=-1; //number of decimal places (digits to the right of the decimal point)
 
 		//Temporary method untill drivers explicitly and correctly create the ADOFieldObject objects.
 		public function FillFromObject($pObject)
@@ -5230,6 +5231,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				break;
 			case 'borland_ibase':
 				$drivername = 'ibase';
+				break;
+			case 'sybase_ase':
+				$drivername = 'sybase';
 				break;
 			default:
 				$drivername = 'generic';
