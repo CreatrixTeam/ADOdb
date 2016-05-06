@@ -462,17 +462,39 @@ class ADODB_postgres64 extends ADOConnection{
 			}
 
 			//Freek
-			$fld->not_null = $rs->fields[4] == 't';
-
+			$fld->not_null = ($rs->fields[4] == $this->true);
 
 			// Freek
 			if (is_array($keys)) {
 				foreach($keys as $key) {
-					if ($fld->name == $key['column_name'] AND $key['primary_key'] == 't')
+					if ($fld->name == $key['column_name'] AND $key['primary_key'] == $this->true)
 						$fld->primary_key = true;
-					if ($fld->name == $key['column_name'] AND $key['unique_key'] == 't')
+					if ($fld->name == $key['column_name'] AND $key['unique_key'] == $this->true)
 						$fld->unique = true; // What name is more compatible?
 				}
+			}
+
+			switch($fld->type)
+			{
+				case "int2":
+					$fld->precision = 16;
+					break;
+				case "int4":
+					$fld->precision = 32;
+					break;
+				case "numeric":
+					if($rs->fields[3] !== -1)
+						{$fld->precision = (($rs->fields[3] - 4) >> 16) & 0xFFFF;}
+					break;
+				case "float4":
+					$fld->precision = 24;
+					break;
+				case "float8":
+					$fld->precision = 53;
+					break;
+				default:
+					$fld->precision = -1;
+					break;
 			}
 
 			if ($this->GetFetchMode() == ADODB_FETCH_NUM) $retarr[] = $fld;

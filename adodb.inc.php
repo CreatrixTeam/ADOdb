@@ -252,7 +252,6 @@ if (!defined('_ADODB_LAYER')) {
 		public  $name = '';
 		public  $max_length=0;
 		public  $type=""; //a value understandable by ADORecordSet::MetaType()
-		public  $scale=-1; //number of decimal places (digits to the right of the decimal point)
 
 		//Temporary method untill drivers explicitly and correctly create the ADOFieldObject objects.
 		public function FillFromObject($pObject)

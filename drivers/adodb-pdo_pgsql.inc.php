@@ -110,21 +110,38 @@ select viewname,'V' from pg_views where viewname like $mask";
 		}
 		return $ret;
 	}
+	
+	/**
+	 * Generate the SQL to retrieve MetaColumns data
+	 * @param string $table Table name
+	 * @param string $schema Schema name (can be blank)
+	 * @return string SQL statement to execute
+	 */
+	protected function _generateMetaColumnsSQL($table, $schema)
+	{
+		if ($schema) {
+			return sprintf($this->metaColumnsSQL1, $table, $table, $schema);
+		}
+		else {
+			return sprintf($this->metaColumnsSQL, $table, $table, $schema);
+		}
+	}
 
+	//VERBATIM COPY FROM "adodb-postgres64.inc.php"
 	protected function _MetaColumns($pParsedTableName)
 	{
+		$false = false;
 		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
 				$pParsedTableName['table']['name']);
-		$schema = @$pParsedTableName['schema']['name'];
+		$schema = (array_key_exists('schema', $pParsedTableName) ? 
+				$pParsedTableName['schema']['name'] : false);
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
-		if ($schema) $rs = $this->Execute(sprintf($this->metaColumnsSQL1,$table,$table,$schema));
-		else $rs = $this->Execute(sprintf($this->metaColumnsSQL,$table,$table));
+		$rs = $this->Execute($this->_generateMetaColumnsSQL($table, $schema));
 		$this->SetFetchMode2($savem);
 
 		if ($rs === false) {
-			$false = false;
 			return $false;
 		}
 		if (!empty($this->metaKeySQL)) {
@@ -191,9 +208,7 @@ select viewname,'V' from pg_views where viewname like $mask";
 			}
 
 			//Freek
-			if ($rs->fields[4] == $this->true) {
-				$fld->not_null = true;
-			}
+			$fld->not_null = ($rs->fields[4] == $this->true);
 
 			// Freek
 			if (is_array($keys)) {
@@ -205,16 +220,39 @@ select viewname,'V' from pg_views where viewname like $mask";
 				}
 			}
 
+			switch($fld->type)
+			{
+				case "int2":
+					$fld->precision = 16;
+					break;
+				case "int4":
+					$fld->precision = 32;
+					break;
+				case "numeric":
+					if($rs->fields[3] !== -1)
+						{$fld->precision = (($rs->fields[3] - 4) >> 16) & 0xFFFF;}
+					break;
+				case "float4":
+					$fld->precision = 24;
+					break;
+				case "float8":
+					$fld->precision = 53;
+					break;
+				default:
+					$fld->precision = -1;
+					break;
+			}
+
 			if ($this->GetFetchMode() == ADODB_FETCH_NUM) $retarr[] = $fld;
 			else $retarr[strtoupper($fld->name)] = $fld;
 
 			$rs->MoveNext();
 		}
 		$rs->Close();
-		if (empty($retarr)) {
-			$false = false;
-			return $false;
-		} else return $retarr;
+		if (empty($retarr))
+			return  $false;
+		else
+			return $retarr;
 
 	}
 
