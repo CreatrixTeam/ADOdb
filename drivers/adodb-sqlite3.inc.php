@@ -77,7 +77,7 @@ class ADODB_sqlite3 extends ADOConnection {
 		}
 		return !empty($ret);
 	}
-    
+
 	// mark newnham
 	protected function _MetaColumns($pParsedTableName)
 	{
@@ -121,12 +121,12 @@ class ADODB_sqlite3 extends ADOConnection {
 
 		return $arr;
 	}
-	
+
 	function metaForeignKeys( $table, $owner = FALSE, $upper = FALSE, $associative = FALSE )
 	{
-		if ($this->GetFetchMode() == ADODB_FETCH_ASSOC) 
+		if ($this->GetFetchMode() == ADODB_FETCH_ASSOC)
 		$associative = true;
-		
+
 	    /*
 		* Read sqlite master to find foreign keys
 		*/
@@ -147,12 +147,12 @@ class ADODB_sqlite3 extends ADOConnection {
 		{
 			if (!preg_match('/FOREIGN/',$y))
 				continue;
-			
+
 			$matches = false;
 			preg_match_all('/\((.+?)\)/i',$y,$matches);
 			$tmatches = false;
 			preg_match_all('/REFERENCES (.+?)\(/i',$y,$tmatches);
-			
+
 			if ($associative)
 			{
 				if (!isset($fkeyList[$tmatches[1][0]]))
@@ -162,7 +162,7 @@ class ADODB_sqlite3 extends ADOConnection {
 			else
 				$fkeyList[$tmatches[1][0]][] = $matches[1][0] . '=' . $matches[1][1];
 		}
-		
+
 		if ($associative)
 		{
 			if ($upper)
@@ -347,9 +347,9 @@ class ADODB_sqlite3 extends ADOConnection {
 
 		return $indexes;
 	}
-	
+
 	/**
-	* Returns the maximum size of a MetaType C field. Because of the 
+	* Returns the maximum size of a MetaType C field. Because of the
 	* database design, sqlite places no limits on the size of data inserted
 	*
 	* @return int
@@ -360,7 +360,7 @@ class ADODB_sqlite3 extends ADOConnection {
 	}
 
 	/**
-	* Returns the maximum size of a MetaType X field. Because of the 
+	* Returns the maximum size of a MetaType X field. Because of the
 	* database design, sqlite places no limits on the size of data inserted
 	*
 	* @return int

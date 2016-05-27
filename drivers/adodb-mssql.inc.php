@@ -748,7 +748,7 @@ order by constraint_name, referenced_table_name, keyno";
 	{
 		return ADORecordSet_array_mssql::UnixTimeStamp($v);
 	}
-	
+
 	/**
 	* Returns a substring of a varchar type field
 	*
@@ -766,11 +766,11 @@ order by constraint_name, referenced_table_name, keyno";
 		if ($length == 0)
 			/*
 		     * The length available to varchar is 2GB, but that makes no
-			 * sense in a substring, so I'm going to arbitrarily limit 
+			 * sense in a substring, so I'm going to arbitrarily limit
 			 * the length to 1K, but you could change it if you want
 			 */
 			$length = 1024;
-		
+
 		$text = "SUBSTRING($fld,$start,$length)";
 		return $text;
 	}
@@ -962,7 +962,7 @@ class ADORecordset_mssql extends ADORecordSet {
 	}
 
 	/**
-	* Returns the maximum size of a MetaType C field. Because of the 
+	* Returns the maximum size of a MetaType C field. Because of the
 	* database design, SQL Server places no limits on the size of data inserted
 	* Although the actual limit is 2^31-1 bytes.
 	*
@@ -974,7 +974,7 @@ class ADORecordset_mssql extends ADORecordSet {
 	}
 
 	/**
-	* Returns the maximum size of a MetaType X field. Because of the 
+	* Returns the maximum size of a MetaType X field. Because of the
 	* database design, SQL Server places no limits on the size of data inserted
 	* Although the actual limit is 2^31-1 bytes.
 	*
