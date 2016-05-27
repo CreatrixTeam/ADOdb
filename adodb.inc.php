@@ -3233,7 +3233,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @return	string				The SQL text
 	 */
 	function month($fld) {
-		$x = $this->sqlDate('m',$fld);
+		$x = $this->SQLDate('m',$fld);
 
 		return $x;
 	}
@@ -3245,7 +3245,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @return	string		The SQL text
 	 */
 	function day($fld) {
-		$x = $this->sqlDate('d',$fld);
+		$x = $this->SQLDate('d',$fld);
 		return $x;
 	}
 
@@ -3257,7 +3257,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @return	string		The SQL text
 	 */
 	function year($fld) {
-		$x = $this->sqlDate('Y',$fld);
+		$x = $this->SQLDate('Y',$fld);
 		return $x;
 	}
 
