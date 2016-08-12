@@ -203,4 +203,34 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 class  ADORecordSet_pdo_sqlsrv extends ADORecordSet_pdo {
 
 	public  $databaseType = 'pdo_sqlsrv';
+
+	public function FetchField($fieldOffset = -1)
+	{
+		$off=$fieldOffset+1; // offsets begin at 1
+
+		$o= new ADOFieldObject();
+		$arr = @$this->_queryID->getColumnMeta($fieldOffset);
+		if (!$arr) {
+			return false;
+		}
+		//adodb_pr($arr);
+		$o->name = $arr['name'];
+		if (isset($arr['sqlsrv:decl_type']) && $arr['sqlsrv:decl_type'] <> "null") 
+		{
+		    $o->type = $arr['sqlsrv:decl_type'];
+		}
+		elseif (isset($arr['native_type']) && $arr['native_type'] <> "null") 
+		{
+		    $o->type = $arr['native_type'];
+		}
+		else 
+		{
+		     $o->type = adodb_pdo_type($arr['pdo_type']);
+		}
+		
+		$o->max_length = $arr['len'];
+		$o->precision = $arr['precision'];
+
+		return $o;
+	}
 }
