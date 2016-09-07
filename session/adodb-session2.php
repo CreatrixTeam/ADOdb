@@ -158,8 +158,11 @@ class ADODB_Session {
 	*/
 	static function driver($driver = null)
 	{
-		static $_driver = 'mysqli';
+		static $_driver = NULL;
 		static $set = false;
+
+		if($_driver === NULL)
+			{$_driver = ((version_compare(PHP_VERSION, '7.0.0') >= 0) ? 'mysqli' : 'mysql');}
 
 		if (!is_null($driver)) {
 			$_driver = trim($driver);
