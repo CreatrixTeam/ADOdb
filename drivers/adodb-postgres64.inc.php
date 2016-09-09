@@ -876,8 +876,10 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 			$this->_currentRow++;
 			if ($this->_numOfRows < 0 || $this->_numOfRows > $this->_currentRow) {
 				$this->fields = @pg_fetch_array($this->_queryID,$this->_currentRow,$this->postgres64_getDriverFetchMode());
-				if (is_array($this->fields) && $this->fields) {
-					if (isset($this->_blobArr)) $this->_fixblobs();
+				if (is_array($this->fields)) {
+					if ($this->fields) {
+						if (isset($this->_blobArr)) $this->_fixblobs();
+					}
 					return true;
 				}
 			}

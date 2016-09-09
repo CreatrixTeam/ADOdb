@@ -98,9 +98,6 @@ class ADODB_postgres7 extends ADODB_postgres64 {
 	public function __construct()
 	{
 		parent::__construct();
-		if (ADODB_ASSOC_CASE !== ADODB_ASSOC_CASE_NATIVE) {
-			$this->rsPrefix .= 'assoc_';
-		}
 		$this->_bindInputArray = PHP_VERSION >= 5.1;
 	}
 
@@ -327,50 +324,4 @@ class ADORecordSet_postgres7 extends ADORecordSet_postgres64{
 		return false;
 	}
 
-}
-
-class ADORecordSet_assoc_postgres7 extends ADORecordSet_postgres64{
-
-	public  $databaseType = "postgres7";
-
-
-	protected function _fetch()
-	{
-		$this->bind = false;
-		if ($this->_currentRow >= $this->_numOfRows && $this->_numOfRows >= 0) {
-			return false;
-		}
-
-		$this->fields = @pg_fetch_array($this->_queryID,$this->_currentRow,$this->postgres64_getDriverFetchMode());
-
-		if ($this->fields) {
-			if (isset($this->_blobArr)) $this->_fixblobs();
-		}
-
-		return (is_array($this->fields));
-	}
-
-	public function MoveNext()
-	{
-		if (!$this->EOF) {
-			$this->bind = false;
-			$this->_currentRow++;
-			if ($this->_numOfRows < 0 || $this->_numOfRows > $this->_currentRow) {
-				$this->fields = @pg_fetch_array($this->_queryID,$this->_currentRow,$this->postgres64_getDriverFetchMode());
-
-				if (is_array($this->fields)) {
-					if ($this->fields) {
-						if (isset($this->_blobArr)) $this->_fixblobs();
-
-					}
-					return true;
-				}
-			}
-
-
-			$this->fields = false;
-			$this->EOF = true;
-		}
-		return false;
-	}
 }

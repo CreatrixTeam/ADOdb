@@ -876,26 +876,6 @@ class ADORecordset_mssql extends ADORecordSet {
 						$this->fields = false;
 				}
 			}
-
-			if (is_array($this->fields)) {
-				if (ADODB_ASSOC_CASE == 0) {
-					foreach($this->fields as $k=>$v) {
-						$kn = strtolower($k);
-						if ($kn <> $k) {
-							unset($this->fields[$k]);
-							$this->fields[$kn] = $v;
-						}
-					}
-				} else if (ADODB_ASSOC_CASE == 1) {
-					foreach($this->fields as $k=>$v) {
-						$kn = strtoupper($k);
-						if ($kn <> $k) {
-							unset($this->fields[$k]);
-							$this->fields[$kn] = $v;
-						}
-					}
-				}
-			}
 		} else {
 			$this->fields = @mssql_fetch_row($this->_queryID);
 		}
