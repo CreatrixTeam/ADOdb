@@ -109,6 +109,18 @@ if (!defined('_ADODB_LAYER')) {
 	if (!defined('ADODB_DEFAULT_METATYPE'))
 		define ('ADODB_DEFAULT_METATYPE','N');
 
+	/**
+	 * Associative array case constants
+	 *
+	 *	The actual values of these constants may and might change in the future. Please use the 
+	 *		constants, not the values in your code. All code prior to august/2016 will retain
+	 *		backward compatibility even when the constant values are changed in the future.
+	 */
+	define('ADODB_ASSOC_CASE_LOWER', 0);
+	define('ADODB_ASSOC_CASE_UPPER', 1);
+	define('ADODB_ASSOC_CASE_NATIVE', 2);
+
+		
 	if (!$ADODB_EXTENSION || ADODB_EXTENSION < 4.0) {
 
 		define('ADODB_BAD_RS','<p>Bad $rs in %s. Connection or SQL invalid. Try using $connection->debug=true;</p>');
@@ -141,26 +153,6 @@ if (!defined('_ADODB_LAYER')) {
 		define('ADODB_FETCH_NUM', 1);
 		define('ADODB_FETCH_ASSOC', 2);
 		define('ADODB_FETCH_BOTH', 3);
-
-	/**
-	 * Associative array case constants
-	 *
-	 * By defining the ADODB_ASSOC_CASE constant to one of these values, it is
-	 * possible to control the case of field names (associative array's keys)
-	 * when operating in ADODB_FETCH_ASSOC fetch mode.
-	 *   - LOWER:  $rs->fields['orderid']
-	 *   - UPPER:  $rs->fields['ORDERID']
-	 *   - NATIVE: $rs->fields['OrderID'] (or whatever the RDBMS will return)
-	 *
-	 * The default is to use native case-names.
-	 *
-	 * NOTE: This functionality is not implemented everywhere, it currently
-	 * works only with: mssql, odbc, oci8 and ibase derived drivers
-	 */
-		define('ADODB_ASSOC_CASE_LOWER', 0);
-		define('ADODB_ASSOC_CASE_UPPER', 1);
-		define('ADODB_ASSOC_CASE_NATIVE', 2);
-
 
 		if (!defined('TIMESTAMP_FIRST_YEAR')) {
 			define('TIMESTAMP_FIRST_YEAR',100);
@@ -4109,10 +4101,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	/**
 	 * Builds the bind array associating keys to recordset fields
 	 *
-	 * @param int $upper Case for the array keys, defaults to uppercase
-	 *                   (see ADODB_ASSOC_CASE_xxx constants)
 	 */
-	public function GetAssocKeys() {
+	protected function GetAssocKeys() {
 		if ($this->bind) {
 			return;
 		}
@@ -4165,7 +4155,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @param int $upper Case for the array keys, defaults to uppercase
 	 *                   (see ADODB_ASSOC_CASE_xxx constants)
 	 */
-	public function GetRowAssoc($upper = ADODB_ASSOC_CASE) {
+	public function GetRowAssoc($upper = ADODB_ASSOC_CASE_UPPER) {
 		$record = array();
 		$this->GetAssocKeys();
 
@@ -4198,8 +4188,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * state. This is because it assumes its output will be used to rebuild $fields.
 	 *
 	 *
-	 * @param int $upper Case for the array keys, defaults to uppercase
-	 *                   (see ADODB_ASSOC_CASE_xxx constants)
 	 */
 	protected function GetEmulatedRowAssoc()
 	{
@@ -4995,9 +4983,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	function ADONewConnection($db='') {
 		global $ADODB_NEWCONNECTION, $ADODB_LASTDB;
 
-		if (!defined('ADODB_ASSOC_CASE')) {
-			define('ADODB_ASSOC_CASE', ADODB_ASSOC_CASE_NATIVE);
-		}
 		$errorfn = (defined('ADODB_ERROR_HANDLER')) ? ADODB_ERROR_HANDLER : false;
 		if (($at = strpos($db,'://')) !== FALSE) {
 			$origdsn = $db;

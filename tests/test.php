@@ -17,7 +17,7 @@ error_reporting(E_ALL|E_STRICT);
 
 $ADODB_FLUSH = true;
 
-define('ADODB_ASSOC_CASE',0);
+
 
 
 function getmicrotime()
@@ -30,7 +30,6 @@ function getmicrotime()
 
 if (PHP_VERSION < 5) include_once('../adodb-pear.inc.php');
 //--------------------------------------------------------------------------------------
-//define('ADODB_ASSOC_CASE',1);
 //
 function Err($msg)
 {
@@ -856,7 +855,7 @@ END Adodb;
 	print "<p>CacheSelectLimit  Test...</p>";
 	$rs = $db->CacheSelectLimit('select  id, firstname from  ADOXYZ order by id',2);
 
-	if (ADODB_ASSOC_CASE == 2 || $db->dataProvider == 'oci8') {
+	if ($db->dataProvider == 'oci8') {
 		$id = 'ID';
 		$fname = 'FIRSTNAME';
 	}else {
@@ -882,7 +881,7 @@ END Adodb;
 		}
 	}
 
-	print "<p>FETCH_MODE = ASSOC: Should get 1, Caroline ASSOC_CASE=".ADODB_ASSOC_CASE."</p>";
+	print "<p>FETCH_MODE = ASSOC: Should get 1, Caroline</p>";
 	$rs = $db->SelectLimit('select id,firstname from ADOXYZ order by id',2);
 	if ($rs && !$rs->EOF) {
 
