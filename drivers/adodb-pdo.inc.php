@@ -600,3 +600,5 @@ class ADORecordSet_pdo extends ADORecordSet {
 	}
 
 }
+
+class ADORecordSet_array_pdo extends ADORecordSet_array {}
