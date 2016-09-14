@@ -72,6 +72,7 @@ class ADODB_pdo extends ADOConnection {
 	public  $fmtTimeStamp = "'Y-m-d, h:i:sA'";
 	public  $replaceQuote = "''"; // string to use to replace quotes
 	public  $hasAffectedRows = true;
+	public  $arrayClass = 'ADORecordSet_array_pdo';
 	protected  $_bindInputArray = true;
 	protected  $_autocommit = true;
 	protected  $_haserrorfunctions = true;
