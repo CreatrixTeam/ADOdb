@@ -39,6 +39,8 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 		join sys.tables st on st.name=o.name
 		join sys.columns sc on sc.object_id = st.object_id and sc.name=c.name
 		where o.name='%s'";
+	
+	var $arrayClass = 'ADORecordSet_array_pdo_sqlsrv';
 
 	public function BeginTrans()
 	{
@@ -161,6 +163,7 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 	{
 		return ADOConnection::ServerInfo();
 	}
+}
 
 	//VERBATIM COPY FROM "adodb-mssqlnative.inc.php"/"adodb-odbc_mssql.inc.php"
 	protected function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
