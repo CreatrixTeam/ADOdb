@@ -668,8 +668,11 @@ class ADORecordSet_odbtp extends ADORecordSet {
 		}
 	}
 
-	public function FetchField($fieldOffset = 0)
+	public function FetchField($fieldOffset = -1)
 	{
+		if($fieldOffset === -1)
+			{$fieldOffset = 0;}
+
 		$off=$fieldOffset; // offsets begin at 0
 		$o= new ADOFieldObject();
 		$o->name = @odbtp_field_name($this->_queryID,$off);

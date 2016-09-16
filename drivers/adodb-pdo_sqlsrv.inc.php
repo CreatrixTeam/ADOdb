@@ -40,8 +40,6 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 		join sys.columns sc on sc.object_id = st.object_id and sc.name=c.name
 		where o.name='%s'";
 	
-	var $arrayClass = 'ADORecordSet_array_pdo_sqlsrv';
-
 	public function BeginTrans()
 	{
 		$returnval = parent::BeginTrans();
@@ -209,7 +207,8 @@ class  ADORecordSet_pdo_sqlsrv extends ADORecordSet_pdo {
 
 	public function FetchField($fieldOffset = -1)
 	{
-		$off=$fieldOffset+1; // offsets begin at 1
+		if($fieldOffset === -1)
+			{$fieldOffset = 0;}
 
 		$o= new ADOFieldObject();
 		$arr = @$this->_queryID->getColumnMeta($fieldOffset);

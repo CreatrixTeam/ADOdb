@@ -72,7 +72,6 @@ class ADODB_pdo extends ADOConnection {
 	public  $fmtTimeStamp = "'Y-m-d, h:i:sA'";
 	public  $replaceQuote = "''"; // string to use to replace quotes
 	public  $hasAffectedRows = true;
-	public  $arrayClass = 'ADORecordSet_array_pdo';
 	protected  $_bindInputArray = true;
 	protected  $_autocommit = true;
 	protected  $_haserrorfunctions = true;
@@ -540,10 +539,17 @@ class ADORecordSet_pdo extends ADORecordSet {
 		$this->_numOfFields = $this->_queryID->columnCount();
 	}
 
-	// returns the field object
+	/** 
+	* returns the field object 
+	* 
+	* @param    int	$fieldOffset in PDO drivers $fieldOffset defaults to first field if not passed.
+	* 
+	* @return	obj	The ADOfieldobject describing the field 
+	*/
 	public function FetchField($fieldOffset = -1)
 	{
-		$off=$fieldOffset+1; // offsets begin at 1
+		if($fieldOffset === -1)
+			{$fieldOffset = 0;}
 
 		$o= new ADOFieldObject();
 		$arr = @$this->_queryID->getColumnMeta($fieldOffset);
@@ -602,4 +608,3 @@ class ADORecordSet_pdo extends ADORecordSet {
 
 }
 
-class ADORecordSet_array_pdo extends ADORecordSet_array {}

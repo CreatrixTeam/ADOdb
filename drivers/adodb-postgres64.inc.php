@@ -823,8 +823,11 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 		}
 	}
 
-	public function FetchField($off = 0)
+	public function FetchField($off = -1)
 	{
+		if($off === -1)
+			{$off = 0;}
+
 		// offsets begin at 0
 
 		$o= new ADOFieldObject();

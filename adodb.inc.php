@@ -4311,7 +4311,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	/**
 	 * Get the ADOFieldObject of a specific column.
 	 *
-	 * @param fieldoffset	is the column position to access(0-based).
+	 * @param fieldoffset	is the column position to access(0-based). The field is optional for some drivers with differing behavior.
 	 *
 	 * @return the ADOFieldObject for that column, or false.
 	 */
