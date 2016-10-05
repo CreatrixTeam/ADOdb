@@ -273,7 +273,7 @@ order by constraint_name, referenced_table_name, keyno";
 		return $rs;
 	}
 
-	}
+
 	
 	/**
 	* Returns a substring of a varchar type field

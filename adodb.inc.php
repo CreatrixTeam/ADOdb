@@ -3536,7 +3536,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		$this->fetchMode = (($mode === false) ? $ADODB_FETCH_MODE : $mode);
 	}
 
-	function __destruct() {
+	public function __destruct() {
 		$this->Close();
 	}
 
@@ -3549,6 +3549,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		include_once(ADODB_DIR.'/toexport.inc.php');
 		return _adodb_export($this,',',',',false,true);
 	}
+
 
 	public function Init() {
 		if ($this->_inited) {
@@ -3571,6 +3572,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 	}
 
+	/*Should be implemented by child classes when needed.*/
+	protected function _initrs() {}
+	protected function _fetch() {}
 
 	/**
 	 * Generate a SELECT tag string from a recordset, and return the string.
@@ -4712,13 +4716,12 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		/**
 		 * Constructor
 		 */
-		public function __construct($fakeid=1) {
+		public function __construct($fakeid=1, $mode=false) {
 			global $ADODB_FETCH_MODE,$ADODB_COMPAT_FETCH;
 
 			// fetch() on EOF does not delete $this->fields
 			$this->compat = !empty($ADODB_COMPAT_FETCH);
-			parent::__construct($fakeid); // fake queryID
-			$this->fetchMode = $ADODB_FETCH_MODE;
+			parent::__construct($fakeid, $mode); // fake queryID. mode expected to be set correctly later by the likes of ADOConnection::_rs2rs()
 		}
 
 		protected function _transpose($addfieldnames=true) {

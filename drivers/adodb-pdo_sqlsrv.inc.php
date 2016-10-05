@@ -161,7 +161,7 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 	{
 		return ADOConnection::ServerInfo();
 	}
-}
+
 
 	//VERBATIM COPY FROM "adodb-mssqlnative.inc.php"/"adodb-odbc_mssql.inc.php"
 	protected function _MetaIndexes($pParsedTableName,$primary=false, $owner=false)
