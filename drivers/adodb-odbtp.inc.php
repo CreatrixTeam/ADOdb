@@ -735,12 +735,9 @@ class ADORecordSet_odbtp extends ADORecordSet {
 		return true;
 	}
 
-	public function NextRecordSet()
+	protected function _NextRecordSet()
 	{
 		if (!@odbtp_next_result($this->_queryID)) return false;
-		$this->_inited = false;
-		$this->_currentRow = -1;
-		$this->Init();
 		return true;
 	}
 

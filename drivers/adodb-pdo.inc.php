@@ -505,29 +505,6 @@ class ADORecordSet_pdo extends ADORecordSet {
 	public  $databaseType = "pdo";
 	public  $dataProvider = "pdo";
 
-	public function Init()
-	{
-		if ($this->_inited) {
-			return;
-		}
-		$this->_inited = true;
-		if ($this->_queryID) {
-			@$this->_initrs();
-		}
-		else {
-			$this->_numOfRows = 0;
-			$this->_numOfFields = 0;
-		}
-		if ($this->_numOfRows != 0 && $this->_currentRow == -1) {
-			$this->_currentRow = 0;
-			if ($this->EOF = ($this->_fetch() === false)) {
-				$this->_numOfRows = 0; // _numOfRows could be -1
-			}
-		} else {
-			$this->EOF = true;
-		}
-	}
-
 	protected function _initrs()
 	{
 	global $ADODB_COUNTRECS;

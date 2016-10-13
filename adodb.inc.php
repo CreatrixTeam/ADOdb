@@ -3551,7 +3551,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 
-	public function Init() {
+	public final function Init() {
 		if ($this->_inited) {
 			return;
 		}
@@ -3569,6 +3569,12 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			}
 		} else {
 			$this->EOF = true;
+		}
+		
+		if ($this->EOF) { //EXPERIMENTAL: Based on the OCI's driver's treatment
+			$this->bind = false;
+			$this->fields = false;
+			$this->_numOfRows = 0;
 		}
 	}
 
@@ -3667,6 +3673,19 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	* will return true if there is a next recordset, or false if no more.
 	*/
 	public function NextRecordSet() {
+		$vReturn = $this->_NextRecordSet();
+
+		if($vReturn === true)
+		{
+			$this->_inited = false;
+			$this->_currentRow = -1;
+			$this->Init();
+		}
+
+		return $vReturn;
+	}
+
+	protected function _NextRecordSet() {
 		return false;
 	}
 

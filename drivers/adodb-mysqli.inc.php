@@ -833,7 +833,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 	}
 
 
-	public function NextRecordSet()
+	protected function _NextRecordSet()
 	{
 	global $ADODB_COUNTRECS;
 
@@ -852,9 +852,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		if(!$this->_queryID) {
 			return false;
 		}
-		$this->_inited = false;
-		$this->_currentRow = -1;
-		$this->Init();
+
 		return true;
 	}
 

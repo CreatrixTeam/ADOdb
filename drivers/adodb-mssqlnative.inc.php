@@ -840,12 +840,9 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 
 	//Contributed by "Sven Axelsson" <sven.axelsson@bokochwebb.se>
 	// get next resultset - requires PHP 4.0.5 or later
-	public function NextRecordSet()
+	protected function _NextRecordSet()
 	{
 		if (!sqlsrv_next_result($this->_queryID)) return false;
-		$this->_inited = false;
-		$this->_currentRow = -1;
-		$this->Init();
 		return true;
 	}
 

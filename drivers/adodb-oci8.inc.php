@@ -1415,47 +1415,9 @@ class ADORecordset_oci8 extends ADORecordSet {
 	public  $databaseType = 'oci8';
 	protected  $_fieldobjs;
 
-	public function Init()
-	{
-		if ($this->_inited) {
-			return;
-		}
-
-		$this->_inited = true;
-		if ($this->_queryID) {
-
-			$this->_currentRow = 0;
-			@$this->_initrs();
-			if ($this->_numOfFields) {
-				$this->EOF = !$this->_fetch();
-			}
-			else $this->EOF = true;
-
-			/*
-			// based on idea by Gaetano Giunta to detect unusual oracle errors
-			// see http://phplens.com/lens/lensforum/msgs.php?id=6771
-			$err = oci_error($this->_queryID);
-			if ($err && $this->connection->debug) {
-				ADOConnection::outp($err);
-			}
-			*/
-
-			if (!is_array($this->fields)) {
-				$this->_numOfRows = 0;
-				$this->bind = false;
-				$this->fields = array();
-			}
-		} else {
-			$this->bind = false;
-			$this->fields = array();
-			$this->_numOfRows = 0;
-			$this->_numOfFields = 0;
-			$this->EOF = true;
-		}
-	}
-
 	protected function _initrs()
 	{
+		$this->_currentRow = -1;
 		$this->_numOfRows = -1;
 		$this->_numOfFields = oci_num_fields($this->_queryID);
 		if ($this->_numOfFields>0) {

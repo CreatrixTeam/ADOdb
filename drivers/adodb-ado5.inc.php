@@ -655,22 +655,19 @@ class ADORecordSet_ado extends ADORecordSet {
 		return true;
 	}
 
-		public function NextRecordSet()
+		public function _NextRecordSet()
 		{
 			$rs = $this->_queryID;
 			$this->_queryID = $rs->NextRecordSet();
 			//$this->_queryID = $this->_QueryId->NextRecordSet();
 			if ($this->_queryID == null) return false;
 
-			$this->_currentRow = -1;
 			$this->_currentPage = -1;
 			$this->bind = false;
 			$this->fields = false;
 			$this->_flds = false;
 			$this->_tarr = false;
 
-			$this->_inited = false;
-			$this->Init();
 			return true;
 		}
 
