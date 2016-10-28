@@ -85,7 +85,7 @@ class ADODB_mysqlt extends ADODB_mysql {
 class ADORecordSet_mysqlt extends ADORecordSet_mysql{
 	public  $databaseType = "mysqlt";
 
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		$this->bind = false;
 		if (@$this->fields = mysql_fetch_array($this->_queryID,$this->mysql_getDriverFetchMode())) {
@@ -102,7 +102,7 @@ class ADORecordSet_mysqlt extends ADORecordSet_mysql{
 
 class ADORecordSet_ext_mysqlt extends ADORecordSet_mysqlt {
 
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		return adodb_movenext($this);
 	}

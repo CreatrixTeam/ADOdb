@@ -626,7 +626,7 @@ class ADORecordset_ibase extends ADORecordSet
 			fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by
 			FetchField() is retrieved.		*/
 
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 			$fld = new ADOFieldObject;
 			$ibf = ibase_field_info($this->_queryID,$fieldOffset);

@@ -55,15 +55,7 @@ $ADODB_INCLUDED_CSV = 1;
 		## changed format from ====0 to ====1
 		$line = "====1,$tt,$sql\n";
 
-		if ($rs->databaseType == 'array') {
-			$rows = $rs->_array;
-		} else {
-			$rows = array();
-			while (!$rs->EOF) {
-				$rows[] = $rs->fields;
-				$rs->MoveNext();
-			}
-		}
+		$rows = $rs->GetArray();
 
 		for($i=0; $i < $max; $i++) {
 			$o = $rs->FetchField($i);

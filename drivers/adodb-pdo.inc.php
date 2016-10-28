@@ -523,7 +523,7 @@ class ADORecordSet_pdo extends ADORecordSet {
 	* 
 	* @return	obj	The ADOfieldobject describing the field 
 	*/
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 		if($fieldOffset === -1)
 			{$fieldOffset = 0;}

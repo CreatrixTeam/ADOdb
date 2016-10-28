@@ -127,7 +127,6 @@ adorecordset Object
 	[_numOfFields] => 0
 	[_queryID] => 1
 	[_currentRow] => -1
-	[_closed] =>
 	[_inited] =>
 	[sql] => insert into products (productname) values ('testprod')
 	[affectedrows] => 1
@@ -156,7 +155,6 @@ adorecordset Object
 	[_numOfFields] => 0
 	[_queryID] => 1
 	[_currentRow] => -1
-	[_closed] =>
 	[_inited] =>
 	[sql] => insert into products (productname) values ('testprod')
 	[affectedrows] => 1
@@ -185,7 +183,6 @@ adorecordset Object
 	[_numOfFields] => 0
 	[_queryID] => 1
 	[_currentRow] => -1
-	[_closed] =>
 	[_inited] =>
 	[sql] => delete from products where productid>80
 	[affectedrows] => 2

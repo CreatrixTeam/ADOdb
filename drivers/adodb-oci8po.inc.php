@@ -118,7 +118,7 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 	}
 
 	// 10% speedup to move MoveNext to child class
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		$this->bind = false;
 		if(@OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode())) {
@@ -140,7 +140,7 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 	}
 
 	/* Optimize SelectLimit() by using OCIFetch() instead of OCIFetchInto() */
-	public function GetArrayLimit($nrows,$offset=-1)
+	protected function _GetArrayLimit($nrows,$offset=-1)
 	{
 		if ($offset <= 0) {
 			$arr = $this->GetArray($nrows);

@@ -572,7 +572,7 @@ class ADORecordSet_mysql extends ADORecordSet{
 		$this->_numOfFields = @mysql_num_fields($this->_queryID);
 	}
 
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 		if ($fieldOffset != -1) {
 			$o = @mysql_fetch_field($this->_queryID, $fieldOffset);
@@ -605,7 +605,7 @@ class ADORecordSet_mysql extends ADORecordSet{
 		return @mysql_data_seek($this->_queryID,$row);
 	}
 
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		$this->bind = false;
 		//return adodb_movenext($this);
@@ -705,7 +705,7 @@ class ADORecordSet_mysql extends ADORecordSet{
 
 class ADORecordSet_ext_mysql extends ADORecordSet_mysql {
 
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		return @adodb_movenext($this);
 	}

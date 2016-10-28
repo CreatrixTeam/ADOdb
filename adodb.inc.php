@@ -1343,8 +1343,8 @@ if (!defined('_ADODB_LAYER')) {
 			global $ADODB_COUNTRECS;
 			if ($ADODB_COUNTRECS) {
 				if (!$rs->EOF) {
-					$rs = $this->_rs2rs($rs,-1,-1,!is_array($sql));
-					$rs->_queryID = $this->_queryID;
+					$rs = $rs->SwitchToBufferMode(-1,-1,!is_array($sql));
+					//$rs->_queryID = $this->_queryID;
 				} else
 					$rs->_numOfRows = 0;
 			}
@@ -1653,7 +1653,7 @@ if (!defined('_ADODB_LAYER')) {
 
 		$ADODB_COUNTRECS = $savec;
 		if ($rs && !$rs->EOF) {
-			$rs = $this->_rs2rs($rs,$nrows,$offset);
+			$rs->SwitchToBufferMode($nrows,$offset);
 		}
 		//print_r($rs);
 		return $rs;
@@ -1665,14 +1665,19 @@ if (!defined('_ADODB_LAYER')) {
 	* @param rs			the recordset to serialize
 	*/
 	public function SerializableRS(&$rs) {
-		$rs2 = $this->_rs2rs($rs);
+		$rs->SwitchToBufferMode();
 		$ignore = false;
-		$rs2->connection = $ignore;
+		$rs->connection = $ignore;
 
-		return $rs2;
+		return $rs;
 	}
 
 	/**
+	* Important: This function is kept for backward compatibility. Do not use. Refer to
+	* 	ADORecordSet::SwitchToBufferMode() for an alternative. This function now uses
+	* 	ADORecordSet::SwitchToBufferMode() for its function, which means that it no
+	* 	longer returns a new instance of ADORecordSet, but instead the same instance.
+	*
 	* Convert database recordset to an array recordset
 	* input recordset's cursor should be at beginning, and
 	* old $rs will be closed.
@@ -1682,7 +1687,7 @@ if (!defined('_ADODB_LAYER')) {
 	* @param [offset]	offset by number of rows (optional)
 	* @return			the new recordset
 	*/
-	protected function &_rs2rs(&$rs,$nrows=-1,$offset=-1,$close=true) {
+	public final function &_rs2rs(&$rs,$nrows=-1,$offset=-1,$close=true) {
 		if (! $rs) {
 			return false;
 		}
@@ -1696,26 +1701,9 @@ if (!defined('_ADODB_LAYER')) {
 			$rs = $rs; // required to prevent crashing in 4.2.1, but does not happen in 4.3.1-- why ?
 			return $rs;
 		}
-		$flds = array();
-		for ($i=0, $max=$rs->FieldCount(); $i < $max; $i++) {
-			$flds[] = $rs->FetchField($i);
-		}
+		$rs->SwitchToBufferMode($nrows, $offset, $close);
 
-		$arr = $rs->GetArrayLimit($nrows,$offset);
-		//print_r($arr);
-		if ($close) {
-			$rs->Close();
-		}
-
-		$arrayClass = $this->arrayClass;
-
-		$rs2 = new $arrayClass();
-		$rs2->connection = $this;
-		$rs2->sql = $rs->sql;
-		$rs2->dataProvider = $this->dataProvider;
-		$rs2->InitArrayFields($arr,$flds);
-		$rs2->fetchMode = $rs->fetchMode;
-		return $rs2;
+		return $rs;
 	}
 
 	/*
@@ -1864,13 +1852,13 @@ if (!defined('_ADODB_LAYER')) {
 	}
 
 	public function Transpose(&$rs,$addfieldnames=true) {
-		$rs2 = $this->_rs2rs($rs);
-		if (!$rs2) {
+		$vReturn = $rs->SwitchToBufferMode();
+		if (!$vReturn) {
 			return false;
 		}
 
-		$rs2->_transpose($addfieldnames);
-		return $rs2;
+		$rs->_transpose($addfieldnames);
+		return $rs;
 	}
 
 	/*
@@ -2165,7 +2153,7 @@ if (!defined('_ADODB_LAYER')) {
 
 			if ($rs) {
 				$eof = $rs->EOF;
-				$rs = $this->_rs2rs($rs); // read entire recordset into memory immediately
+				$rs->SwitchToBufferMode(); // read entire recordset into memory immediately
 				$rs->timeCreated = time(); // used by caching
 				$txt = _rs2serialize($rs,false,$sql); // serialize
 
@@ -3509,9 +3497,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 */
 	public  $_numOfRows = -1;	/** number of rows, or -1 */
 	protected  $_numOfFields = -1;	/** number of fields in recordset */
-	public  $_queryID = -1;		/** This variable keeps the result link identifier.	*/
+	public  $_queryID = -1;		/** This variable keeps the result link identifier.	-1: indicates unset.  false: indicates set but closed or not a resource(used in buffer mode)*/
 	protected  $_currentRow = -1;	/** This variable keeps the current row in the Recordset.	*/
-	protected  $_closed = false;	/** has recordset been closed */
 	protected  $_inited = false;	/** Init() should only be called once */
 	protected  $_obj;				/** Used by FetchObj */
 	protected  $_names;			/** Used by FetchObj */
@@ -3522,6 +3509,15 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	protected  $_lastPageNo = -1;
 	protected  $_maxRecordCount = 0;
 	public  $datetime = false;
+	
+
+	//BUFFERED MODE
+	private    $_isBufferMode = false; /** Sub classes should never need to know whether it is buffer mode, and should always be able to assume that it is not*/
+	protected  $_array;	// holds the 2-dimensional data array
+	protected  $_fieldobjects; // holds array of field objects
+	protected  $affectedrows = false;
+	protected  $insertid = false;
+	protected  $compat = false;
 
 	/**
 	 * Constructor
@@ -3556,7 +3552,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			return;
 		}
 		$this->_inited = true;
-		if ($this->_queryID) {
+		if($this->_isBufferMode)
+			{$this->_initrsForBufferMode();}
+		elseif ($this->_queryID) {			
 			@$this->_initrs();
 		} else {
 			$this->_numOfRows = 0;
@@ -3564,7 +3562,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 		if ($this->_numOfRows != 0 && $this->_numOfFields && $this->_currentRow == -1) {
 			$this->_currentRow = 0;
-			if ($this->EOF = ($this->_fetch() === false)) {
+			if ($this->EOF = ($this->_callFetch() === false)) {
 				$this->_numOfRows = 0; // _numOfRows could be -1
 			}
 		} else {
@@ -3578,9 +3576,69 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 	}
 
-	/*Should be implemented by child classes when needed.*/
+	/*Should be implemented by child classes when needed.*/	
 	protected function _initrs() {}
+
+	/*
+		Should be implemented by child classes when needed. Child classes should not call this 
+		function, but instead call $this->_callFetch();
+	*/	
 	protected function _fetch() {}
+
+	/*
+		Added to add support for fetching in buffer mode. Child classes should call this function
+			instead of $this->_fetch().
+	*/
+	protected final function _callFetch()
+	{
+		if($this->_isBufferMode)
+		{
+			$pos = $this->_currentRow;
+
+			if ($this->_numOfRows <= $pos) {
+				if (!$this->compat) {
+					$this->fields = false;
+				}
+				return false;
+			}
+			$this->fields = $this->_array[$pos];
+			return true;
+		}
+		else
+			{return $this->_fetch();}
+	}
+
+	protected function _initrsForBufferMode()
+	{
+		$this->_numOfRows =  sizeof($this->_array);
+
+		$this->_numOfFields = sizeof($this->_fieldobjects);
+	}
+
+	/*
+		Should be implemented by child classes when needed. Child classes should not call this 
+		function, but instead call $this->_callSeek();
+	*/	
+	protected function _seek($row) {}
+
+	/*
+		Added to add support for seeking in buffer mode. Child classes should call this function
+			instead of $this->_seek().
+	*/
+	protected final function _callSeek($row)
+	{
+		if($this->_isBufferMode)
+		{
+			if (sizeof($this->_array) && 0 <= $row && $row < $this->_numOfRows) {
+				$this->_currentRow = $row;
+				$this->fields = $this->_array[$row];
+				return true;
+			}
+			return false;
+		}
+		else
+			{return $this->_seek($row);}
+	}
 
 	/**
 	 * Generate a SELECT tag string from a recordset, and return the string.
@@ -3648,11 +3706,24 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *
 	 * @return an array indexed by the rows (0-based) from the recordset
 	 */
-	public function GetArray($nRows = -1) {
-		global $ADODB_EXTENSION; if ($ADODB_EXTENSION) {
-		$results = adodb_getall($this,$nRows);
-		return $results;
-	}
+	public final function GetArray($nRows = -1) {
+		global $ADODB_EXTENSION;
+
+		if($this->_isBufferMode)
+		{
+			if ($nRows == -1 && $this->_currentRow <= 0 /*&& !$this->_skiprow1*/) {
+				return $this->_array;
+			}/* else {
+				$arr = ADORecordSet::GetArray($nRows);
+				return $arr;
+			}*/
+		}
+
+		if ($ADODB_EXTENSION) {
+			$results = adodb_getall($this,$nRows);
+			return $results;
+		}
+
 		$results = array();
 		$cnt = 0;
 		while (!$this->EOF && $nRows != $cnt) {
@@ -3673,13 +3744,15 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	* will return true if there is a next recordset, or false if no more.
 	*/
 	public function NextRecordSet() {
-		$vReturn = $this->_NextRecordSet();
+		$vReturn = false;
+
+		if($this->_queryID)
+			{$vReturn = $this->_NextRecordSet();}
 
 		if($vReturn === true)
 		{
-			$this->_inited = false;
-			$this->_currentRow = -1;
-			$this->Init();
+			$this->_isBufferMode = false;
+			$this->ReInit();
 		}
 
 		return $vReturn;
@@ -3698,7 +3771,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *
 	 * @return an array indexed by the rows (0-based) from the recordset
 	 */
-	public function GetArrayLimit($nrows,$offset=-1) {
+	protected function _GetArrayLimit($nrows,$offset=-1) {
 		if ($offset <= 0) {
 			$arr = $this->GetArray($nrows);
 			return $arr;
@@ -3715,6 +3788,14 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 		return $results;
 	}
+	
+	public final function GetArrayLimit($nrows,$offset=-1)
+	{
+		if($this->_isBufferMode)
+			{return ADORecordSet::_GetArrayLimit($nrows,$offset);}
+		else
+			{return $this->_GetArrayLimit($nrows,$offset);}
+	}		
 
 
 	/**
@@ -3960,7 +4041,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 		$arr = $this->fields;
 		$this->_currentRow++;
-		if (!$this->_fetch()) {
+		if (!$this->_callFetch()) {
 			$this->EOF = true;
 		}
 		return $arr;
@@ -3988,11 +4069,19 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *
 	 * @return true or false
 	 */
-	public function MoveFirst() {
+	protected function _MoveFirst() {
 		if ($this->_currentRow == 0) {
 			return true;
 		}
 		return $this->Move(0);
+	}
+	
+	public final function MoveFirst()
+	{
+		if($this->_isBufferMode)
+			{return ADORecordSet::_MoveFirst();}
+		else
+			{return $this->_MoveFirst();}
 	}
 
 
@@ -4001,7 +4090,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *
 	 * @return true or false
 	 */
-	public function MoveLast() {
+	protected function _MoveLast() {
 		if ($this->_numOfRows >= 0) {
 			return $this->Move($this->_numOfRows-1);
 		}
@@ -4017,16 +4106,24 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		return true;
 	}
 
+	public final function MoveLast()
+	{
+		if($this->_isBufferMode)
+			{return ADORecordSet::_MoveLast();}
+		else
+			{return $this->_MoveLast();}
+	}
+
 
 	/**
 	 * Move to next record in the recordset.
 	 *
 	 * @return true if there still rows available, or false if there are no more rows (EOF).
 	 */
-	public function MoveNext() {
+	protected function _MoveNext() {
 		if (!$this->EOF) {
 			$this->_currentRow++;
-			if ($this->_fetch()) {
+			if ($this->_callFetch()) {
 				return true;
 			}
 		}
@@ -4041,6 +4138,31 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		return false;
 	}
 
+	public final function MoveNext()
+	{
+		if($this->_isBufferMode)
+		{
+			if (!$this->EOF) {
+				$this->_currentRow++;
+
+				$pos = $this->_currentRow;
+
+				if ($this->_numOfRows <= $pos) {
+					if (!$this->compat) {
+						$this->fields = false;
+					}
+				} else {
+					$this->fields = $this->_array[$pos];
+					return true;
+				}
+				$this->EOF = true;
+			}
+
+			return false;
+		}
+		else
+			{return $this->_MoveNext();}
+	}
 
 	/**
 	 * Random access to a specific row in the recordset. Some databases do not support
@@ -4067,9 +4189,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 
 		if ($this->canSeek) {
-			if ($this->_seek($rowNumber)) {
+			if ($this->_callSeek($rowNumber)) {
 				$this->_currentRow = $rowNumber;
-				if ($this->_fetch()) {
+				if ($this->_callFetch()) {
 					return true;
 				}
 			} else {
@@ -4089,7 +4211,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				while (! $this->EOF && $this->_currentRow < $rowNumber) {
 					$this->_currentRow++;
 
-					if (!$this->_fetch()) {
+					if (!$this->_callFetch()) {
 						$this->EOF = true;
 					}
 				}
@@ -4241,12 +4363,15 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @return true or false
 	 */
 	public function Close() {
-		// free connection object - this seems to globally free the object
+		// free resource object - this seems to globally free the object
 		// and not merely the reference, so don't do this...
-		// $this->connection = false;
-		if (!$this->_closed) {
-			$this->_closed = true;
-			return $this->_close();
+		// $this->_queryID = false;
+		if ($this->_queryID) {
+			$tReturn = $this->_close();
+
+			$this->_queryID = false;
+
+			return $tReturn;
 		} else
 			return true;
 	}
@@ -4334,15 +4459,40 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	/**
 	 * Get the ADOFieldObject of a specific column.
 	 *
-	 * @param fieldoffset	is the column position to access(0-based). The field is optional for some drivers with differing behavior.
+	 * @param fieldoffset	is the column position to access(0-based). The field is optional but for some drivers only with differing behavior.
 	 *
 	 * @return the ADOFieldObject for that column, or false.
 	 */
-	public function FetchField($fieldoffset = -1) {
+	protected function _FetchField($fieldoffset = -1) {
 		// must be defined by child class
 
 		return false;
 	}
+
+	public final function FetchField($fieldoffset = -1)
+	{
+		if($this->_isBufferMode)
+			{return $this->_FetchField__bufferMode($fieldoffset);}
+		else
+		{
+			if(($fieldoffset !== -1))
+			{
+				if($this->_fieldobjects === NULL)
+					{$this->_fieldobjects = array();}
+
+				if(!array_key_exists($fieldoffset, $this->_fieldobjects))
+					{$this->_fieldobjects[$fieldoffset] = $this->_FetchField($fieldoffset);}
+				
+				return $this->_fieldobjects[$fieldoffset];
+			}
+			else
+				{return $this->_FetchField(-1);}	//Drivers behave inconsistently in this case, and thus it is 
+													//		their responsibility to fill $this->_fieldobjects
+		}
+	}
+
+	protected function _FetchField__bufferMode($fieldoffset = -1)
+		{return $this->_fieldobjects[$fieldoffset];}
 
 	/**
 	 * Get the ADOFieldObjects of all columns in an array.
@@ -4430,7 +4580,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		if ($this->_numOfRows != 0 && !$this->EOF) {
 			$o = $this->FetchObject($isupper);
 			$this->_currentRow++;
-			if ($this->_fetch()) {
+			if ($this->_callFetch()) {
 				return $o;
 			}
 		}
@@ -4705,6 +4855,183 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		else
 			{return 0;}
 	}
+
+	protected function ReInit()
+	{
+		$this->_inited = false;
+		$this->_currentRow = -1;
+		$this->bind = false;
+		$this->Init();
+	}
+
+	/**
+	 *	Turns the record set to the equivilant to what used to be an instance of ADORecordSet_array. This
+	 *		essentially pre fetches the entierty of the record. The record set is then closed unless $close
+	 *		is set to false. This is useful on databases that support ADORecordSet::NextRecordSet(). When this
+	 *		function is called, the instance switches to buffer mode, but when ADORecordSet::NextRecordSet() is
+	 *		called the instance would switch back to normal mode, and hence, this function must be called again. 
+	 *		If $close was not set to false, a future call to ADORecordSet::NextRecordSet() would be unsuccesful
+	 *
+	 *	
+	 *
+	*/
+	public final function SwitchToBufferMode($nrows=-1, $offset=-1, $close=true)
+	{
+		if($this->_isBufferMode)
+			{return false;}
+
+		global $ADODB_COMPAT_FETCH;
+		$vFields = array();
+		$vFieldCount = $this->FieldCount();
+		$vData = null;
+
+		$this->canSeek = true;
+		$this->compat = !empty($ADODB_COMPAT_FETCH);
+
+
+		for($tI = 0; $tI < $vFieldCount; $tI++)
+			{$vFields[] = $this->FetchField($tI);}
+
+		$this->_array = $this->GetArrayLimit($nrows,$offset);
+		if($vFields)
+			{$this->_fieldobjects = $vFields;}
+
+		if($close)
+			{$this->Close();}
+		$this->_isBufferMode = true;
+		$this->ReInit();
+
+		return true;
+	}
+
+	/**
+	 * Initializes record set with data passed through $pDataArray, and closes the record set resource if there is
+	 *		one.
+	 *
+	 * @param pDataArray	Contains the data necessary to fill the record set. The structure is as follows:
+	 *		pDataArray["fetchMode"]: (optional) contains the fetch mode used to retrieve the data originally. The
+	 *				value should be one of the ADODB_FETCH_xxx constants. If not set, the value of $ADODB_FETCH_MODE
+	 *				is assumed. It is highly recommended that this be explicitly set. Things are kept this way for
+	 *				the time being for backward compatibility with the rest of the library. The field is likely
+	 *				to become mandatory in the future.
+	 *		pDataArray["columnNames"]: An array containing the corresponding column
+	 *				names of the data. The field is ignored if $pADOFieldObjects is set, and is mandatory otherwise
+	 *		pDataArray["columnTypes"]: An array containing the corresponding types of the data. The types are
+	 *				defined with values understandable by ADORecordSet::MetaType().The field is ignored if $pADOFieldObjects
+	 *				is set, and is mandatory otherwise
+	 *		pDataArray["columnMaxLength"]: (optional) An array containing the corresponding column max length. The field is 
+	 *		ignored if $pADOFieldObjects is set.
+	 *		pDataArray["recordSets"]: (mandatory) A numerically indexed array of arrays, where each array contains a
+	 *				single record set. This is for databases that can return multiple record sets. See 
+	 *				ADORecordSet::NextRecordSet() for clarification. Currently the multi record set functionality
+	 *				when in buffer mode is not operational, and hence the only value that should exist is
+	 *				pDataArray["data"][0]
+	 * @param pADOFieldObjects	Contains an array of instances of ADOFieldObject corresponding to each data column.
+	 */
+	public function InitializeBufferWith($pDataArray, $pADOFieldObjects = NULL)
+	{
+		global $ADODB_FETCH_MODE;
+
+		$this->canSeek = true;
+		$this->compat = !empty($ADODB_COMPAT_FETCH);
+
+		$this->fetchMode = ((array_key_exists("fetchMode", $pDataArray) && ($pDataArray["fetchMode"] !== false)) ? 
+				$pDataArray["fetchMode"] : $ADODB_FETCH_MODE);
+
+		if($pADOFieldObjects !== NULL)
+			{$this->_fieldobjects = $pADOFieldObjects;}
+		else
+		{
+			$tIsColumnMaxLengthSet = isset($pDataArray["columnMaxLength"]);
+
+			$this->_fieldobjects = array();
+
+			for($tI = 0; $tI < count($pDataArray["recordSets"][0][0]); $tI++)
+			{
+				$tADOFieldObject = new ADOFieldObject();
+
+				$tADOFieldObject->name = $pDataArray["columnNames"][$tI];
+				$tADOFieldObject->type = $pDataArray["columnTypes"][$tI];
+				$tADOFieldObject->max_length = ($tIsColumnMaxLengthSet ? $pDataArray["columnMaxLength"][$tI] :
+						-1);
+
+				$this->_fieldobjects[$tI] = $tADOFieldObject;
+			}
+		}
+		$this->_array = $pDataArray["recordSets"][0];
+
+		$this->Close();
+		$this->_isBufferMode = true;
+		$this->ReInit();
+	}
+
+	// For backward compatibility only. Do not use. Refer to the old ADORecordSet_array::InitArray()
+	public final function InitArray($pData, $pTypes, $pColumnNames = false)
+	{
+		$vDataArray = array();
+
+		$vDataArray["recordSets"] = array();
+		$vDataArray["columnTypes"] = $pTypes;		
+
+		if($pColumnNames)
+		{
+			$vDataArray["columnNames"] = $pColumnNames;
+			$vDataArray["recordSets"][0] = $pData;
+		}
+		else
+		{
+			$vDataArray["columnNames"] = array_shift($pData);
+			$vDataArray["recordSets"][0] = $pData;
+		}
+
+		return $this->InitializeBufferWith($vDataArray);
+	}
+
+	// For backward compatibility only. Do not use. Refer to the old ADORecordSet_array::InitArrayFields()
+	public final function InitArrayFields(&$pData, &$pADOFieldObjects)
+	{
+		$vDataArray = array();
+
+		$vDataArray["recordSets"] = array();
+
+		$vDataArray["recordSets"][0] = $pData;
+
+		return $this->InitializeBufferWith($vDataArray, $pADOFieldObjects);
+	}
+	
+	public function Transpose($addfieldnames=true) {
+		global $ADODB_INCLUDED_LIB;
+		$vTypes = true;
+
+		$this->SwitchToBufferMode();
+
+		if (empty($ADODB_INCLUDED_LIB)) {
+			include(ADODB_DIR.'/adodb-lib.inc.php');
+		}
+		$hdr = true;
+
+		$fobjs = $addfieldnames ? $this->_fieldobjects : false;
+		adodb_transpose($this->_array, $newarr, $hdr, $fobjs);
+		//adodb_pr($newarr);
+
+		$this->_array = $newarr;
+
+		adodb_probetypes($newarr,$vTypes);
+
+		$this->_fieldobjects = array();
+
+		foreach($hdr as $k => $name) {
+			$f = new ADOFieldObject();
+			$f->name = $name;
+			$f->type = $vTypes[$k];
+			$f->max_length = -1;
+			$this->_fieldobjects[] = $f;
+		}
+		$this->fields = reset($this->_array);
+
+		$this->_initrs();
+
+	}
 } // end class ADORecordSet
 
 	//==============================================================================================
@@ -4719,7 +5046,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 */
 	class ADORecordSet_array extends ADORecordSet
 	{
-		public  $databaseType = 'array';
+		/*public  $databaseType = 'array';
 
 		protected  $_array;	// holds the 2-dimensional data array
 		protected  $_types;	// the array of types of each column (C B I L M)
@@ -4730,20 +5057,20 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		public  $affectedrows = false;
 		public  $insertid = false;
 		public  $sql = '';
-		public  $compat = false;
+		public  $compat = false;*/
 
 		/**
 		 * Constructor
 		 */
-		public function __construct($fakeid=1, $mode=false) {
-			global $ADODB_FETCH_MODE,$ADODB_COMPAT_FETCH;
+		public function __construct($fakeid=false, $mode=false) {
+			/*global $ADODB_FETCH_MODE,$ADODB_COMPAT_FETCH;
 
 			// fetch() on EOF does not delete $this->fields
-			$this->compat = !empty($ADODB_COMPAT_FETCH);
-			parent::__construct($fakeid, $mode); // fake queryID. mode expected to be set correctly later by the likes of ADOConnection::_rs2rs()
+			$this->compat = !empty($ADODB_COMPAT_FETCH);*/
+			parent::__construct($fakeid, $mode); // fake queryID.
 		}
 
-		protected function _transpose($addfieldnames=true) {
+		/*public function _transpose($addfieldnames=true) {
 			global $ADODB_INCLUDED_LIB;
 
 			if (empty($ADODB_INCLUDED_LIB)) {
@@ -4774,7 +5101,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 			$this->_initrs();
 
-		}
+		}*/
 
 		/**
 		 * Setup the array.
@@ -4787,7 +5114,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		 * @param [colnames]	array of column names. If set, then the first row of
 		 *			$array should not hold the column names.
 		 */
-		public function InitArray($array,$typearr,$colnames=false) {
+		/*public function InitArray($array,$typearr,$colnames=false) {
 			$this->_array = $array;
 			$this->_types = $typearr;
 			if ($colnames) {
@@ -4798,7 +5125,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				$this->_colnames = $array[0];
 			}
 			$this->Init();
-		}
+		}*/
 		/**
 		 * Setup the Array and datatype file objects
 		 *
@@ -4807,25 +5134,25 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		 *			unless paramter $colnames is used.
 		 * @param fieldarr	holds an array of ADOFieldObject's.
 		 */
-		public function InitArrayFields(&$array,&$fieldarr) {
+		/*public function InitArrayFields(&$array,&$fieldarr) {
 			$this->_array = $array;
 			$this->_skiprow1= false;
 			if ($fieldarr) {
 				$this->_fieldobjects = $fieldarr;
 			}
 			$this->Init();
-		}
+		}*/
 
-		public function GetArray($nRows=-1) {
+		/*public function GetArray($nRows=-1) {
 			if ($nRows == -1 && $this->_currentRow <= 0 && !$this->_skiprow1) {
 				return $this->_array;
 			} else {
 				$arr = ADORecordSet::GetArray($nRows);
 				return $arr;
 			}
-		}
+		}*/
 
-		protected function _initrs() {
+		/*protected function _initrs() {
 			$this->_numOfRows =  sizeof($this->_array);
 			if ($this->_skiprow1) {
 				$this->_numOfRows -= 1;
@@ -4834,10 +5161,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			$this->_numOfFields = (isset($this->_fieldobjects))
 				? sizeof($this->_fieldobjects)
 				: sizeof($this->_types);
-		}
+		}*/
 
 		/* Use associative array to get fields array */
-		public function Fields($colname) {
+		/*public function Fields($colname) {
 			$mode = $this->fetchMode;
 
 			if ($mode & ADODB_FETCH_ASSOC) {
@@ -4854,9 +5181,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				}
 			}
 			return $this->fields[$this->bind[strtoupper($colname)]];
-		}
+		}*/
 
-		public function FetchField($fieldOffset = -1) {
+		/*public function FetchField($fieldOffset = -1) {
 			if (isset($this->_fieldobjects)) {
 				return $this->_fieldobjects[$fieldOffset];
 			}
@@ -4866,9 +5193,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			$o->max_length = -1; // length not known
 
 			return $o;
-		}
+		}*/
 
-		protected function _seek($row) {
+		/*protected function _seek($row) {
 			if (sizeof($this->_array) && 0 <= $row && $row < $this->_numOfRows) {
 				$this->_currentRow = $row;
 				if ($this->_skiprow1) {
@@ -4878,9 +5205,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				return true;
 			}
 			return false;
-		}
+		}*/
 
-		public function MoveNext() {
+		/*public function MoveNext() {
 			if (!$this->EOF) {
 				$this->_currentRow++;
 
@@ -4901,9 +5228,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			}
 
 			return false;
-		}
+		}*/
 
-		protected function _fetch() {
+		/*protected function _fetch() {
 			$pos = $this->_currentRow;
 
 			if ($this->_numOfRows <= $pos) {
@@ -4917,11 +5244,11 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			}
 			$this->fields = $this->_array[$pos];
 			return true;
-		}
+		}*/
 
-		protected function _close() {
+		/*protected function _close() {
 			return true;
-		}
+		}*/
 
 	} // ADORecordSet_array
 

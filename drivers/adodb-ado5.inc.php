@@ -380,7 +380,7 @@ class ADORecordSet_ado extends ADORecordSet {
   	public  $hideErrors = true;
 
 	// returns the field object
-	public function FetchField($fieldOffset = -1) {
+	protected function _FetchField($fieldOffset = -1) {
 		$off=$fieldOffset+1; // offsets begin at 1
 
 		$o= new ADOFieldObject();
@@ -660,10 +660,9 @@ class ADORecordSet_ado extends ADORecordSet {
 			$rs = $this->_queryID;
 			$this->_queryID = $rs->NextRecordSet();
 			//$this->_queryID = $this->_QueryId->NextRecordSet();
-			if ($this->_queryID == null) return false;
+			if ($this->_queryID == null) {$this->_queryID = false; return false;}
 
 			$this->_currentPage = -1;
-			$this->bind = false;
 			$this->fields = false;
 			$this->_flds = false;
 			$this->_tarr = false;

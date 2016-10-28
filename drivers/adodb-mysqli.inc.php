@@ -118,13 +118,13 @@ class ADODB_mysqli extends ADOConnection {
 		//http ://php.net/manual/en/mysqli.persistconns.php
 		if ($persist && PHP_VERSION > 5.2 && strncmp($argHostname,'p:',2) != 0) $argHostname = 'p:'.$argHostname;
 
-		#if (!empty($this->port)) $argHostname .= ":".$this->port;
+		//#if (!empty($this->port)) $argHostname .= ":".$this->port;
 		$ok = mysqli_real_connect($this->_connectionID,
 					$argHostname,
 					$argUsername,
 					$argPassword,
 					$argDatabasename,
-					# PHP7 compat: port must be int. Use default port if cast yields zero
+					//# PHP7 compat: port must be int. Use default port if cast yields zero
 					(int)$this->port != 0 ? (int)$this->port : 3306,
 					$this->socket,
 					$this->clientFlags);
@@ -791,7 +791,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 131072 = MYSQLI_BINCMP_FLAG
 */
 
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 		$fieldnr = $fieldOffset;
 		if ($fieldOffset != -1) {
@@ -838,7 +838,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 	global $ADODB_COUNTRECS;
 
 		mysqli_free_result($this->_queryID);
-		$this->_queryID = -1;
+		$this->_queryID = false;
 		// Move to the next recordset, or return false if there is none. In a stored proc
 		// call, mysqli_next_result returns true for the last "recordset", but mysqli_store_result
 		// returns false. I think this is because the last "recordset" is actually just the
@@ -859,7 +859,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 	// 10% speedup to move MoveNext to child class
 	// This is the only implementation that works now (23-10-2003).
 	// Other functions return no or the wrong results.
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		if ($this->EOF) return false;
 		$this->_currentRow++;
@@ -1032,107 +1032,14 @@ class ADORecordSet_mysqli extends ADORecordSet{
 
 } // rs class
 
-}
 
-class ADORecordSet_array_mysqli extends ADORecordSet_array {
 
-	public function __construct($id=-1,$mode=false)
+class ADORecordSet_array_mysqli extends ADORecordSet_mysqli {
+
+	public function __construct($id=false,$mode=false)
 	{
 		parent::__construct($id,$mode);
 	}
-
-	public function MetaType($t, $len = -1, $fieldobj = false)
-	{
-		if (is_object($t)) {
-			$fieldobj = $t;
-			$t = $fieldobj->type;
-			$len = $fieldobj->max_length;
-		}
-
-
-		$len = -1; // mysql max_length is not accurate
-		switch (strtoupper($t)) {
-		case 'STRING':
-		case 'CHAR':
-		case 'VARCHAR':
-		case 'TINYBLOB':
-		case 'TINYTEXT':
-		case 'ENUM':
-		case 'SET':
-
-		case MYSQLI_TYPE_TINY_BLOB :
-		#case MYSQLI_TYPE_CHAR :
-		case MYSQLI_TYPE_STRING :
-		case MYSQLI_TYPE_ENUM :
-		case MYSQLI_TYPE_SET :
-		case 253 :
-			if ($len <= $this->blobSize) return 'C';
-
-		case 'TEXT':
-		case 'LONGTEXT':
-		case 'MEDIUMTEXT':
-			return 'X';
-
-		// php_mysql extension always returns 'blob' even if 'text'
-		// so we have to check whether binary...
-		case 'IMAGE':
-		case 'LONGBLOB':
-		case 'BLOB':
-		case 'MEDIUMBLOB':
-
-		case MYSQLI_TYPE_BLOB :
-		case MYSQLI_TYPE_LONG_BLOB :
-		case MYSQLI_TYPE_MEDIUM_BLOB :
-
-			return !empty($fieldobj->binary) ? 'B' : 'X';
-		case 'YEAR':
-		case 'DATE':
-		case MYSQLI_TYPE_DATE :
-		case MYSQLI_TYPE_YEAR :
-
-			return 'D';
-
-		case 'TIME':
-		case 'DATETIME':
-		case 'TIMESTAMP':
-
-		case MYSQLI_TYPE_DATETIME :
-		case MYSQLI_TYPE_NEWDATE :
-		case MYSQLI_TYPE_TIME :
-		case MYSQLI_TYPE_TIMESTAMP :
-
-			return 'T';
-
-		case 'INT':
-		case 'INTEGER':
-		case 'BIGINT':
-		case 'TINYINT':
-		case 'MEDIUMINT':
-		case 'SMALLINT':
-
-		case MYSQLI_TYPE_INT24 :
-		case MYSQLI_TYPE_LONG :
-		case MYSQLI_TYPE_LONGLONG :
-		case MYSQLI_TYPE_SHORT :
-		case MYSQLI_TYPE_TINY :
-
-			if (!empty($fieldobj->primary_key)) return 'R';
-
-			return 'I';
-
-
-		// Added floating-point types
-		// Maybe not necessery.
-		case 'FLOAT':
-		case 'DOUBLE':
-//		case 'DOUBLE PRECISION':
-		case 'DECIMAL':
-		case 'DEC':
-		case 'FIXED':
-		default:
-			//if (!is_numeric($t)) echo "<p>--- Error in type matching $t -----</p>";
-			return ADODB_DEFAULT_METATYPE;
-		}
-	} // function
+}
 
 }

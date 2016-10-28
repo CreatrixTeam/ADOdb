@@ -389,7 +389,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 		Get column information in the Recordset object. FetchField() can be used in order to obtain information about
 		fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by
 		FetchField() is retrieved.	*/
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 		if (empty($this->_fieldprops)) {
 			$fp = ifx_fieldproperties($this->_queryID);
@@ -422,7 +422,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 		return @ifx_fetch_row($this->_queryID, (int) $row);
 	}
 
-   public function MoveLast()
+   protected function _MoveLast()
    {
 	  $this->bind = false;
 	  $this->fields = @ifx_fetch_row($this->_queryID, "LAST");
@@ -439,7 +439,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 	  return true;
    }
 
-   public function MoveFirst()
+   protected function _MoveFirst()
 	{
 	  $this->bind = false;
 	  $this->fields = @ifx_fetch_row($this->_queryID, "FIRST");
@@ -456,7 +456,7 @@ class ADORecordset_informix72 extends ADORecordSet {
 	  return true;
    }
 
-   protected function _fetch($ignore_fields=false)
+   protected function _fetch()
    {
 		$this->bind = false;
 		$this->fields = @ifx_fetch_row($this->_queryID);

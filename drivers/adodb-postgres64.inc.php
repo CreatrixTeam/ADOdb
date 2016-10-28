@@ -823,7 +823,7 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 		}
 	}
 
-	public function FetchField($off = -1)
+	protected function _FetchField($off = -1)
 	{
 		if($off === -1)
 			{$off = 0;}
@@ -872,7 +872,7 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 	}
 
 	// 10% speedup to move MoveNext to child class
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		if (!$this->EOF) {
 			$this->bind = false;

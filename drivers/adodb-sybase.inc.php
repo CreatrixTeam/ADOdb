@@ -238,7 +238,7 @@ class ADORecordset_sybase extends ADORecordSet {
 		Get column information in the Recordset object. FetchField() can be used in order to obtain information about
 		fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by
 		FetchField() is retrieved.	*/
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 		if ($fieldOffset != -1) {
 			$o = @sybase_fetch_field($this->_queryID, $fieldOffset);
@@ -273,7 +273,7 @@ class ADORecordset_sybase extends ADORecordSet {
 		return @sybase_data_seek($this->_queryID, $row);
 	}
 
-	protected function _fetch($ignore_fields=false)
+	protected function _fetch()
 	{
 		$this->bind = false;
 		if ($this->fetchMode == ADODB_FETCH_NUM) {
@@ -314,10 +314,10 @@ class ADORecordset_sybase extends ADORecordSet {
 	}
 }
 
-class ADORecordSet_array_sybase extends ADORecordSet_array {
-	public function __construct($id=-1)
+class ADORecordSet_array_sybase extends ADORecordset_sybase {
+	public function __construct($id=false,$mode=false)
 	{
-		parent::__construct($id);
+		parent::__construct($id,$mode);
 	}
 
 	// sybase/mssql uses a default date like Dec 30 2000 12:00AM

@@ -817,7 +817,7 @@ class ADORecordset_mssql extends ADORecordSet {
 		fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by
 		FetchField() is retrieved.	*/
 
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 		if ($fieldOffset != -1) {
 			$f = @mssql_fetch_field($this->_queryID, $fieldOffset);
@@ -845,7 +845,7 @@ class ADORecordset_mssql extends ADORecordSet {
 	}
 
 	// speedup
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		if ($this->EOF) return false;
 
@@ -885,7 +885,7 @@ class ADORecordset_mssql extends ADORecordSet {
 
 	// INSERT UPDATE DELETE returns false even if no error occurs in 4.0.4
 	// also the date format has been changed from YYYY-mm-dd to dd MMM YYYY in 4.0.4. Idiot!
-	protected function _fetch($ignore_fields=false)
+	protected function _fetch()
 	{
 		$this->bind = false;
 		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
@@ -965,8 +965,8 @@ class ADORecordset_mssql extends ADORecordSet {
 }
 
 
-class ADORecordSet_array_mssql extends ADORecordSet_array {
-	public function __construct($id=-1,$mode=false)
+class ADORecordSet_array_mssql extends ADORecordset_mssql {
+	public function __construct($id=false,$mode=false)
 	{
 		parent::__construct($id,$mode);
 	}

@@ -37,25 +37,23 @@
  */
 function RSFilter($rs,$fn)
 {
-	if ($rs->databaseType != 'array') {
-		if (!$rs->connection) return false;
+	$vData = null;
 
-		$rs = $rs->connection->_rs2rs($rs);
-	}
+	$rs->SwitchToBufferMode();
 	$rows = $rs->RecordCount();
+	$vData = $rs->GetArray();
 	for ($i=0; $i < $rows; $i++) {
 		if (is_array ($fn)) {
         	$obj = $fn[0];
         	$method = $fn[1];
-        	$obj->$method ($rs->_array[$i],$rs);
+        	$obj->$method ($vData[$i],$rs);
       } else {
-			$fn($rs->_array[$i],$rs);
+			$fn($vData[$i],$rs);
       }
 
 	}
 	if (!$rs->EOF) {
-		$rs->_currentRow = 0;
-		$rs->fields = $rs->_array[0];
+		$rs->MoveFirst();
 	}
 
 	return $rs;

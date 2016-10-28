@@ -1,6 +1,6 @@
 <?php
 
-include_once('../adodb.inc.php');
+include_once(dirname(__FILE__).'/../adodb.inc.php');
 $rs = new ADORecordSet_array();
 
 $array = array(

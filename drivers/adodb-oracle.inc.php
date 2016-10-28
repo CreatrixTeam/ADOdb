@@ -214,33 +214,12 @@ class ADORecordset_oracle extends ADORecordSet {
 
 	public  $databaseType = "oracle";
 
-	public function __construct($queryID,$mode=false)
-	{
-		parent::__construct($queryID,$mode);
-
-		$this->_inited = true;
-		$this->fields = array();
-		if ($queryID) {
-			$this->_currentRow = 0;
-			$this->EOF = !$this->_fetch();
-			@$this->_initrs();
-		} else {
-			$this->_numOfRows = 0;
-			$this->_numOfFields = 0;
-			$this->EOF = true;
-		}
-
-		return $this->_queryID;
-	}
-
-
-
 	   /*		Returns: an object containing field information.
 			   Get column information in the Recordset object. FetchField() can be used in order to obtain information about
 			   fields in a certain query result. If the field offset isn't specified, the next field that wasn't yet retrieved by
 			   FetchField() is retrieved.		*/
 
-	   public function FetchField($fieldOffset = -1)
+	   protected function _FetchField($fieldOffset = -1)
 	   {
 			$fld = new ADOFieldObject;
 			$fld->name = ora_columnname($this->_queryID, $fieldOffset);
@@ -266,7 +245,7 @@ class ADORecordset_oracle extends ADORecordSet {
 		   return false;
    }
 
-   protected function _fetch($ignore_fields=false) {
+   protected function _fetch() {
 		$this->bind = false;
 // should remove call by reference, but ora_fetch_into requires it in 4.0.3pl1
 		if ($this->fetchMode & ADODB_FETCH_ASSOC)

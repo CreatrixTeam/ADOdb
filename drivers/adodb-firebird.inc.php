@@ -638,7 +638,7 @@ class  ADORecordset_firebird extends ADORecordSet
 	 * field that wasn't yet retrieved by FetchField() is retrieved.
 	 * @return object containing field information.
 	*/
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 			$fld = new ADOFieldObject;
 			 $ibf = fbird_field_info($this->_queryID,$fieldOffset);

@@ -1614,7 +1614,7 @@ END Adodb;
 	$rs = $db->Execute('select * from ADOXYZ');
 	if ($debugerr) print " Move";
 	$rs->Move(100);
-	$rs->_queryID = false;
+	$rs->Close();//$rs->_queryID = false;
 	if ($debugerr) print " MoveNext";
 	$rs->MoveNext();
 	if ($debugerr) print " $rs=false";

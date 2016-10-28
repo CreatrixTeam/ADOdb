@@ -435,7 +435,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		$this->SetFetchMode2($savem);
 
 		if (!$rs) return $false;
-		$rs->_fetch();
+		$rs->db2__fetch();
 
 		$retarr = array();
 
@@ -487,7 +487,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 
 		if(!(!$rs))
 		{
-			$rs->_fetch();
+			$rs->db2__fetch();
 
 			/*
 			$rs->fields indices
@@ -642,7 +642,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 	public  $useFetchArray;
 
 	// returns the field object
-	public function FetchField($offset = -1)
+	protected function _FetchField($offset = -1)
 	{
 		$o= new ADOFieldObject();
 		$o->name = @db2_field_name($this->_queryID,$offset);
@@ -672,7 +672,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 	}
 
 	// speed up SelectLimit() by switching to ADODB_FETCH_NUM as ADODB_FETCH_ASSOC is emulated
-	public function GetArrayLimit($nrows,$offset=-1)
+	protected function _GetArrayLimit($nrows,$offset=-1)
 	{
 		if ($offset <= 0) {
 			$rs = $this->GetArray($nrows);
@@ -700,7 +700,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 	}
 
 
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		$this->bind = false;
 		if ($this->_numOfRows != 0 && !$this->EOF) {
@@ -736,6 +736,9 @@ class ADORecordSet_db2 extends ADORecordSet {
 		$this->fields = false;
 		return false;
 	}
+	
+	public function db2__fetch()
+		{return $this->_callFetch();}
 
 	protected function _close()
 	{

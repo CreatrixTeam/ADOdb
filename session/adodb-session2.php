@@ -511,7 +511,7 @@ class ADODB_Session {
 		if (!is_object($rs)) {
 			return;
 		}
-		$rs = $conn->_rs2rs($rs);
+		$rs->SwitchToBufferMode();
 
 		require_once ADODB_SESSION.'/../tohtml.inc.php';
 		rs2html($rs);

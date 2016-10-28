@@ -668,7 +668,7 @@ class ADORecordSet_odbtp extends ADORecordSet {
 		}
 	}
 
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 		if($fieldOffset === -1)
 			{$fieldOffset = 0;}
@@ -719,7 +719,7 @@ class ADORecordSet_odbtp extends ADORecordSet {
 		return $this->_fetch_odbtp();
 	}
 
-	public function MoveFirst()
+	protected function _MoveFirst()
 	{
 		if (!$this->_fetch_odbtp(ODB_FETCH_FIRST)) return false;
 		$this->EOF = false;
@@ -727,7 +727,7 @@ class ADORecordSet_odbtp extends ADORecordSet {
 		return true;
     }
 
-	public function MoveLast()
+	protected function _MoveLast()
 	{
 		if (!$this->_fetch_odbtp(ODB_FETCH_LAST)) return false;
 		$this->EOF = false;

@@ -597,7 +597,7 @@ class ADORecordSet_odbc extends ADORecordSet {
 
 
 	// returns the field object
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 
 		$off=$fieldOffset+1; // offsets begin at 1
@@ -631,7 +631,7 @@ class ADORecordSet_odbc extends ADORecordSet {
 	}
 
 	// speed up SelectLimit() by switching to ADODB_FETCH_NUM as ADODB_FETCH_ASSOC is emulated
-	public function GetArrayLimit($nrows,$offset=-1)
+	protected function _GetArrayLimit($nrows,$offset=-1)
 	{
 		if ($offset <= 0) {
 			$rs = $this->GetArray($nrows);
@@ -659,12 +659,12 @@ class ADORecordSet_odbc extends ADORecordSet {
 	}
 
 
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		$this->bind = false;
 		if ($this->_numOfRows != 0 && !$this->EOF) {
 			$this->_currentRow++;
-			if( $this->_fetch() ) {
+			if( $this->_callFetch() ) {
 				return true;
 			}
 		}
@@ -695,7 +695,7 @@ class ADORecordSet_odbc extends ADORecordSet {
 	}
 
 	public function odbc__fetch()
-		{return $this->_fetch();}
+		{return $this->_callFetch();}
 
 	protected function _close()
 	{

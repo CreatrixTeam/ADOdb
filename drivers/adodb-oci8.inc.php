@@ -1413,7 +1413,6 @@ SELECT /*+ RULE */ distinct b.column_name
 class ADORecordset_oci8 extends ADORecordSet {
 
 	public  $databaseType = 'oci8';
-	protected  $_fieldobjs;
 
 	protected function _initrs()
 	{
@@ -1421,9 +1420,9 @@ class ADORecordset_oci8 extends ADORecordSet {
 		$this->_numOfRows = -1;
 		$this->_numOfFields = oci_num_fields($this->_queryID);
 		if ($this->_numOfFields>0) {
-			$this->_fieldobjs = array();
+			$this->_fieldobjects = array();
 			$max = $this->_numOfFields;
-			for ($i=0;$i<$max; $i++) $this->_fieldobjs[] = $this->_FetchField($i);
+			for ($i=0;$i<$max; $i++) $this->_fieldobjects[] = $this->_FetchField($i);
 		}
 	}
 
@@ -1466,14 +1465,10 @@ class ADORecordset_oci8 extends ADORecordSet {
 		return $fld;
 	}
 
-	/* For some reason, oci_field_name fails when called after _initrs() so we cache it */
-	public function FetchField($fieldOffset = -1)
-	{
-		return $this->_fieldobjs[$fieldOffset];
-	}
+	/* WARNING: "For some reason, oci_field_name fails when called after _initrs() so we cache it". This was a
+				note on the old FetchField (not _FetchField) function*/
 
-
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		$this->bind = false;
 		if ($this->fields = @oci_fetch_array($this->_queryID,$this->oci8_getDriverFetchAndOthersMode())) {
@@ -1489,7 +1484,7 @@ class ADORecordset_oci8 extends ADORecordSet {
 	}
 
 	// Optimize SelectLimit() by using oci_fetch()
-	public function GetArrayLimit($nrows,$offset=-1)
+	protected function _GetArrayLimit($nrows,$offset=-1)
 	{
 		if ($offset <= 0) {
 			$arr = $this->GetArray($nrows);
@@ -1631,7 +1626,7 @@ class ADORecordset_oci8 extends ADORecordSet {
 
 class ADORecordSet_ext_oci8 extends ADORecordSet_oci8 {
 
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		return adodb_movenext($this);
 	}

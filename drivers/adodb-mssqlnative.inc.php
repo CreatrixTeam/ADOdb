@@ -767,16 +767,6 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 	// _mths works only in non-localised system
 	
 	/*
-	 * Holds a cached version of the metadata
-	 */
-	private $fieldObjects = false;
-	
-	/*
-	 * Flags if we have retrieved the metadata
-	 */
-	private $fieldObjectsRetrieved = false;
-	
-	/*
 	* Cross-reference the objects by name for easy access
 	*/
 	private $fieldObjectsIndex = array();
@@ -860,24 +850,6 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 	*/
 	protected function _FetchField($fieldOffset = -1)
 	{
-		if ($this->fieldObjectsRetrieved){
-			if ($this->fieldObjects) {
-				/*
-				 * Already got the information
-				 */
-				if ($fieldOffset == -1)
-					return $this->fieldObjects;
-				else
-					return $this->fieldObjects[$fieldOffset];
-			}
-			else 
-				/*
-			     * No metadata available
-				 */
-				return false;
-		}
-
-		$this->fieldObjectsRetrieved = true;
 		/*
 		 * Retrieve all metadata in one go. This is always returned as a
 		 * numeric array.
@@ -905,55 +877,38 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 			$fld->column_source = $value['Name'];
 			$fld->type          = $this->_typeConversion[$value['Type']];
 			
-			$this->fieldObjects[$key] = $fld; 
+			$this->_fieldobjects[$key] = $fld; 
 			
 			$this->fieldObjectsIndex[$fld->name] = $key;
 			
 		}
 		if ($fieldOffset == -1)
-			return $this->fieldObjects;
+			return $this->_fieldobjects;
 		
-		return $this->fieldObjects[$fieldOffset];
+		return $this->_fieldobjects[$fieldOffset];
 	}
 	
-	/*
-	 * Fetchfield copies the oracle method, it loads the field information
-	 * into the _fieldobjs array once, to save multiple calls to the
-	 * sqlsrv_field_metadata function
-	 *
-	 * @param int $fieldOffset	(optional)
-	 *
-	 * @return adoFieldObject
-	 *
-	 * @author 	KM Newnham
-	 * @date 	02/20/2013
-	 */
-	public function FetchField($fieldOffset = -1)
-	{
-		return $this->fieldObjects[$fieldOffset];
-	}
-
 	protected function _seek($row)
 	{
 		return false;//There is no support for cursors in the driver at this time.  All data is returned via forward-only streams.
 	}
 
 	// speedup
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		if ($this->EOF) 
 			return false;
 
 		$this->_currentRow++;
 
-		if ($this->_fetch()) 
+		if ($this->_callFetch()) 
 			return true;
 		$this->EOF = true;
 
 		return false;
 	}
 
-	protected function _fetch($ignore_fields=false)
+	protected function _fetch()
 	{
 		$this->bind = false;
 		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
@@ -999,8 +954,8 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 }
 
 
-class ADORecordSet_array_mssqlnative extends ADORecordSet_array {
-	public function __construct($id=-1,$mode=false)
+class ADORecordSet_array_mssqlnative extends ADORecordset_mssqlnative {
+	public function __construct($id=false,$mode=false)
 	{
 		parent::__construct($id,$mode);
 	}

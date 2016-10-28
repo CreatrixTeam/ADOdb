@@ -205,7 +205,7 @@ class  ADORecordSet_pdo_sqlsrv extends ADORecordSet_pdo {
 
 	public  $databaseType = 'pdo_sqlsrv';
 
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 		if($fieldOffset === -1)
 			{$fieldOffset = 0;}

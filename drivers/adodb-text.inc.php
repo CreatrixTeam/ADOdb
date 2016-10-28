@@ -86,9 +86,9 @@ class ADODB_text extends ADOConnection {
 	public  $readOnly = true;
 	public  $hasTransactions = false;
 
-	protected  $_rezarray;
-	protected  $_reznames;
-	protected  $_reztypes;
+	public  $_rezarray;
+	public  $_reznames;
+	public  $_reztypes;
 
 	public function RSRecordCount()
 	{
@@ -374,6 +374,8 @@ class ADORecordSet_text extends ADORecordSet_array
 
 	public function __construct(&$conn,$mode=false)
 	{
+		//WARNING: The following usage of InitArray is buggy because under certain circumstances $conn->_rezarray
+		//		continues to hold the row containing the column names even when $conn->_reznames is defined.
 		parent::__construct();
 		$this->InitArray($conn->_rezarray,$conn->_reztypes,$conn->_reznames);
 		$conn->_rezarray = false;

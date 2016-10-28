@@ -175,7 +175,7 @@ class ADORecordSet_fbsql extends ADORecordSet{
 
 
 
-	public function FetchField($fieldOffset = -1) {
+	protected function _FetchField($fieldOffset = -1) {
 		if ($fieldOffset != -1) {
 			$o =  @fbsql_fetch_field($this->_queryID, $fieldOffset);
 			//$o->max_length = -1; // fbsql returns the max length less spaces -- so it is unrealiable
@@ -204,7 +204,7 @@ class ADORecordSet_fbsql extends ADORecordSet{
 		return @fbsql_data_seek($this->_queryID,$row);
 	}
 
-	protected function _fetch($ignore_fields=false)
+	protected function _fetch()
 	{
 		$this->bind = false;
 		$this->fields = @fbsql_fetch_array($this->_queryID,$this->fbsql_getDriverFetchMode());

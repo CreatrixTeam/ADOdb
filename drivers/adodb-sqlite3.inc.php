@@ -425,27 +425,7 @@ class ADORecordset_sqlite3 extends ADORecordSet {
 	public  $databaseType = "sqlite3";
 	public  $bind = false;
 
-	public function __construct($queryID,$mode=false)
-	{
-		parent::__construct($queryID,$mode);
-
-		$this->_inited = true;
-		$this->fields = array();
-		if ($queryID) {
-			$this->_currentRow = 0;
-			$this->EOF = !$this->_fetch();
-			@$this->_initrs();
-		} else {
-			$this->_numOfRows = 0;
-			$this->_numOfFields = 0;
-			$this->EOF = true;
-		}
-
-		return $this->_queryID;
-	}
-
-
-	public function FetchField($fieldOffset = -1)
+	protected function _FetchField($fieldOffset = -1)
 	{
 		$fld = new ADOFieldObject;
 		$fld->name = $this->_queryID->columnName($fieldOffset);
@@ -537,7 +517,7 @@ class ADORecordset_sqlite3 extends ADORecordSet {
 		return false;
 	}
 
-	protected function _fetch($ignore_fields=false)
+	protected function _fetch()
 	{
 		$this->bind = false;
 		$this->fields = $this->_queryID->fetchArray($this->sqlite3_getDriverFetchMode());

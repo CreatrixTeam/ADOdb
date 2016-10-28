@@ -305,7 +305,7 @@ class ADORecordSet_postgres7 extends ADORecordSet_postgres64{
 	public  $databaseType = "postgres7";
 
 	// 10% speedup to move MoveNext to child class
-	public function MoveNext()
+	protected function _MoveNext()
 	{
 		if (!$this->EOF) {
 			$this->bind = false;

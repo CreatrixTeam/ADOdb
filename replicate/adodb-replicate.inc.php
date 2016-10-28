@@ -862,7 +862,7 @@ word-wrap: break-word; /* Internet Explorer 5.5+ */
 
 			if ($this->updateSrcFn && strpos($src2->databaseType,'mssql') !== false) {
 				# problem is writers interfere with readers in mssql
-				$rs = $src->_rs2rs($rs);
+				$rs->SwitchToBufferMode();
 			}
 			$cnt = 0;
 			$upd = 0;
