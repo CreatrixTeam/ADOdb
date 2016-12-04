@@ -121,8 +121,10 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 	protected function _MoveNext()
 	{
 		$this->bind = false;
-		if(@OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode())) {
+		$ret = @oci_fetch_array($this->_queryID,$this->oci8_getDriverFetchAndOthersMode());
+		if($ret !== false) {
 		global $ADODB_ANSI_PADDING_OFF;
+			$this->fields = $ret;
 			$this->_currentRow++;
 
 			if (!empty($ADODB_ANSI_PADDING_OFF)) {
@@ -152,11 +154,12 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 				return $arr;
 			}
 		$this->bind = false;
-		if (!@OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode())) {
+		$ret = @oci_fetch_array($this->_queryID,$this->oci8_getDriverFetchAndOthersMode());
+		if ($ret === false) {
 			$arr = array();
 			return $arr;
 		}
-
+		$this->fields = $ret;
 		$results = array();
 		$cnt = 0;
 		while (!$this->EOF && $nrows != $cnt) {
@@ -172,15 +175,17 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 		global $ADODB_ANSI_PADDING_OFF;
 
 		$this->bind = false;
-		$ret = @OCIfetchinto($this->_queryID,$this->fields,$this->oci8_getDriverFetchAndOthersMode());
+		$ret = @oci_fetch_array($this->_queryID,$this->oci8_getDriverFetchAndOthersMode());
 		if ($ret) {
+			$this->fields = $ret;
+
 			if (!empty($ADODB_ANSI_PADDING_OFF)) {
 				foreach($this->fields as $k => $v) {
 					if (is_string($v)) $this->fields[$k] = rtrim($v);
 				}
 			}
 		}
-		return $ret;
+		return $ret !== false;
 	}
 
 }
