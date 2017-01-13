@@ -133,31 +133,22 @@ class ADODB_mssqlnative extends ADOConnection {
 			sqlsrv_configure('WarningsReturnAsErrors', 0);
 		}
 	}
+
+	/**
+	 * Initializes the SQL Server version.
+	 * Dies if connected to a non-supported version (2000 and older)
+	 */
 	public function ServerVersion() {
 		$data = $this->ServerInfo();
-		if (preg_match('/^09/',$data['version'])){
-			/*
-			 * SQL Server 2005
-			 */
-			$this->mssql_version = 9;
-		} elseif (preg_match('/^10/',$data['version'])){
-			/*
-			 * SQL Server 2008
-			 */
-			$this->mssql_version = 10;
-		} elseif (preg_match('/^11/',$data['version'])){
-			/*
-			 * SQL Server 2012
-			 */
-			$this->mssql_version = 11;
-		} elseif (preg_match('/^12/',$data['version'])){
-			/*
-			 * SQL Server 2014
-			 */
-			$this->mssql_version = 12;
-		
-		} else
+		preg_match('/^\d{2}', $data['version'], $matches);
+		$version = (int)reset($matches);
+
+		// We only support SQL Server 2005 and up
+		if($version < 9) {
 			die("SQL SERVER VERSION {$data['version']} NOT SUPPORTED IN mssqlnative DRIVER");
+		}
+
+		$this->mssql_version = $version;
 	}
 
 	public function ServerInfo() {
@@ -201,8 +192,7 @@ class ADODB_mssqlnative extends ADOConnection {
 		case 10:
 			return $this->GenID2008($seq, $start);
 			break;
-		case 11:
-		case 12:
+		default:
 			return ADOConnection::GenID($seq, $start);
 			break;
 		}
@@ -210,7 +200,7 @@ class ADODB_mssqlnative extends ADOConnection {
 
 	public function CreateSequence($seq='adodbseq',$start=1)
 	{
-		if (!$this->mssql_vesion)
+		if (!$this->mssql_version)
 			$this->ServerVersion();
 
 		switch($this->mssql_version){
@@ -218,9 +208,7 @@ class ADODB_mssqlnative extends ADOConnection {
 		case 10:
 			return $this->CreateSequence2008($seq, $start);
 			break;
-		case 11:
-		case 12:
-			// Proper Sequences Only available to Server 2012 and up
+		default:
 			return  ADOConnection::CreateSequence($seq, $start);
 			break;
 		}
@@ -446,6 +434,12 @@ class ADODB_mssqlnative extends ADOConnection {
 		if (is_array($sql))
 			$sql = $sql[1];
 
+		$insert = false;
+		// handle native driver flaw for retrieving the last insert ID
+		if(preg_match('/^\W*insert[\s\w()",.]+values\s*\((?:[^;\']|\'\'|(?:(?:\'\')*\'[^\']+\'(?:\'\')*))*;?$/i', $sql)) {
+			$insert = true;
+			$sql .= '; '.$this->identitySQL; // select scope_identity()
+		}
 		if($inputarr) {
 			$rez = sqlsrv_query($this->_connectionID, $sql, $inputarr);
 		} else {
