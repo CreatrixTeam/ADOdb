@@ -21,6 +21,7 @@ Older changelogs:
 - adodb: Added portable substring method. #219
 - adodb: New helper methods: day(), month(), year(). #225
 - adodb: Remove references to obsolete ADOdb Extension. #270
+- adodb: add Occitan translation. #285
 - adodb-time: Fix 'Q' (quarter of year) format in adodb_date(). #222
 - adodb-time: Add 'W' (week of year) format support in adodb_date(). #223
 - firebird: updated driver, thanks to Lester Caine. #201
@@ -40,6 +41,7 @@ Older changelogs:
 - pdo: fix PHP notice. #248
 - pdo: ADORecordSet class loading. #250
 - pdo/sqlsrv: fix fetchField() method. #251, #234
+- pgsql: add CIDR data type to MetaType(). #281
 - sqlite: _createSuffix is now compatible with parent. #178
 - sqlite: metaIndexes could not locate indexes on uppercase table name. #176
 - sqlite: Fix Metataypes mapping. #177
