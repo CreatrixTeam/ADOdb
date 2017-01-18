@@ -178,7 +178,7 @@ class ADODB2_mssql extends ADODB_DataDict {
 		return $constraintname;
 	}
   
-	function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
+	public function AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
 	{
 		if($this->dataProvider !== "mssqlnative")
 			{return parent::AlterColumnSQL($tabname, $flds, $tableflds='',$tableoptions='');}
