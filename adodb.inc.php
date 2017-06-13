@@ -1714,7 +1714,14 @@ if (!defined('_ADODB_LAYER')) {
 		return $arr;
 	}
 
-	public function GetAssoc($sql, $inputarr=false,$force_array = false, $first2cols = false) {
+	/**
+	 * @param string $sql
+	 * @param false|array $inputarr
+	 * @param bool $force_array
+	 * @param bool $first2cols
+	 * @return false|array
+	 */
+	public function GetAssoc($sql, $inputarr = false, $force_array = false, $first2cols = false) {
 		$savem = $this->fetchMode;
 
 		// Method does not work in ADODB_FETCH_BOTH mode
@@ -1732,7 +1739,15 @@ if (!defined('_ADODB_LAYER')) {
 		return $rs->GetAssoc($force_array, $first2cols);
 	}
 
-	public function CacheGetAssoc($secs2cache, $sql=false, $inputarr=false,$force_array = false, $first2cols = false) {
+	/**
+	 * @param int $secs2cache
+	 * @param false|string $sql
+	 * @param false|array $inputarr
+	 * @param bool $force_array
+	 * @param bool $first2cols
+	 * @return false|array
+	 */
+	public function CacheGetAssoc($secs2cache, $sql = false, $inputarr = false,$force_array = false, $first2cols = false) {
 		if (!is_numeric($secs2cache)) {
 			$first2cols = $force_array;
 			$force_array = $inputarr;
@@ -1741,18 +1756,18 @@ if (!defined('_ADODB_LAYER')) {
 		if (!$rs) {
 			return false;
 		}
-		$arr = $rs->GetAssoc($force_array,$first2cols);
-		return $arr;
+		return $rs->GetAssoc($force_array, $first2cols);
 	}
 
 	/**
-	* Return first element of first row of sql statement. Recordset is disposed
-	* for you.
-	*
-	* @param sql			SQL statement
-	* @param [inputarr]		input bind array
-	*/
-	public function GetOne($sql,$inputarr=false) {
+	 * Return first element of first row of sql statement. Recordset is disposed
+	 * for you.
+	 *
+	 * @param string		$sql		SQL statement
+	 * @param array|bool	$inputarr	input bind array
+	 * @return mixed
+	 */
+	public function GetOne($sql, $inputarr=false) {
 		global $ADODB_COUNTRECS,$ADODB_GETONE_EOF;
 
 		$crecs = $ADODB_COUNTRECS;
