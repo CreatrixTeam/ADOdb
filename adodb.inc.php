@@ -1298,7 +1298,7 @@ if (!defined('_ADODB_LAYER')) {
 		if ($this->debug) {
 			global $ADODB_INCLUDED_LIB;
 			if (empty($ADODB_INCLUDED_LIB)) {
-				include(ADODB_DIR.'/adodb-lib.inc.php');
+				include_once(ADODB_DIR.'/adodb-lib.inc.php');
 			}
 			$this->_queryID = _adodb_debug_execute($this, $sql,$inputarr);
 		} else {
@@ -1552,8 +1552,8 @@ if (!defined('_ADODB_LAYER')) {
 	/**
 	 * Choose a database to connect to. Many databases do not support this.
 	 *
-	 * @param dbName is the name of the database to select
-	 * @return true or false
+	 * @param string $dbName the name of the database to select
+	 * @return bool
 	 */
 	public function SelectDB($dbName) {return false;}
 
@@ -2013,7 +2013,7 @@ if (!defined('_ADODB_LAYER')) {
 	public function Replace($table, $fieldArray, $keyCol, $autoQuote=false, $has_autoinc=false) {
 		global $ADODB_INCLUDED_LIB;
 		if (empty($ADODB_INCLUDED_LIB)) {
-			include(ADODB_DIR.'/adodb-lib.inc.php');
+			include_once(ADODB_DIR.'/adodb-lib.inc.php');
 		}
 
 		return _adodb_replace($this, $table, $fieldArray, $keyCol, $autoQuote, $has_autoinc);
@@ -2298,7 +2298,7 @@ if (!defined('_ADODB_LAYER')) {
 		// ********************************************************
 
 		if (empty($ADODB_INCLUDED_LIB)) {
-			include(ADODB_DIR.'/adodb-lib.inc.php');
+			include_once(ADODB_DIR.'/adodb-lib.inc.php');
 		}
 		return _adodb_getupdatesql($this,$rs,$arrFields,$forceUpdate,$magicq,$force);
 	}
@@ -2318,7 +2318,7 @@ if (!defined('_ADODB_LAYER')) {
 			$force = $ADODB_FORCE_TYPE;
 		}
 		if (empty($ADODB_INCLUDED_LIB)) {
-			include(ADODB_DIR.'/adodb-lib.inc.php');
+			include_once(ADODB_DIR.'/adodb-lib.inc.php');
 		}
 		return _adodb_getinsertsql($this,$rs,$arrFields,$magicq,$force);
 	}
@@ -3144,7 +3144,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	public function PageExecute($sql, $nrows, $page, $inputarr=false, $secs2cache=0) {
 		global $ADODB_INCLUDED_LIB;
 		if (empty($ADODB_INCLUDED_LIB)) {
-			include(ADODB_DIR.'/adodb-lib.inc.php');
+			include_once(ADODB_DIR.'/adodb-lib.inc.php');
 		}
 		if ($this->pageExecuteCountRows) {
 			$rs = _adodb_pageexecute_all_rows($this, $sql, $nrows, $page, $inputarr, $secs2cache);
@@ -3432,7 +3432,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	// DATE AND TIME FUNCTIONS
 	//==============================================================================================
 	if (!defined('ADODB_DATE_VERSION')) {
-		include(ADODB_DIR.'/adodb-time.inc.php');
+		include_once(ADODB_DIR.'/adodb-time.inc.php');
 	}
 
 	//==============================================================================================
@@ -3680,7 +3680,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	{
 		global $ADODB_INCLUDED_LIB;
 		if (empty($ADODB_INCLUDED_LIB)) {
-			include(ADODB_DIR.'/adodb-lib.inc.php');
+			include_once(ADODB_DIR.'/adodb-lib.inc.php');
 		}
 		return _adodb_getmenu($this, $name,$defstr,$blank1stItem,$multiple,
 			$size, $selectAttr,$compareFields0);
@@ -3708,7 +3708,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	{
 		global $ADODB_INCLUDED_LIB;
 		if (empty($ADODB_INCLUDED_LIB)) {
-			include(ADODB_DIR.'/adodb-lib.inc.php');
+			include_once(ADODB_DIR.'/adodb-lib.inc.php');
 		}
 		return _adodb_getmenu_gp($this, $name,$defstr,$blank1stItem,$multiple,
 			$size, $selectAttr,false);
@@ -5089,7 +5089,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			global $ADODB_INCLUDED_LIB;
 
 			if (empty($ADODB_INCLUDED_LIB)) {
-				include(ADODB_DIR.'/adodb-lib.inc.php');
+				include_once(ADODB_DIR.'/adodb-lib.inc.php');
 			}
 			$hdr = true;
 
@@ -5698,7 +5698,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	function adodb_backtrace($printOrArr=true,$levels=9999,$ishtml=null) {
 		global $ADODB_INCLUDED_LIB;
 		if (empty($ADODB_INCLUDED_LIB)) {
-			include(ADODB_DIR.'/adodb-lib.inc.php');
+			include_once(ADODB_DIR.'/adodb-lib.inc.php');
 		}
 		return _adodb_backtrace($printOrArr,$levels,0,$ishtml);
 	}

@@ -21,7 +21,7 @@ Set tabs to 4 for best viewing.
 if (!defined('ADODB_DIR')) die();
 
 if (!defined('_ADODB_ADO_LAYER')) {
-	include(ADODB_DIR."/drivers/adodb-ado5.inc.php");	
+	include_once(ADODB_DIR."/drivers/adodb-ado5.inc.php");	
 }
 
 
