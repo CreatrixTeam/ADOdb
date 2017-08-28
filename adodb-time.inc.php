@@ -403,6 +403,7 @@ First implementation.
 */
 define('ADODB_DATE_VERSION',0.35);
 
+global $ADODB_DATETIME_CLASS;
 $ADODB_DATETIME_CLASS = (PHP_VERSION >= 5.2);
 
 /*
@@ -800,7 +801,9 @@ echo "<hr />$i ";
 */
 
 
+global $_month_table_normal;
 $_month_table_normal = array("",31,28,31,30,31,30,31,31,30,31,30,31);
+global $_month_table_leaf;
 $_month_table_leaf = array("",31,29,31,30,31,30,31,31,30,31,30,31);
 
 function adodb_validdate($y,$m,$d)
