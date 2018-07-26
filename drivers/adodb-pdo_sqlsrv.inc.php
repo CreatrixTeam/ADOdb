@@ -207,10 +207,12 @@ class  ADORecordSet_pdo_sqlsrv extends ADORecordSet_pdo {
 
 	protected function _FetchField($fieldOffset = -1)
 	{
-		if($fieldOffset === -1)
-			{$fieldOffset = 0;}
+		// Default behavior allows passing in of -1 offset, which crashes the method
+		if ($fieldOffset == -1) {
+			$fieldOffset++;
+		}
 
-		$o= new ADOFieldObject();
+		$o = new ADOFieldObject();
 		$arr = @$this->_queryID->getColumnMeta($fieldOffset);
 		if (!$arr) {
 			return false;
