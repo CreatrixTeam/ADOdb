@@ -465,7 +465,7 @@ if (!defined('_ADODB_LAYER')) {
 	public  $memCache = false; /// should we use memCache instead of caching in files
 	public  $memCacheHost; /// memCache host
 	public  $memCachePort = 11211; /// memCache port
-	public  $memCacheCompress = false; /// Use 'true' to store the item compressed (uses zlib)
+	public  $memCacheCompress = false; /// Use 'true' to store the item compressed (uses zlib, not supported w/memcached library)
 
 	public  $sysDate = false; /// name of function that returns the current date. NOTE: Copied from ADODB_DataDict::$sql_sysDate during set up of data dictionary.
 	public  $sysTimeStamp = false; /// name of function that returns the current timestamp. NOTE: Copied from ADODB_DataDict::$sql_sysTimeStamp during set up of data dictionary.
@@ -2501,6 +2501,7 @@ if (!defined('_ADODB_LAYER')) {
 	 */
 	public function Close() {
 		$rez = $this->_close();
+		$this->_queryID = false;
 		$this->_connectionID = false;
 		return $rez;
 	}
@@ -5313,8 +5314,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				break;
 		}
 
-		$file = ADODB_DIR."/drivers/adodb-".$db.".inc.php";
-		@include_once($file);
+		$file = "drivers/adodb-$db.inc.php";
+		@include_once(ADODB_DIR . '/' . $file);
 		$ADODB_LASTDB = $class;
 		if (class_exists("ADODB_" . $class)) {
 			return $class;

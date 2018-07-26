@@ -794,7 +794,7 @@ class ADORecordset_mssql extends ADORecordSet {
 		// freedts check...
 		$this->hasFetchAssoc = function_exists('mssql_fetch_assoc');
 
-		return parent::__construct($id,$mode);
+		return parent::__construct($id);
 	}
 
 
