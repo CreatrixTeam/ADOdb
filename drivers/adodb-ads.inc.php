@@ -73,17 +73,15 @@ class ADODB_ads extends ADOConnection {
   // returns true or false
   protected function _connect($argDSN, $argUsername, $argPassword, $argDatabasename)
   {
-          global $php_errormsg;
-
     if (!function_exists('ads_connect')) return null;
 
     if ($this->debug && $argDatabasename && $this->databaseType != 'vfp') {
       ADOConnection::outp("For Advantage Connect(), $argDatabasename is not used. Place dsn in 1st parameter.");
     }
-    if (isset($php_errormsg)) $php_errormsg = '';
+    $last_php_error = $this->resetLastError();
     if ($this->curmode === false) $this->_connectionID = ads_connect($argDSN,$argUsername,$argPassword);
     else $this->_connectionID = ads_connect($argDSN,$argUsername,$argPassword,$this->curmode);
-    $this->_errorMsg = isset($php_errormsg) ? $php_errormsg : '';
+    $this->_errorMsg = $this->getChangedErrorMsg($last_php_error);
     if (isset($this->connectStmt)) $this->Execute($this->connectStmt);
 
     return $this->_connectionID != false;
@@ -92,12 +90,10 @@ class ADODB_ads extends ADOConnection {
   // returns true or false
   protected function _pconnect($argDSN, $argUsername, $argPassword, $argDatabasename)
   {
-  global $php_errormsg;
-
     if (!function_exists('ads_connect')) return null;
 
-    if (isset($php_errormsg)) $php_errormsg = '';
-    $this->_errorMsg = isset($php_errormsg) ? $php_errormsg : '';
+    $last_php_error = $this->resetLastError();
+    $this->_errorMsg = '';
     if ($this->debug && $argDatabasename) {
             ADOConnection::outp("For PConnect(), $argDatabasename is not used. Place dsn in 1st parameter.");
     }
@@ -105,7 +101,7 @@ class ADODB_ads extends ADOConnection {
     if ($this->curmode === false) $this->_connectionID = ads_connect($argDSN,$argUsername,$argPassword);
     else $this->_connectionID = ads_pconnect($argDSN,$argUsername,$argPassword,$this->curmode);
 
-    $this->_errorMsg = isset($php_errormsg) ? $php_errormsg : '';
+    $this->_errorMsg = $this->getChangedErrorMsg($last_php_error);
     if ($this->_connectionID && $this->autoRollback) @ads_rollback($this->_connectionID);
     if (isset($this->connectStmt)) $this->Execute($this->connectStmt);
 
@@ -472,9 +468,8 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
   /* returns queryID or false */
   public function _query($sql,$inputarr=false)
   {
-  GLOBAL $php_errormsg;
-    if (isset($php_errormsg)) $php_errormsg = '';
-    $this->_error = '';
+    $last_php_error = $this->resetLastError();
+    $this->_errorMsg = '';
 
                 if ($inputarr) {
       if (is_array($sql)) {
@@ -483,7 +478,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
         $stmtid = ads_prepare($this->_connectionID,$sql);
 
         if ($stmtid == false) {
-          $this->_errorMsg = isset($php_errormsg) ? $php_errormsg : '';
+          $this->_errorMsg = $this->getChangedErrorMsg($last_php_error);
           return false;
         }
       }
@@ -516,8 +511,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 
                 $this->_lastAffectedRows = 0;
 
-    if ($stmtid)
-                {
+    if ($stmtid) {
 
       if (@ads_num_fields($stmtid) == 0) {
         $this->_lastAffectedRows = ads_num_rows($stmtid);
@@ -531,22 +525,19 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 
       }
 
-      if ($this->_haserrorfunctions)
-                        {
-
+      if ($this->_haserrorfunctions) {
         $this->_errorMsg = '';
         $this->_errorCode = 0;
+      } else {
+          $this->_errorMsg = $this->getChangedErrorMsg($last_php_error);
       }
-                        else
-        $this->_errorMsg = isset($php_errormsg) ? $php_errormsg : '';
-    }
-                else
-                {
+    } else {
       if ($this->_haserrorfunctions) {
         $this->_errorMsg = ads_errormsg();
         $this->_errorCode = ads_error();
-      } else
-        $this->_errorMsg = isset($php_errormsg) ? $php_errormsg : '';
+      } else {
+          $this->_errorMsg = $this->getChangedErrorMsg($last_php_error);
+      }
     }
 
     return $stmtid;
@@ -564,10 +555,11 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
    */
   public function UpdateBlob($table,$column,$val,$where,$blobtype='BLOB')
   {
+                $last_php_error = $this->resetLastError();
                 $sql = "UPDATE $table SET $column=? WHERE $where";
                 $stmtid = ads_prepare($this->_connectionID,$sql);
                 if ($stmtid == false){
-                  $this->_errorMsg = isset($php_errormsg) ? $php_errormsg : '';
+                  $this->_errorMsg = $this->getChangedErrorMsg($last_php_error);
                   return false;
           }
                 if (! ads_execute($stmtid,array($val),array(SQL_BINARY) )){

@@ -587,9 +587,8 @@ class ADODB_odbtp extends ADOConnection{
 
 	public function _query($sql,$inputarr=false)
 	{
-	global $php_errormsg;
-
-        $this->_errorMsg = false;
+		$last_php_error = $this->resetLastError();
+		$this->_errorMsg = false;
 		$this->_errorCode = false;
 
  		if ($inputarr) {
@@ -598,7 +597,7 @@ class ADODB_odbtp extends ADOConnection{
 			} else {
 				$stmtid = @odbtp_prepare($sql,$this->_connectionID);
 				if ($stmtid == false) {
-					$this->_errorMsg = $php_errormsg;
+					$this->_errorMsg = $this->getChangedErrorMsg($last_php_error);
 					return false;
 				}
 			}

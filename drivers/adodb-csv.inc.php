@@ -79,6 +79,8 @@ class ADODB_csv extends ADOConnection {
 	// parameters use PostgreSQL convention, not MySQL
 	public function SelectLimit($sql, $nrows = -1, $offset = -1, $inputarr = false, $secs2cache = 0)
 	{
+		$nrows = (int) $nrows;
+		$offset = (int) $offset;
 		$url = $this->_url.'?sql='.urlencode($sql)."&nrows=$nrows&fetch=".
 			$this->GetFetchMode().
 			"&offset=$offset";
