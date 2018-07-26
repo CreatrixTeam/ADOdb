@@ -344,12 +344,8 @@ order by constraint_name, referenced_table_name, keyno";
 			$arr = $args;
 		}
 
-		array_walk(
-			$arr,
-			function(&$value, $key) {
-				$value = "CAST(" . $value . " AS VARCHAR(255))";
-			}
-		);
+		foreach($arr as $key => $value)
+			{$arr[$key] = "CAST(" . $value . " AS VARCHAR(255))";}
 		$s = implode('+',$arr);
 		if (sizeof($arr) > 0) return "$s";
 

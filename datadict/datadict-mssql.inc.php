@@ -434,6 +434,7 @@ CREATE TABLE
 	protected function _FormatDateSQL($fmt, $pParsedColumnName=false)
 	{
 		$col = false;
+		$vIsDone = false;
 
 		if($pParsedColumnName)
 			{$col = $pParsedColumnName['name'];}
@@ -441,60 +442,86 @@ CREATE TABLE
 		if (!$col) $col = $this->sql_sysTimeStamp;
 		$s = '';
 
-		$len = strlen($fmt);
-		for ($i=0; $i < $len; $i++) {
-			if ($s) $s .= '+';
-			$ch = $fmt[$i];
-			switch($ch) {
-			case 'Y':
-			case 'y':
-				$s .= "datename(yyyy,$col)";
-				break;
-			case 'M':
-				$s .= "convert(char(3),$col,0)";
-				break;
-			case 'm':
-				$s .= "replace(str(month($col),2),' ','0')";
-				break;
-			case 'Q':
-			case 'q':
-				$s .= "datename(quarter,$col)";
-				break;
-			case 'D':
-			case 'd':
-				$s .= "replace(str(day($col),2),' ','0')";
-				break;
-			case 'h':
-				$s .= "substring(convert(char(14),$col,0),13,2)";
-				break;
-
-			case 'H':
-				$s .= "replace(str(datepart(hh,$col),2),' ','0')";
-				break;
-
-			case 'i':
-				$s .= "replace(str(datepart(mi,$col),2),' ','0')";
-				break;
-			case 's':
-				$s .= "replace(str(datepart(ss,$col),2),' ','0')";
-				break;
-			case 'a':
-			case 'A':
-				$s .= "substring(convert(char(19),$col,0),18,2)";
-				break;
-			case 'l': 
-				$s .= "datename(dw,$col)"; 
-				break;
-
-			default:
-				if ($ch == '\\') {
-					$i++;
-					$ch = substr($fmt,$i,1);
-				}
-				$s .= $this->connection->qstr($ch);
-				break;
+		if($this->dataProvider === "mssqlnative")
+		{
+			$ConvertableFmt=array(
+				   "m/d/Y"=>101,"m/d/y"=>101 // US
+				  ,"Y.m.d"=>102,"y/m/d"=>102 // ANSI
+				  ,"d/m/Y"=>103,"d/m/y"=>103 // French /english
+				  ,"d.m.Y"=>104,"d.m.y"=>104 // German
+				  ,"d-m-Y"=>105,"d-m-y"=>105 // Italian
+				  ,"m-d-Y"=>110,"m-d-y"=>110 // US Dash
+				  ,"Y/m/d"=>111,"y/m/d"=>111 // Japan
+				  ,"Ymd"=>112,"ymd"=>112 // ISO
+				  ,"H:i:s"=>108 // Time
+			);
+			if(key_exists($fmt,$ConvertableFmt))
+			{
+				$s =  "convert (varchar ,$col,".$ConvertableFmt[$fmt].")";
+				$vIsDone = true;
 			}
 		}
+
+		if(!$vIsDone)
+		{
+			$len = strlen($fmt);
+			for ($i=0; $i < $len; $i++) {
+				if ($s) $s .= '+';
+				$ch = $fmt[$i];
+				switch($ch) {
+				case 'Y':
+				case 'y':
+					$s .= "datename(yyyy,$col)";
+					break;
+				case 'M':
+					$s .= "convert(char(3),$col,0)";
+					break;
+				case 'm':
+					$s .= "replace(str(month($col),2),' ','0')";
+					break;
+				case 'Q':
+				case 'q':
+					$s .= "datename(quarter,$col)";
+					break;
+				case 'D':
+				case 'd':
+					$s .= "replace(str(day($col),2),' ','0')";
+					break;
+				case 'h':
+					$s .= "substring(convert(char(14),$col,0),13,2)";
+					break;
+
+				case 'H':
+					$s .= "replace(str(datepart(hh,$col),2),' ','0')";
+					break;
+
+				case 'i':
+					$s .= "replace(str(datepart(mi,$col),2),' ','0')";
+					break;
+				case 's':
+					$s .= "replace(str(datepart(ss,$col),2),' ','0')";
+					break;
+				case 'a':
+				case 'A':
+					$s .= "substring(convert(char(19),$col,0),18,2)";
+					break;
+				case 'l': 
+					$s .= "datename(dw,$col)"; 
+					break;
+
+				default:
+					if ($ch == '\\') {
+						$i++;
+						$ch = substr($fmt,$i,1);
+					}
+					$s .= $this->connection->qstr($ch);
+					break;
+				}
+			}
+
+			$vIsDone = true;
+		}
+
 		return (empty($s) ? array() : array($s));
 	}
 	
