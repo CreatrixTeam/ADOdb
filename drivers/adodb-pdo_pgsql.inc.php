@@ -314,7 +314,7 @@ select viewname,'V' from pg_views where viewname like $mask";
 		return $indexes;
 	}
 
-	function BeginTrans()
+	public function BeginTrans()
 	{
 		if (!$this->hasTransactions) {
 			return false;
@@ -327,7 +327,7 @@ select viewname,'V' from pg_views where viewname like $mask";
 		return $this->_connectionID->beginTransaction();
 	}
 
-	function CommitTrans($ok = true)
+	public function CommitTrans($ok = true)
 	{
 		if (!$this->hasTransactions) {
 			return false;
@@ -347,7 +347,7 @@ select viewname,'V' from pg_views where viewname like $mask";
 		return $ret;
 	}
 
-	function RollbackTrans()
+	public function RollbackTrans()
 	{
 		if (!$this->hasTransactions) {
 			return false;
@@ -364,7 +364,7 @@ select viewname,'V' from pg_views where viewname like $mask";
 		return $ret;
 	}
 
-	function SetTransactionMode( $transaction_mode )
+	public function SetTransactionMode( $transaction_mode )
 	{
 		$this->_transmode  = $transaction_mode;
 		if (empty($transaction_mode)) {

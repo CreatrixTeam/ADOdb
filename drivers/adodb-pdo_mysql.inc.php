@@ -85,15 +85,6 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		return $ret;
 	}
 
-    /**
-     * @param bool $auto_commit
-     * @return void
-     */
-    function SetAutoCommit($auto_commit)
-    {
-        $this->_connectionID->setAttribute(PDO::ATTR_AUTOCOMMIT, $auto_commit);
-    }
-
 	public function SetTransactionMode($transaction_mode)
 	{
 		$this->_transmode  = $transaction_mode;
