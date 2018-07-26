@@ -235,4 +235,15 @@ class  ADORecordSet_pdo_sqlsrv extends ADORecordSet_pdo {
 
 		return $o;
 	}
+	
+	function SetTransactionMode( $transaction_mode )
+	{
+		$this->_transmode  = $transaction_mode;
+		if (empty($transaction_mode)) {
+			$this->_connectionID->query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
+			return;
+		}
+		if (!stristr($transaction_mode,'isolation')) $transaction_mode = 'ISOLATION LEVEL '.$transaction_mode;
+		$this->_connectionID->query("SET TRANSACTION ".$transaction_mode);
+	}
 }

@@ -605,8 +605,7 @@ if (!defined('_ADODB_LAYER')) {
 			$fn($msg,$newline);
 			return;
 		} else if (isset($ADODB_OUTP)) {
-			$fn = $ADODB_OUTP;
-			$fn($msg,$newline);
+			call_user_func($ADODB_OUTP,$msg,$newline);
 			return;
 		}
 
@@ -1217,8 +1216,7 @@ if (!defined('_ADODB_LAYER')) {
 
 				foreach($inputarr as $arr) {
 					$sql = ''; $i = 0;
-					//Use each() instead of foreach to reduce memory usage -mikefedyk
-					while(list(, $v) = each($arr)) {
+					foreach ($arr as $v) {
 						$sql .= $sqlarr[$i];
 						// from Ron Baldwin <ron.baldwin#sourceprose.com>
 						// Only quote string types
@@ -4514,9 +4512,12 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *
 	 */
 	public function FieldTypesArray() {
-		$arr = array();
-		for ($i=0, $max=$this->_numOfFields; $i < $max; $i++)
-			$arr[] = $this->FetchField($i);
+		static $arr = array();
+		if (empty($arr)) {
+			for ($i=0, $max=$this->_numOfFields; $i < $max; $i++) {
+				$arr[] = $this->FetchField($i);
+			}
+		}
 		return $arr;
 	}
 
