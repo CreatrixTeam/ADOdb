@@ -208,8 +208,8 @@ class  ADORecordSet_pdo_sqlsrv extends ADORecordSet_pdo {
 	protected function _FetchField($fieldOffset = -1)
 	{
 		// Default behavior allows passing in of -1 offset, which crashes the method
-		if ($fieldOffset == -1) {
-			$fieldOffset++;
+		if ($fieldOffset === -1) {
+			$fieldOffset = 0;
 		}
 
 		$o = new ADOFieldObject();
