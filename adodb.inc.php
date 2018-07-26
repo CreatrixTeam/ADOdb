@@ -5322,7 +5322,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 
 		//ADOConnection::outp(adodb_pr(get_declared_classes(),true));
-		if (!file_exists($file)) {
+		if (!file_exists(ADODB_DIR . '/' . $file)) {
 			ADOConnection::outp("Missing file: $file");
 		} else {
 			ADOConnection::outp("Syntax error in file: $file");
