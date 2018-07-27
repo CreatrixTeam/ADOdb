@@ -199,6 +199,17 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 		}
 		return $indexes;
 	}
+	
+	public function SetTransactionMode( $transaction_mode )
+	{
+		$this->_transmode  = $transaction_mode;
+		if (empty($transaction_mode)) {
+			$this->_connectionID->query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
+			return;
+		}
+		if (!stristr($transaction_mode,'isolation')) $transaction_mode = 'ISOLATION LEVEL '.$transaction_mode;
+		$this->_connectionID->query("SET TRANSACTION ".$transaction_mode);
+	}
 }
 
 class  ADORecordSet_pdo_sqlsrv extends ADORecordSet_pdo {
@@ -236,16 +247,5 @@ class  ADORecordSet_pdo_sqlsrv extends ADORecordSet_pdo {
 		$o->precision = $arr['precision'];
 
 		return $o;
-	}
-	
-	function SetTransactionMode( $transaction_mode )
-	{
-		$this->_transmode  = $transaction_mode;
-		if (empty($transaction_mode)) {
-			$this->_connectionID->query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
-			return;
-		}
-		if (!stristr($transaction_mode,'isolation')) $transaction_mode = 'ISOLATION LEVEL '.$transaction_mode;
-		$this->_connectionID->query("SET TRANSACTION ".$transaction_mode);
 	}
 }
