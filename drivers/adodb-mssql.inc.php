@@ -693,15 +693,15 @@ order by constraint_name, referenced_table_name, keyno";
 						$decl .= "@P$i NVARCHAR($len)";
 					}
 
+					$params .= "@P$i=N";
 					if(substr($v,0,1) == "'" && substr($v,-1,1) == "'")
 						/*
 						* String is already fully quoted
 						*/
-						$inputVar = $v;
+						{$params .= $v;}
 					else
-						$inputVar = $db->this($v);
+						{$params .= $this->qstr($v);}
 
-					$params .= "@P$i=N" . $inputVar;
 					
 				} else if (is_integer($v)) {
 					$decl .= "@P$i INT";
