@@ -80,9 +80,6 @@ function ADODB_SetDatabaseAdapter(&$db, $index=false)
 
 class ADODB_Active_Record {
 	static $_changeNames = true; // dynamically pluralize table names
-	/*
-	* Optional parameter that duplicates the ADODB_QUOTE_FIELDNAMES
-	*/
 	static $_quoteNames = false;
 	static $_tablePrefix = "";	//  table prefix. this prefix is captured when a record is created, and retained for the duration of that record
 
@@ -706,14 +703,9 @@ class ADODB_Active_Record {
 			$val = false;
 		}
 
-		if (is_null($val) || $val === false)
-		{
-			$SQL = sprintf("SELECT MAX(%s) FROM %s",
-						   $this->nameQuoter($db,$fieldname),
-						   $this->nameQuoter($db,$this->_table)
-						   );
+		if (is_null($val) || $val === false) {
 			// this might not work reliably in multi-user environment
-			return $db->GetOne("select max(".$fieldname.") from ".$this->GetTableName()); //return $db->GetOne("select max(".$fieldname.") from ".$this->_table);
+			return $db->GetOne("select max(".$this->_QName($fieldname, $db).") from ".$this->_QName($this->GetTableName(), $db)); //return $db->GetOne("select max(".$fieldname.") from ".$this->_table);
 		}
 		return $val;
 	}
@@ -760,10 +752,10 @@ class ADODB_Active_Record {
 		foreach($keys as $k) {
 			$f = $table->flds[$k];
 			if ($f) {
-				$parr[] = $k.' = '.$this->doquote($db,$this->_data[$k],$db->MetaType($f->type));
+				$parr[] = $this->_QName($k, $db).' = '.$this->doquote($db,$this->_data[$k],$db->MetaType($f->type));
 			}
 		}
-		return implode(' AND ', $parr);
+		return implode(' and ', $parr);
 	}
 
 
@@ -793,7 +785,7 @@ class ADODB_Active_Record {
 
 		$savem = $db->SetFetchMode2(ADODB_FETCH_NUM);
 
-		$qry = "select * from ".$this->GetTableName(); //$qry = "select * from ".$this->_table;
+		$qry = "select * from ".$this->_QName($this->GetTableName(), $db); //$qry = "select * from ".$this->_table;
 
 		if($where) {
 			$qry .= ' WHERE '.$where;
@@ -861,7 +853,7 @@ class ADODB_Active_Record {
 			$val = $this->_data[$name];
 			if(!is_array($val) || !is_null($val) || !array_key_exists($name, $table->keys)) {
 				$valarr[] = $val;
-				$names[] = $this->nameQuoter($db,$name);
+				$names[] = $this->_QName($name,$db);
 				$valstr[] = $db->Param($cnt);
 				$cnt += 1;
 			}
@@ -870,12 +862,12 @@ class ADODB_Active_Record {
 		if (empty($names)){
 			foreach($table->flds as $name=>$fld) {
 				$valarr[] = null;
-				$names[] = $this->nameQuoter($db,$name);
+				$names[] = $this->_QName($name, $db);
 				$valstr[] = $db->Param($cnt);
 				$cnt += 1;
 			}
 		}
-		$sql = 'INSERT INTO '.$this->GetTableName()."(".implode(',',$names).') VALUES ('.implode(',',$valstr).')'; //$sql = 'INSERT INTO '.$this->_table."(".implode(',',$names).') VALUES ('.implode(',',$valstr).')';
+		$sql = 'INSERT INTO '.$this->_QName($this->GetTableName(), $db)." (".implode(',',$names).') VALUES ('.implode(',',$valstr).')'; //$sql = 'INSERT INTO '.$this->_table."(".implode(',',$names).') VALUES ('.implode(',',$valstr).')';
 		$ok = $db->Execute($sql,$valarr);
 
 		if ($ok) {
@@ -906,7 +898,7 @@ class ADODB_Active_Record {
 		$table = $this->TableInfo();
 
 		$where = $this->GenWhere($db,$table);
-		$sql = 'DELETE FROM '.$this->GetTableName().' WHERE '.$where; //$sql = 'DELETE FROM '.$this->_table.' WHERE '.$where;
+		$sql = 'DELETE FROM '.$this->_QName($this->GetTableName(), $db).' WHERE '.$where; //$sql = 'DELETE FROM '.$this->_table.' WHERE '.$where;
 		$ok = $db->Execute($sql);
 
 		return $ok ? true : false;
@@ -981,19 +973,19 @@ class ADODB_Active_Record {
 		}
 
 		//$ok = $db->Replace($this->GetTableName(),$arr,$pkey); //$ok = $db->Replace($this->_table,$arr,$pkey);
-		
+
 		$newArr = array();
 		foreach($arr as $k=>$v)
-			$newArr[$this->nameQuoter($db,$k)] = $v;
+			$newArr[$this->_QName($db,$k)] = $v;
 		$arr = $newArr;
-		
+
 		$newPkey = array();
 		foreach($pkey as $k=>$v)
-			$newPkey[$k] = $this->nameQuoter($db,$v);
+			$newPkey[$k] = $this->_QName($db,$v);
 		$pkey = $newPkey;
-		
-		$tableName = $this->nameQuoter($db,$this->_table);
-		
+
+		$tableName = $this->_QName($this->GetTableName(), $db);
+
 		$ok = $db->Replace($tableName,$arr,$pkey);
 		if ($ok) {
 			$this->_saved = true; // 1= update 2=insert
@@ -1066,7 +1058,7 @@ class ADODB_Active_Record {
 			}
 
 			$valarr[] = $val;
-			$pairs[] = $this->nameQuoter($db,$name).'='.$db->Param($cnt);
+			$pairs[] = $this->_QName($name,$db).'='.$db->Param($cnt);
 			$cnt += 1;
 		}
 
@@ -1075,7 +1067,7 @@ class ADODB_Active_Record {
 			return -1;
 		}
 
-		$sql = 'UPDATE '.$this->GetTableName()." SET ".implode(",",$pairs)." WHERE ".$where; //$sql = 'UPDATE '.$this->_table." SET ".implode(",",$pairs)." WHERE ".$where;
+		$sql = 'UPDATE '.$this->_QName($this->GetTableName(), $db)." SET ".implode(",",$pairs)." WHERE ".$where; //$sql = 'UPDATE '.$this->_table." SET ".implode(",",$pairs)." WHERE ".$where;
 		$ok = $db->Execute($sql,$valarr);
 		if ($ok) {
 			$this->_original = $neworig;
@@ -1138,6 +1130,7 @@ global $_ADODB_ACTIVE_DBS;
 
 
 	$save = $db->SetFetchMode2(ADODB_FETCH_NUM);
+
 	$qry = "select * from ".adodb_active_GetTableNamePrefix().$table; //$qry = "select * from ".$table;
 
 	if (!empty($whereOrderBy)) {
