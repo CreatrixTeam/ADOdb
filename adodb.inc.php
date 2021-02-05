@@ -3621,9 +3621,37 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		$this->fetchMode = (($mode === false) ? $ADODB_FETCH_MODE : $mode);
 	}
 
+	/*
+		Call to Close() is generally not necessary because drivers will free the pertaining resources
+		automatically. This has been confirmed for most drivers. See:
+		
+		https://www.php.net/manual/en/function.fbsql-free-result.php {fbsql_free_result}
+		https://www.ic.unicamp.br/~celio/mc527/interbase/PHPapi3506b.html {fbird_free_result, ibase_free_result, COULD BE INVALID}
+		https://www.php.net/manual/en/function.ldap-free-result.php {ldap_free_result}
+		https://php-legacy-docs.zend.com/manual/php5/en/function.mssql-free-result {mssql_free_result}
+		https://www.sitepoint.com/sql-server-php/ {sqlsrv_free_stmt}
+		https://www.php.net/manual/en/function.mysql-free-result.php {mysql_free_result}
+		https://stackoverflow.com/questions/14088155/mysqli-free-result-necessary {mysqli_free_result}
+		https://www.php.net/manual/en/function.odbc-free-result.php {odbc_free_result}
+		Adodb Src Code file: drivers/adodb-oracle.inc.php {ora_close, source from 14 years ago also had comment}
+		https://www.php.net/manual/en/function.pg-free-result.php {pg_free_result}
+		https://php-legacy-docs.zend.com/manual/php5/en/function.sybase-free-result {sybase_free_result}
+		https://devzone.advantagedatabase.com/dz/webhelp/Advantage11/php_ads_free_result.htm{ads_free_result}
+		https://www.php.net/manual/en/function.db2-free-result.php {db2_free_result}
+		https://stackoverflow.com/questions/8380185/is-it-necessary-to-close-an-adodb-recordset-object-before-setting-it-to-nothing {ADODB::Recordset::Close, For driver drivers/adodb-ado5.inc.php}
+		
+		However, was not able to confirm for the following:
+		ifx_free_result				{ADORecordset_informix72, drivers/adodb-informix72.inc.php}
+		oci_free_statement			{ADORecordset_oci8, drivers/adodb-oci8.inc.php}
+		odbtp_free_query			{ADORecordSet_odbtp, drivers/adodb-odbtp.inc.php}
+		
+		Note that the code was originally committed in "Sep 13, 2015", and not part of the original apparent 
+		specification that suggests any responsibility of necessary cleanup is to be on the client code.
+	
 	public function __destruct() {
 		$this->Close();
 	}
+	*/
 
 	public function getIterator() {
 		return new ADODB_Iterator($this);
