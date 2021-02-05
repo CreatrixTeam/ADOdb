@@ -80,6 +80,9 @@ function ADODB_SetDatabaseAdapter(&$db, $index=false)
 
 class ADODB_Active_Record {
 	static $_changeNames = true; // dynamically pluralize table names
+	/*
+	* Optional parameter that duplicates the ADODB_QUOTE_FIELDNAMES
+	*/
 	static $_quoteNames = false;
 	static $_tablePrefix = "";	//  table prefix. this prefix is captured when a record is created, and retained for the duration of that record
 
@@ -703,7 +706,12 @@ class ADODB_Active_Record {
 			$val = false;
 		}
 
-		if (is_null($val) || $val === false) {
+		if (is_null($val) || $val === false)
+		{
+			$SQL = sprintf("SELECT MAX(%s) FROM %s",
+						   $this->nameQuoter($db,$fieldname),
+						   $this->nameQuoter($db,$this->_table)
+						   );
 			// this might not work reliably in multi-user environment
 			return $db->GetOne("select max(".$fieldname.") from ".$this->GetTableName()); //return $db->GetOne("select max(".$fieldname.") from ".$this->_table);
 		}
@@ -755,7 +763,7 @@ class ADODB_Active_Record {
 				$parr[] = $k.' = '.$this->doquote($db,$this->_data[$k],$db->MetaType($f->type));
 			}
 		}
-		return implode(' and ', $parr);
+		return implode(' AND ', $parr);
 	}
 
 
@@ -853,7 +861,7 @@ class ADODB_Active_Record {
 			$val = $this->_data[$name];
 			if(!is_array($val) || !is_null($val) || !array_key_exists($name, $table->keys)) {
 				$valarr[] = $val;
-				$names[] = $this->_QName($name,$db);
+				$names[] = $this->nameQuoter($db,$name);
 				$valstr[] = $db->Param($cnt);
 				$cnt += 1;
 			}
@@ -862,7 +870,7 @@ class ADODB_Active_Record {
 		if (empty($names)){
 			foreach($table->flds as $name=>$fld) {
 				$valarr[] = null;
-				$names[] = $name;
+				$names[] = $this->nameQuoter($db,$name);
 				$valstr[] = $db->Param($cnt);
 				$cnt += 1;
 			}
@@ -972,7 +980,21 @@ class ADODB_Active_Record {
 			}
 		}
 
-		$ok = $db->Replace($this->GetTableName(),$arr,$pkey); //$ok = $db->Replace($this->_table,$arr,$pkey);
+		//$ok = $db->Replace($this->GetTableName(),$arr,$pkey); //$ok = $db->Replace($this->_table,$arr,$pkey);
+		
+		$newArr = array();
+		foreach($arr as $k=>$v)
+			$newArr[$this->nameQuoter($db,$k)] = $v;
+		$arr = $newArr;
+		
+		$newPkey = array();
+		foreach($pkey as $k=>$v)
+			$newPkey[$k] = $this->nameQuoter($db,$v);
+		$pkey = $newPkey;
+		
+		$tableName = $this->nameQuoter($db,$this->_table);
+		
+		$ok = $db->Replace($tableName,$arr,$pkey);
 		if ($ok) {
 			$this->_saved = true; // 1= update 2=insert
 			if ($ok == 2) {
@@ -1044,7 +1066,7 @@ class ADODB_Active_Record {
 			}
 
 			$valarr[] = $val;
-			$pairs[] = $this->_QName($name,$db).'='.$db->Param($cnt);
+			$pairs[] = $this->nameQuoter($db,$name).'='.$db->Param($cnt);
 			$cnt += 1;
 		}
 
