@@ -567,43 +567,28 @@ class ADODB_Session {
 #		assert('$database');
 #		assert('$driver');
 #		assert('$host');
-		if (strpos($driver, 'pdo_') === 0){
-			$conn = ADONewConnection('pdo');
-			$driver = str_replace('pdo_', '', $driver);
-			$dsn = $driver.':'.'hostname='.$host.';dbname='.$database.';';
+
+		$conn = ADONewConnection($driver);
+
+		if ($debug) {
+			$conn->debug = true;
+			ADOConnection::outp( " driver=$driver user=$user db=$database ");
+		}
+
+		if (empty($conn->_connectionID)) { // not dsn
 			if ($persist) {
 				switch($persist) {
 				default:
-				case 'P': $ok = $conn->PConnect($dsn,$user,$password); break;
-				case 'C': $ok = $conn->Connect($dsn,$user,$password); break;
-				case 'N': $ok = $conn->NConnect($dsn,$user,$password); break;
+				case 'P': $ok = $conn->PConnect($host, $user, $password, $database); break;
+				case 'C': $ok = $conn->Connect($host, $user, $password, $database); break;
+				case 'N': $ok = $conn->NConnect($host, $user, $password, $database); break;
 				}
 			} else {
-				$ok = $conn->Connect($dsn,$user,$password);
+				$ok = $conn->Connect($host, $user, $password, $database);
 			}
-		}else{
-			$conn = ADONewConnection($driver);
-			if ($debug) {
-				$conn->debug = true;
-				ADOConnection::outp( " driver=$driver user=$user db=$database ");
-			}
-
-			if (empty($conn->_connectionID)) { // not dsn
-				if ($persist) {
-					switch($persist) {
-					default:
-					case 'P': $ok = $conn->PConnect($host, $user, $password, $database); break;
-					case 'C': $ok = $conn->Connect($host, $user, $password, $database); break;
-					case 'N': $ok = $conn->NConnect($host, $user, $password, $database); break;
-					}
-				} else {
-					$ok = $conn->Connect($host, $user, $password, $database);
-				}
-			} else {
-				$ok = true; // $conn->_connectionID is set after call to ADONewConnection
-			}
+		} else {
+			$ok = true; // $conn->_connectionID is set after call to ADONewConnection
 		}
-
 
 		if ($ok) $GLOBALS['ADODB_SESS_CONN'] = $conn;
 		else
@@ -825,7 +810,7 @@ class ADODB_Session {
 		//assert('$table');
 
 		$qkey = $conn->quote($key);
-		$binary = $conn->dataProvider === 'mysql' || $conn->dataProvider === 'pdo' ? '/*! BINARY */' : '';
+		$binary = $conn->dataProvider === 'mysql' ? '/*! BINARY */' : '';
 
 		if ($expire_notify) {
 			reset($expire_notify);
