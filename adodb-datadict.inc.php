@@ -206,10 +206,10 @@ class ADODB_DataDict {
 		return $this->connection->MetaTables();
 	}
 
-	public function MetaColumns($tab, $upper=null, $schema=false)
+	public function MetaColumns($tab, $upper=null)
 	{
 		if (!$this->connection->IsConnected()) return array();
-		return $this->connection->MetaColumns($tab, $upper, $schema);
+		return $this->connection->MetaColumns($tab, $upper);
 	}
 
 	public function MetaPrimaryKeys($tab,$owner=false,$intkey=false)
@@ -386,17 +386,6 @@ class ADODB_DataDict {
 			return $this->NameQuote($this->schema) .'.'. $this->NameQuote($name);
 		}
 		return $this->NameQuote($name);
-	}
-	
-	//PRIVATE	
-	public function removeStandardAdodbDataDictNameQuotes($pName)
-	{
-		$vName = trim($pName);
-		$vMatches = NULL;
-
-		if(preg_match('/^`(.+)`$/', $vName, $vMatches))
-			{return $vMatches[1];}
-		return $vName;
 	}
 	
 	// Executes the sql array returned by GetTableSQL and GetIndexSQL
