@@ -59,11 +59,11 @@ class ADODB_mysqli extends ADOConnection {
 	public  $optionFlags = array(array(MYSQLI_READ_DEFAULT_GROUP,0));
 	public  $arrayClass = 'ADORecordSet_array_mysqli';
 	public  $multiQuery = false;
-	var $ssl_key = null;
-	var $ssl_cert = null;
-	var $ssl_ca = null;
-	var $ssl_capath = null;
-	var $ssl_cipher = null;
+	public $ssl_key = null;		//ADODB_mysqli specific
+	public $ssl_cert = null;	//ADODB_mysqli specific
+	public $ssl_ca = null;		//ADODB_mysqli specific
+	public $ssl_capath = null;	//ADODB_mysqli specific
+	public $ssl_cipher = null;	//ADODB_mysqli specific
 
 	public function __construct()
 	{
