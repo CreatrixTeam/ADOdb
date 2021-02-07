@@ -59,6 +59,11 @@ class ADODB_mysqli extends ADOConnection {
 	public  $optionFlags = array(array(MYSQLI_READ_DEFAULT_GROUP,0));
 	public  $arrayClass = 'ADORecordSet_array_mysqli';
 	public  $multiQuery = false;
+	var $ssl_key = null;
+	var $ssl_cert = null;
+	var $ssl_ca = null;
+	var $ssl_capath = null;
+	var $ssl_cipher = null;
 
 	public function __construct()
 	{
@@ -117,6 +122,11 @@ class ADODB_mysqli extends ADOConnection {
 
 		//http ://php.net/manual/en/mysqli.persistconns.php
 		if ($persist && PHP_VERSION > 5.2 && strncmp($argHostname,'p:',2) != 0) $argHostname = 'p:'.$argHostname;
+
+		// SSL Connections for MySQLI
+		if ($this->ssl_key || $this->ssl_cert || $this->ssl_ca || $this->ssl_capath || $this->ssl_cipher) {
+			mysqli_ssl_set($this->_connectionID, $this->ssl_key, $this->ssl_cert, $this->ssl_ca, $this->ssl_capath, $this->ssl_cipher);
+		}
 
 		//#if (!empty($this->port)) $argHostname .= ":".$this->port;
 		$ok = @mysqli_real_connect($this->_connectionID,
