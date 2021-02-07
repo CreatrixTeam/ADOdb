@@ -972,21 +972,8 @@ class ADODB_Active_Record {
 			}
 		}
 
-		//$ok = $db->Replace($this->GetTableName(),$arr,$pkey); //$ok = $db->Replace($this->_table,$arr,$pkey);
+		$ok = $this->Replace__Do($this->GetTableName(),$arr,$pkey); //$ok = $db->Replace($this->_table,$arr,$pkey);
 
-		$newArr = array();
-		foreach($arr as $k=>$v)
-			$newArr[$this->_QName($db,$k)] = $v;
-		$arr = $newArr;
-
-		$newPkey = array();
-		foreach($pkey as $k=>$v)
-			$newPkey[$k] = $this->_QName($db,$v);
-		$pkey = $newPkey;
-
-		$tableName = $this->_QName($this->GetTableName(), $db);
-
-		$ok = $db->Replace($tableName,$arr,$pkey);
 		if ($ok) {
 			$this->_saved = true; // 1= update 2=insert
 			if ($ok == 2) {
@@ -1006,6 +993,81 @@ class ADODB_Active_Record {
 			$this->_original = $valarr;
 		}
 		return $ok;
+	}
+
+	//ALMOST VERBATIM TO _adodb_replace
+	private function Replace__Do($table, $fieldArray, $keyCol)
+	{
+		if (count($fieldArray) == 0) return 0;
+		$first = true;
+		$uSet = '';
+		$vDb = $this->DB();
+
+
+		foreach($fieldArray as $k => $v) {
+			if ($v === null) {
+				$v = 'NULL';
+				$fieldArray[$k] = $v;
+			} 
+
+			if (in_array($k,$keyCol)) continue; // skip UPDATE if is key
+
+			if ($first) {
+				$first = false;
+				$uSet = $this->_QName($vDb, $k) . "=$v";
+			} else
+				$uSet .= "," . $this->_QName($vDb, $k) . "=$v";
+		}
+
+		$where = false;
+		foreach ($keyCol as $v) {
+			if (isset($fieldArray[$v])) {
+				if ($where) $where .= ' and '.$this->_QName($vDb, $v).'='.$fieldArray[$v];
+				else $where = $this->_QName($vDb, $v).'='.$fieldArray[$v];
+			}
+		}
+
+		if ($uSet && $where) {
+			$update = "UPDATE " . $this->_QName($vDb,$table) . " SET $uSet WHERE $where";
+
+			$rs = $vDb->Execute($update);
+
+
+			if ($rs) {
+				if ($vDb->poorAffectedRows) {
+				/*
+				 The Select count(*) wipes out any errors that the update would have returned.
+				http://phplens.com/lens/lensforum/msgs.php?id=5696
+				*/
+					if ($vDb->ErrorNo()<>0) return 0;
+
+				# affected_rows == 0 if update field values identical to old values
+				# for mysql - which is silly.
+
+					$cnt = $vDb->GetOne("select count(*) from " . $this->_QName($vDb,$table) . " where $where");
+					if ($cnt > 0) return 1; // record already exists
+				} else {
+					if (($vDb->Affected_Rows()>0)) return 1;
+				}
+			} else
+				return 0;
+		}
+
+	//	print "<p>Error=".$this->ErrorNo().'<p>';
+		$first = true;
+		foreach($fieldArray as $k => $v) {
+			if ($first) {
+				$first = false;
+				$iCols = $this->_QName($vDb,$k);
+				$iVals = "$v";
+			} else {
+				$iCols .= "," . $this->_QName($vDb,$k);
+				$iVals .= ",$v";
+			}
+		}
+		$insert = "INSERT INTO " . $this->_QName($vDb,$table) . " ($iCols) VALUES ($iVals)";
+		$rs = $vDb->Execute($insert);
+		return ($rs) ? 2 : 0;
 	}
 
 	// returns 0 on error, 1 on update, -1 if no change in data (no update)
