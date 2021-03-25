@@ -13,7 +13,7 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 {
 
 	public  $databaseType = 'pdo_sqlsrv';
-	public  $dsnType = 'sqlsrv';
+	protected  $dsnType = 'sqlsrv';
 	public  $hasTop = 'top';
 	public  $hasTransactions = true;
 	protected  $_bindInputArray = true;

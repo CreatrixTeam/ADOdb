@@ -80,7 +80,7 @@ class ADODB_pdo extends ADOConnection {
 	protected  $_errormsg = false;
 	protected  $_errorno = false;
 
-	public  $dsnType = '';
+	protected  $dsnType = '';
 	public  $stmt = false;
 
 	// returns true or false

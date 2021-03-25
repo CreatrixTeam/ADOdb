@@ -20,7 +20,7 @@ include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
 class ADODB_pdo_oci extends ADODB_pdo_base {
 
 	public  $databaseType = "pdo_oci";
-	public  $dsnType = 'oci';
+	protected  $dsnType = 'oci';
 	public  $NLS_DATE_FORMAT = 'YYYY-MM-DD';  // To include time, use 'RRRR-MM-DD HH24:MI:SS'
 	public  $random = "abs(mod(DBMS_RANDOM.RANDOM,10000001)/10000000)";
 	public  $metaTablesSQL = "select table_name,table_type from cat where table_type in ('TABLE','VIEW')";

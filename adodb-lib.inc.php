@@ -419,8 +419,8 @@ function _adodb_getcount(&$zthis, $sql,$inputarr=false,$secs2cache=0)
         } else if (strncmp($zthis->databaseType,'postgres',8) == 0
             || strncmp($zthis->databaseType,'mysql',5) == 0
 	    || strncmp($zthis->databaseType,'mssql',5) == 0
-            || strncmp($zthis->dsnType,'sqlsrv',5) == 0
-            || strncmp($zthis->dsnType,'mssql',5) == 0
+            || strncmp($zthis->databaseType,'pdo_mssql',9) == 0
+            || strncmp($zthis->databaseType,'pdo_sqlsrv',10) == 0
         ){
 		    $rewritesql = "SELECT COUNT(*) FROM ($rewritesql) _ADODB_ALIAS_";
         } else {
@@ -1126,7 +1126,7 @@ function _adodb_debug_execute(&$zthis, $sql, $inputarr)
 	$inBrowser = isset($_SERVER['HTTP_USER_AGENT']);
 
 	$dbt = $zthis->databaseType;
-	if (isset($zthis->dsnType)) $dbt .= '-'.$zthis->dsnType;
+
 	if ($inBrowser) {
 		if ($ss) {
 			$ss = '<code>'.htmlspecialchars($ss).'</code>';

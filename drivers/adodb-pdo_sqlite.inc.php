@@ -22,7 +22,7 @@ include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
 
 class ADODB_pdo_sqlite extends ADODB_pdo {
 	public  $databaseType    = "pdo_sqlite";
-	public  $dsnType 		 = 'sqlite'; 
+	protected  $dsnType 		 = 'sqlite'; 
 	public  $metaTablesSQL   = "SELECT name FROM sqlite_master WHERE type='table'";
 	public  $sysDate         = 'current_date';
 	public  $sysTimeStamp    = 'current_timestamp';

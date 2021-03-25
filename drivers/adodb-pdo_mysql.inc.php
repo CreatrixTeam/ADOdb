@@ -18,7 +18,7 @@ include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
 class ADODB_pdo_mysql extends ADODB_pdo {
 
 	public  $databaseType = "pdo_mysql";
-	public  $dsnType = 'mysql';
+	protected  $dsnType = 'mysql';
 	public  $metaTablesSQL = "SELECT
 			TABLE_NAME,
 			CASE WHEN TABLE_TYPE = 'VIEW' THEN 'V' ELSE 'T' END

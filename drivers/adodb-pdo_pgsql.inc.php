@@ -18,7 +18,7 @@ include_once(ADODB_DIR."/drivers/adodb-pdo.inc.php");
 
 class ADODB_pdo_pgsql extends ADODB_pdo {
 	public  $databaseType = "pdo_pgsql";
-	public  $dsnType = 'pgsql';
+	protected  $dsnType = 'pgsql';
 	public  $metaDatabasesSQL = "select datname from pg_database where datname not in ('template0','template1') order by 1";
     public  $metaTablesSQL = "select tablename,'T' from pg_tables where tablename not like 'pg\_%'
 	and tablename not in ('sql_features', 'sql_implementation_info', 'sql_languages',
