@@ -20,7 +20,6 @@ class ADODB2_db2 extends ADODB_DataDict {
 	public  $sql_concatenateOperator = '||';
 	public  $sql_sysDate = 'CURRENT DATE';
 	public  $sql_sysTimeStamp = 'CURRENT TIMESTAMP';
-	var $dropCol = 'ALTER TABLE %s DROP COLUMN %s';
 
  	public function ActualType($meta)
 	{
@@ -100,27 +99,6 @@ class ADODB2_db2 extends ADODB_DataDict {
 	}
 
 
-	public function DropColumnSQL($tabname, $flds, $tableflds='',$tableoptions='')
-	{
-		
-		
-		$tabname = $this->connection->getMetaCasedValue($tabname);
-		$flds    = $this->connection->getMetaCasedValue($flds);
-		
-		if (ADODB_ASSOC_CASE  == ADODB_ASSOC_CASE_NATIVE )
-		{
-			/*
-			 * METACASE_NATIVE
-			 */
-			$tabname = $this->connection->nameQuote . $tabname . $this->connection->nameQuote;
-			$flds    = $this->connection->nameQuote . $flds . $this->connection->nameQuote;
-		}
-		$sql = sprintf($this->dropCol,$tabname,$flds);
-		return (array)$sql;
-
-	}
-    
-
 	public function ChangeTableSQL($tablename, $flds, $tableoptions = false, $dropOldFlds=false)
 	{
 
@@ -132,26 +110,22 @@ class ADODB2_db2 extends ADODB_DataDict {
 
 		$validTypes = array("CHAR","VARC");
 		$invalidTypes = array("BIGI","BLOB","CLOB","DATE", "DECI","DOUB", "INTE", "REAL","SMAL", "TIME");
+		$vFetchMode = $this->connection->SetFetchMode2(ADODB_FETCH_ASSOC);
 		// check table exists
 		
 		
-		$cols = $this->metaColumns($tablename);
+		$cols = $this->MetaColumns($tablename);
+		$this->connection->SetFetchMode2($vFetchMode);
 		if ( empty($cols)) {
-			return $this->createTableSQL($tablename, $flds, $tableoptions);
+			return $this->CreateTableSQL($tablename, $flds, $tableoptions);
 		}
 
 		// already exists, alter table instead
 		list($lines,$pkey) = $this->_GenFields($flds);
-		$alter = 'ALTER TABLE ' . $this->tableName($tablename);
+		$alter = 'ALTER TABLE ' . $this->TableName($tablename);
 		$sql = array();
 
 		foreach ( $lines as $id => $v ) {
-			/*
-			 * If the metaCasing was NATIVE the col returned with nameQuotes
-			 * around the field. We need to remove this for the metaColumn
-			 * match
-			 */
-			$id = str_replace($this->connection->nameQuote,'',$id);
 			if ( isset($cols[$id]) && is_object($cols[$id]) ) {
 				/**
 				  If the first field of $v is the fieldname, and
@@ -170,7 +144,7 @@ class ADODB2_db2 extends ADODB_DataDict {
 
 				// if $vargs[$i] is one of the following, we are trying to change the
 				// size of the field, if not allowed, simply ignore the request.
-				if (in_array(substr($vargs[$i],0,4),$invalidTypes))
+				if (in_array(strtoupper(substr($vargs[$i],0,4)),$invalidTypes))
 					continue;
 				// insert the appropriate DB2 syntax
 				if (in_array(substr($vargs[$i],0,4),$validTypes)) {
@@ -327,11 +301,22 @@ class ADODB2_db2 extends ADODB_DataDict {
 	{
 		if($this->databaseType !== "odbc_db2")
 		{
-			return array
-			(
-				sprintf("CREATE SEQUENCE %s START WITH %s NO MAXVALUE NO CYCLE", 
-						$pParsedSequenceName['name'], $pStartID)
-			);
+			if($this->databaseType !== "db2")
+			{
+				return array
+				(
+					sprintf("CREATE SEQUENCE %s START WITH %s NO MAXVALUE NO CYCLE", 
+							$pParsedSequenceName['name'], $pStartID)
+				);
+			}
+			else
+			{
+				return array
+				(
+					sprintf("CREATE SEQUENCE %s START WITH %s NO MAXVALUE NO CYCLE INCREMENT BY 1 NO CACHE", 
+							$pParsedSequenceName['name'], $pStartID)
+				);
+			}
 		}
 		else
 		{

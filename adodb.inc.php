@@ -503,7 +503,7 @@ if (!defined('_ADODB_LAYER')) {
 	protected  $_transOK = null;
 	public	   $_connectionID	= false;	/// The returned link identifier whenever a successful database connection is made.
 	protected  $_errorMsg = false;		/// A variable which was used to keep the returned last error message.  The value will
-								/// then returned by the errorMsg() function
+								/// then be returned by the ErrorMsg() function
 	protected  $_errorCode = false;	/// Last error code, not guaranteed to be used - only by oci8
 	protected  $_queryID = false;		/// This variable keeps the last created result link identifier
 
@@ -1065,6 +1065,9 @@ if (!defined('_ADODB_LAYER')) {
 		@param [$maxLen] Holds an maximum length of the variable.
 		@param [$type] The data type of $var. Legal values depend on driver.
 
+		WARNING: This function is supported in only 4 drivers, and it appears ill defined in at least one of
+				them. ADOConnection::InParameter() and ADOConnection::OutParameter() have the same support, 
+				plus apparant support on the PDO drivers.
 	*/
 	public function Parameter(&$stmt,&$var,$name,$isOutput=false,$maxLen=4000,$type=false) {
 		return false;
@@ -1362,7 +1365,7 @@ if (!defined('_ADODB_LAYER')) {
 			global $ADODB_COUNTRECS;
 			if ($ADODB_COUNTRECS) {
 				if (!$rs->EOF) {
-					$rs = $rs->SwitchToBufferMode(-1,-1,!is_array($sql));
+					$rs->SwitchToBufferMode(-1,-1,!is_array($sql));
 					//$rs->_queryID = $this->_queryID;
 				} else
 					$rs->_numOfRows = 0;
@@ -2631,7 +2634,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 	/**
-	 * List procedures or functions in an array.
+	 * List procedures or functions in an array. NOTE: This is currently implemented by four main drivers only. (MARCH, 2021)
 	 * @param procedureNamePattern  a procedure name pattern; must match the procedure name as it is stored in the database
 	 * @param catalog a catalog name; must match the catalog name as it is stored in the database;
 	 * @param schemaPattern a schema name pattern;
@@ -2713,7 +2716,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @param $normalize	makes table name case-insensitive (required by some databases)
 	 * @schema is optional database schema to use - not supported by all databases.
 	 *
-	 * @return  array of ADOFieldObjects for current table.
+	 * @return  array of ADOFieldObjects for current table. The array is numerically indexed only
+	 *			if the fetch mode is ADODB_FETCH_NUM, otherwise it is only associatively indexed
+	 *			and with the keys upper cased.
 	 */
 	public function MetaColumns($pTableName,$pIsToNormalize=null) {
 		return $this->_MetaColumns(
@@ -2730,7 +2735,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *		info in is ignored, and table names are always to be quoted by implementing classes.
 	 * @schema is optional database schema to use - not supported by all databases.
 	 *
-	 * @return  array of ADOFieldObjects for current table.
+	 * @return  array of ADOFieldObjects for current table. The array is numerically index only
+	 *			if the fetch mode is ADODB_FETCH_NUM, otherwise it is only associatively indexed
+	 *			and with the keys upper cased.
 	 */
 	protected function _MetaColumns($pParsedTableName) {
 		if (!empty($this->metaColumnsSQL)) {
@@ -2781,7 +2788,13 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * ACCESS: FINAL PUBLIC
 	 * @param table  table name to query optionaly formated name per the 
 	 *		ADODB_DataDict::ParseIdentifierName specification
-	 * @param primary true to only show primary keys. Not actually used for most databases
+	 * @param primary ??true to only show primary keys??. 
+	 *		WARNING: THE BEHAVIOR OF THIS PARAMETER DIFFERS	BETWEEN DRIVERS. 
+	 *		ON SOME DRIVERS, A VALUE OF TRUE WILL GET ALL INDICES INCLUDING PRIMARY KEYS, OTHERWISE
+	 *				ALL INDICES EXCLUDING PRIMARY KEYS. (ROUGHLY 2/3 OF DRIVERS)
+	 *		ON SOME DRIVERS, A VALUE OF TRUE WILL GET PRIMARY KEYS ONLY, OTHERWISE ALL INDICES INCLUDING
+	 *				PRIMARY KEYS. (ROUGHLY 1/3 OF DRIVERS)
+	 *		NOTE THAT THIS PARAMETER IS ADDRESSED BY ABOUT 39 OF THE DRIVERS AT THE TIME OF THIS COMMENT (MARCH-2021).
 	 *
 	 * @return array of indexes on current table. Each element represents an index, and is itself an associative array.
 	 *
@@ -3564,7 +3577,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * public variables
 	 */
 	public  $dataProvider = "native";
-	public  $fields = false;	/// holds the current row data. Note: When accessing fields using associative keys, use Fetch() instead.
+	public  $fields = false;	/// holds the current row data. Note: When accessing fields using associative keys, use Fields() instead.
 	public  $blobSize = 100;	/// any varchar/char field this size or greater is treated as a blob
 							/// in other words, we use a text area for editing.
 	public  $canSeek = false;	/// indicates that seek is supported
@@ -5418,7 +5431,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		}
 
 		$file = "drivers/adodb-$db.inc.php";
-		@include_once(ADODB_DIR . '/' . $file);
+		include_once(ADODB_DIR . '/' . $file);
 		$ADODB_LASTDB = $class;
 		if (class_exists("ADODB_" . $class)) {
 			return $class;
@@ -5718,6 +5731,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				$drivername = 'sqlite';
 				break;
 			case 'db2'   :
+			case 'db2legacy':
+				$drivername = 'db2';
 			case 'sapdb' :
 				break;
 			case 'borland_ibase':

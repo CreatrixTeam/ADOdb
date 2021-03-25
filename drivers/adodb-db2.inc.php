@@ -34,44 +34,28 @@ if (!defined('ADODB_DIR')) die();
 
 
 class ADODB_db2 extends ADOConnection {
-	var $databaseType = "db2";
-	var $fmtDate = "'Y-m-d'";
-	var $concat_operator = '||';
+	public $databaseType = "db2";
+	public $fmtDate = "'Y-m-d'";
 
-	var $sysTime = 'CURRENT TIME';
-	var $sysDate = 'CURRENT DATE';
-	var $sysTimeStamp = 'CURRENT TIMESTAMP';
+	public $sysTime = 'CURRENT TIME';//Note: This variable is not used any where in the entirety of this library except in the db2legacy driver
 
-	var $fmtTimeStamp = "'Y-m-d H:i:s'";
-	var $replaceQuote = "''"; // string to use to replace quotes
-	var $dataProvider = "db2";
-	var $hasAffectedRows = true;
+	public $fmtTimeStamp = "'Y-m-d H:i:s'";
+	public $replaceQuote = "''"; // string to use to replace quotes
+	public $dataProvider = "db2";
+	public $hasAffectedRows = true;
 
-	var $binmode = DB2_BINARY;
+	public $binmode = DB2_BINARY;
 
 	/*
 	* setting this to true will make array elements in FETCH_ASSOC 
 	* mode case-sensitive breaking backward-compat
 	*/
-	var $useFetchArray = false; 
-	var $_bindInputArray = true;
-	var $_genIDSQL = "VALUES NEXTVAL FOR %s";
-	var $_genSeqSQL = "
-	CREATE SEQUENCE %s START WITH %s 
-	NO MAXVALUE NO CYCLE INCREMENT BY 1 NO CACHE
-	";
-	var $_dropSeqSQL = "DROP SEQUENCE %s";
-	var $_autocommit = true;
-	var $_lastAffectedRows = 0;
-	var $hasInsertID = true;
-	var $hasGenID    = true;
-	
-	/* 
-	 * Character used to wrap column and table names for escaping special 
-	 * characters in column and table names as well as forcing upper and
-	 * lower case
-	 */
-	public $nameQuote = '"';
+	public $useFetchArray = false; 
+	protected $_bindInputArray = true;
+	protected $_autocommit = true;
+	protected $_lastAffectedRows = 0;
+	public $hasInsertID = true;
+	public $hasGenID    = true;
 	
 	/*
 	 * Executed after successful connection
@@ -90,9 +74,8 @@ class ADODB_db2 extends ADOConnection {
 	private $storedProcedureParameters = false;
 	 
 	
-	function __construct() {}
 
-    function _insertid()
+    protected function _insertid()
     {
         return ADOConnection::GetOne('VALUES IDENTITY_VAL_LOCAL()');
     }
@@ -401,93 +384,22 @@ class ADODB_db2 extends ADOConnection {
 	*
 	* @return string
 	*/
-	function dbTimeStamp($ts,$isField=false)
+	public function DBTimeStamp($ts,$isField=false)
 	{
 		if (empty($ts) && $ts !== 0) return 'null';
-		if (is_string($ts)) $ts = ADORecordSet::unixTimeStamp($ts);
+		if (is_string($ts)) $ts = ADORecordSet::UnixTimeStamp($ts);
 		return 'TO_DATE('.adodb_date($this->fmtTimeStamp,$ts).",'YYYY-MM-DD HH24:MI:SS')";
 	}
 
-	/**
-	* Format date column in sql string given an input format that understands Y M D
-	*
-	* @param	string	$fmt
-	* @param	bool	$col
-	*
-	* @return string
-	*/
-	function sqlDate($fmt, $col=false)
+	public function ServerInfo()
 	{
-		if (!$col) $col = $this->sysDate;
-
-		/* use TO_CHAR() if $fmt is TO_CHAR() allowed fmt */
-		if ($fmt== 'Y-m-d H:i:s')
-			return 'TO_CHAR('.$col.", 'YYYY-MM-DD HH24:MI:SS')";
-
-		$s = '';
-
-		$len = strlen($fmt);
-		for ($i=0; $i < $len; $i++) {
-			if ($s) $s .= $this->concat_operator;
-			$ch = $fmt[$i];
-			switch($ch) {
-			case 'Y':
-			case 'y':
-				if ($len==1) return "year($col)";
-				$s .= "char(year($col))";
-				break;
-			case 'M':
-				if ($len==1) return "monthname($col)";
-				$s .= "substr(monthname($col),1,3)";
-				break;
-			case 'm':
-				if ($len==1) return "month($col)";
-				$s .= "right(digits(month($col)),2)";
-				break;
-			case 'D':
-			case 'd':
-				if ($len==1) return "day($col)";
-				$s .= "right(digits(day($col)),2)";
-				break;
-			case 'H':
-			case 'h':
-				if ($len==1) return "hour($col)";
-				if ($col != $this->sysDate) $s .= "right(digits(hour($col)),2)";
-				else $s .= "''";
-				break;
-			case 'i':
-			case 'I':
-				if ($len==1) return "minute($col)";
-				if ($col != $this->sysDate)
-					$s .= "right(digits(minute($col)),2)";
-					else $s .= "''";
-				break;
-			case 'S':
-			case 's':
-				if ($len==1) return "second($col)";
-				if ($col != $this->sysDate)
-					$s .= "right(digits(second($col)),2)";
-				else $s .= "''";
-				break;
-			default:
-				if ($ch == '\\') {
-					$i++;
-					$ch = substr($fmt,$i,1);
-				}
-				$s .= $this->qstr($ch);
-			}
-		}
-		return $s;
-	}
-
-
-	function serverInfo()
-	{
+		$vFetchMode = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$sql = "SELECT service_level, fixpack_num 
 				  FROM TABLE(sysproc.env_get_inst_info())
 					AS INSTANCEINFO";
 		$row = $this->GetRow($sql);
 
+		$this->SetFetchMode2($vFetchMode);
 
 		if ($row) {
 			$info['version'] = $row[0].':'.$row[1];
@@ -500,33 +412,19 @@ class ADODB_db2 extends ADOConnection {
 		return $info;
 	}
 
-	function createSequence($seqname='adodbseq',$start=1)
-	{
-		if (empty($this->_genSeqSQL)) 
-			return false;
-		
-		$ok = $this->execute(sprintf($this->_genSeqSQL,$seqname,$start));
-		if (!$ok) 
-			return false;
-		return true;
-	}
 
-	function dropSequence($seqname='adodbseq')
-	{
-		if (empty($this->_dropSeqSQL)) return false;
-		return $this->execute(sprintf($this->_dropSeqSQL,$seqname));
-	}
 
-	function selectLimit($sql,$nrows=-1,$offset=-1,$inputArr=false,$secs2cache=0)
+	public function SelectLimit($sql,$nrows=-1,$offset=-1,$inputArr=false,$secs2cache=0)
 	{
 		$nrows = (integer) $nrows;
+		$offset = (integer) $offset;
 		
 		if ($offset <= 0)
 		{
 			if ($nrows >= 0) 
 				$sql .=  " FETCH FIRST $nrows ROWS ONLY ";
 			
-			$rs = $this->execute($sql,$inputArr);
+			$rs = $this->Execute($sql,$inputArr);
 			
 		} 
 		else
@@ -542,7 +440,7 @@ class ADODB_db2 extends ADOConnection {
 			/*
 			 * DB2 has no native support for mid table offset
 			 */
-			$rs = ADOConnection::selectLimit($sql,$nrows,$offset,$inputArr);
+			$rs = ADOConnection::SelectLimit($sql,$nrows,$offset,$inputArr);
 		
 		}
 		
@@ -550,7 +448,7 @@ class ADODB_db2 extends ADOConnection {
 	}
 
 	
-	function errorMsg()
+	public function ErrorMsg()
 	{
 		if ($this->_errorMsg !== false) 
 			return $this->_errorMsg;
@@ -561,7 +459,7 @@ class ADODB_db2 extends ADOConnection {
 		return @db2_conn_errormsg($this->_connectionID);
 	}
 
-	function errorNo()
+	public function ErrorNo()
 	{
 
 		if ($this->_errorCode !== false) 
@@ -579,7 +477,7 @@ class ADODB_db2 extends ADOConnection {
 
 
 
-	function beginTrans()
+	public function BeginTrans()
 	{
 		if (!$this->hasTransactions) 
 			return false;
@@ -593,7 +491,7 @@ class ADODB_db2 extends ADOConnection {
 		return db2_autocommit($this->_connectionID,false);
 	}
 
-	function CommitTrans($ok=true)
+	public function CommitTrans($ok=true)
 	{
 		if ($this->transOff)
 			return true;
@@ -610,7 +508,7 @@ class ADODB_db2 extends ADOConnection {
 		return $ret;
 	}
 
-	function RollbackTrans()
+	public function RollbackTrans()
 	{
 		if ($this->transOff) return true;
 		if ($this->transCnt) $this->transCnt -= 1;
@@ -626,37 +524,30 @@ class ADODB_db2 extends ADOConnection {
 	  * We don't use db2_statistics as the function does not seem to play
 	  * well with mixed case table names
       *
-      * @param string   $table
-      * @param bool     $primary    (optional) only return primary keys
-      * @param bool     $owner      (optional) not used in this driver
+      * param  owner is not used in this driver
       *
-      * @return string[]    Array of indexes
+      * returns string[]    Array of indexes
       */
-	public function metaPrimaryKeys($table,$owner=false)
+	protected function _MetaPrimaryKeys($pParsedTableName, $owner=false)
 	{
-	    
+	    $table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
+		$schema = @$pParsedTableName['schema']['name'];
 		$primaryKeys = array();
 		
-		global $ADODB_FETCH_MODE;
 
-		$schema = '';
-		$this->_findschema($table,$schema);
 		
-		$table = $this->getTableCasedValue($table);
 
-		$savem 			  = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$this->setFetchMode(ADODB_FETCH_NUM);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
 
         $sql = "SELECT * 
 				  FROM syscat.indexes
 				 WHERE tabname='$table'";
 		 
-		$rows = $this->getAll($sql);
+		$rows = $this->GetAll($sql);
 		
-		$this->setFetchMode($savem);
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 
 		if (empty($rows))
 			return false;
@@ -671,8 +562,7 @@ class ADODB_db2 extends ADOConnection {
 			{
 				if ($colIndex == 0)
 					continue;
-				$columnName = $this->getMetaCasedValue($col);
-				$primaryKeys[] = $columnName;
+				$primaryKeys[] = $col;
 			}
 			break;
 		}
@@ -689,18 +579,15 @@ class ADODB_db2 extends ADOConnection {
 	 *
 	 * @return	mixed[]			Array of foreign key information
 	 */
-	public function metaForeignKeys($table, $owner = FALSE, $upper = FALSE, $asociative = FALSE )
+	public function MetaForeignKeys($table, $owner = FALSE, $upper = FALSE, $asociative = FALSE )
 	{
-		
-		global $ADODB_FETCH_MODE;
+		$vParsedTableName = $this->_dataDict->ParseTableName($table);
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
+		$schema = @$vParsedTableName['schema']['name'];
 
-		$schema = '';
-		$this->_findschema($table,$schema);
 
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		
-		$this->setFetchMode(ADODB_FETCH_NUM);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		
 		$sql = "SELECT SUBSTR(tabname,1,20) table_name,
 					   SUBSTR(constname,1,20) fk_name,
@@ -710,10 +597,9 @@ class ADODB_db2 extends ADOConnection {
 				 FROM syscat.references 
 				WHERE tabname = '$table'";
 		
-		$results = $this->getAll($sql);
+		$results = $this->GetAll($sql);
 		
-		$ADODB_FETCH_MODE = $savem;
-		$this->setFetchMode($savem);
+		$this->SetFetchMode2($savem);
 
 		if (empty($results))
 			return false;
@@ -722,8 +608,8 @@ class ADODB_db2 extends ADOConnection {
 		
 		foreach ($results as $r)
 		{
-			$parentTable = trim($this->getMetaCasedValue($r[2]));
-			$keyName     = trim($this->getMetaCasedValue($r[1]));
+			$parentTable = trim($r[2]);
+			$keyName     = trim($r[1]);
 			$foreignKeys[$parentTable] = $keyName;
 		}
 		
@@ -739,13 +625,10 @@ class ADODB_db2 extends ADOConnection {
 	  *
 	  * @return array
 	  */
-	public function metaTables($ttype=false,$schema=false,$mask=false)
+	public function MetaTables($ttype = false, $schema = false, $mask = false)
 	{
-		
-		global $ADODB_FETCH_MODE;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
-		$savem 			  = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		
 		/*
 		* Values for TABLE_TYPE
@@ -777,14 +660,14 @@ class ADODB_db2 extends ADOConnection {
 		
 		$qid = @db2_tables($this->_connectionID,NULL,$schema,$mask,$ttype);
 
-		$rs = new ADORecordSet_db2($qid);
+		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
 		
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 		
 		if (!$rs)
 			return false;
 		
-		$arr = $rs->getArray();
+		$arr = $rs->GetArray();
 		
 		$rs->Close();
 		
@@ -814,10 +697,6 @@ class ADODB_db2 extends ADOConnection {
 			if ($ttype == '' && (strcmp($tableType,'TABLE') <> 0 && strcmp($tableType,'VIEW') <> 0))
 				continue;
 			
-			/*
-			 * Set metacasing if required
-			 */
-			$tableName = $this->getMetaCasedValue($tableName);
 			
 			/*
 			 * If we requested a schema, we prepend the schema 
@@ -844,9 +723,8 @@ class ADODB_db2 extends ADOConnection {
       *
       * @return string[]    Array of indexes
       */
-    public function metaIndexes($table, $primary = false, $owner = false) {
+    protected function _MetaIndexes ($pParsedTableName, $primary = false, $owner=false) {
         
-		global $ADODB_FETCH_MODE;
 
 		 /* Array(
 		 *   [name_of_index] => Array(
@@ -861,22 +739,21 @@ class ADODB_db2 extends ADOConnection {
 		 */
 		$indices 		= array();
 		$primaryKeyName = '';
-		
-		$table = $this->getTableCasedValue($table);
+		$vSchema = @$pParsedTableName['schema']['name'];
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
+
 
 		
-		$savem 			  = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$this->setFetchMode(ADODB_FETCH_NUM);
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
         $sql = "SELECT * 
 				  FROM syscat.indexes
 				 WHERE tabname='$table'";
 		 
-		$rows = $this->getAll($sql);
+		$rows = $this->GetAll($sql);
 		
-		$this->setFetchMode($savem);
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 		
 		if (empty($rows))
 			return false;
@@ -892,12 +769,12 @@ class ADODB_db2 extends ADOConnection {
 				if ($r[7] == 'P')
 					continue;
 				
-			$indexName = $this->getMetaCasedValue($r[1]);
+			$indexName = $r[1];
 			if (!isset($indices[$indexName]))
 			{
 				$unique = ($r[7] == 'U')?1:0;
 				$indices[$indexName] = array('unique'=>$unique,
-											 'primary'=>$primaryIndex,
+											 /*'primary'=>$primaryIndex, */ //NOT PER APPARANT SPECIFICATION
 										     'columns'=>array()
 										);
 			}
@@ -906,7 +783,7 @@ class ADODB_db2 extends ADOConnection {
 			{
 				if ($colIndex == 0)
 					continue;
-				$columnName = $this->getMetaCasedValue($col);
+				$columnName = $col;
 				$indices[$indexName]['columns'][] = $columnName;
 			}
 			
@@ -930,18 +807,16 @@ class ADODB_db2 extends ADOConnection {
 	 * @return array of procedures on current database.
 	 *
 	 */
-	public function metaProcedures($procedureNamePattern = null, $catalog  = null, $schemaPattern  = null) {
+	public function MetaProcedures($procedureNamePattern = null, $catalog  = null, $schemaPattern  = null) {
 		
 		
-		global $ADODB_FETCH_MODE;
 				
 		$metaProcedures = array();
 		$procedureSQL   = '';
 		$catalogSQL     = '';
 		$schemaSQL      = '';
 		
-		$savem 			  = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		
 		if ($procedureNamePattern)
 			$procedureSQL = "AND ROUTINENAME LIKE " . strtoupper($this->qstr($procedureNamePattern));
@@ -972,16 +847,16 @@ class ADODB_db2 extends ADOConnection {
 				ORDER BY ROUTINENAME
 				";
 		
-		$result = $this->execute($SQL);
+		$result = $this->Execute($SQL);
 		
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 		
 		if (!$result)
 			return false;
 		
-		while ($r = $result->fetchRow()){
-			$procedureName = $this->getMetaCasedValue($r[0]);
-			$schemaName    = $this->getMetaCasedValue($r[2]);
+		while ($r = $result->FetchRow()){
+			$procedureName = $r[0];
+			$schemaName    = $r[2];
 			$metaProcedures[$procedureName] = array('type'=> $r[1],
 												   'catalog' => '',
 												   'schema'  => $schemaName,
@@ -999,9 +874,9 @@ class ADODB_db2 extends ADOConnection {
 	  *
 	  * @return string[]
 	  */
-	public function metaDatabases(){
+	public function MetaDatabases(){
 		
-		$dbName = $this->getMetaCasedValue($this->databaseName);
+		$dbName = $this->databaseName;
 		
 		return (array)$dbName;
 		
@@ -1038,7 +913,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 #define SQL_UNICODE_VARCHAR                     (-96)
 #define SQL_UNICODE_LONGVARCHAR                 (-97)
 */
-	function DB2Types($t)
+	public function DB2Types($t)
 	{
 		switch ((integer)$t) {
 		case 1:
@@ -1074,19 +949,18 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 			return 'L';
 
 		default:
-			return 'N';
+			return 'N'; //TODO: Correct usage of ADODB_DEFAULT_METATYPE. See commit https://github.com/ADOdb/ADOdb/commit/6005cb728243288093ea4c32112d350c138adf30
 		}
 	}
 
-	public function metaColumns($table, $normalize=true)
+	protected function _MetaColumns($pParsedTableName)
 	{
-		global $ADODB_FETCH_MODE;
-		
-		$savem = $ADODB_FETCH_MODE;
+		$table = $this->NormaliseIdentifierNameIf($pParsedTableName['table']['isToNormalize'],
+				$pParsedTableName['table']['name']);
+		$schema = @$pParsedTableName['schema']['name'];
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
-		$schema = '%';
-		$this->_findschema($table,$schema);
-		$table = $this->getTableCasedValue($table);
+		$schema = (empty($schema) ? '%' : $schema);
        	$colname = "%";
 	    $qid = db2_columns($this->_connectionID, null, $schema, $table, $colname);
 		if (empty($qid))
@@ -1096,15 +970,18 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 				$errorMessage = @db2_conn_errormsg($this->_connectionID);
 				ADOConnection::outp($errorMessage);
 			}
+
+			$this->SetFetchMode2($savem);
+
 			return false;
 		}
 
-		$rs = new ADORecordSet_db2($qid);
+		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
 
 		if (!$rs) 
-			return false;
+			{$this->SetFetchMode2($savem); return false;}
 		
-		$rs->_fetch();
+		$rs->db2__fetch();
 
 		$retarr = array();
 
@@ -1131,7 +1008,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		*/
 		while (!$rs->EOF) 
 		{
-			if ($rs->fields[2] == $table) 
+			if (strtoupper(trim($rs->fields[2])) == strtoupper($table)) 
 			{
 				
 				$fld       = new ADOFieldObject();
@@ -1175,16 +1052,17 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		
 		$qid = @db2_primary_keys($this->_connectionID, "", $schema, $table);
 		if (empty($qid)) 
-			return false;
+			{$this->SetFetchMode2($savem); return false;}
 
-		$rs = new ADORecordSet_db2($qid);
+		$rs = new ADORecordSet_db2($qid, ADODB_FETCH_NUM);
 
 		if (!$rs)
 		{	
-			$ADODB_FETCH_MODE = $savem;
+			$this->SetFetchMode2($savem);
+
 			return $retarr;
 		}	
-		$rs->_fetch();
+		$rs->db2__fetch();
 
 		/*
 		$rs->fields indices
@@ -1208,7 +1086,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		}
 		$rs->Close();
 
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 
 		if (empty($retarr)) 
 			return false;
@@ -1216,7 +1094,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		/*
 		* If the fetch mode is numeric, return as numeric array
 		*/
-		if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM)
+		if ($this->GetFetchMode() == ADODB_FETCH_NUM)
 			$retarr = array_values($retarr);
 		
 		return $retarr;
@@ -1232,9 +1110,8 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	  * @param	mixed   $parameters (not used in db2 connections)
 	  * @return mixed[]
 	  */
-	function prepareSp($procedureName,$parameters=false) {
+	public function PrepareSP($procedureName,$parameters=false) {
 		
-		global $ADODB_FETCH_MODE;
 		
 		$this->storedProcedureParameters = array('name'=>'',
 												 'resource'=>false,
@@ -1247,12 +1124,11 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		//$procedureName = strtoupper($procedureName);
 		//$procedureName = $this->getTableCasedValue($procedureName);
 
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		
 		$qid = db2_procedures($this->_connectionID, NULL , '%' , $procedureName );
 				
-		$ADODB_FETCH_MODE = $savem;
+		$this->SetFetchMode2($savem);
 		
 		if (!$qid)
 		{
@@ -1268,22 +1144,23 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		 * Now we know we have a valid procedure name, lets see if it requires 
 		 * parameters
 		 */
-		$savem = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		
 		$qid = db2_procedure_columns($this->_connectionID, NULL , '%' , $procedureName , NULL );
 		
-		$ADODB_FETCH_MODE = $savem;
 
 		if (!$qid)
 		{
 			if ($this->debug)
 				ADOConnection::outp(sprintf('No columns of name %s available',$procedureName));
+			
+			$this->SetFetchMode2($savem);
+
 			return false;
 		}
-		$rs = new ADORecordSet_db2($qid);
+		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
 		if (!$rs) 
-			return false;
+			{$this->SetFetchMode2($savem); return false;}
 		
 		$preparedStatement = 'CALL %s(%s)';
 		$parameterMarkers = array();
@@ -1292,7 +1169,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 			$parameterName = $rs->fields[3];
 			if ($parameterName == '')
 			{
-				$rs->moveNext();
+				$rs->MoveNext();
 				continue;
 			}
 			$parameterType = $rs->fields[4];
@@ -1310,7 +1187,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 			}
 			$this->storedProcedureParameters['index'][$parameterName] = $ordinalPosition;
 			$this->storedProcedureParameters['parameters'][$ordinalPosition] = $rs->fields;
-			$rs->moveNext();
+			$rs->MoveNext();
 
 		}
 		$parameterCount = count($this->storedProcedureParameters['index']);
@@ -1324,6 +1201,8 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		$sql = sprintf($preparedStatement,$procedureName,$parameterList);
 		
 		$spResource = @db2_prepare($this->_connectionID,$sql);
+
+		$this->SetFetchMode2($savem);
 		
 		if (!$spResource)
 		{
@@ -1518,7 +1397,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
     *
 	* @return bool				Success of the operation
 	*/
-	public function parameter(&$stmt, &$var, $name, $isOutput=false, $maxLen=4000, $type=false)
+	public function Parameter(&$stmt, &$var, $name, $isOutput=false, $maxLen=4000, $type=false)
 	{
 		
 		/*
@@ -1555,7 +1434,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	* 
 	* @return mixed
 	*/
-	function prepare($sql)
+	public function Prepare($sql)
 	{
 		
 		if (! $this->_bindInputArray) return $sql; // no binding
@@ -1576,37 +1455,18 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	* 
 	* @return mixed				either the queryID or false
 	*/
-	function _query(&$sql,$inputarr=false)
+	public function _query(&$sql,$inputarr=false)
 	{
         
         GLOBAL $php_errormsg;
 		
 		if (isset($php_errormsg))
 			$php_errormsg = '';
-		$this->_error = '';
+		$this->_errorMsg = '';
 
 		$db2Options = array();
-		/*
-         * Use DB2 Internal case handling for best speed
-         */
-		switch(ADODB_ASSOC_CASE)
-		{
-        case ADODB_ASSOC_CASE_UPPER:
-            $db2Options = array('db2_attr_case'=>DB2_CASE_UPPER);
-            $setOption = @db2_set_option($this->_connectionID,$db2Options,1);
-            break;
-         
-		 case ADODB_ASSOC_CASE_LOWER:
-            $db2Options = array('db2_attr_case'=>DB2_CASE_LOWER);
-            $setOption = @db2_set_option($this->_connectionID,$db2Options,1);
-            break;
-        
-		default:
-            $db2Options = array('db2_attr_case'=>DB2_CASE_NATURAL);
-            $setOption = @db2_set_option($this->_connectionID,$db2Options,1);
-        }
             
-		$db2Options = array('db2_attr_case'=>DB2_CASE_LOWER);
+		$db2Options = array('db2_attr_case'=>DB2_CASE_NATURAL);
         $setOption = @db2_set_option($this->_connectionID,$db2Options,1);	
 		
         if ($inputarr)
@@ -1733,104 +1593,28 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		$conn->execute('INSERT INTO blobtable (id, blobcol) VALUES (1, null)');
 		$conn->UpdateBlob('blobtable','blobcol',$blob,'id=1');
 	*/
-	function updateBlob($table,$column,$val,$where,$blobtype='BLOB')
+	public function UpdateBlob($table,$column,$val,$where,$blobtype='BLOB')
 	{
 		return $this->execute("UPDATE $table SET $column=? WHERE $where",array($val)) != false;
 	}
 
 	// returns true or false
-	function _close()
+	protected function _close()
 	{
 		$ret = @db2_close($this->_connectionID);
 		$this->_connectionID = false;
 		return $ret;
 	}
 
-	function _affectedrows()
+	protected function _affectedrows()
 	{
 		return $this->_lastAffectedRows;
 	}
 	
-	/**
-	  * Gets a meta cased parameter 
-	  *
-	  * Receives an input variable to be processed per the metaCasing
-	  * rule, and returns the same value, processed
-	  *
-	  * @param string $value
-	  *
-	  * @return string
-	  */
-	final public function getMetaCasedValue($value)
-	{
-		global $ADODB_ASSOC_CASE;
-		
-		switch($ADODB_ASSOC_CASE)
-		{
-		case ADODB_ASSOC_CASE_LOWER:
-			$value = strtolower($value);
-			break;
-		case ADODB_ASSOC_CASE_UPPER:
-			$value = strtoupper($value);
-			break;
-		}
-		return $value;
-	}
 	
 	
-	const TABLECASE_LOWER    =  0;
-    const TABLECASE_UPPER    =  1;
-    const TABLECASE_DEFAULT  =  2;
+
 	
-	/*
-	 * Controls the casing of the table provided to the meta functions
-	 */
-	private $tableCase = 2;
-	
-	/**
-	  * Sets the table case parameter 
-	  *
-	  * @param int $caseOption
-	  * @return null
-	  */
-	final public function setTableCasing($caseOption)
-	{
-		$this->tableCase = $caseOption;
-	}
-	
-	/**
-	  * Gets the table casing parameter 
-	  *
-	  * @return int $caseOption
-	  */
-	final public function getTableCasing()
-	{
-		return $this->tableCase;
-	}
-	
-	/**
-	  * Gets a table cased parameter 
-	  *
-	  * Receives an input variable to be processed per the tableCasing
-	  * rule, and returns the same value, processed
-	  *
-	  * @param string $value
-	  *
-	  * @return string
-	  */
-	final public function getTableCasedValue($value)
-	{
-		switch($this->tableCase)
-		{
-		case self::TABLECASE_LOWER:
-			$value = strtolower($value);
-			break;
-		case self::TABLECASE_UPPER:
-			$value = strtoupper($value);
-			break;
-		}
-		return $value;
-	}
 
 }
 
@@ -1840,25 +1624,15 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 
 class ADORecordSet_db2 extends ADORecordSet {
 
-	var $bind = false;
-	var $databaseType = "db2";
-	var $dataProvider = "db2";
-	var $useFetchArray;
+	public $bind = false;
+	public $databaseType = "db2";
+	public $dataProvider = "db2";
+	public $useFetchArray;
 
-	function __construct($id,$mode=false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-		$this->fetchMode = $mode;
-
-		$this->_queryID = $id;
-	}
 
 
 	// returns the field object
-	function fetchField($offset = 0)
+	protected function _FetchField($offset = -1)
 	{
 		$o			   = new ADOFieldObject();
 		$o->name 	   = @db2_field_name($this->_queryID,$offset);
@@ -1874,27 +1648,9 @@ class ADORecordSet_db2 extends ADORecordSet {
 		return $o;
 	}
 
-	/* Use associative array to get fields array */
-	function fields($colname)
-	{
-		
-		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-			return $this->fields[$colname];
-        }
-		
-		if (!$this->bind) {
-			$this->bind = array();
-			for ($i=0; $i < $this->_numOfFields; $i++) {
-				$o = $this->FetchField($i);
-				$this->bind[strtoupper($o->name)] = $i;
-			}
-		}
-
-		 return $this->fields[$this->bind[strtoupper($colname)]];
-	}
 
 
-	function _initrs()
+	protected function _initrs()
 	{
 		global $ADODB_COUNTRECS;
 		$this->_numOfRows = ($ADODB_COUNTRECS) ? @db2_num_rows($this->_queryID) : -1;
@@ -1907,41 +1663,26 @@ class ADORecordSet_db2 extends ADORecordSet {
 			$this->_numOfRows = -1;
 	}
 
-	function _seek($row)
+	protected function _seek($row)
 	{
 		return false;
 	}
 
-	function getArrayLimit($nrows,$offset=0)
+	protected function _MoveNext()
 	{
-		if ($offset <= 0) {
-			$rs = $this->GetArray($nrows);
-			return $rs;
-		}
-		
-		$this->Move($offset);
+		$this->bind = false;
+		if ($this->_numOfRows != 0 && !$this->EOF) {
+			$this->_currentRow++;
 
-
-		$results = array();
-		$cnt = 0;
-		while (!$this->EOF && $nrows != $cnt) {
-			$results[$cnt++] = $this->fields;
-			$this->MoveNext();
-		}
-		
-		return $results;
-	}
-
-	function moveNext()
-	{
-		if ($this->EOF || $this->_numOfRows == 0)
-			return false;
-		
-		$this->_currentRow++;
+			$this->processCoreFetch();
 			
-		$this->processCoreFetch();
-		return $this->processMoveRecord();
-		
+			if ($this->fields) {
+				return true;
+			}
+		}
+		$this->fields = false;
+		$this->EOF = true;
+		return false;
 	}
     
     final private function processCoreFetch()
@@ -1970,18 +1711,9 @@ class ADORecordSet_db2 extends ADORecordSet {
 		}
     }
 
-	final private function processMoveRecord()
-    {
-		if (!$this->fields){
-			$this->EOF = true;
-			return false;
-		}
-		   
-		return true;
-	}
-    
-    function _fetch()
+    protected function _fetch()
 	{
+		$this->bind = false;
         $this->processCoreFetch();
         if ($this->fields) 
 			return true;
@@ -1989,8 +1721,11 @@ class ADORecordSet_db2 extends ADORecordSet {
 		$this->fields = false;
 		return false;
 	}
+	
+	public function db2__fetch()
+		{return $this->_callFetch();}
 
-	function _close()
+	protected function _close()
 	{
 		$ok = @db2_free_result($this->_queryID);
 		if (!$ok)
@@ -2003,6 +1738,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 			return false;
 		}
 		
+		return $ok;
 	}
 
 }

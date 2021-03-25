@@ -29,11 +29,11 @@ if (!defined('ADODB_DIR')) die();
 
 
 
-class ADODB_db2 extends ADOConnection {
-	public  $databaseType = "db2";
+class ADODB_db2legacy extends ADOConnection {
+	public  $databaseType = "db2legacy";
 	public  $fmtDate = "'Y-m-d'";
 
-	public  $sysTime = 'CURRENT TIME';
+	public  $sysTime = 'CURRENT TIME';//Note: This variable is not used any where in the entirety of this library except in the db2 driver
 
 	public  $fmtTimeStamp = "'Y-m-d H:i:s'";
 	public  $replaceQuote = "''"; // string to use to replace quotes
@@ -50,6 +50,8 @@ class ADODB_db2 extends ADOConnection {
 	protected  $_lastAffectedRows = 0;
 	public  $uCaseTables = true; // for meta* functions, uppercase table names
 	public  $hasInsertID = true;
+	public $hasGenID    = true;
+	public $connectStmt = '';
 
 
     protected function _insertid()
@@ -65,6 +67,8 @@ class ADODB_db2 extends ADOConnection {
 		// returns true or false
 	protected function _connect($argDSN, $argUsername, $argPassword, $argDatabasename)
 	{
+		global $php_errormsg;
+
 		if (!function_exists('db2_connect')) {
 			ADOConnection::outp("Warning: The old ODBC based DB2 driver has been renamed 'odbc_db2'. This ADOdb driver calls PHP's native db2 extension which is not installed.");
 			return null;
@@ -82,6 +86,10 @@ class ADODB_db2 extends ADOConnection {
 			if (stripos($argDSN,'UID=') && stripos($argDSN,'PWD=')) $this->_connectionID = db2_connect($argDSN,null,null);
 			else $this->_connectionID = db2_connect($argDSN,$argUsername,$argPassword);
 		}
+		if(function_exists('error_clear_last'))
+			{error_clear_last();}
+		elseif(isset($php_errormsg))
+			{$php_errormsg = '';}
 
 		// For db2_connect(), there is an optional 4th arg.  If present, it must be
 		// an array of valid options.  So far, we don't use them.
@@ -96,6 +104,8 @@ class ADODB_db2 extends ADOConnection {
 	// returns true or false
 	protected function _pconnect($argDSN, $argUsername, $argPassword, $argDatabasename)
 	{
+		global $php_errormsg;
+
 		if (!function_exists('db2_connect')) return null;
 
 		// This needs to be set before the connect().
@@ -113,6 +123,10 @@ class ADODB_db2 extends ADOConnection {
 			if (stripos($argDSN,'UID=') && stripos($argDSN,'PWD=')) $this->_connectionID = db2_pconnect($argDSN,null,null);
 			else $this->_connectionID = db2_pconnect($argDSN,$argUsername,$argPassword);
 		}
+		if(function_exists('error_clear_last'))
+			{error_clear_last();}
+		elseif(isset($php_errormsg))
+			{$php_errormsg = '';}
 
 		$this->_errorMsg = @db2_conn_errormsg();
 		if ($this->_connectionID && $this->autoRollback) @db2_rollback($this->_connectionID);
@@ -132,9 +146,12 @@ class ADODB_db2 extends ADOConnection {
 
 	public function ServerInfo()
 	{
+		$vFetchMode = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$row = $this->GetRow("SELECT service_level, fixpack_num FROM TABLE(sysproc.env_get_inst_info())
 			as INSTANCEINFO");
 
+
+		$this->SetFetchMode2($vFetchMode);
 
 		if ($row) {
 			$info['version'] = $row[0].':'.$row[1];
@@ -246,7 +263,7 @@ class ADODB_db2 extends ADOConnection {
 			$this->SetFetchMode2($savem);
 			return false;
 		}
-		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
+		$rs = new ADORecordSet_db2legacy($qid, $this->GetFetchMode());
 		$this->SetFetchMode2($savem);
 
 		if (!$rs) return false;
@@ -275,7 +292,7 @@ class ADODB_db2 extends ADOConnection {
 			$this->SetFetchMode2($savem);
 			return false;
 		}
-		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
+		$rs = new ADORecordSet_db2legacy($qid, $this->GetFetchMode());
 
 		$this->SetFetchMode2($savem);
 		/*
@@ -313,7 +330,7 @@ class ADODB_db2 extends ADOConnection {
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = db2_tables($this->_connectionID);
 
-		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
+		$rs = new ADORecordSet_db2legacy($qid, $this->GetFetchMode());
 
 		$this->SetFetchMode2($savem);
 		if (!$rs) {
@@ -423,12 +440,12 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 
         	$colname = "%";
 	        $qid = db2_columns($this->_connectionID, "", $schema, $table, $colname);
-		if (empty($qid)) return $false;
+		if (empty($qid)) {$this->SetFetchMode2($savem); return $false;}
 
-		$rs = new ADORecordSet_db2($qid, $this->GetFetchMode());
-		$this->SetFetchMode2($savem);
+		$rs = new ADORecordSet_db2legacy($qid, $this->GetFetchMode());
+		
 
-		if (!$rs) return $false;
+		if (!$rs) {$this->SetFetchMode2($savem); return $false;}
 		$rs->db2__fetch();
 
 		$retarr = array();
@@ -475,9 +492,9 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 		if (empty($retarr)) $retarr = false;
 
 	      $qid = db2_primary_keys($this->_connectionID, "", $schema, $table);
-		if (empty($qid)) return $false;
+		if (empty($qid)) {$this->SetFetchMode2($savem); return $false;}
 
-		$rs = new ADORecordSet_db2($qid, ADODB_FETCH_NUM);
+		$rs = new ADORecordSet_db2legacy($qid, $this->GetFetchMode());
 
 		if(!(!$rs))
 		{
@@ -503,6 +520,8 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 			}
 			$rs->Close();
 		}
+
+		$this->SetFetchMode2($savem)
 
 		if(empty($retarr))
 			{return false;}
@@ -628,10 +647,10 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	 Class Name: Recordset
 --------------------------------------------------------------------------------------*/
 
-class ADORecordSet_db2 extends ADORecordSet {
+class ADORecordSet_db2legacy extends ADORecordSet {
 
 	public  $bind = false;
-	public  $databaseType = "db2";
+	public  $databaseType = "db2legacy";
 	public  $dataProvider = "db2";
 	public  $useFetchArray;
 

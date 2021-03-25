@@ -35,7 +35,7 @@ function ADODB_Error_Handler($dbms, $fn, $errno, $errmsg, $p1, $p2, &$thisConnec
 	if (error_reporting() == 0) return; // obey @ protocol
 	switch($fn) {
 	case 'EXECUTE':
-		$sql = $p1;
+		$sql = (is_string($p1) ? $p1 : var_export($p1, true));
 		$inputparams = $p2;
 
 		$s = "$dbms error: [$errno: $errmsg] in $fn(\"$sql\")\n";
