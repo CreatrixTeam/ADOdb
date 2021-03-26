@@ -256,18 +256,15 @@ function _adodb_getmenu(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=f
 			$zthis->MoveNext();
 			continue;
 		}
-		
-		$myFields = array_map('trim',array_values($zthis->fields));
-        
-		if ($fieldsize > 1) {
-			if (isset($myFields[1]))
-				$zval2 = $myFields[1];
+
+        if ($fieldsize > 1) {
+			if (isset($zthis->fields[1]))
+				$zval2 = rtrim($zthis->fields[1]);
 			else
-				$zval2 = next($myFields);
+				$zval2 = rtrim(next($zthis->fields));
 		}
 		$selected = ($compareFields0) ? $zval : $zval2;
 
-	
 		if ($hasvalue)
 			$value = " value='".htmlspecialchars($zval2)."'";
 
@@ -288,7 +285,6 @@ function _adodb_getmenu(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=f
 		$zthis->MoveNext();
 	} // while
 
-    
 	return $s ."\n</select>\n";
 }
 
@@ -335,21 +331,17 @@ function _adodb_getmenu_gp(&$zthis, $name,$defstr='',$blank1stItem=true,$multipl
 			continue;
 		}
 
-		$myFields = array_map('trim',array_values($zthis->fields));
-
-        if ($fieldsize > 1) {
-			if (isset($myFields[1]))
-				$zval2 = $myFields[1];
+		if ($fieldsize > 1) {
+			if (isset($zthis->fields[1]))
+				$zval2 = rtrim($zthis->fields[1]);
 			else
-				$zval2 = next($myFields);
+				$zval2 = rtrim(next($zthis->fields));
 		}
-		
 		$selected = ($compareFields0) ? $zval : $zval2;
 
         $group = '';
-		
-		if (isset($myFields[2])) {
-            $group = $myFields[2];
+		if (isset($zthis->fields[2])) {
+            $group = rtrim($zthis->fields[2]);
         }
 
         if ($optgroup != $group) {

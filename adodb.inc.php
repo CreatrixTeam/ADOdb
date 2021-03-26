@@ -3773,6 +3773,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * the text to display to the user, and 2nd col as the return value. Default
 	 * strings are compared with the FIRST column.
 	 *
+	 * Warning: Fetch mode must be ADODB_FETCH_NUM (see ::_adodb_getmenu()).
+	 *
 	 * @param name			name of SELECT tag
 	 * @param [defstr]		the value to hilite. Use an array for multiple hilites for listbox.
 	 * @param [blank1stItem]	true to leave the 1st item in list empty
@@ -3791,6 +3793,16 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			$size=0, $selectAttr='',$compareFields0=true)
 	{
 		global $ADODB_INCLUDED_LIB;
+		
+		if($this->CheckIfCurrentRowIsNumeric() != 1)
+		{
+			ADOConnection::outp("ADORecordSet::GetMenu(): Warning: Fetch mode is either set to ".
+					"ADODB_FETCH_ASSOC, or is set to ADODB_FETCH_BOTH and associative and ".
+					"numeric keys overlaped.");
+
+			return "";
+		}
+
 		if (empty($ADODB_INCLUDED_LIB)) {
 			include_once(ADODB_DIR.'/adodb-lib.inc.php');
 		}
@@ -3806,19 +3818,42 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * the text to display to the user, and 2nd col as the return value. Default
 	 * strings are compared with the SECOND column.
 	 *
+	 * Warning: Fetch mode must be ADODB_FETCH_NUM (see ::_adodb_getmenu()).
 	 */
 	public function GetMenu2($name,$defstr='',$blank1stItem=true,$multiple=false,$size=0, $selectAttr='') {
+		
+		if($this->CheckIfCurrentRowIsNumeric() != 1)
+		{
+			ADOConnection::outp("ADORecordSet::GetMenu2(): Warning: Fetch mode is either set to ".
+					"ADODB_FETCH_ASSOC, or is set to ADODB_FETCH_BOTH and associative and ".
+					"numeric keys overlaped.");
+
+			return "";
+		}
+
 		return $this->GetMenu($name,$defstr,$blank1stItem,$multiple,
 			$size, $selectAttr,false);
 	}
 
 	/*
 		Grouped Menu
+		
+		Warning: Fetch mode must be ADODB_FETCH_NUM (see ::_adodb_getmenu_gp()).
 	*/
 	public function GetMenu3($name,$defstr='',$blank1stItem=true,$multiple=false,
 			$size=0, $selectAttr='')
 	{
 		global $ADODB_INCLUDED_LIB;
+		
+		if($this->CheckIfCurrentRowIsNumeric() != 1)
+		{
+			ADOConnection::outp("ADORecordSet::GetMenu3(): Warning: Fetch mode is either set to ".
+					"ADODB_FETCH_ASSOC, or is set to ADODB_FETCH_BOTH and associative and ".
+					"numeric keys overlaped.");
+
+			return "";
+		}
+
 		if (empty($ADODB_INCLUDED_LIB)) {
 			include_once(ADODB_DIR.'/adodb-lib.inc.php');
 		}
