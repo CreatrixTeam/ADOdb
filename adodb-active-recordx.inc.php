@@ -131,7 +131,7 @@ class ADODB_Active_Record {
 	// if $options['new'] is true, we forget all relations
 	public function __construct($table = false, $pkeyarr=false, $db=false, $options=array())
 	{
-	global $ADODB_ASSOC_CASE,$_ADODB_ACTIVE_DBS;
+	global $_ADODB_ACTIVE_DBS;
 
 		if ($db == false && is_object($pkeyarr)) {
 			$db = $pkeyarr;
@@ -404,7 +404,7 @@ class ADODB_Active_Record {
 	// update metadata
 	public function UpdateActiveTable($pkeys=false,$forceUpdate=false)
 	{
-	global $ADODB_ASSOC_CASE,$_ADODB_ACTIVE_DBS , $ADODB_CACHE_DIR, $ADODB_ACTIVE_CACHESECS;
+	global $_ADODB_ACTIVE_DBS , $ADODB_CACHE_DIR, $ADODB_ACTIVE_CACHESECS;
 	global $ADODB_ACTIVE_DEFVALS;
 
 		$activedb = $_ADODB_ACTIVE_DBS[$this->_dbat];
@@ -478,8 +478,8 @@ class ADODB_Active_Record {
 		$attr = array();
 		$keys = array();
 
-		switch($ADODB_ASSOC_CASE) {
-		case 0:
+		switch (ADODB_ASSOC_CASE) {
+		case ADODB_ASSOC_CASE_LOWER:
 			foreach($cols as $name => $fldobj) {
 				$name = strtolower($name);
 				if ($ADODB_ACTIVE_DEFVALS && isset($fldobj->default_value)) {
@@ -495,7 +495,7 @@ class ADODB_Active_Record {
 			}
 			break;
 
-		case 1:
+		case ADODB_ASSOC_CASE_UPPER:
 			foreach($cols as $name => $fldobj) {
 				$name = strtoupper($name);
 
@@ -1047,8 +1047,6 @@ class ADODB_Active_Record {
 	// returns 0 on error, 1 on update, 2 on insert
 	public function Replace()
 	{
-	global $ADODB_ASSOC_CASE;
-
 		$db = $this->DB();
 		if (!$db) {
 			return false;
@@ -1084,7 +1082,7 @@ class ADODB_Active_Record {
 		}
 
 
-		switch ($ADODB_ASSOC_CASE == 0) {
+		switch (ADODB_ASSOC_CASE) {
 			case ADODB_ASSOC_CASE_LOWER:
 				foreach($pkey as $k => $v) {
 					$pkey[$k] = strtolower($v);
