@@ -18,8 +18,7 @@ point numbers (normally 64-bits).
 Dates from 100 A.D. to 3000 A.D. and later
 have been tested. The minimum is 100 A.D. as <100 will invoke the
 2 => 4 digit year conversion. The maximum is billions of years in the
-future, but this is a theoretical limit as the computation of that year
-would take too long with the current implementation of adodb_mktime().
+future.
 
 This library replaces native functions as follows:
 
@@ -422,8 +421,6 @@ $ADODB_DATETIME_CLASS = (PHP_VERSION >= 5.2);
 
 if (!defined('ADODB_ALLOW_NEGATIVE_TS')) define('ADODB_NO_NEGATIVE_TS',1);
 
-if (!DEFINED('ADODB_FUTURE_DATE_CUTOFF_YEARS')) 
-	DEFINE('ADODB_FUTURE_DATE_CUTOFF_YEARS',200);												
 function adodb_date_test_date($y1,$m,$d=13)
 {
 	$h = round(rand()% 24);
@@ -835,22 +832,13 @@ global $_month_table_normal,$_month_table_leaf;
 function _adodb_getdate($origd=false,$fast=false,$is_gmt=false)
 {
 static $YRS;
-global $_month_table_normal,$_month_table_leaf, $_adodb_last_date_call_failed;
-
-	$_adodb_last_date_call_failed = false;
+global $_month_table_normal,$_month_table_leaf;
 
 	$d =  $origd - ($is_gmt ? 0 : adodb_get_gmt_diff_ts($origd));
 	$_day_power = 86400;
 	$_hour_power = 3600;
 	$_min_power = 60;
 
-	$cutoffDate = time() + (60 * 60 * 24 * 365 * ADODB_FUTURE_DATE_CUTOFF_YEARS);
-	
-	if ($d > $cutoffDate)
-	{
-		$d = $cutoffDate;
-		$_adodb_last_date_call_failed = true;
-	}
 	if ($d < -12219321600) $d -= 86400*10; // if 15 Oct 1582 or earlier, gregorian correction
 
 	$_month_table_normal = array("",31,28,31,30,31,30,31,31,30,31,30,31);
@@ -1267,8 +1255,6 @@ function adodb_gmmktime($hr,$min,$sec,$mon=false,$day=false,$year=false,$is_dst=
 /**
 	Return a timestamp given a local time. Originally by jackbbs.
 	Note that $is_dst is not implemented and is ignored.
-
-	Not a very fast algorithm - O(n) operation. Could be optimized to O(1).
 */
 function adodb_mktime($hr,$min,$sec,$mon=false,$day=false,$year=false,$is_dst=false,$is_gmt=false)
 {
@@ -1329,6 +1315,30 @@ function adodb_mktime($hr,$min,$sec,$mon=false,$day=false,$year=false,$is_dst=fa
 
 	$_total_date = 0;
 	if ($year >= 1970) {
+		$tYear = $year - 1;
+		$leaf = _adodb_is_leap_year($year);
+		$loop_table = null;
+		$_add_date = -1;
+
+		$_total_date = (($tYear - 1970 + 1) * 365) + (floor($tYear / 4) - 492) - (floor($tYear / 100) - 19) +
+				(floor($tYear / 400) - 4);
+
+		if ($leaf == true) {
+			$loop_table = $_month_table_leaf;
+			$_add_date = 366;
+		} else {
+			$loop_table = $_month_table_normal;
+			$_add_date = 365;
+		}
+
+		for($b=1;$b<$mon;$b++) {
+			$_total_date += $loop_table[$b];
+		}
+		
+		$_total_date +=$day-1;
+		$ret = $_total_date * $_day_power + $hr * $_hour_power + $min * $_min_power + $sec + $gmt_different;
+
+		/* ORIGINAL CODE, KEPT FOR REFERENCE. IF THE BEHAVIOR OF ::_adodb_is_leap_year() IS CHANGED, THE ABOVE CODE WOULD NO LONGER BE VALID.
 		for ($a = 1970 ; $a <= $year; $a++) {
 			$leaf = _adodb_is_leap_year($a);
 			if ($leaf == true) {
@@ -1348,8 +1358,59 @@ function adodb_mktime($hr,$min,$sec,$mon=false,$day=false,$year=false,$is_dst=fa
 		}
 		$_total_date +=$day-1;
 		$ret = $_total_date * $_day_power + $hr * $_hour_power + $min * $_min_power + $sec + $gmt_different;
+		-------*/
 
 	} else {
+		$tYear = $year + 1;
+		$leaf = _adodb_is_leap_year($year);
+		$loop_table = null;
+		$_add_date = -1;
+		
+		if($year >= 0)
+		{	
+			if($year > 1582)
+			{
+				$_total_date += ((1970 - $tYear) * 365) + (492 - floor($tYear / 4)) - 
+						(19 - floor($tYear / 100)) + (4 - floor($tYear / 400));
+						
+				if(_adodb_is_leap_year($tYear))
+					{$_total_date += 1;}
+			}
+			else
+			{
+				$_total_date += ((1970 - $tYear) * 365) + (492 - floor($tYear / 4)) -
+					(19 - floor(1582 / 100)) + (4 - floor(1582 / 400));
+
+				if(_adodb_is_leap_year($tYear))
+					{$_total_date += 1;}
+			}
+		}
+		else
+		{
+			$_total_date += (1970 * 365) + 492 - (19 - floor(1582 / 100)) + (4 - floor(1582 / 400)) + 1;
+			$_total_date += (abs($tYear) * 365) + floor(abs($tYear) / 4);// - floor(abs($tYear) / 100) + floor(abs($tYear) / 400);
+		}
+
+		if ($leaf == true) {
+			$loop_table = $_month_table_leaf;
+			$_add_date = 366;
+		} else {
+			$loop_table = $_month_table_normal;
+			$_add_date = 365;
+		}
+
+		for($b=12;$b>$mon;$b--) {
+			$_total_date += $loop_table[$b];
+		}
+		$_total_date += $loop_table[$mon] - $day;
+
+		$_day_time = $hr * $_hour_power + $min * $_min_power + $sec;
+		$_day_time = $_day_power - $_day_time;
+		$ret = -( $_total_date * $_day_power + $_day_time - $gmt_different);
+		if ($ret < -12220185600) $ret += 10*86400; // if earlier than 5 Oct 1582 - gregorian correction
+		else if ($ret < -12219321600) $ret = -12219321600; // if in limbo, reset to 15 Oct 1582.
+
+		/* ORIGINAL CODE, KEPT FOR REFERENCE. IF THE BEHAVIOR OF ::_adodb_is_leap_year() IS CHANGED, THE ABOVE CODE WOULD NO LONGER BE VALID.
 		for ($a = 1969 ; $a >= $year; $a--) {
 			$leaf = _adodb_is_leap_year($a);
 			if ($leaf == true) {
@@ -1373,6 +1434,7 @@ function adodb_mktime($hr,$min,$sec,$mon=false,$day=false,$year=false,$is_dst=fa
 		$ret = -( $_total_date * $_day_power + $_day_time - $gmt_different);
 		if ($ret < -12220185600) $ret += 10*86400; // if earlier than 5 Oct 1582 - gregorian correction
 		else if ($ret < -12219321600) $ret = -12219321600; // if in limbo, reset to 15 Oct 1582.
+		-------*/
 	}
 	//print " dmy=$day/$mon/$year $hr:$min:$sec => " .$ret;
 	return $ret;
@@ -1487,16 +1549,3 @@ global $ADODB_DATE_LOCALE;
 	$ret = adodb_date($fmtdate, $ts, $is_gmt);
 	return $ret;
 }
-
-/**
-* Returns the status of the last date calculation and whether it exceeds
-* the limit of ADODB_FUTURE_DATE_CUTOFF_YEARS
-*
-* @return boolean
-*/
-function adodb_last_date_status()
-{
-	global $_adodb_last_date_call_failed;
-	
-	return $_adodb_last_date_call_failed;
-}								 
