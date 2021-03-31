@@ -39,7 +39,7 @@ if (!defined('ADODB_DIR')) die();
 //----------------------------------------------------------------
 
 
-// has datetime converstion to YYYY-MM-DD format, and also mssql_fetch_assoc
+// has datetime conversion to YYYY-MM-DD format, and also mssql_fetch_assoc
 ini_set('mssql.datetimeconvert',0);
 
 

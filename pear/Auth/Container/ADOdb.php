@@ -58,7 +58,7 @@ class Auth_Container_ADOdb extends Auth_Container
     /**
      * Constructor of the container class
      *
-     * Initate connection to the database via PEAR::ADOdb
+     * Initiate connection to the database via PEAR::ADOdb
      *
      * @param  string Connection data or DB object
      * @return object Returns an error object if something went wrong
@@ -199,7 +199,7 @@ class Auth_Container_ADOdb extends Auth_Container
         /* Include additional fields if they exist */
         if(!empty($this->options['db_fields'])){
             if(is_array($this->options['db_fields'])){
-                $this->options['db_fields'] = join($this->options['db_fields'], ', ');
+                $this->options['db_fields'] = join(', ', $this->options['db_fields']);
             }
             $this->options['db_fields'] = ', '.$this->options['db_fields'];
         }
@@ -262,7 +262,7 @@ class Auth_Container_ADOdb extends Auth_Container
                     continue;
                 }
                 // Use reference to the auth object if exists
-                // This is because the auth session variable can change so a static call to setAuthData does not make sence
+                // This is because the auth session variable can change so a static call to setAuthData does not make sense
                 if(is_object($this->_auth_obj)){
                     $this->_auth_obj->setAuthData($key, $value);
                 } else {

@@ -23,7 +23,7 @@ if (!defined('ADODB_DIR')) die();
 //
 class perf_informix extends adodb_perf{
 
-	// Maximum size on varchar upto 9.30 255 chars
+	// Maximum size on varchar up to 9.30 255 chars
 	// better truncate varchar to 255 than char(4000) ?
 	public  $createTableSQL = "CREATE TABLE adodb_logsql (
 		created datetime year to second NOT NULL,

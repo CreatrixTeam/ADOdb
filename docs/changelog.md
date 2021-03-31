@@ -69,7 +69,8 @@ Older changelogs:
 - pdo/mysql: remove extraneous comma in $fmtTimeStamp. #531
 - active record: Use ADODB_ASSOC_CASE constant. #536
 - session: Remove session_module_name('user') calls (PHP 7.2 compatibility). #449
- 
+- PHP 7.4 compatibility: fix deprecated usage of join() #547
+
 ## 5.20.14 - 06-Jan-2019
 
 - security: Denial of service in adodb_date(). #467
@@ -266,7 +267,7 @@ other database types as well; all drivers derived from the above are also impact
 - odbc: clear fields before fetching. See http://phplens.com/lens/lensforum/msgs.php?id=17539
 - oci8: GetRowAssoc now works in ADODB_FETCH_ASSOC fetch mode
 - oci8: MetaType and MetaForeignKeys argument count are now strict-standards compliant
-- oci8: Added trailing `;` on trigger creation for sequence fields, prevents occurence of ORA-24344
+- oci8: Added trailing `;` on trigger creation for sequence fields, prevents occurrence of ORA-24344
 - oci8quercus: new oci8 driver with support for quercus jdbc data types.
 - pdo: Fixed concat recursion bug in 5.3. See http://phplens.com/lens/lensforum/msgs.php?id=19285
 - pgsql: Default driver (postgres/pgsql) is now postgres8
