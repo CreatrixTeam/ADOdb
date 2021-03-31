@@ -204,11 +204,6 @@ if (!defined('_ADODB_LAYER')) {
 			}
 		}
 
-
-		// Initialize random number generator for randomizing cache flushes
-		// -- note Since PHP 4.2.0, the seed  becomes optional and defaults to a random value if omitted.
-		srand(((double)microtime())*1000000);
-
 		/**
 		 * ADODB version as a string.
 		 */
@@ -5454,7 +5449,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 			case 'pgsql':
 			case 'postgres':
-				$class = $db = 'postgres8';
+				$class = $db = 'postgres9';
 				break;
 
 			default:
