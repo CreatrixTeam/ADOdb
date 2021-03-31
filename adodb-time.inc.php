@@ -839,6 +839,7 @@ global $_month_table_normal,$_month_table_leaf;
 	$_hour_power = 3600;
 	$_min_power = 60;
 
+
 	if ($d < -12219321600) $d -= 86400*10; // if 15 Oct 1582 or earlier, gregorian correction
 
 	$_month_table_normal = array("",31,28,31,30,31,30,31,31,30,31,30,31);

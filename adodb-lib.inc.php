@@ -225,6 +225,13 @@ function _adodb_getmenu(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=f
 		*/
 	}
 
+	if (is_array($name))
+	{
+		/*
+		* Reserved for future use
+		*/
+	}
+
 	if ($multiple or is_array($defstr)) {
 		if ($size==0) $size=5;
 		$attr = ' multiple size="'.$size.'"';
@@ -240,7 +247,8 @@ function _adodb_getmenu(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=f
 			if (sizeof($barr) == 1) $barr[] = '';
 			$s .= "\n<option value=\"".$barr[0]."\">".$barr[1]."</option>";
 		} 
-			else $s .= "\n<option></option>";
+		else
+			$s .= "\n<option></option>";
 	}
 	if ($zthis->FieldCount() > 1) $hasvalue=true;
 	else $compareFields0 = true;
@@ -257,7 +265,7 @@ function _adodb_getmenu(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=f
 			continue;
 		}
 
-        if ($fieldsize > 1) {
+		if ($fieldsize > 1) {
 			if (isset($zthis->fields[1]))
 				$zval2 = rtrim($zthis->fields[1]);
 			else
@@ -293,14 +301,14 @@ function _adodb_getmenu_gp(&$zthis, $name,$defstr='',$blank1stItem=true,$multipl
 			$size=0, $selectAttr='',$compareFields0=true)
 {
 	$hasvalue = false;
-	
+
 	if (is_array($name))
 	{
 		/*
 		* Reserved for future use
 		*/
 	}
-	
+
 	if ($multiple or is_array($defstr)) {
 		if ($size==0) $size=5;
 		$attr = ' multiple size="'.$size.'"';
@@ -320,9 +328,9 @@ function _adodb_getmenu_gp(&$zthis, $name,$defstr='',$blank1stItem=true,$multipl
 	else $compareFields0 = true;
 
 	$value = '';
-    $optgroup = null;
-    $firstgroup = true;
-    $fieldsize = sizeof($zthis->fields);
+	$optgroup = null;
+	$firstgroup = true;
+	$fieldsize = sizeof($zthis->fields);
 	while(!$zthis->EOF) {
 		$zval = rtrim(reset($zthis->fields));
 
@@ -337,22 +345,23 @@ function _adodb_getmenu_gp(&$zthis, $name,$defstr='',$blank1stItem=true,$multipl
 			else
 				$zval2 = rtrim(next($zthis->fields));
 		}
+
 		$selected = ($compareFields0) ? $zval : $zval2;
 
-        $group = '';
+		$group = '';
 		if (isset($zthis->fields[2])) {
-            $group = rtrim($zthis->fields[2]);
-        }
+			$group = rtrim($zthis->fields[2]);
+		}
 
-        if ($optgroup != $group) {
-            $optgroup = $group;
-            if ($firstgroup) {
-                $firstgroup = false;
-                $s .="\n<optgroup label='". htmlspecialchars($group) ."'>";
-            } else {
-                $s .="\n</optgroup>";
-                $s .="\n<optgroup label='". htmlspecialchars($group) ."'>";
-            }
+		if ($optgroup != $group) {
+			$optgroup = $group;
+			if ($firstgroup) {
+				$firstgroup = false;
+				$s .="\n<optgroup label='". htmlspecialchars($group) ."'>";
+			} else {
+				$s .="\n</optgroup>";
+				$s .="\n<optgroup label='". htmlspecialchars($group) ."'>";
+			}
 		}
 
 		if ($hasvalue)
@@ -374,13 +383,12 @@ function _adodb_getmenu_gp(&$zthis, $name,$defstr='',$blank1stItem=true,$multipl
 		$zthis->MoveNext();
 	} // while
 
-    // closing last optgroup
-    if($optgroup != null) {
-        $s .= "\n</optgroup>";
+	// closing last optgroup
+	if($optgroup != null) {
+		$s .= "\n</optgroup>";
 	}
 	return $s ."\n</select>\n";
 }
-
 
 /*
 	Count the number of records this sql statement will return by using
@@ -413,16 +421,16 @@ function _adodb_getcount(&$zthis, $sql,$inputarr=false,$secs2cache=0)
 			} else
 				$rewritesql = "SELECT COUNT(*) FROM (".$rewritesql.")";
 
-        } else if (strncmp($zthis->databaseType,'postgres',8) == 0
-            || strncmp($zthis->databaseType,'mysql',5) == 0
-	    || strncmp($zthis->databaseType,'mssql',5) == 0
-            || strncmp($zthis->databaseType,'pdo_mssql',9) == 0
-            || strncmp($zthis->databaseType,'pdo_sqlsrv',10) == 0
-        ){
-		    $rewritesql = "SELECT COUNT(*) FROM ($rewritesql) _ADODB_ALIAS_";
-        } else {
-            $rewritesql = "SELECT COUNT(*) FROM ($rewritesql)";
-        }
+		} else if (strncmp($zthis->databaseType,'postgres',8) == 0
+			|| strncmp($zthis->databaseType,'mysql',5) == 0
+		|| strncmp($zthis->databaseType,'mssql',5) == 0
+			|| strncmp($zthis->databaseType,'pdo_mssql',9) == 0
+			|| strncmp($zthis->databaseType,'pdo_sqlsrv',10) == 0
+		){
+			$rewritesql = "SELECT COUNT(*) FROM ($rewritesql) _ADODB_ALIAS_";
+		} else {
+			$rewritesql = "SELECT COUNT(*) FROM ($rewritesql)";
+		}
 	} else {
 		// now replace SELECT ... FROM with SELECT COUNT(*) FROM
 		if ( strpos($sql, '_ADODB_COUNT') !== FALSE ) {
