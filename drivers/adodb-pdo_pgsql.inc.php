@@ -54,7 +54,6 @@ WHERE relkind in ('r','v') AND (c.relname='%s' or c.relname = lower('%s'))
 	public  $fmtTimeStamp = "'Y-m-d G:i:s'"; // used by DBTimeStamp as the default timestamp fmt.
 	public  $hasMoveFirst = true;
 	public  $hasGenID = true;
-	public  $metaDefaultsSQL = "SELECT d.adnum as num, d.adsrc as def from pg_attrdef d, pg_class c where d.adrelid=c.oid and c.relname='%s' order by d.adnum";
 	public  $random = 'random()';		/// random function
 	public  $hasTransactions = false; ## <<< BUG IN PDO pgsql driver
 	public  $hasInsertID = true;
@@ -137,6 +136,7 @@ select viewname,'V' from pg_views where viewname like $mask";
 				$pParsedTableName['table']['name']);
 		$schema = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'] : false);
+		$vMetaDefaultsSQL = "";
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
@@ -163,10 +163,11 @@ select viewname,'V' from pg_views where viewname like $mask";
 			unset($rskey);
 		}
 
+		$vMetaDefaultsSQL = $this->_dataDict->Postgres_GetMetaDefaultSql($table);
 		$rsdefa = array();
-		if (!empty($this->metaDefaultsSQL)) {
+		if (!empty($vMetaDefaultsSQL)) {
 			$savem = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
-			$sql = sprintf($this->metaDefaultsSQL, ($table));
+			$sql = sprintf($vMetaDefaultsSQL, ($table));
 			$rsdef = $this->Execute($sql);
 			$this->SetFetchMode2($savem);
 

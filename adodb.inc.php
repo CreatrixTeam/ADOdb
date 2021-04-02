@@ -2444,6 +2444,10 @@ if (!defined('_ADODB_LAYER')) {
 	/**
 	*  Change the SQL connection locale to a specified locale.
 	*  This is used to get the date formats written depending on the client locale.
+	*
+	*  Warning: Use of this function is discouraged. If a driver currently overrides 
+	*		ADOConnection::$fmtTimeStamp, and most, if not all, of the drivers do, the behavior of
+	*		this function is undefined.
 	*/
 	public function SetDateLocale($locale = 'En') {
 		$this->locale = $locale;

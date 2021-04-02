@@ -99,7 +99,6 @@ class ADODB_postgres64 extends ADOConnection{
 	public  $fmtTimeStamp = "'Y-m-d H:i:s'"; // used by DBTimeStamp as the default timestamp fmt.
 	public  $hasMoveFirst = true;
 	public  $hasGenID = true;
-	public  $metaDefaultsSQL = "SELECT d.adnum as num, d.adsrc as def from pg_attrdef d, pg_class c where d.adrelid=c.oid and c.relname='%s' order by d.adnum";
 	public  $random = 'random()';		/// random function
 	public  $autoRollback = true; // apparently pgsql does not autorollback properly before php 4.3.4
 							// http://bugs.php.net/bug.php?id=25404
@@ -419,6 +418,7 @@ class ADODB_postgres64 extends ADOConnection{
 				$pParsedTableName['table']['name']);
 		$schema = (array_key_exists('schema', $pParsedTableName) ? 
 				$pParsedTableName['schema']['name'] : false);
+		$vMetaDefaultsSQL = "";
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
@@ -445,10 +445,11 @@ class ADODB_postgres64 extends ADOConnection{
 			unset($rskey);
 		}
 
+		$vMetaDefaultsSQL = $this->_dataDict->Postgres_GetMetaDefaultSql($table);
 		$rsdefa = array();
-		if (!empty($this->metaDefaultsSQL)) {
+		if (!empty($vMetaDefaultsSQL)) {
 			$savem = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
-			$sql = sprintf($this->metaDefaultsSQL, ($table));
+			$sql = $vMetaDefaultsSQL;
 			$rsdef = $this->Execute($sql);
 			$this->SetFetchMode2($savem);
 
