@@ -1364,7 +1364,7 @@ class ADODB_DataDict {
 	/**
 	*	ACCESS: PROTECTED
 	*	Fired by ADOConnection::GenID() before returning. The function must set the
-	*		ADOConnection::$genID class variable. TThe parameter $pParsedSequenceName is the 
+	*		ADOConnection::$genID class variable. The parameter $pParsedSequenceName is the 
 	*		parsed info of an identifier name. Refer to ADODB_DataDict::ParseIdentifierName 
 	*		for full specification of the return. The parameter $pADORecordSet is the returned 
 	*		record set of the last sql statement that ADOConnection::GenID() executed. The 

@@ -21,26 +21,21 @@
  */
 class ADODB_pdo_firebird extends ADODB_pdo
 {
+	public  $databaseType = "pdo_firebird";
+	protected  $dsnType = 'firebird';
 	public $dialect = 3;
 	public $metaTablesSQL = "select lower(rdb\$relation_name) from rdb\$relations where rdb\$relation_name not like 'RDB\$%'";
 	public $metaColumnsSQL = "select lower(a.rdb\$field_name), a.rdb\$null_flag, a.rdb\$default_source, b.rdb\$field_length, b.rdb\$field_scale, b.rdb\$field_sub_type, b.rdb\$field_precision, b.rdb\$field_type from rdb\$relation_fields a, rdb\$fields b where a.rdb\$field_source = b.rdb\$field_name and a.rdb\$relation_name = '%s' order by a.rdb\$field_position asc";
 
-	var $arrayClass = 'ADORecordSet_array_pdo_firebird';
-
-	function _init($parentDriver)
-	{
-		$this->pdoDriver = $parentDriver;
-		//$parentDriver->_bindInputArray = true;
-		//$parentDriver->hasTransactions = false; // // should be set to false because of PDO SQLite driver not supporting changing autocommit mode
-		//$parentDriver->hasInsertID = true;
-	}
+	public $arrayClass = 'ADORecordSet_array_pdo_firebird';
 
 	/**
 	 * Gets the version iformation from the server
 	 *
 	 * @return string[]
 	 */
-	public function serverInfo()
+	//ALMOST VERBATIM FROM adodb-firebird.inc.php. DIFFERENCES ARE ONLY IN CODE STYLE.
+	public function ServerInfo()
 	{
 		$arr['dialect'] = $this->dialect;
 		switch ($arr['dialect']) {
@@ -61,42 +56,29 @@ class ADODB_pdo_firebird extends ADODB_pdo
 		return $arr;
 	}
 
-	/**
-	 * Returns the tables in the database.
-	 *
-	 * @param mixed $ttype
-	 * @param bool  $showSchema
-	 * @param mixed $mask
-	 *
-	 * @return    string[]
-	 */
-	public function metaTables($ttype = false, $showSchema = false, $mask = false)
+	//ALMOST VERBATIM FROM adodb-firebird.inc.php. DIFFERENCES ARE ONLY IN CODE STYLE APART FROM ONE
+	//		DIFFERENCE THAT IS THE USE OF $false IN THE ORIGINAL.
+	protected function _MetaColumns($pParsedTableName)
 	{
-		$ret = ADOConnection::MetaTables($ttype, $showSchema);
-
-		return $ret;
-	}
-
-	public function metaColumns($table, $normalize = true)
-	{
-		global $ADODB_FETCH_MODE;
-
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
+		$table = $pParsedTableName['table']['name'];
 
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL, strtoupper($table)));
 
-		$ADODB_FETCH_MODE = $save;
+		$this->SetFetchMode2($savem);
 
 		if ($rs === false) {
 			return false;
 		}
 
 		$retarr = array();
+		//OPN STUFF start
 		$dialect3 = $this->dialect == 3;
+		//OPN STUFF end
 		while (!$rs->EOF) { //print_r($rs->fields);
 			$fld = new ADOFieldObject();
 			$fld->name = trim($rs->fields[0]);
+			//OPN STUFF start
 			$this->_ConvertFieldType($fld, $rs->fields[7], $rs->fields[3], $rs->fields[4], $rs->fields[5],
 				$rs->fields[6], $dialect3);
 			if (isset($rs->fields[1]) && $rs->fields[1]) {
@@ -131,7 +113,7 @@ class ADODB_pdo_firebird extends ADODB_pdo
 			} else {
 				$fld->sub_type = null;
 			}
-			if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM) {
+			if ($this->GetFetchMode() == ADODB_FETCH_NUM) {
 				$retarr[] = $fld;
 			} else {
 				$retarr[strtoupper($fld->name)] = $fld;
@@ -147,15 +129,13 @@ class ADODB_pdo_firebird extends ADODB_pdo
 		}
 	}
 
-	public function metaIndexes($table, $primary = false, $owner = false)
+	//ALMOST VERBATIM FROM adodb-firebird.inc.php. DIFFERENCES ARE ONLY IN CODE STYLE APART FROM ONE
+	//		DIFFERENCE THAT IS THE USE OF $false IN THE ORIGINAL.
+	protected function _MetaIndexes ($pParsedTableName, $primary = FALSE, $owner=false)
 	{
-		// save old fetch mode
-		global $ADODB_FETCH_MODE;
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== false) {
-			$savem = $this->SetFetchMode(false);
-		}
+		$table = $pParsedTableName['table']['name'];
+		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
+
 		$table = strtoupper($table);
 		$sql = "SELECT * FROM RDB\$INDICES WHERE RDB\$RELATION_NAME = '" . $table . "'";
 		if (!$primary) {
@@ -168,10 +148,8 @@ class ADODB_pdo_firebird extends ADODB_pdo
 		$rs = $this->Execute($sql);
 		if (!is_object($rs)) {
 			// restore fetchmode
-			if (isset($savem)) {
-				$this->SetFetchMode($savem);
-			}
-			$ADODB_FETCH_MODE = $save;
+			$this->SetFetchMode2($savem);
+
 			return false;
 		}
 
@@ -194,25 +172,23 @@ class ADODB_pdo_firebird extends ADODB_pdo
 			}
 		}
 		// restore fetchmode
-		if (isset($savem)) {
-			$this->SetFetchMode($savem);
-		}
-		$ADODB_FETCH_MODE = $save;
+		$this->SetFetchMode2($savem);
 
 		return $indexes;
 	}
 
-	public function metaPrimaryKeys($table, $owner_notused = false, $internalKey = false)
+	//ALMOST VERBATIM FROM adodb-firebird.inc.php. DIFFERENCES ARE ONLY IN CODE STYLE.
+	protected function _MetaPrimaryKeys($pParsedTableName,$owner_notused=false,$internalKey=false)
 	{
 		if ($internalKey) {
 			return array('RDB$DB_KEY');
 		}
-
+		$table = $pParsedTableName['table']['name'];
 		$table = strtoupper($table);
 
 		$sql = 'SELECT S.RDB$FIELD_NAME AFIELDNAME
 	FROM RDB$INDICES I JOIN RDB$INDEX_SEGMENTS S ON I.RDB$INDEX_NAME=S.RDB$INDEX_NAME
-	WHERE I.RDB$RELATION_NAME=\'' . $table . '\' and I.RDB$INDEX_NAME like \'RDB$PRIMARY%\'
+	WHERE UPPER(I.RDB$RELATION_NAME)=\'' . $table . '\' and I.RDB$INDEX_NAME like \'RDB$PRIMARY%\'
 	ORDER BY I.RDB$INDEX_NAME,S.RDB$FIELD_POSITION';
 
 		$a = $this->GetCol($sql, false, true);
@@ -222,51 +198,8 @@ class ADODB_pdo_firebird extends ADODB_pdo
 		return false;
 	}
 
-	public function createSequence($seqname = 'adodbseq', $startID = 1)
-	{
-		$ok = $this->execute("CREATE SEQUENCE $seqname");
-		if (!$ok) {
-			return false;
-		}
-
-		return $this->execute("ALTER SEQUENCE $seqname RESTART WITH " . ($startID - 1));
-	}
-
-	public function dropSequence($seqname = 'adodbseq')
-	{
-		$seqname = strtoupper($seqname);
-		return $this->Execute("DROP SEQUENCE $seqname");
-	}
-
-
-	public function _affectedrows()
-	{
-		return fbird_affected_rows($this->_transactionID ? $this->_transactionID : $this->_connectionID);
-	}
-
-	public function genId($seqname = 'adodbseq', $startID = 1)
-	{
-		$getnext = ("SELECT Gen_ID($seqname,1) FROM RDB\$DATABASE");
-		$rs = @$this->execute($getnext);
-		if (!$rs) {
-			$this->execute(("CREATE SEQUENCE $seqname"));
-			$this->execute("ALTER SEQUENCE $seqname RESTART WITH " . ($startID - 1) . ';');
-			$rs = $this->execute($getnext);
-		}
-		if ($rs && !$rs->EOF) {
-			$this->genID = (integer)reset($rs->fields);
-		} else {
-			$this->genID = 0; // false
-		}
-
-		if ($rs) {
-			$rs->Close();
-		}
-
-		return $this->genID;
-	}
-
-	public function selectLimit($sql, $nrows = -1, $offset = -1, $inputarr = false, $secs = 0)
+	//ALMOST VERBATIM FROM adodb-firebird.inc.php. DIFFERENCES ARE ONLY IN CODE STYLE.
+	public function SelectLimit($sql, $nrows = -1, $offset = -1, $inputarr = false, $secs = 0)
 	{
 		$nrows = (integer)$nrows;
 		$offset = (integer)$offset;
@@ -297,6 +230,8 @@ class ADODB_pdo_firebird extends ADODB_pdo
 	 * @param int            $fprecision
 	 * @param bool           $dialect3
 	 */
+	//OPN STUFF start
+	//ALMOST VERBATIM FROM adodb-firebird.inc.php. DIFFERENCES ARE ONLY IN CODE STYLE.
 	final private function _convertFieldType(&$fld, $ftype, $flen, $fscale, $fsubtype, $fprecision, $dialect3)
 	{
 		$fscale = abs($fscale);
@@ -392,6 +327,7 @@ class ADODB_pdo_firebird extends ADODB_pdo
 				break;
 		} // switch
 	}
+	//OPN STUFF end
 }
 
 /**
@@ -401,47 +337,5 @@ class ADORecordSet_pdo_firebird extends ADORecordSet_pdo
 {
 
 	public $databaseType = "pdo_firebird";
-
-	/**
-	 * returns the field object
-	 *
-	 * @param int $fieldOffset Optional field offset
-	 *
-	 * @return object The ADOFieldObject describing the field
-	 */
-	public function fetchField($fieldOffset = 0)
-	{
-	}
 }
 
-/**
- * Class ADORecordSet_array_pdo_firebird
- */
-class ADORecordSet_array_pdo_firebird extends ADORecordSet_array_pdo
-{
-	public $databaseType = "pdo_firebird";
-	public $canSeek = true;
-
-	/**
-	 * returns the field object
-	 *
-	 * @param int $fieldOffset Optional field offset
-	 *
-	 * @return object The ADOFieldObject describing the field
-	 */
-	public function fetchField($fieldOffset = 0)
-	{
-
-		$fld = new ADOFieldObject;
-		$fld->name = $fieldOffset;
-		$fld->type = 'C';
-		$fld->max_length = 0;
-
-		// This needs to be populated from the metadata
-		$fld->not_null = false;
-		$fld->has_default = false;
-		$fld->default_value = 'null';
-
-		return $fld;
-	}
-}

@@ -355,17 +355,36 @@ end;
 	
 	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)
 	{
-		return array
-		(
-			"CREATE GENERATOR $pParsedSequenceName[name]",
-			"SET GENERATOR $pParsedSequenceName[name] TO ".($pStartID-1).';'
-		);
+		if($this->databaseType !== "pdo_firebird")
+		{
+			return array
+			(
+				"CREATE GENERATOR $pParsedSequenceName[name]",
+				"SET GENERATOR $pParsedSequenceName[name] TO ".($pStartID-1).';'
+			);
+		}
+		else
+		{
+			return array
+			(
+				"CREATE SEQUENCE $pParsedSequenceName[name]",
+				"ALTER SEQUENCE $pParsedSequenceName[name] RESTART WITH " . ($pStartID - 1)
+			);
+		}
 	}
 	
 	protected function _DropSequenceSQL($pParsedSequenceName)
 	{
-		return array("DROP GENERATOR ".
-				strtoupper($pParsedSequenceName['name']));
+		if($this->databaseType !== "pdo_firebird")
+		{
+			return array("DROP GENERATOR ".
+					strtoupper($pParsedSequenceName['name']));
+		}
+		else
+		{
+			return array("DROP SEQUENCE ".
+					strtoupper($pParsedSequenceName['name']));
+		}
 	}
 	
 	protected function _GenIDSQL($pParsedSequenceName)
