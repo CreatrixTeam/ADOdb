@@ -106,6 +106,7 @@ class ADODB_pdo extends ADOConnection {
 				case 'mysql':
 				case 'oci':
 				case 'pgsql':
+				case 'firebird':
 				default:
 					$argDSN .= ';dbname='.$argDatabasename;
 			}
