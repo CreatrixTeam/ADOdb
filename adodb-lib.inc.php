@@ -205,36 +205,12 @@ function _adodb_replace(&$zthis, $table, $fieldArray, $keyCol, $autoQuote, $has_
 function _adodb_getmenu(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=false,
 			$size=0, $selectAttr='',$compareFields0=true)
 {
-	$hasvalue = false;
-	
-	if (is_array($name))
-	{
-		/*
-		* Reserved for future use
-		*/
+	$s = _adodb_getmenu_select($name, $defstr, $blank1stItem, $multiple, $size, $selectAttr);
+
+	$hasvalue = $zthis->FieldCount() > 1;
+	if (!$hasvalue) {
+		$compareFields0 = true;
 	}
-
-
-	if ($multiple or is_array($defstr)) {
-		if ($size==0) $size=5;
-		$attr = ' multiple size="'.$size.'"';
-		if (!strpos($name,'[]')) $name .= '[]';
-	} else if ($size) $attr = ' size="'.$size.'"';
-	else $attr ='';
-
-	$s = '<select name="'.$name.'"'.$attr.' '.$selectAttr.'>';
-	if ($blank1stItem)
-	{
-		if (is_string($blank1stItem))  {
-			$barr = explode(':',$blank1stItem);
-			if (sizeof($barr) == 1) $barr[] = '';
-			$s .= "\n<option value=\"".$barr[0]."\">".$barr[1]."</option>";
-		} 
-		else
-			$s .= "\n<option></option>";
-	}
-	if ($zthis->FieldCount() > 1) $hasvalue=true;
-	else $compareFields0 = true;
 
 	$value = '';
     $optgroup = null;
@@ -244,7 +220,6 @@ function _adodb_getmenu(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=f
 		$zval = rtrim(reset($zthis->fields));
 
 		if ($blank1stItem && $zval=="") {
-		if ($blank1stItem && $zval == "") {
 			$zthis->MoveNext();
 			continue;
 		}
@@ -255,25 +230,12 @@ function _adodb_getmenu(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=f
 			else
 				$zval2 = rtrim(next($zthis->fields));
 		}
-		$selected = ($compareFields0) ? $zval : $zval2;
 
 		if ($hasvalue)
 			$value = " value='".htmlspecialchars($zval2)."'";
 
-		if (is_array($defstr))
-		{
+		$s .= _adodb_getmenu_option($defstr, $compareFields0 ? $zval : $zval2, $value, $zval);
 
-			if (in_array($selected,$defstr))
-				$s .= "\n<option selected='selected'$value>".htmlspecialchars($zval).'</option>';
-			else
-				$s .= "\n<option".$value.'>'.htmlspecialchars($zval).'</option>';
-		}
-		else {
-			if (strcasecmp($selected,$defstr)==0)
-				$s .= "\n<option selected='selected'$value>".htmlspecialchars($zval).'</option>';
-			else
-				$s .= "\n<option".$value.'>'.htmlspecialchars($zval).'</option>';
-		}
 		$zthis->MoveNext();
 	} // while
 
@@ -284,28 +246,12 @@ function _adodb_getmenu(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=f
 function _adodb_getmenu_gp(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=false,
 			$size=0, $selectAttr='',$compareFields0=true)
 {
-	$hasvalue = false;
-	global $ADODB_FETCH_MODE;
+	$s = _adodb_getmenu_select($name, $defstr, $blank1stItem, $multiple, $size, $selectAttr);
 
+	$hasvalue = $zthis->FieldCount() > 1;
+	if (!$hasvalue) {
+		$compareFields0 = true;
 	}
-
-	if ($multiple or is_array($defstr)) {
-		if ($size==0) $size=5;
-		$attr = ' multiple size="'.$size.'"';
-		if (!strpos($name,'[]')) $name .= '[]';
-	} else if ($size) $attr = ' size="'.$size.'"';
-	else $attr ='';
-
-	$s = '<select name="'.$name.'"'.$attr.' '.$selectAttr.'>';
-	if ($blank1stItem)
-		if (is_string($blank1stItem))  {
-			$barr = explode(':',$blank1stItem);
-			if (sizeof($barr) == 1) $barr[] = '';
-			$s .= "\n<option value=\"".$barr[0]."\">".$barr[1]."</option>";
-		} else $s .= "\n<option></option>";
-
-	if ($zthis->FieldCount() > 1) $hasvalue=true;
-	else $compareFields0 = true;
 
 	$value = '';
 	$optgroup = null;
@@ -326,8 +272,6 @@ function _adodb_getmenu_gp(&$zthis, $name,$defstr='',$blank1stItem=true,$multipl
 				$zval2 = rtrim(next($zthis->fields));
 		}
 
-		$selected = ($compareFields0) ? $zval : $zval2;
-
 		$group = '';
 		if (isset($zthis->fields[2])) {
 			$group = rtrim($zthis->fields[2]);
@@ -347,19 +291,8 @@ function _adodb_getmenu_gp(&$zthis, $name,$defstr='',$blank1stItem=true,$multipl
 		if ($hasvalue)
 			$value = " value='".htmlspecialchars($zval2)."'";
 
-		if (is_array($defstr))  {
+		$s .= _adodb_getmenu_option($defstr, $compareFields0 ? $zval : $zval2, $value, $zval);
 
-			if (in_array($selected,$defstr))
-				$s .= "\n<option selected='selected'$value>".htmlspecialchars($zval).'</option>';
-			else
-				$s .= "\n<option".$value.'>'.htmlspecialchars($zval).'</option>';
-		}
-		else {
-			if (strcasecmp($selected,$defstr)==0)
-				$s .= "\n<option selected='selected'$value>".htmlspecialchars($zval).'</option>';
-			else
-				$s .= "\n<option".$value.'>'.htmlspecialchars($zval).'</option>';
-		}
 		$zthis->MoveNext();
 	} // while
 
