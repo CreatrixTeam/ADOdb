@@ -249,14 +249,14 @@ class ADODB_pdo extends ADOConnection {
 		return $err;
 	}
 
-    /**
-     * @param bool $auto_commit
-     * @return void
-     */
+	/**
+	 * @param bool $auto_commit
+	 * @return void
+	 */
 	public function SetAutoCommit($auto_commit)
-    {
-        $this->_connectionID->setAttribute(PDO::ATTR_AUTOCOMMIT, $auto_commit);
-    }
+	{
+		$this->_connectionID->setAttribute(PDO::ATTR_AUTOCOMMIT, $auto_commit);
+	}
 
 	public function BeginTrans()
 	{
