@@ -135,81 +135,81 @@ function _array_change_key_case($an_array)
 
 function _adodb_replace(&$zthis, $table, $fieldArray, $keyCol, $autoQuote, $has_autoinc)
 {
-		if (count($fieldArray) == 0) return 0;
-		$first = true;
-		$uSet = '';
+	if (count($fieldArray) == 0) return 0;
+	$first = true;
+	$uSet = '';
 
-		if (!is_array($keyCol)) {
-			$keyCol = array($keyCol);
+	if (!is_array($keyCol)) {
+		$keyCol = array($keyCol);
+	}
+	foreach($fieldArray as $k => $v) {
+		if ($v === null) {
+			$v = 'NULL';
+			$fieldArray[$k] = $v;
+		} else if ($autoQuote && /*!is_numeric($v) /*and strncmp($v,"'",1) !== 0 -- sql injection risk*/ strcasecmp($v,$zthis->null2null)!=0) {
+			$v = $zthis->qstr($v);
+			$fieldArray[$k] = $v;
 		}
-		foreach($fieldArray as $k => $v) {
-			if ($v === null) {
-				$v = 'NULL';
-				$fieldArray[$k] = $v;
-			} else if ($autoQuote && /*!is_numeric($v) /*and strncmp($v,"'",1) !== 0 -- sql injection risk*/ strcasecmp($v,$zthis->null2null)!=0) {
-				$v = $zthis->qstr($v);
-				$fieldArray[$k] = $v;
-			}
-			if (in_array($k,$keyCol)) continue; // skip UPDATE if is key
+		if (in_array($k,$keyCol)) continue; // skip UPDATE if is key
 
-			if ($first) {
-				$first = false;
-				$uSet = "$k=$v";
-			} else
-				$uSet .= ",$k=$v";
+		if ($first) {
+			$first = false;
+			$uSet = "$k=$v";
+		} else
+			$uSet .= ",$k=$v";
+	}
+
+	$where = false;
+	foreach ($keyCol as $v) {
+		if (isset($fieldArray[$v])) {
+			if ($where) $where .= ' and '.$v.'='.$fieldArray[$v];
+			else $where = $v.'='.$fieldArray[$v];
 		}
+	}
 
-		$where = false;
-		foreach ($keyCol as $v) {
-			if (isset($fieldArray[$v])) {
-				if ($where) $where .= ' and '.$v.'='.$fieldArray[$v];
-				else $where = $v.'='.$fieldArray[$v];
-			}
-		}
+	if ($uSet && $where) {
+		$update = "UPDATE $table SET $uSet WHERE $where";
 
-		if ($uSet && $where) {
-			$update = "UPDATE $table SET $uSet WHERE $where";
-
-			$rs = $zthis->Execute($update);
+		$rs = $zthis->Execute($update);
 
 
-			if ($rs) {
-				if ($zthis->poorAffectedRows) {
-				/*
-				 The Select count(*) wipes out any errors that the update would have returned.
-				http://phplens.com/lens/lensforum/msgs.php?id=5696
-				*/
-					if ($zthis->ErrorNo()<>0) return 0;
+		if ($rs) {
+			if ($zthis->poorAffectedRows) {
+			/*
+			 The Select count(*) wipes out any errors that the update would have returned.
+			http://phplens.com/lens/lensforum/msgs.php?id=5696
+			*/
+				if ($zthis->ErrorNo()<>0) return 0;
 
-				# affected_rows == 0 if update field values identical to old values
-				# for mysql - which is silly.
+			# affected_rows == 0 if update field values identical to old values
+			# for mysql - which is silly.
 
-					$cnt = $zthis->GetOne("select count(*) from $table where $where");
-					if ($cnt > 0) return 1; // record already exists
-				} else {
-					if (($zthis->Affected_Rows()>0)) return 1;
-				}
-			} else
-				return 0;
-		}
-
-	//	print "<p>Error=".$this->ErrorNo().'<p>';
-		$first = true;
-		foreach($fieldArray as $k => $v) {
-			if ($has_autoinc && in_array($k,$keyCol)) continue; // skip autoinc col
-
-			if ($first) {
-				$first = false;
-				$iCols = "$k";
-				$iVals = "$v";
+				$cnt = $zthis->GetOne("select count(*) from $table where $where");
+				if ($cnt > 0) return 1; // record already exists
 			} else {
-				$iCols .= ",$k";
-				$iVals .= ",$v";
+				if (($zthis->Affected_Rows()>0)) return 1;
 			}
+		} else
+			return 0;
+	}
+
+//	print "<p>Error=".$this->ErrorNo().'<p>';
+	$first = true;
+	foreach($fieldArray as $k => $v) {
+		if ($has_autoinc && in_array($k,$keyCol)) continue; // skip autoinc col
+
+		if ($first) {
+			$first = false;
+			$iCols = "$k";
+			$iVals = "$v";
+		} else {
+			$iCols .= ",$k";
+			$iVals .= ",$v";
 		}
-		$insert = "INSERT INTO $table ($iCols) VALUES ($iVals)";
-		$rs = $zthis->Execute($insert);
-		return ($rs) ? 2 : 0;
+	}
+	$insert = "INSERT INTO $table ($iCols) VALUES ($iVals)";
+	$rs = $zthis->Execute($insert);
+	return ($rs) ? 2 : 0;
 }
 
 // Requires $ADODB_FETCH_MODE = ADODB_FETCH_NUM
