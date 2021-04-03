@@ -214,12 +214,6 @@ function _adodb_getmenu(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=f
 		*/
 	}
 
-	if (is_array($name))
-	{
-		/*
-		* Reserved for future use
-		*/
-	}
 
 	if ($multiple or is_array($defstr)) {
 		if ($size==0) $size=5;
@@ -250,6 +244,7 @@ function _adodb_getmenu(&$zthis, $name,$defstr='',$blank1stItem=true,$multiple=f
 		$zval = rtrim(reset($zthis->fields));
 
 		if ($blank1stItem && $zval=="") {
+		if ($blank1stItem && $zval == "") {
 			$zthis->MoveNext();
 			continue;
 		}
@@ -290,12 +285,8 @@ function _adodb_getmenu_gp(&$zthis, $name,$defstr='',$blank1stItem=true,$multipl
 			$size=0, $selectAttr='',$compareFields0=true)
 {
 	$hasvalue = false;
+	global $ADODB_FETCH_MODE;
 
-	if (is_array($name))
-	{
-		/*
-		* Reserved for future use
-		*/
 	}
 
 	if ($multiple or is_array($defstr)) {
@@ -377,6 +368,78 @@ function _adodb_getmenu_gp(&$zthis, $name,$defstr='',$blank1stItem=true,$multipl
 		$s .= "\n</optgroup>";
 	}
 	return $s ."\n</select>\n";
+}
+
+/**
+ * Generate the opening SELECT tag for getmenu functions.
+ *
+ * ADOdb internal function, used by _adodb_getmenu() and _adodb_getmenu_gp().
+ *
+ * @param string $name
+ * @param string $defstr
+ * @param bool   $blank1stItem
+ * @param bool   $multiple
+ * @param int    $size
+ * @param string $selectAttr
+ *
+ * @return string HTML
+ */
+function _adodb_getmenu_select($name, $defstr = '', $blank1stItem = true,
+							   $multiple = false, $size = 0, $selectAttr = '')
+{
+	if ($multiple || is_array($defstr)) {
+		if ($size == 0 ) {
+			$size = 5;
+		}
+		$attr = ' multiple size="' . $size . '"';
+		if (!strpos($name,'[]')) {
+			$name .= '[]';
+		}
+	} elseif ($size) {
+		$attr = ' size="' . $size . '"';
+	} else {
+		$attr = '';
+	}
+
+	$html = '<select name="' . $name . '"' . $attr . ' ' . $selectAttr . '>';
+	if ($blank1stItem) {
+		if (is_string($blank1stItem))  {
+			$barr = explode(':',$blank1stItem);
+			if (sizeof($barr) == 1) {
+				$barr[] = '';
+			}
+			$html .= "\n<option value=\"" . $barr[0] . "\">" . $barr[1] . "</option>";
+		} else {
+			$html .= "\n<option></option>";
+		}
+	}
+
+	return $html;
+}
+
+/**
+ * Print the OPTION tags for getmenu functions.
+ *
+ * ADOdb internal function, used by _adodb_getmenu() and _adodb_getmenu_gp().
+ *
+ * @param string $defstr  Default values
+ * @param string $compare Value to compare against defaults
+ * @param string $value   Ready-to-print `value="xxx"` (or empty) string
+ * @param string $display Display value
+ *
+ * @return string HTML
+ */
+function _adodb_getmenu_option($defstr, $compare, $value, $display)
+{
+	if (   is_array($defstr) && in_array($compare, $defstr)
+		|| !is_array($defstr) && strcasecmp($compare, $defstr) == 0
+	) {
+		$selected = ' selected="selected"';
+	} else {
+		$selected = '';
+	}
+
+	return "\n<option $value$selected>" . htmlspecialchars($display) . '</option>';
 }
 
 /*
