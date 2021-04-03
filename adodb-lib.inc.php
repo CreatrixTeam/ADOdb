@@ -136,12 +136,11 @@ function _array_change_key_case($an_array)
 function _adodb_replace(&$zthis, $table, $fieldArray, $keyCol, $autoQuote, $has_autoinc)
 {
 	if (count($fieldArray) == 0) return 0;
-	$first = true;
-	$uSet = '';
 
 	if (!is_array($keyCol)) {
 		$keyCol = array($keyCol);
 	}
+	$uSet = '';
 	foreach($fieldArray as $k => $v) {
 		if ($v === null) {
 			$v = 'NULL';
@@ -152,19 +151,18 @@ function _adodb_replace(&$zthis, $table, $fieldArray, $keyCol, $autoQuote, $has_
 		}
 		if (in_array($k,$keyCol)) continue; // skip UPDATE if is key
 
-		if ($first) {
-			$first = false;
-			$uSet = "$k=$v";
-		} else
-			$uSet .= ",$k=$v";
+		$uSet .= ",$k=$v";
 	}
+	$uSet = ltrim($uSet, ',');
 
-	$where = false;
+	$where = '';
 	foreach ($keyCol as $v) {
 		if (isset($fieldArray[$v])) {
-			if ($where) $where .= ' and '.$v.'='.$fieldArray[$v];
-			else $where = $v.'='.$fieldArray[$v];
+			$where .= ' and '.$v.'='.$fieldArray[$v];
 		}
+	}
+	if ($where) {
+		$where = substr($where, 5);
 	}
 
 	if ($uSet && $where) {
@@ -193,20 +191,16 @@ function _adodb_replace(&$zthis, $table, $fieldArray, $keyCol, $autoQuote, $has_
 			return 0;
 	}
 
-//	print "<p>Error=".$this->ErrorNo().'<p>';
-	$first = true;
+	$iCols = $iVals = '';
 	foreach($fieldArray as $k => $v) {
 		if ($has_autoinc && in_array($k,$keyCol)) continue; // skip autoinc col
 
-		if ($first) {
-			$first = false;
-			$iCols = "$k";
-			$iVals = "$v";
-		} else {
-			$iCols .= ",$k";
-			$iVals .= ",$v";
-		}
+		$iCols .= ",$k";
+		$iVals .= ",$v";
 	}
+	$iCols = ltrim($iCols, ',');
+	$iVals = ltrim($iVals, ',');
+
 	$insert = "INSERT INTO $table ($iCols) VALUES ($iVals)";
 	$rs = $zthis->Execute($insert);
 	return ($rs) ? 2 : 0;
