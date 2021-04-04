@@ -121,7 +121,7 @@ class ADODB_oci8po extends ADODB_oci8 {
 			/*
 			* find the next character of the string
 			*/
-			$c = $sql{$i};
+			$c = $sql[$i];
 
 			if ($c == "'" && !$inString && $escaped==0)
 				/*
