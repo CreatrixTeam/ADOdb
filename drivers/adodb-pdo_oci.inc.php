@@ -36,7 +36,7 @@ class ADODB_pdo_oci extends ADODB_pdo_base {
 
  	protected  $_initdate = true;
 
-	public function event_pdoConnectionEstablished()
+	protected function event_pdoConnectionEstablished()
 	{
 		if ($this->_initdate) {
 			$this->Execute("ALTER SESSION SET NLS_DATE_FORMAT='".$this->NLS_DATE_FORMAT."'");

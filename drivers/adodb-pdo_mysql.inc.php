@@ -31,7 +31,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	#protected  $_bindInputArray = false;
 	public  $hasInsertID = true;
 
-	public function event_pdoConnectionEstablished()
+	protected function event_pdoConnectionEstablished()
 		{$this->_connectionID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);}
 
 	// dayFraction is a day in floating point

@@ -89,6 +89,9 @@ class ADODB_pdo extends ADOConnection {
 		$at = strpos($argDSN,':');
 		$vDsnType = substr($argDSN,0,$at);
 		
+		if($vDsnType === "dblib")
+			{$vDsnType = "dblib_mssql";}
+		
 		if($this->dsnType !== $vDsnType){
 			$this->_errormsg = 'Connection attempt failed: DSN mismatch. Driver expects '.
 					$this->dsnType.'. '.$vDsnType." provided.";
@@ -102,11 +105,15 @@ class ADODB_pdo extends ADOConnection {
 					break;
 				case 'sqlite':
 					break;
+				case 'dblib_mssql':
+					$argDSN = str_replace('dblib_mssql', 'dblib', $argDSN).';dbname='.$argDatabasename;
+					break;
 				case 'mssql':
 				case 'mysql':
 				case 'oci':
 				case 'pgsql':
 				case 'firebird':
+				case 'dblib':
 				default:
 					$argDSN .= ';dbname='.$argDatabasename;
 			}
@@ -148,7 +155,7 @@ class ADODB_pdo extends ADOConnection {
 	*	ACCESS: PROTECTED
 	*	Called when a successful PDO connection is established.
 	*/
-	public function event_pdoConnectionEstablished()
+	protected function event_pdoConnectionEstablished()
 		{}
 
 	public function Concat()
@@ -426,7 +433,7 @@ class ADODB_pdo_base extends ADODB_pdo {
 	protected  $_bindInputArray = true;
 
 
-	public function event_pdoConnectionEstablished()
+	protected function event_pdoConnectionEstablished()
 	{		
 		#$parentDriver->_connectionID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY,true);
 	}
