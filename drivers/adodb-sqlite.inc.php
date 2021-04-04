@@ -259,6 +259,7 @@ class ADODB_sqlite extends ADOConnection {
 		return @sqlite_close($this->_connectionID);
 	}
 
+	//Verbatim confirmed from "adodb-sqlite.inc.php"/"adodb-sqlite3.inc.php"
 	protected function _MetaIndexes($pParsedTableName, $primary = FALSE, $owner=false)
 	{
 		$false = false;
@@ -288,15 +289,12 @@ class ADODB_sqlite extends ADOConnection {
 				);
 			}
 			/**
-			 * There must be a more elegant way of doing this,
-			 * the index elements appear in the SQL statement
+			 * The index elements appear in the SQL statement
 			 * in cols[1] between parentheses
 			 * e.g CREATE UNIQUE INDEX ware_0 ON warehouse (org,warehouse)
 			 */
-			$cols = explode("(",$row[1]);
-			$cols = explode(")",$cols[1]);
-			array_pop($cols);
-			$indexes[$row[0]]['columns'] = $cols;
+			preg_match_all('/\((.*)\)/',$row[1],$indexExpression);
+			$indexes[$row[0]]['columns'] = array_map('trim',explode(',',$indexExpression[1][0]));
 		}
 
 		$this->SetFetchMode2($savem);

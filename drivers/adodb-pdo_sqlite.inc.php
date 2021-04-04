@@ -226,6 +226,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		$false = false;
 		$table = $pParsedTableName['table']['name'];
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
+
 		$SQL=sprintf("SELECT name,sql FROM sqlite_master WHERE type='index' AND LOWER(tbl_name)='%s'", strtolower($table));
 		$rs = $this->Execute($SQL);
 		if (!is_object($rs)) {
@@ -249,16 +250,14 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 				);
 			}
 			/**
-			 * There must be a more elegant way of doing this,
-			 * the index elements appear in the SQL statement
+			 * The index elements appear in the SQL statement
 			 * in cols[1] between parentheses
 			 * e.g CREATE UNIQUE INDEX ware_0 ON warehouse (org,warehouse)
 			 */
-			$cols = explode("(",$row[1]);
-			$cols = explode(")",$cols[1]);
-			array_pop($cols);
-			$indexes[$row[0]]['columns'] = $cols;
+			preg_match_all('/\((.*)\)/',$row[1],$indexExpression);
+			$indexes[$row[0]]['columns'] = array_map('trim',explode(',',$indexExpression[1][0]));
 		}
+
 		$this->SetFetchMode2($savem);
 
 		return $indexes;
