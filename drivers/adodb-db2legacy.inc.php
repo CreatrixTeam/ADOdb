@@ -321,7 +321,7 @@ class ADODB_db2legacy extends ADOConnection {
 		}
 
 		$rs->Close();
-		return $foreign_key;
+		return $foreign_keys;
 	}
 
 

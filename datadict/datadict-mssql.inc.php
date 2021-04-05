@@ -56,6 +56,9 @@ class ADODB2_mssql extends ADODB_DataDict {
 
 	//public  $alterCol = ' ALTER COLUMN ';
 
+	public $blobAllowsDefaultValue = true;
+	public $blobAllowsNotNull      = true;
+
 	protected function _event_connectionSet($pADOConnection)
 	{
 		if($this->dataProvider === "mssqlnative")

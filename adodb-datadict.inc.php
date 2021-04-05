@@ -195,13 +195,13 @@ class ADODB_DataDict {
 	* The type is whatever is matched to an X or X2 or B type. We must 
 	* explicitly set the value in the driver to switch the behaviour on
 	*/
-	public $blobAllowsNotNull;
+	public $blobAllowsNotNull = false;
 	/*
 	* Indicates whether a BLOB/CLOB field will allow a DEFAULT set
 	* The type is whatever is matched to an X or X2 or B type. We must 
 	* explicitly set the value in the driver to switch the behaviour on
 	*/
-	public $blobAllowsDefaultValue;
+	public $blobAllowsDefaultValue = false;
 
 	public function GetCommentSQL($table,$col)
 	{
