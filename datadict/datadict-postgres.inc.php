@@ -271,7 +271,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 			if ($this->debug) ADOConnection::outp("AlterColumnSQL needs a complete table-definiton for PostgreSQL");
 			return array();
 		}
-		return $this->_recreate_copy_table($tabname,False,$tableflds,$tableoptions);
+		return $this->do_recreate_copy_table($tabname,False,$tableflds,$tableoptions);
 	}
 
 	/**
@@ -295,7 +295,7 @@ class ADODB2_postgres extends ADODB_DataDict {
 		if ($has_drop_column) {
 			return ADODB_DataDict::DropColumnSQL($tabname, $flds);
 		}
-		return $this->_recreate_copy_table($tabname,$flds,$tableflds,$tableoptions);
+		return $this->do_recreate_copy_table($tabname,$flds,$tableflds,$tableoptions);
 	}
 
 	/**
@@ -368,6 +368,56 @@ class ADODB2_postgres extends ADODB_DataDict {
 		}
 		$aSql[] = 'COMMIT';
 		return $aSql;
+	}
+	
+	protected function do_recreate_copy_table($tabname,$dropflds,$tableflds,$tableoptions='')
+	{
+		if(((float) $this->GetServerInfo('version')) >= 9.0)
+			{return $this->_recreate_copy_table($tabname,$dropflds,$tableflds,$tableoptions);}
+		{
+			if ($dropflds && !is_array($dropflds)) $dropflds = explode(',',$dropflds);
+			$copyflds = array();
+			foreach($this->MetaColumns($tabname) as $fld) {
+				if (!$dropflds || !in_array($fld->name,$dropflds)) {
+					// we need to explicit convert varchar to a number to be able to do an AlterColumn of a char column to a nummeric one
+					if (preg_match('/'.$fld->name.' (I|I2|I4|I8|N|F)/i',$tableflds,$matches) &&
+						in_array($fld->type,array('varchar','char','text','bytea'))) {
+						$copyflds[] = "to_number($fld->name,'S9999999999999D99')";
+					} else {
+						$copyflds[] = $fld->name;
+					}
+					// identify the sequence name and the fld its on
+					if ($fld->primary_key && $fld->has_default &&
+						preg_match("/nextval\('([^']+)'::text\)/",$fld->default_value,$matches)) {
+						$seq_name = $matches[1];
+						$seq_fld = $fld->name;
+					}
+				}
+			}
+			$copyflds = implode(', ',$copyflds);
+
+			$tempname = $tabname.'_tmp';
+			$aSql[] = 'BEGIN';		// we use a transaction, to make sure not to loose the content of the table
+			$aSql[] = "SELECT * INTO TEMPORARY TABLE $tempname FROM $tabname";
+			$aSql = array_merge($aSql,$this->DropTableSQL($tabname));
+			$aSql = array_merge($aSql,$this->CreateTableSQL($tabname,$tableflds,$tableoptions));
+			$aSql[] = "INSERT INTO $tabname SELECT $copyflds FROM $tempname";
+			if ($seq_name && $seq_fld) {	// if we have a sequence we need to set it again
+				$seq_name = $tabname.'_'.$seq_fld.'_seq';	// has to be the name of the new implicit sequence
+				$aSql[] = "SELECT setval('$seq_name',MAX($seq_fld)) FROM $tabname";
+			}
+			$aSql[] = "DROP TABLE $tempname";
+			// recreate the indexes, if they not contain one of the dropped columns
+			foreach($this->MetaIndexes($tabname) as $idx_name => $idx_data)
+			{
+				if (substr($idx_name,-5) != '_pkey' && (!$dropflds || !count(array_intersect($dropflds,$idx_data['columns'])))) {
+					$aSql = array_merge($aSql,$this->CreateIndexSQL($idx_name,$tabname,$idx_data['columns'],
+						$idx_data['unique'] ? array('UNIQUE') : False));
+				}
+			}
+			$aSql[] = 'COMMIT';
+			return $aSql;
+		}
 	}
 
 	public function DropTableSQL($tabname)
