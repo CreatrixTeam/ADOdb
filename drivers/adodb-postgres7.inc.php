@@ -178,7 +178,10 @@ class ADODB_postgres7 extends ADODB_postgres64 {
 				lookup_table,
 				dep_table,
 				dep_field";
+		$vFetchMode = $this->SetFetchMode2(ADODB_FETCH_ASSOC);
 		$rs = $this->Execute($sql);
+		
+		$this->SetFetchMode2($vFetchMode);
 
 		if (!$rs || $rs->EOF) return false;
 

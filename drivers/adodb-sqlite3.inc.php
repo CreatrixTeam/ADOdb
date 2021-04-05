@@ -123,7 +123,7 @@ class ADODB_sqlite3 extends ADOConnection {
 		return $arr;
 	}
 
-	function metaForeignKeys( $table, $owner = FALSE, $upper = FALSE, $associative = FALSE )
+	function MetaForeignKeys( $table, $owner = FALSE, $upper = FALSE, $associative = FALSE )
 	{
 		if ($this->GetFetchMode() == ADODB_FETCH_ASSOC)
 		$associative = true;

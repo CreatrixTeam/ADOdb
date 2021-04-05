@@ -1571,6 +1571,75 @@ if (!defined('_ADODB_LAYER')) {
 
 	/**
 	 * @returns assoc array where keys are tables, and values are foreign keys
+	 *
+	 * WARNING: Drivers vary widely on the implementation of the following function. Usage
+	 *			is highly discouraged.
+	 *
+	 * Note: The above statement about the return format is the original statement that is 
+	 *			from 2005 or before.
+	 *			The following is a result of a code analysis survey done on implementing 
+	 *			drivers (5/Apr/2021). The statistics do not include drivers that inherit their 
+	 *			implementations from other drivers, which include postgres8, postgres9, 
+	 *			odbtp_mssql, odbtp_access, odbtp_vfp, odbtp_oci8, odbtp_sybase,	oci8quercus, 
+	 *			oci805, oci8po, and informix.
+	 *		- Returns array of arrays or not?
+	 *				All implementing drivers return array of arrays, except "adodb-db2.inc.php"
+	 *				and "adodb-oci8.inc.php".
+	 *		- Is the returned array associative?
+	 *				All implementing drivers return associative arrays.
+	 *		- Are the inner arrays (2nd level) associative?
+	 *			- "adodb-postgres7.inc.php", "adodb-odbtp.inc.php", "adodb-mssqlnative.inc.php",
+	 *					and "adodb-informix72.inc.php" return numeric inner arrays
+	 *			- "adodb-sqlite3.inc.php", "adodb-pdo_sqlite.inc.php", "adodb-mysqli.inc.php",
+	 *					and "adodb-mysql.inc.php" return associative inner arrays, iff the 
+	 *					fetch mode is ADODB_FETCH_ASSOC. These drivers, however, also accept
+	 *					an extra parameter, $associative, that will force return associative
+	 *					inner arrays when set to 'true'.
+	 *			- "adodb-db2.inc.php" AND "adodb-oci8.inc.php": Not applicable, because these
+	 *					drivers do not return array of arrays.
+	 *		- SUPPORT $upper PARAMETER?
+	 *				All drivers support the parameter, except for "adodb-oci8.inc.php",
+	 *				"adodb-db2.inc.php" and "adodb-db2Legacy.inc.php". All implementing drivers 
+	 *				agree on the meaning of the parameter and that is to upper case keys of the
+	 *				returned array (outer array) iff $upper is 'true', and leave them as they are 
+	 *				if 'false'. 
+	 *				However note the following exceptions:
+	 *			- "adodb-sqlite3.inc.php" and "adodb-pdo_sqlite.inc.php" will lower case the keys
+	 *					if $upper is 'false'. (Note that these function implementations are a 
+	 *					recent addition from jan/2016)
+	 *		- Format of the returned array:
+	 *			- For drivers that return, or can return, an associative inner arrays:
+					- "adodb-sqlite3.inc.php" and "adodb-pdo_sqlite.inc.php": 
+	 *						{FOREIGN_KEY_COLUMN_NAME => {FOREIGN_KEY_COLUMN_NAME => "REFERENCE_COLUMN_NAME"}}
+	 *				- "adodb-mysql.inc.php" and "adodb-mysqli.inc.php":
+	 *						{REFERENCE_TABLE_NAME => {REFERENCE_COLUMN_NAME => "FOREIGN_KEY_COLUMN_NAME"}
+	 *				- "adodb-db2Legacy.inc.php":
+	 *						{FOREIGN_KEY_TABLE_NAME => {FOREIGN_KEY_COLUMN_NAME => "REFERENCE_COLUMN_NAME"}}
+	 *			- For drivers that return, or can return, numeric inner arrays, the return is:
+	 *							{REFERENCE_TABLE_NAME => { => "FOREIGN_KEY_COLUMN_NAME=REFERENCE_COLUMN_NAME"}}
+	 *					HOWEVER NOTE THE FOLLOWING EXCEPTIONS:
+	 *				- "adodb-sqlite3.inc.php", "adodb-pdo_sqlite.inc.php" return:
+	 *								{FOREIGN_KEY_COLUMN_NAME => { => "FOREIGN_KEY_COLUMN_NAME=REFERENCE_COLUMN_NAME"}}
+	 *						(Note that these function implementations are a recent addition from jan/2016)
+	 *				- "adodb-informix72.inc.php": The format could not be deduced for this survey.
+	 *			- For drivers that do not return array of arrays:
+	 *				- "adodb-db2.inc.php":
+	 *						{REFERENCE_TABLE_NAME => "FOREIGN_KEY_NAME"}
+	 *				- "adodb-oci8.inc.php": The format could not be deduced for this survey.
+	 *
+	 *
+	 * RECOMMENDATIONS: Given the above and the age of the different drivers, the following is 
+	 *			recommended:
+	 *		- Implementations should return an array of arrays.
+	 *		- The inner arrays must be associative if the fetch mode is ADODB_FETCH_ASSOC, 
+	 *				and numeric	otherwise
+	 *		- The format of the array if the inner array is associative should be
+	 *				{REFERENCE_TABLE_NAME => {REFERENCE_COLUMN_NAME => "FOREIGN_KEY_COLUMN_NAME"}
+	 *		- The format of the array if the inner array is numeric should be
+	 *				{FOREIGN_KEY_COLUMN_NAME => { => "FOREIGN_KEY_COLUMN_NAME=REFERENCE_COLUMN_NAME"}}
+	 *
+	 * Given the divergent implementations for this function, this function must not be used 
+	 *		within ADOdb, as is already the case.
 	 */
 	public function MetaForeignKeys($table, $owner=false, $upper=false) {
 		return false;

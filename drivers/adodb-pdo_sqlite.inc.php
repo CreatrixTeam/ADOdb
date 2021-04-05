@@ -152,7 +152,7 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	}
 	
 	//Verbatim copy from "adodb-sqlite3.inc.php". This might not work on older Sqlite (<3) however.
-	function metaForeignKeys( $table, $owner = FALSE, $upper = FALSE, $associative = FALSE )
+	function MetaForeignKeys( $table, $owner = FALSE, $upper = FALSE, $associative = FALSE )
 	{
 		if ($this->GetFetchMode() == ADODB_FETCH_ASSOC) 
 		$associative = true;
