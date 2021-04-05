@@ -27,6 +27,8 @@ class ADODB2_mysql extends ADODB_DataDict {
 	public  $sql_sysTimeStamp = 'NOW()';
 	public  $nameQuote = '`';
 
+	public $blobAllowsNotNull = true;
+	
 	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		

@@ -190,6 +190,19 @@ class ADODB_DataDict {
 	//PRIVATES
 	protected  $_serverInfoArray = null;
 
+	/*
+	* Indicates whether a BLOB/CLOB field will allow a NOT NULL setting
+	* The type is whatever is matched to an X or X2 or B type. We must 
+	* explicitly set the value in the driver to switch the behaviour on
+	*/
+	public $blobAllowsNotNull;
+	/*
+	* Indicates whether a BLOB/CLOB field will allow a DEFAULT set
+	* The type is whatever is matched to an X or X2 or B type. We must 
+	* explicitly set the value in the driver to switch the behaviour on
+	*/
+	public $blobAllowsDefaultValue;
+
 	public function GetCommentSQL($table,$col)
 	{
 		return false;
@@ -587,7 +600,7 @@ class ADODB_DataDict {
 		list($lines,$pkey,$idxs) = $this->_GenFields($flds, true);
 		// genfields can return FALSE at times
 		if ($lines == null) $lines = array();
-
+	
 		$taboptions = $this->_Options($tableoptions);
 		$tabname = $this->TableName ($tabname);
 		$sql = $this->_TableSQL($tabname,$lines,$pkey,$taboptions);
@@ -664,7 +677,6 @@ class ADODB_DataDict {
 		$idxs = array();
 		foreach($flds as $fld) {
 			$fld = _array_change_key_case($fld);
-
 			$fname = false;
 			$fdefault = false;
 			$fautoinc = false;
@@ -746,12 +758,22 @@ class ADODB_DataDict {
 
 			$ftype = $this->_GetSize($ftype, $ty, $fsize, $fprec, $fOptions);
 
-			if ($ty == 'X' || $ty == 'X2' || $ty == 'B') $fnotnull = false; // some blob types do not accept nulls
+			if (($ty == 'X' || $ty == 'X2' || $ty == 'XL' || $ty == 'B') && !$this->blobAllowsNotNull)
+				/*
+				* some blob types do not accept nulls, so we override the
+				* previously defined value
+				*/
+				$fnotnull = false; 
 
-			if ($fprimary) $pkey[] = $fname;
+			if ($fprimary) 
+				$pkey[] = $fname;
 
-			// some databases do not allow blobs to have defaults
-			if ($ty == 'X') $fdefault = false;
+			if (($ty == 'X' || $ty == 'X2' || $ty == 'XL' || $ty == 'B') && !$this->blobAllowsDefaultValue)
+				/*
+				* some databases do not allow blobs to have defaults, so we
+				* override the previously defined value
+				*/
+				$fdefault = false;
 
 			// build list of indexes
 			if ($findex != '') {
@@ -921,6 +943,7 @@ class ADODB_DataDict {
 				return $sql;
 			}
 		}
+		
 		$s = "CREATE TABLE $tabname (\n";
 		$s .= implode(",\n", $lines);
 		if (sizeof($pkey)>0) {

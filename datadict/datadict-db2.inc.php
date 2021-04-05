@@ -21,6 +21,10 @@ class ADODB2_db2 extends ADODB_DataDict {
 	public  $sql_sysDate = 'CURRENT DATE';
 	public  $sql_sysTimeStamp = 'CURRENT TIMESTAMP';
 
+	public $blobAllowsDefaultValue = true;
+	public $blobAllowsNotNull      = true;
+
+	
  	public function ActualType($meta)
 	{
 		switch($meta) {

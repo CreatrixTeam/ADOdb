@@ -28,6 +28,9 @@ class ADODB2_postgres extends ADODB_DataDict {
 	public  $sql_sysDate = "CURRENT_DATE";
 	public  $sql_sysTimeStamp = "CURRENT_TIMESTAMP";
 
+	public $blobAllowsDefaultValue = true;
+	public $blobAllowsNotNull      = true;
+	
 	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {

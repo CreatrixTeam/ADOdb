@@ -27,8 +27,9 @@ class ADODB2_sqlite extends ADODB_DataDict {
 	public  $sql_concatenateOperator = '||';
 	public  $nameQuote = '`';
 
-
-
+	public $blobAllowsDefaultValue = true;
+	public $blobAllowsNotNull      = true;
+    
 	public function ActualType($meta)
 	{
 		switch(strtoupper($meta)) {
