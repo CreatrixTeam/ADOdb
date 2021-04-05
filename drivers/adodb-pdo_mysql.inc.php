@@ -30,7 +30,10 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	public  $hasTransactions = false;
 	#protected  $_bindInputArray = false;
 	public  $hasInsertID = true;
-
+	var $_genIDSQL = "UPDATE %s SET id=LAST_INSERT_ID(id+1);";
+	var $_genSeqSQL = "CREATE TABLE  if NOT EXISTS %s (id int not null)";
+	var $_genSeqCountSQL = "SELECT count(*) FROM %s";
+	var $_genSeq2SQL = "INSERT INTO %s VALUES (%s)";
 	protected function event_pdoConnectionEstablished()
 		{$this->_connectionID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);}
 
@@ -255,9 +258,47 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		return $rs;
 	}
 
+
+
+
+	function GenID($seqname='adodbseq',$startID=1)
+	{
+		$getnext = sprintf($this->_genIDSQL,$seqname);
+		$holdtransOK = $this->_transOK; // save the current status
+		$rs = @$this->Execute($getnext);
+		if (!$rs) {
+			if ($holdtransOK) $this->_transOK = true; //if the status was ok before reset
+			$this->Execute(sprintf($this->_genSeqSQL,$seqname));
+			$cnt = $this->GetOne(sprintf($this->_genSeqCountSQL,$seqname));
+			if (!$cnt) $this->Execute(sprintf($this->_genSeq2SQL,$seqname,$startID-1));
+			$rs = $this->Execute($getnext);
+		}
+
+		if ($rs) {
+			$this->genID = $this->_connectionID->lastInsertId($seqname);
+			$rs->Close();
+		} else {
+			$this->genID = 0;
+		}
+
+		return $this->genID;
+	}
+
+
+	function createSequence($seqname='adodbseq',$startID=1)
+	{
+		if (empty($this->_genSeqSQL)) {
+			return false;
+		}
+		$ok = $this->Execute(sprintf($this->_genSeqSQL,$seqname,$startID));
+		if (!$ok) {
+			return false;
+		}
+
+		return $this->Execute(sprintf($this->_genSeq2SQL,$seqname,$startID-1));
+	}
 }
 
 class  ADORecordSet_pdo_mysql extends ADORecordSet_pdo {
-
 	public  $databaseType = 'pdo_mysql';
 }
