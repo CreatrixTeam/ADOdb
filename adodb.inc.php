@@ -450,7 +450,7 @@ if (!defined('_ADODB_LAYER')) {
 	public  $hasTransactions = true;	/// has transactions
 	//--
 	public  $genID = 0;					/// sequence id used by GenID();
-	/** @var bool|callable  */
+	/** @var falsy|callable  */
 	public  $raiseErrorFn = false;		/// error function to call
 	public  $isoDates = false;			/// accepts dates in ISO format
 	public  $cacheSecs = 3600;			/// cache for 1 hour
@@ -475,9 +475,9 @@ if (!defined('_ADODB_LAYER')) {
 	public  $ansiOuter = false; /// whether ansi outer join syntax supported
 	public  $autoRollback = false; // autoRollback on PConnect().
 	public  $poorAffectedRows = false; // affectedRows not working or unreliable
-	/** @var bool|callable  */
+	/** @var false|callable  */
 	public  $fnExecute = false;
-	/** @var bool|callable  */
+	/** @var false|callable  */
 	public  $fnCacheExecute = false;
 	public  $blobEncodeType = false; // false=not required, 'I'=encode to integer, 'C'=encode to char
 	public  $rsPrefix = "ADORecordSet_";
@@ -858,7 +858,7 @@ if (!defined('_ADODB_LAYER')) {
 	 * For databases that do not support this, we return the $sql.
 	 *
 	 * @param string $sql   SQL to send to database
-	 * @param bool   $param
+	 * @param mixed  $param RESERVED. DO NOT USE. THIS IS NOT USED ANY WHERE IN ADODB, BUT APPEARS TO HAVE BEEN AN ARRAY.
 	 *
 	 * @return mixed|false The prepared statement, or the original sql if the
 	 *                     database does not support prepare.
@@ -999,10 +999,10 @@ if (!defined('_ADODB_LAYER')) {
 	/**
 	 * PEAR DB Compat - do not use internally.
 	 *
-	 * @param string     $sql
+	 * @param string|array     $sql		See ADOConnection::Execute()
 	 * @param array|bool $inputarr
 	 *
-	 * @return ADORecordSet|bool
+	 * @return ADORecordSet|false
 	*/
 	public function Query($sql, $inputarr=false) {
 		$rs = $this->Execute($sql, $inputarr);
@@ -1192,12 +1192,12 @@ if (!defined('_ADODB_LAYER')) {
 	/**
 	 * Execute SQL
 	 *
-	 * @param string     $sql      SQL statement to execute, or possibly an array
+	 * @param string|array	$sql   SQL statement to execute, or possibly an array
 	 *                             holding prepared statement ($sql[0] will hold sql text)
-	 * @param array|bool $inputarr holds the input data to bind to.
+	 * @param array|false $inputarr holds the input data to bind to.
 	 *                             Null elements will be set to null.
 	 *
-	 * @return ADORecordSet|bool
+	 * @return ADORecordSet|false
 	 */
 	public function Execute($sql, $inputarr = false) {
 		if ($this->fnExecute) {
@@ -1687,13 +1687,13 @@ if (!defined('_ADODB_LAYER')) {
 	 * Uses SELECT TOP for Microsoft databases (when $this->hasTop is set)
 	 * BUG: Currently SelectLimit fails with $sql with LIMIT or TOP clause already set
 	 *
-	 * @param string     $sql
+	 * @param string     $sql		 WARNING: SPECIFICATION NEEDS CONFIRMATION FROM CODE ANALYSIS. THIS PARAMETER LIKELY ALLOWS ARRAYS. SEE ADOConnection::Execute()
 	 * @param int        $offset     Row to start calculations from (1-based)
 	 * @param int        $nrows      Number of rows to get
 	 * @param array|bool $inputarr   Array of bind variables
 	 * @param int        $secs2cache Private parameter only used by jlim
 	 *
-	 * @return ADORecordSet The recordset ($rs->databaseType == 'array')
+	 * @return ADORecordSet The recordset ($rs->_isBufferMode == true)
 	 */
 	public function SelectLimit($sql,$nrows=-1,$offset=-1, $inputarr=false,$secs2cache=0) {
 		$nrows = (int)$nrows;
@@ -1780,9 +1780,11 @@ if (!defined('_ADODB_LAYER')) {
 	/**
 	* Create serializable recordset. Breaks rs link to connection.
 	*
+	* Warning: this will modify the passed $rs.
+	*
 	* @param ADORecordSet $rs the recordset to serialize
-	 *
-	* @return ADORecordSet_array|bool the new recordset
+	*
+	* @return ADORecordSet the new recordset ($rs->_isBufferMode == true)
 	*/
 	public function SerializableRS(&$rs) {
 		$rs->SwitchToBufferMode();
@@ -1794,20 +1796,20 @@ if (!defined('_ADODB_LAYER')) {
 
 	/**
 	* Important: This function is kept for backward compatibility. Do not use. Refer to
-	* 	ADORecordSet::SwitchToBufferMode() for an alternative. This function now uses
-	* 	ADORecordSet::SwitchToBufferMode() for its function, which means that it no
-	* 	longer returns a new instance of ADORecordSet, but instead the same instance.
+	* 		ADORecordSet::SwitchToBufferMode() for an alternative. This function now uses
+	* 		ADORecordSet::SwitchToBufferMode() for its function, which means that it no
+	* 		longer returns a new instance of ADORecordSet, but instead the same instance.
 	*
 	* Convert database recordset to an array recordset
 	* input recordset's cursor should be at beginning, and
 	* old $rs will be closed.
 	*
-	 * @param ADORecordSet $rs     the recordset to copy
+	 * @param ADORecordSet $rs     the recordset to convert
 	 * @param int          $nrows  number of rows to retrieve (optional)
 	 * @param int          $offset offset by number of rows (optional)
 	 * @param bool         $close
 	 *
-	 * @return ADORecordSet_array|ADORecordSet|bool the new recordset
+	 * @return ADORecordSet|false the new recordset. ($rs->_isBufferMode == true) | ($rs->_isBufferMode == false) | false
 	*/
 	public final function &_rs2rs(&$rs,$nrows=-1,$offset=-1,$close=true) {
 		if (! $rs) {
@@ -1833,8 +1835,8 @@ if (!defined('_ADODB_LAYER')) {
 	 *
 	 * Compat with PEAR DB.
 	 *
-	 * @param string     $sql      SQL statement
-	 * @param array|bool $inputarr Input bind array
+	 * @param string|array     $sql      SQL statement	See ADOConnection::Execute()
+	 * @param array|bool $inputarr Input bind array		See ADOConnection::Execute()
 	 *
 	 * @return array|false
 	*/
@@ -1844,19 +1846,15 @@ if (!defined('_ADODB_LAYER')) {
 	}
 
 	/**
-	 * Execute statement and return rows in an array.
+	 * Execute statement and return rows by calling 
+	 *		ADORecordSet::GetAssoc($force_array, $first2cols) on the record set
 	 *
-	 * The function executes a statement and returns all of the returned rows in
-	 * an array, or false if the statement execution fails or if only 1 column
-	 * is requested in the SQL statement.
-	 * If no records match the provided SQL statement, an empty array is returned.
+	 * @param string|array     $sql         SQL statement	See ADOConnection::Execute()
+	 * @param array|false $inputarr    input bind array	See ADOConnection::Execute()
+	 * @param bool       $force_array	See ADORecordSet::GetAssoc()
+	 * @param bool       $first2cols	See ADORecordSet::GetAssoc()
 	 *
-	 * @param string     $sql         SQL statement
-	 * @param array|bool $inputarr    input bind array
-	 * @param bool       $force_array
-	 * @param bool       $first2cols
-	 *
-	 * @return array|bool
+	 * @return array|false
 	 */
 	public function GetAssoc($sql, $inputarr = false, $force_array = false, $first2cols = false) {
 		$savem = $this->fetchMode;
@@ -1880,8 +1878,8 @@ if (!defined('_ADODB_LAYER')) {
 	 * Search for the results of an executed query in the cache.
 	 *
 	 * @param int $secs2cache
-	 * @param string|bool $sql         SQL statement
-	 * @param array|bool  $inputarr    input bind array
+	 * @param string|false $sql         SQL statement	WARNING: NON AUTHORITATIVE. REQUIRES FURTHER CODE ANALYSIS
+	 * @param array|false  $inputarr    input bind array
 	 * @param bool        $force_array
 	 * @param bool        $first2cols
 	 *
@@ -1964,13 +1962,13 @@ if (!defined('_ADODB_LAYER')) {
 	/**
 	 * Executes a statement and returns each row's first column in an array.
 	 *
-	 * @param string     $sql      SQL statement
-	 * @param array|bool $inputarr input bind array
+	 * @param string|array  $sql      SQL statement. See ADOConnection::Execute()
+	 * @param array|bool $inputarr input bind array. See ADOConnection::Execute()
 	 * @param bool       $trim     enables space trimming of the returned value.
 	 *                             This is only relevant if the returned string
 	 *                             is coming from a CHAR type field.
 	 *
-	 * @return array|bool 1D array containning the first row of the query
+	 * @return array|false 1D array containning the first row of the query
 	 */
 	public function GetCol($sql, $inputarr = false, $trim = false) {
 
@@ -2045,8 +2043,8 @@ if (!defined('_ADODB_LAYER')) {
 	/**
 	 * Executes a statement and returns a the entire recordset in an array.
 	 *
-	 * @param string     $sql      SQL statement
-	 * @param array|bool $inputarr input bind array
+	 * @param string|array     $sql      SQL statement See ADOConnection::Execute()
+	 * @param array|bool $inputarr input bind array	See ADOConnection::Execute()
 	 *
 	 * @return array|false
 	 */
@@ -2103,9 +2101,11 @@ if (!defined('_ADODB_LAYER')) {
 	/**
 	* Return one row of sql statement. Recordset is disposed for you.
 	* Note that SelectLimit should not be called.
+	* Note that if the fetch mode is ADODB_FETCH_ASSOC or ADODB_FETCH_BOTH, the associative
+	* 		keys are case sensitive
 	*
-	* @param string     $sql      SQL statement
-	* @param array|bool $inputarr input bind array
+	* @param string|array     $sql      SQL statement	See ADOConnection::Execute()
+	* @param array|bool $inputarr input bind array		See ADOConnection::Execute()
 	 *
 	* @return array|false Array containing the first row of the query
 	*/
@@ -2193,7 +2193,7 @@ if (!defined('_ADODB_LAYER')) {
 	 * @param int    $nrows      Number of rows to get
 	 * @param array $inputarr    Array of bind variables
 	 *
-	 * @return ADORecordSet The recordset ($rs->databaseType == 'array')
+	 * @return ADORecordSet The recordset ($rs->_isBufferMode == true)
 	 */
 	public function CacheSelectLimit($secs2cache,$sql,$nrows=-1,$offset=-1,$inputarr=false) {
 		if (!is_numeric($secs2cache)) {
@@ -2274,10 +2274,10 @@ if (!defined('_ADODB_LAYER')) {
 	 *
 	 * @param int         $secs2cache Seconds to cache data, set to 0 to force query.
 	 *                                This is an optional parameter.
-	 * @param string|bool $sql        SQL statement to execute
+	 * @param string|bool $sql        SQL statement to execute. WARNING: NON AUTHORITATIVE. REQUIRES FURTHER CODE ANALYSIS
 	 * @param array|bool  $inputarr   Holds the input data to bind
 	 *
-	 * @return ADORecordSet RecordSet or false
+	 * @return ADORecordSet|false RecordSet or false
 	 */
 	public function CacheExecute($secs2cache,$sql=false,$inputarr=false) {
 		global $ADODB_CACHE;
@@ -2758,7 +2758,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * return the databases that the driver can connect to.
 	 * Some databases will return an empty array.
 	 *
-	 * @return array|bool an array of database names.
+	 * @return array|false an array of database names.
 	 */
 	public function MetaDatabases() {
 		if ($this->metaDatabasesSQL) {
@@ -3587,7 +3587,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		public  $databaseType = false;
 		public  $EOF = true;
 		public  $_numOfRows = 0;
-		/** @var bool|array  */
+		/** @var bool|false  */
 		public  $fields = false;
 		public  $connection = false;
 
@@ -3927,9 +3927,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *
 	 * @param string       $name            Name of SELECT tag
 	 * @param string|array $defstr          The value to highlight. Use an array for multiple highlight values.
-	 * @param bool|string $blank1stItem     True to create an empty item (default), False not to add one; (Original authorative comment: true to leave the 1st item in list empty)
+	 * @param bool|string $blank1stItem     True to create an empty item (default), False not to add one; (Original authoritative comment: true to leave the 1st item in list empty)
 	 *                                      'string' to set its label and 'value:string' to assign a value to it.
-	 * @param bool         $multiple        True for multi-select list (Original authorative comment: true for listbox, false for popup)
+	 * @param bool         $multiple        True for multi-select list (Original authoritative comment: true for listbox, false for popup)
 	 * @param int          $size            Number of rows to show (applies to multi-select list only)
 	 * @param string       $selectAttr      Additional attributes to defined for SELECT tag,
 	 *                                      useful for holding javascript onChange='...' handlers, CSS class, etc.
