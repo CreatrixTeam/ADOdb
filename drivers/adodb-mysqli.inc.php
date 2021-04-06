@@ -473,7 +473,6 @@ class ADODB_mysqli extends ADOConnection {
 	 */
 	public function Concat()
 	{
-		$s = "";
 		$arr = func_get_args();
 
 		// suggestion by andrew005@mnogo.ru
@@ -513,7 +512,6 @@ class ADODB_mysqli extends ADOConnection {
 	 */
 	public function MetaProcedures($NamePattern = false, $catalog  = null, $schemaPattern  = null)
 	{
-		$false = false;
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
@@ -838,7 +836,7 @@ class ADODB_mysqli extends ADOConnection {
 			}
 
 			$fnarr = array_merge( array($stmt,$a) , $inputarr);
-			$ret = call_user_func_array('mysqli_stmt_bind_param',$fnarr);
+			call_user_func_array('mysqli_stmt_bind_param',$fnarr);
 			$ret = mysqli_stmt_execute($stmt);
 			return $ret;
 		}
