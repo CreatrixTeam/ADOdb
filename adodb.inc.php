@@ -539,13 +539,17 @@ if (!defined('_ADODB_LAYER')) {
 	*
 	* @example, for mssqlnative driver ('CharacterSet','UTF-8')
 	*/
-	final public function setConnectionParameter($parameter,$value)
-	{
+	final public function setConnectionParameter($parameter,$value) {
 
 		$this->connectionParameters[] = array($parameter=>$value);
 
 	}
 
+	/**
+	 * ADOdb version.
+	 *
+	 * @return string
+	 */
 	static function Version() {
 		global $ADODB_vers;
 
@@ -567,15 +571,20 @@ if (!defined('_ADODB_LAYER')) {
 	}
 
 	/**
-		Get server version info...
-
-		@returns An array with 2 elements: $arr['string'] is the description string,
-			and $arr[version] is the version (also a string).
-	*/
+	 * Get server version info.
+	 *
+	 * @return string[] An array with 2 elements: $arr['string'] is the description string,
+	 *				 	and $arr[version] is the version (also a string).
+	 */
 	public function ServerInfo() {
 		return array('description' => '', 'version' => '');
 	}
 
+	/**
+	 * Return true if connected to the database.
+	 *
+	 * @return bool
+	 */
 	public function IsConnected() {
 		return !empty($this->_connectionID);
 	}
@@ -589,9 +598,13 @@ if (!defined('_ADODB_LAYER')) {
 	}
 
 	/**
-	* All error messages go through this bottleneck function.
-	* You can define your own handler by defining the function name in ADODB_OUTP.
-	*/
+	 * All error messages go through this bottleneck function.
+	 *
+	 * You can define your own handler by defining the function name in ADODB_OUTP.
+	 *
+	 * @param string $msg     Message to print
+	 * @param bool   $newline True to add a newline after printing $msg
+	 */
 	static function outp($msg,$newline=true) {
 		global $ADODB_FLUSH,$ADODB_OUTP;
 
@@ -621,6 +634,10 @@ if (!defined('_ADODB_LAYER')) {
 
 	}
 
+	/**
+	 * Return the database server's current date and time.
+	 * @return int|false
+	 */
 	public function Time() {
 		$rs = $this->_Execute("select $this->sysTimeStamp");
 		if ($rs && !$rs->EOF) {
@@ -876,6 +893,8 @@ if (!defined('_ADODB_LAYER')) {
 
 	/**
 	 * Requested by "Karsten Dambekalns" <k.dambekalns@fishfarm.de>
+	 *
+	 * @return string
 	 */
 	public function QMagic($s) {
 		return $this->qstr($s,get_magic_quotes_gpc());
@@ -907,8 +926,9 @@ if (!defined('_ADODB_LAYER')) {
 	 * Lock a row, will escalate and lock the table if row locking not supported
 	 * will normally free the lock at the end of the transaction
 	 *
-	 * @param $table	name of table to lock
-	 * @param $where	where clause to use, eg: "WHERE row=12". If left empty, will escalate to table lock
+	 * @param string $table	name of table to lock
+	 * @param string $where	where clause to use, eg: "WHERE row=12". If left empty, will escalate to table lock
+     * @param string $col
 	 */
 	public function RowLock($table,$where,$col='1 as adodbignore') {
 		if($this->hasTransactions)
@@ -930,10 +950,18 @@ if (!defined('_ADODB_LAYER')) {
 		return false;
 	}
 
+	/**
+	 * @param string $table
+	 * @return true
+	 */
 	public function CommitLock($table) {
 		return $this->CommitTrans();
 	}
 
+	/**
+	 * @param string $table
+	 * @return true
+	 */
 	public function RollbackLock($table) {
 		return $this->RollbackTrans();
 	}
@@ -945,7 +973,7 @@ if (!defined('_ADODB_LAYER')) {
 	* for easy porting :-)
 	*
 	* @param int $mode The fetchmode ADODB_FETCH_ASSOC or ADODB_FETCH_NUM
-	 *
+	*
 	* @return int Previous effective fetch mode
 	*/
 	public function SetFetchMode($mode) {
@@ -1490,8 +1518,12 @@ if (!defined('_ADODB_LAYER')) {
 	/**
 	 * Portable Insert ID. Pablo Roca <pabloroca#mvps.org>
 	 *
-	 * @return  the last inserted ID. All databases support this. But aware possible
-	 * problems in multiuser environments. Heavy test this before deploying.
+	 * @param string $table
+	 * @param string $id
+	 
+	 * @return mixed The last inserted ID. All databases support this, but be 
+	 *               aware of possible problems in multiuser environments.
+	 *               Heavily test this before deploying.
 	 */
 	public function PO_Insert_ID($table="", $id="") {
 		if ($this->hasInsertID){
@@ -1841,8 +1873,7 @@ if (!defined('_ADODB_LAYER')) {
 	 * @return array|false
 	*/
 	public function GetAll($sql, $inputarr=false) {
-		$arr = $this->GetArray($sql,$inputarr);
-		return $arr;
+        return $this->GetArray($sql,$inputarr);
 	}
 
 	/**
@@ -2057,8 +2088,7 @@ if (!defined('_ADODB_LAYER')) {
 		$ADODB_COUNTRECS = $savec;
 		if (!$rs)
 			if (defined('ADODB_PEAR')) {
-				$cls = ADODB_PEAR_Error();
-				return $cls;
+				return ADODB_PEAR_Error();
 			} else {
 				return false;
 			}
@@ -2068,8 +2098,7 @@ if (!defined('_ADODB_LAYER')) {
 	}
 
 	public function CacheGetAll($secs2cache,$sql=false,$inputarr=false) {
-		$arr = $this->CacheGetArray($secs2cache,$sql,$inputarr);
-		return $arr;
+		return $this->CacheGetArray($secs2cache,$sql,$inputarr);
 	}
 
 	public function CacheGetArray($secs2cache,$sql=false,$inputarr=false) {
@@ -2082,8 +2111,7 @@ if (!defined('_ADODB_LAYER')) {
 
 		if (!$rs)
 			if (defined('ADODB_PEAR')) {
-				$cls = ADODB_PEAR_Error();
-				return $cls;
+				return ADODB_PEAR_Error();
 			} else {
 				return false;
 			}
@@ -2131,6 +2159,12 @@ if (!defined('_ADODB_LAYER')) {
 		return false;
 	}
 
+	/**
+	 * @param int $secs2cache
+	 * @param string|false $sql
+	 * @param mixed[]|bool $inputarr
+	 * @return mixed[]|bool
+	 */
 	public function CacheGetRow($secs2cache,$sql=false,$inputarr=false) {
 		$rs = $this->CacheExecute($secs2cache,$sql,$inputarr);
 		if ($rs) {
@@ -3094,9 +3128,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	/**
 	 * Converts a timestamp "ts" to a string that the database can understand.
 	 *
-	 * @param ts	a timestamp in Unix date time format.
+	 * @param int|object $ts A timestamp in Unix date time format.
 	 *
-	 * @return  timestamp string in database timestamp format
+	 * @return string $timestamp string in database timestamp format
 	 */
 	public function DBTimeStamp($ts,$isfld=false) {
 		if (empty($ts) && $ts !== 0) {
@@ -3127,9 +3161,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 	/**
 	 * Also in ADORecordSet.
-	 * @param $v is a date string in YYYY-MM-DD format
+	 * @param mixed $v is a date string in YYYY-MM-DD format
 	 *
-	 * @return date in unix timestamp format, or 0 if before TIMESTAMP_FIRST_YEAR, or false if invalid date format
+	 * @return int|false Date in unix timestamp format, or 0 if before TIMESTAMP_FIRST_YEAR, or false if invalid date format
 	 */
 	static function UnixDate($v) {
 		if (is_object($v)) {
@@ -3156,9 +3190,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 	/**
 	 * Also in ADORecordSet.
-	 * @param $v is a timestamp string in YYYY-MM-DD HH-NN-SS format
+	 * @param string|object $v is a timestamp string in YYYY-MM-DD HH-NN-SS format
 	 *
-	 * @return date in unix timestamp format, or 0 if before TIMESTAMP_FIRST_YEAR, or false if invalid date format
+	 * @return int|false Date in unix timestamp format, or 0 if before TIMESTAMP_FIRST_YEAR, or false if invalid date format
 	 */
 	static function UnixTimeStamp($v) {
 		if (is_object($v)) {
@@ -3183,14 +3217,15 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 	/**
-	 * Also in ADORecordSet.
-	 *
 	 * Format database date based on user defined format.
 	 *
-	 * @param v		is the character date in YYYY-MM-DD format, returned by database
-	 * @param fmt	is the format to apply to it, using date()
+	 * Also in ADORecordSet.
 	 *
-	 * @return a date formatted as user desires
+	 * @param mixed  $v    Date in YYYY-MM-DD format, returned by database
+	 * @param string $fmt  Format to apply, using date()
+	 * @param bool   $gmt
+	 *
+	 * @return string Formatted date
 	 */
 	public function UserDate($v,$fmt='Y-m-d',$gmt=false) {
 		$tt = $this->UnixDate($v);
@@ -3209,11 +3244,13 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 	/**
+	 * Format timestamp based on user defined format.
 	 *
-	 * @param v		is the character timestamp in YYYY-MM-DD hh:mm:ss format
-	 * @param fmt	is the format to apply to it, using date()
+	 * @param mixed  $v    Date in YYYY-MM-DD hh:mm:ss format
+	 * @param string $fmt  Format to apply, using date()
+	 * @param bool   $gmt
 	 *
-	 * @return a timestamp formatted as user desires
+	 * @return string Formatted timestamp
 	 */
 	public function UserTimeStamp($v,$fmt='Y-m-d H:i:s',$gmt=false) {
 		if (!isset($v)) {
@@ -3234,13 +3271,22 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		return ($gmt) ? adodb_gmdate($fmt,$tt) : adodb_date($fmt,$tt);
 	}
 
+	/**
+	 * @param string $s
+	 * @param bool [$magic_quotes]
+	 * @return mixed
+	 */
 	public function escape($s,$magic_quotes=false) {
 		return $this->addq($s,$magic_quotes);
 	}
 
 	/**
-	* Quotes a string, without prefixing nor appending quotes.
-	*/
+	 * Quotes a string, without prefixing nor appending quotes.
+	 *
+	 * @param string $s
+	 * @param bool [$magic_quotes]
+	 * @return mixed
+	 */
 	public function addq($s,$magic_quotes=false) {
 		if (!$magic_quotes) {
 			if ($this->replaceQuote[0] == '\\') {
@@ -3300,22 +3346,21 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 
 	/**
-	* Will select the supplied $page number from a recordset, given that it is paginated in pages of
-	* $nrows rows per page. It also saves two boolean values saying if the given page is the first
-	* and/or last one of the recordset. Added by Iván Oliva to provide recordset pagination.
-	*
-	* See docs-adodb.htm#ex8 for an example of usage.
-	*
-	* @param sql
-	* @param nrows		is the number of rows per page to get
-	* @param page		is the page number to get (1-based)
-	* @param [inputarr]	array of bind variables
-	* @param [secs2cache]		is a private parameter only used by jlim
-	* @return		the recordset ($rs->databaseType == 'array')
-	*
-	* NOTE: phpLens uses a different algorithm and does not use PageExecute().
-	*
-	*/
+	 * Will select the supplied $page number from a recordset, given that it is paginated in pages of
+	 * $nrows rows per page. It also saves two boolean values saying if the given page is the first
+	 * and/or last one of the recordset. Added by Iván Oliva to provide recordset pagination.
+	 *
+	 * See docs-adodb.htm#ex8 for an example of usage.
+	 * NOTE: phpLens uses a different algorithm and does not use PageExecute().
+	 *
+	 * @param string $sql
+	 * @param int    $nrows          Number of rows per page to get
+	 * @param int    $page           Page number to get (1-based)
+	 * @param mixed[]|bool $inputarr Array of bind variables
+	 * @param int    $secs2cache     Private parameter only used by jlim
+	 *
+	 * @return mixed		the recordset ($rs->databaseType == 'array')
+	 */
 	public function PageExecute($sql, $nrows, $page, $inputarr=false, $secs2cache=0) {
 		global $ADODB_INCLUDED_LIB;
 		if (empty($ADODB_INCLUDED_LIB)) {
@@ -3335,12 +3380,12 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	* $nrows rows per page. It also saves two boolean values saying if the given page is the first
 	* and/or last one of the recordset. Added by Iván Oliva to provide recordset pagination.
 	*
-	* @param secs2cache	seconds to cache data, set to 0 to force query
-	* @param sql
-	* @param nrows		is the number of rows per page to get
-	* @param page		is the page number to get (1-based)
-	* @param [inputarr]	array of bind variables
-	* @return		the recordset ($rs->databaseType == 'array')
+	* @param int $secs2cache	seconds to cache data, set to 0 to force query
+	* @param string $sql
+	* @param int $nrows		is the number of rows per page to get
+	* @param int $page		is the page number to get (1-based)
+	* @param mixed[]|bool $inputarr	array of bind variables
+	* @return mixed	the recordset ($rs->databaseType == 'array')
 	*/
 	public function CachePageExecute($secs2cache, $sql, $nrows, $page,$inputarr=false) {
 		/*switch($this->dataProvider) {
@@ -3349,8 +3394,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			break;
 		default: $secs2cache = 0; break;
 		}*/
-		$rs = $this->PageExecute($sql,$nrows,$page,$inputarr,$secs2cache);
-		return $rs;
+		return $this->PageExecute($sql,$nrows,$page,$inputarr,$secs2cache);
 	}
 
 	/**
@@ -3359,8 +3403,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	*
 	* @return int
 	*/
-	function charMax()
-	{
+	function charMax() {
 		return ADODB_STRINGMAX_NOTSET;
 	}
 
@@ -3370,8 +3413,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	*
 	* @return int
 	*/
-	function textMax()
-	{
+	function textMax() {
 		return ADODB_STRINGMAX_NOTSET;
 	}
 
@@ -3385,7 +3427,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	* @param	int		$start	The start point
 	* @param	int		$length	An optional length
 	*
-	* @return	The SQL text
+	* @return string	The SQL text
 	*/
 	function substr($fld,$start,$length=0) {
 		$text = "{$this->substr}($fld,$start";
@@ -3403,9 +3445,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @return	string				The SQL text
 	 */
 	function month($fld) {
-		$x = $this->SQLDate('m',$fld);
-
-		return $x;
+		return $this->SQLDate('m',$fld);
 	}
 
 	/*
@@ -3415,8 +3455,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @return	string		The SQL text
 	 */
 	function day($fld) {
-		$x = $this->SQLDate('d',$fld);
-		return $x;
+		return $this->SQLDate('d',$fld);
 	}
 
 	/*
@@ -3427,8 +3466,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @return	string		The SQL text
 	 */
 	function year($fld) {
-		$x = $this->SQLDate('Y',$fld);
-		return $x;
+		return $this->SQLDate('Y',$fld);
 	}
 
 	/**
@@ -3437,7 +3475,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * By clearing the message, it becomes possible to detect whether a new error
 	 * has occurred, even when it is the same error as before being repeated.
 	 *
-	 * @return array|null Array if an error has previously occurred. Null otherwise.
+	 * @return mixed[]|null Array if an error has previously occurred. Null otherwise.
 	 */
 	protected function resetLastError() {
 		$error = error_get_last();
@@ -3453,7 +3491,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * Compare a previously stored error message with the last error recorded by PHP
 	 * to determine whether a new error has occurred.
 	 *
-	 * @param array|null $old Optional. Previously stored return value of error_get_last().
+	 * @param mixed[]|null $old Optional. Previously stored return value of error_get_last().
 	 *
 	 * @return string The error message if a new error has occurred
 	 *                or an empty string if no (new) errors have occurred..
@@ -3768,7 +3806,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	/**
 	 * Constructor
 	 *
-	 * @param queryID	this is the queryID returned by ADOConnection->_query()
+	 * @param resource|int queryID	this is the queryID returned by ADOConnection->_query()
 	 *
 	 */
 	public function __construct($queryID, $mode=false) {
@@ -4046,8 +4084,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 	public function GetAll($nRows = -1) {
-		$arr = $this->GetArray($nRows);
-		return $arr;
+		return $this->GetArray($nRows);
 	}
 
 	/*
@@ -4080,12 +4117,11 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @param offset	is the row to start calculations from (1-based)
 	 * @param [nrows]	is the number of rows to return
 	 *
-	 * @return an array indexed by the rows (0-based) from the recordset
+	 * @return array an array indexed by the rows (0-based) from the recordset
 	 */
 	protected function _GetArrayLimit($nrows,$offset=-1) {
 		if ($offset <= 0) {
-			$arr = $this->GetArray($nrows);
-			return $arr;
+			return $this->GetArray($nrows);
 		}
 
 		$this->Move($offset);
@@ -4114,11 +4150,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *
 	 * @param [nRows]  is the number of rows to return. -1 means every row.
 	 *
-	 * @return an array indexed by the rows (0-based) from the recordset
+	 * @return array an array indexed by the rows (0-based) from the recordset
 	 */
 	public function GetRows($nRows = -1) {
-		$arr = $this->GetArray($nRows);
-		return $arr;
+		return $this->GetArray($nRows);
 	}
 
 	/**
@@ -4142,7 +4177,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *								array[col0] => array(remaining cols),
 	 *								return array[col0] => col1
 	 *
-	 * @return mixed
+	 * @return mixed[]|false
 	 *
 	 */
 	public function GetAssoc($force_array = false, $first2cols = false) {
@@ -4256,10 +4291,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 	/**
 	 *
-	 * @param v		is the character timestamp in YYYY-MM-DD hh:mm:ss format
-	 * @param fmt	is the format to apply to it, using date()
+	 * @param mixed $v		is the character timestamp in YYYY-MM-DD hh:mm:ss format
+	 * @param string [$fmt]	is the format to apply to it, using date()
 	 *
-	 * @return a timestamp formatted as user desires
+	 * @return string a timestamp formated as user desires
 	 */
 	public function UserTimeStamp($v,$fmt='Y-m-d H:i:s') {
 		if (is_numeric($v) && strlen($v)<14) {
@@ -4278,10 +4313,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 
 	/**
-	 * @param v		is the character date in YYYY-MM-DD format, returned by database
-	 * @param fmt	is the format to apply to it, using date()
+	 * @param mixed $v		is the character date in YYYY-MM-DD format, returned by database
+	 * @param string $fmt	is the format to apply to it, using date()
 	 *
-	 * @return a date formatted as user desires
+	 * @return string a date formatted as user desires
 	 */
 	public function UserDate($v,$fmt='Y-m-d') {
 		$tt = $this->UnixDate($v);
@@ -4298,9 +4333,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 
 	/**
-	 * @param $v is a date string in YYYY-MM-DD format
+	 * @param mixed $v is a date string in YYYY-MM-DD format
 	 *
-	 * @return date in unix timestamp format, or 0 if before TIMESTAMP_FIRST_YEAR, or false if invalid date format
+	 * @return string date in unix timestamp format, or 0 if before TIMESTAMP_FIRST_YEAR, or false if invalid date format
 	 */
 	static function UnixDate($v) {
 		return ADOConnection::UnixDate($v);
@@ -4308,9 +4343,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 
 	/**
-	 * @param $v is a timestamp string in YYYY-MM-DD HH-NN-SS format
+	 * @param string|object $v is a timestamp string in YYYY-MM-DD HH-NN-SS format
 	 *
-	 * @return date in unix timestamp format, or 0 if before TIMESTAMP_FIRST_YEAR, or false if invalid date format
+	 * @return mixed date in unix timestamp format, or 0 if before TIMESTAMP_FIRST_YEAR, or false if invalid date format
 	 */
 	static function UnixTimeStamp($v) {
 		return ADOConnection::UnixTimeStamp($v);
@@ -4326,26 +4361,30 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 
 	/**
-	* PEAR DB compat, number of rows
-	*/
+	 * PEAR DB compat, number of rows
+	 *
+	 * @return int
+	 */
 	public function NumRows() {
 		return $this->_numOfRows;
 	}
 
 
 	/**
-	* PEAR DB compat, number of cols
-	*/
+	 * PEAR DB compat, number of cols
+	 *
+	 * @return int
+	 */
 	public function NumCols() {
 		return $this->_numOfFields;
 	}
 
 	/**
-	* Fetch a row, returning false if no more rows.
-	* This is PEAR DB compat mode.
-	*
-	* @return false or array containing the current record
-	*/
+	 * Fetch a row, returning false if no more rows.
+	 * This is PEAR DB compat mode.
+	 *
+	 * @return mixed[]|false false or array containing the current record
+	 */
 	public function FetchRow() {
 		if ($this->EOF) {
 			return false;
@@ -4363,7 +4402,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	* Fetch a row, returning PEAR_Error if no more rows.
 	* This is PEAR DB compat mode.
 	*
-	* @return DB_OK or error object
+	* @param mixed[]|false $arr
+	*
+	* @return mixed DB_OK or error object
 	*/
 	public function FetchInto(&$arr) {
 		if ($this->EOF) {
@@ -4378,7 +4419,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	/**
 	 * Move to the first row in the recordset. Many databases do NOT support this.
 	 *
-	 * @return true or false
+	 * @return bool true or false
 	 */
 	protected function _MoveFirst() {
 		if ($this->_currentRow == 0) {
@@ -4399,7 +4440,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	/**
 	 * Move to the last row in the recordset.
 	 *
-	 * @return true or false
+	 * @return bool true or false
 	 */
 	protected function _MoveLast() {
 		if ($this->_numOfRows >= 0) {
@@ -4429,7 +4470,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	/**
 	 * Move to next record in the recordset.
 	 *
-	 * @return true if there still rows available, or false if there are no more rows (EOF).
+	 * @return bool true if there still rows available, or false if there are no more rows (EOF).
 	 */
 	protected function _MoveNext() {
 		if (!$this->EOF) {
@@ -4479,9 +4520,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * Random access to a specific row in the recordset. Some databases do not support
 	 * access to previous rows in the databases (no scrolling backwards).
 	 *
-	 * @param rowNumber is the row to move to (0-based)
+	 * @param int $rowNumber is the row to move to (0-based)
 	 *
-	 * @return true if there still rows available, or false if there are no more rows (EOF).
+	 * @return bool true if there still rows available, or false if there are no more rows (EOF).
 	 */
 	public function Move($rowNumber = 0) {
 		$this->EOF = false;
@@ -4544,9 +4585,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *		supports ADODB_FETCH_ASSOC mode natively, or emulated. Drivers
 	 *		that offer no support at all must override this function.
 	 *
-	 * @param colname  is the field to access
+	 * @param string $colname is the field to access
 	 *
-	 * @return the value of $colname column
+	 * @return mixed the value of $colname column
 	 */
 	public function Fields($colname) {
 		GetAssocKeys();
@@ -4608,7 +4649,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * Use associative array to get fields array for databases that do not support
 	 * associative arrays. Submitted by Paolo S. Asioli paolo.asioli#libero.it
 	 *
-	 * @param int $upper Case for the array keys, defaults to uppercase
+	 * @param int [$upper] Case for the array keys, defaults to uppercase
 	 *                   (see ADODB_ASSOC_CASE_xxx constants)
 	 */
 	public function GetRowAssoc($upper = ADODB_ASSOC_CASE_UPPER) {
@@ -4671,7 +4712,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	/**
 	 * Clean up recordset
 	 *
-	 * @return true or false
+	 * @return bool
 	 */
 	public function Close() {
 		// free resource object - this seems to globally free the object
@@ -4688,19 +4729,21 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 	/**
-	 * synonyms RecordCount and RowCount
+	 * Synonyms RecordCount and RowCount
 	 *
-	 * @return the number of rows or -1 if this is not supported
+	 * @return int Number of rows or -1 if this is not supported
 	 */
 	public function RecordCount() {
 		return $this->_numOfRows;
 	}
 
 
-	/*
-	* If we are using PageExecute(), this will return the maximum possible rows
-	* that can be returned when paging a recordset.
-	*/
+	/**
+	 * If we are using PageExecute(), this will return the maximum possible rows
+	 * that can be returned when paging a recordset.
+	 *
+	 * @return int
+	 */
 	public function MaxRecordCount() {
 		return ($this->_maxRecordCount) ? $this->_maxRecordCount : $this->RecordCount();
 	}
@@ -4766,7 +4809,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		return $this->_numOfFields;
 	}
 
-
 	/**
 	 * Get the ADOFieldObject of a specific column.
 	 *
@@ -4826,8 +4868,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	* @return the object with the properties set to the fields of the current row
 	*/
 	public function FetchObj() {
-		$o = $this->FetchObject(false);
-		return $o;
+		return $this->FetchObject(false);
 	}
 
 	/**
@@ -4873,8 +4914,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	* Fixed bug reported by tim@orotech.net
 	*/
 	public function FetchNextObj() {
-		$o = $this->FetchNextObject(false);
-		return $o;
+		return $this->FetchNextObject(false);
 	}
 
 
@@ -5425,7 +5465,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		 *			unless parameter $colnames is used.
 		 * @param typearr	holds an array of types. These are the same types
 		 *			used in MetaTypes (C,B,L,I,N).
-		 * @param [colnames]	array of column names. If set, then the first row of
+		 * @param string[]|false [$colnames]	array of column names. If set, then the first row of
 		 *			$array should not hold the column names.
 		 */
 		/*public function InitArray($array,$typearr,$colnames=false) {
@@ -5443,10 +5483,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		/**
 		 * Setup the Array and datatype file objects
 		 *
-		 * @param array		is a 2-dimensional array holding the data.
+		 * @param array $array    2-dimensional array holding the data
 		 *			The first row should hold the column names
 		 *			unless parameter $colnames is used.
-		 * @param fieldarr	holds an array of ADOFieldObject's.
+		 * @param array $fieldarr Array of ADOFieldObject's.
 		 */
 		/*public function InitArrayFields(&$array,&$fieldarr) {
 			$this->_array = $array;
@@ -5461,8 +5501,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			if ($nRows == -1 && $this->_currentRow <= 0 && !$this->_skiprow1) {
 				return $this->_array;
 			} else {
-				$arr = ADORecordSet::GetArray($nRows);
-				return $arr;
+				return ADORecordSet::GetArray($nRows);
 			}
 		}*/
 
@@ -5477,7 +5516,12 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				: sizeof($this->_types);
 		}*/
 
-		/* Use associative array to get fields array */
+		/**
+		 * Use associative array to get fields array
+		 *
+		 * @param string $colname
+		 * @return mixed
+		 */
 		/*public function Fields($colname) {
 			$mode = $this->fetchMode;
 
@@ -5628,17 +5672,20 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 	/**
-	 * synonym for ADONewConnection for people like me who cannot remember the correct name
+	 * Synonym for ADONewConnection for people like me who cannot remember the correct name
+	 *
+	 * @param string [$db]
+	 *
+	 * @return ADOConnection|false
 	 */
 	function NewADOConnection($db='') {
-		$tmp = ADONewConnection($db);
-		return $tmp;
+		return ADONewConnection($db);
 	}
 
 	/**
 	 * Instantiate a new Connection class for a specific database driver.
 	 *
-	 * @param [db]  is the database Connection object to create. If undefined,
+	 * @param string $db Database Connection object to create. If undefined,
 	 *	use the last database driver that was loaded by ADOLoadCode().
 	 *
 	 * @return ADOConnection|false The freshly created instance of the Connection class
@@ -5943,9 +5990,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		if (!class_exists($class)) {
 			return false;
 		}
-		$perf = new $class($conn);
 
-		return $perf;
+		return new $class($conn);
 	}
 
 	function NewDataDictionary(&$conn,$drivername=false) {
