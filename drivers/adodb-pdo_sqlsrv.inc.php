@@ -157,10 +157,6 @@ class ADODB_pdo_sqlsrv extends ADODB_pdo
 		return $ret;
 	}
 
-	public function ServerInfo()
-	{
-		return ADOConnection::ServerInfo();
-	}
 
 
 	//VERBATIM COPY FROM "adodb-mssqlnative.inc.php"/"adodb-odbc_mssql.inc.php"

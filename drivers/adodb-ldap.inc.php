@@ -275,6 +275,9 @@ class ADODB_ldap extends ADOConnection {
 		ldap_get_option( $this->_connectionID, LDAP_OPT_ERROR_NUMBER, $version['LDAP_OPT_ERROR_NUMBER'] );
 		ldap_get_option( $this->_connectionID, LDAP_OPT_ERROR_STRING, $version['LDAP_OPT_ERROR_STRING'] );
 		ldap_get_option( $this->_connectionID, LDAP_OPT_MATCHED_DN, $version['LDAP_OPT_MATCHED_DN'] );
+		
+		$version['description'] = "";
+		$version['version'] = "";
 
 		return $this->version = $version;
 	}

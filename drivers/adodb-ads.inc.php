@@ -117,6 +117,7 @@ class ADODB_ads extends ADOConnection {
                         $res =  $this->Execute($stmt);
                         if(!$res)
                                 print $this->ErrorMsg();
+								return ADOConnection::ServerInfo();
                         else{
                                 $ret["version"]= $res->fields[3];
                                 $ret["description"]="Advantage Database Server";

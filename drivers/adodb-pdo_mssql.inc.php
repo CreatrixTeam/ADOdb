@@ -45,10 +45,6 @@ class ADODB_pdo_mssql extends ADODB_pdo {
 		join sys.columns sc on sc.object_id = st.object_id and sc.name=c.name
 		where o.name='%s'";
 
-	public function ServerInfo()
-	{
-		return ADOConnection::ServerInfo();
-	}
 
 	public function SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false,$secs2cache=0)
 	{
