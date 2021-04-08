@@ -204,6 +204,15 @@ begin
 select seqaddress.nextval into :new.A_ID from dual;
 end;
 */
+	/**
+	 * Creates an insert trigger to emulate an auto-increment column
+	 * in a table
+	 *
+	 * @param string   $tabname       The name of the table
+	 * @param string[] $tableoptions  Optional configuration items
+	 *
+	 * @return string[] The SQL statements to create the trigger
+	 */
 	protected function _Triggers($tabname,$tableoptions)
 	{
 		if (!$this->seqField) return array();
