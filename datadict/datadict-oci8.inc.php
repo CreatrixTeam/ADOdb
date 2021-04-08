@@ -28,13 +28,6 @@ class ADODB2_oci8 extends ADODB_DataDict {
 	public  $sql_concatenateOperator='||';
 	public  $sql_sysDate = "TRUNC(SYSDATE)";
 	public  $sql_sysTimeStamp = 'SYSDATE'; // requires oracle 9 or later, otherwise use SYSDATE
-	
-	/*
-	* Legacy compatibility for sequence names for emulated auto-increments
-	* If set to true, creates sequences and triggers as TRIG_394545594
-	* instead of TRIG_possibly_too_long_tablename
-	*/
-	public $useCompactAutoIncrements = false;
 
 	protected function _event_connectionSet($pADOConnection)
 	{
@@ -203,52 +196,35 @@ class ADODB2_oci8 extends ADODB_DataDict {
 		return $suffix;
 	}
 
-	/**
-	* Creates an insert trigger to emulate an auto-increment column
-	* in a table
-	*
-	* @param	str		$tabname		The name of the table
-	* @param	str[]	$tableoptions   Optional configuration items
-	*
-	* @return	str[]	The SQL statements to create the trigger
-	*/
+/*
+CREATE or replace TRIGGER jaddress_insert
+before insert on jaddress
+for each row
+begin
+select seqaddress.nextval into :new.A_ID from dual;
+end;
+*/
 	protected function _Triggers($tabname,$tableoptions)
 	{
-		
 		if (!$this->seqField) return array();
 
-		if ($this->schema) 
-		{
+		if ($this->schema) {
 			$t = strpos($tabname,'.');
-			if ($t !== false) 
-				$tab = substr($tabname,$t+1);
-			else 
-				$tab = $tabname;
-			
-			if ($this->connection->useCompactAutoIncrements)
-				$id = sprintf('%u',crc32(strtolower($tab)));
-			else
-				$id = $tab;
-			
+			if ($t !== false) $tab = substr($tabname,$t+1);
+			else $tab = $tabname;
 			$seqname = $this->schema.'.'.$this->seqPrefix.$tab;
 			$trigname = $this->schema.'.'.$this->trigPrefix.$this->seqPrefix.$tab;
-			
-		} 
-		else 
-		{
-			if ($this->connection->useCompactAutoIncrements)
-				$id = sprintf('%u',crc32(strtolower($tabname)));
-			else
-				$id = $tabname;
-			
-			$seqname = $this->seqPrefix.$id;
-			$trigname = $this->trigPrefix.$id;
+		} else {
+			$seqname = $this->seqPrefix.$tabname;
+			$trigname = $this->trigPrefix.$seqname;
 		}
 
 		if (strlen($seqname) > 30) {
-			$seqname = $this->seqPrefix.uniqid('');
+			//ORIGINAL CODE: $seqname = $this->seqPrefix.uniqid('');
+
+			$seqname = $this->seqPrefix.sprintf('%u',crc32(strtolower($tabname)));
+			$seqname = ((strlen($seqname) > 13) ? substr($seqname,0,30) : $seqname);
 		} // end if
-		
 		if (strlen($trigname) > 30) {
 			$trigname = $this->trigPrefix.uniqid('');
 		} // end if
@@ -260,7 +236,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 		if (isset($tableoptions['SEQUENCE_INCREMENT'])){$seqIncr = ' INCREMENT BY '.$tableoptions['SEQUENCE_INCREMENT'];}
 		$seqStart = '';
 		if (isset($tableoptions['SEQUENCE_START'])){$seqStart = ' START WITH '.$tableoptions['SEQUENCE_START'];}
-		$sql[] = "CREATE SEQUENCE $seqname MINVALUE 1 $seqStart $seqIncr $seqCache";
+		$sql[] = "CREATE SEQUENCE $seqname $seqStart $seqIncr $seqCache";
 		$sql[] = "CREATE OR REPLACE TRIGGER $trigname BEFORE insert ON $tabname FOR EACH ROW WHEN (NEW.$this->seqField IS NULL OR NEW.$this->seqField = 0) BEGIN select $seqname.nextval into :new.$this->seqField from dual; END;";
 
 		$this->seqField = false;
