@@ -520,7 +520,7 @@ class dbTable extends dbObject {
 		return $this->opts;
 	}
 
-	function addTableComment( $opt ) {
+	public function addTableComment( $opt ) {
 		$this->opts['comment'] = $opt;
 		return $this->opts;
 	}
