@@ -39,7 +39,6 @@ if (!defined('ADODB_DIR')) die();
 //----------------------------------------------------------------
 
 
-// has datetime conversion to YYYY-MM-DD format, and also mssql_fetch_assoc
 ini_set('mssql.datetimeconvert',0);
 
 
@@ -82,7 +81,6 @@ class ADODB_mssql extends ADOConnection {
 	from syscolumns c join systypes t on t.xusertype=c.xusertype join sysobjects o on o.id=c.id where o.name='%s'";
 	public  $hasTop = 'top';		// support mssql SELECT TOP 10 * FROM TABLE
 	public  $hasGenID = true;
-	protected  $_has_mssql_init;
 	public  $maxParameterLen = 4000;
 	public  $arrayClass = 'ADORecordSet_array_mssql';
 	public  $uniqueSort = true;
@@ -94,11 +92,6 @@ class ADODB_mssql extends ADOConnection {
 	public  $uniqueOrderBy = true;
 	protected  $_bindInputArray = true;
 	public  $forceNewConnect = false;
-
-	public function __construct()
-	{
-		$this->_has_mssql_init = true;
-	}
 
 	public function ServerInfo()
 	{
@@ -552,10 +545,6 @@ order by constraint_name, referenced_table_name, keyno";
 
 	public function PrepareSP($sql,$param=true)
 	{
-		if (!$this->_has_mssql_init) {
-			ADOConnection::outp( "PrepareSP: mssql_init only available since PHP 4.1.0");
-			return $sql;
-		}
 		$stmt = mssql_init($sql,$this->_connectionID);
 		if (!$stmt)  return $sql;
 		return array($sql,$stmt);
@@ -606,11 +595,6 @@ order by constraint_name, referenced_table_name, keyno";
 	*/
 	public function Parameter(&$stmt, &$var, $name, $isOutput=false, $maxLen=4000, $type=false)
 	{
-		if (!$this->_has_mssql_init) {
-			ADOConnection::outp( "Parameter: mssql_bind only available since PHP 4.1.0");
-			return false;
-		}
-
 		$isNull = is_null($var); // php 4.0.4 and above...
 
 		if ($type === false)
@@ -620,7 +604,7 @@ order by constraint_name, referenced_table_name, keyno";
 			case 'double': $type = SQLFLT8; break;
 			case 'integer': $type = SQLINT4; break;
 			case 'boolean': $type = SQLINT1; break; # SQLBIT not supported in 4.1.0
-			}
+		}
 
 		if  ($this->debug) {
 			$prefix = ($isOutput) ? 'Out' : 'In';

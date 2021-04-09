@@ -734,8 +734,8 @@ function adodb_get_gmt_diff_ts($ts)
 */
 function adodb_get_gmt_diff($y,$m,$d)
 {
-static $TZ,$tzo;
-global $ADODB_DATETIME_CLASS;
+	static $TZ,$tzo;
+	global $ADODB_DATETIME_CLASS;
 
 	if (!defined('ADODB_TEST_DATES')) $y = false;
 	else if ($y < 1970 || $y >= 2038) $y = false;
@@ -1025,15 +1025,23 @@ global $_month_table_normal,$_month_table_leaf;
 		0 => $origd
 	);
 }
+
 /*
 		if ($isphp5)
 				$dates .= sprintf('%s%04d',($gmt<=0)?'+':'-',abs($gmt)/36);
 			else
 				$dates .= sprintf('%s%04d',($gmt<0)?'+':'-',abs($gmt)/36);
 			break;*/
-function adodb_tz_offset($gmt,$isphp5)
+/**
+ * Compute timezone offset.
+ *
+ * @param int  $gmt     Time offset from GMT, in seconds
+ * @param bool $isphp5
+ * @return string
+ */
+function adodb_tz_offset($gmt,$isphp5=true)
 {
-	$zhrs = abs($gmt)/3600;
+	$zhrs = abs($gmt) / 3600;
 	$hrs = floor($zhrs);
 	if ($isphp5)
 		return sprintf('%s%02d%02d',($gmt<=0)?'+':'-',floor($zhrs),($zhrs-$hrs)*60);
@@ -1071,9 +1079,9 @@ function adodb_date2($fmt, $d=false, $is_gmt=false)
 */
 function adodb_date($fmt,$d=false,$is_gmt=false)
 {
-static $daylight;
-global $ADODB_DATETIME_CLASS;
-static $jan1_1971;
+	global $ADODB_DATETIME_CLASS;
+	static $daylight;
+	static $jan1_1971;
 
 	if (!isset($daylight)) {
 		$daylight = function_exists('adodb_daylight_sv');
@@ -1113,8 +1121,6 @@ static $jan1_1971;
 	$max = strlen($fmt);
 	$dates = '';
 
-	$isphp5 = true;
-
 	/*
 		at this point, we have the following integer vars to manipulate:
 		$year, $month, $day, $hour, $min, $secs
@@ -1149,7 +1155,7 @@ static $jan1_1971;
 
 			$gmt = adodb_get_gmt_diff($year,$month,$day);
 
-			$dates .= ' '.adodb_tz_offset($gmt,$isphp5);
+			$dates .= ' '.adodb_tz_offset($gmt, true);
 			break;
 
 		case 'Y': $dates .= $year; break;
@@ -1187,7 +1193,7 @@ static $jan1_1971;
 		case 'O':
 			$gmt = ($is_gmt) ? 0 : adodb_get_gmt_diff($year,$month,$day);
 
-			$dates .= adodb_tz_offset($gmt,$isphp5);
+			$dates .= adodb_tz_offset($gmt, true);
 			break;
 
 		case 'H':

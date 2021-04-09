@@ -298,18 +298,26 @@ class ADODB_ibase extends ADOConnection {
 			$fn = 'ibase_execute';
 			$sql = $sql[1];
 			if (is_array($iarr)) {
-				if ( !isset($iarr[0]) ) $iarr[0] = ''; // PHP5 compat hack
+				if ( !isset($iarr[0]) ) 
+					$iarr[0] = ''; // PHP5 compat hack
 				$fnarr = array_merge( array($sql) , $iarr);
 				$ret = call_user_func_array($fn,$fnarr);
-			} else $ret = $fn($sql);
+			}
+			else {
+				$ret = $fn($sql);
+			}
 		} else {
 			$fn = 'ibase_query';
 
 			if (is_array($iarr)) {
-				if (sizeof($iarr) == 0) $iarr[0] = ''; // PHP5 compat hack
+				if (sizeof($iarr) == 0) 
+					$iarr[0] = ''; // PHP5 compat hack
 				$fnarr = array_merge( array($conn,$sql) , $iarr);
 				$ret = call_user_func_array($fn,$fnarr);
-			} else $ret = $fn($conn,$sql);
+			}
+			else {
+				$ret = $fn($conn, $sql);
+			}
 		}
 		if ($docommit && $ret === true) {
 			ibase_commit($this->_connectionID);
@@ -520,8 +528,7 @@ class ADODB_ibase extends ADOConnection {
 	protected function _BlobDecode( $blob )
 	{
 		$blob_data = ibase_blob_info($this->_connectionID, $blob );
-		$blobid = ibase_blob_open($this->_connectionID, $blob );
-
+		$blobid    = ibase_blob_open($this->_connectionID, $blob );
 
 		if( $blob_data[0] > $this->maxblobsize ) {
 

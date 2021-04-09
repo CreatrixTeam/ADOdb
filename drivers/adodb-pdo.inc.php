@@ -74,7 +74,6 @@ class ADODB_pdo extends ADOConnection {
 	public  $hasAffectedRows = true;
 	protected  $_bindInputArray = true;
 	protected  $_autocommit = true;
-	protected  $_haserrorfunctions = true;
 	protected  $_lastAffectedRows = 0;
 
 	protected  $_errormsg = false;

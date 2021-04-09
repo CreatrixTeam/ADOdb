@@ -77,7 +77,6 @@ class ADODB_oci8 extends ADOConnection {
 	public  $connectSID = false;
 	protected  $_bind = false;
 	protected  $_nestedSQL = true;
-	protected  $_hasOciFetchStatement = false;
 	protected  $_getarray = false; // currently not working
 	public  $leftOuter = '';  // oracle wierdness, $col = $value (+) for LEFT OUTER, $col (+)= $value for RIGHT OUTER
 	public  $session_sharing_force_blob = false; // alter session on updateblob if set to true
@@ -93,7 +92,6 @@ class ADODB_oci8 extends ADOConnection {
 
 	public function __construct()
 	{
-		$this->_hasOciFetchStatement = true;
 		if (defined('ADODB_EXTENSION')) {
 			$this->rsPrefix .= 'ext_';
 		}

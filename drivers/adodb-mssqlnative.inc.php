@@ -68,7 +68,6 @@ if (!function_exists('sqlsrv_log_set_subsystems')) {
 //----------------------------------------------------------------
 
 
-// has datetime conversion to YYYY-MM-DD format, and also mssql_fetch_assoc
 ini_set('mssql.datetimeconvert',0);
 
 class ADODB_mssqlnative extends ADOConnection {

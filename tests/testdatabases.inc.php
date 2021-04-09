@@ -275,7 +275,7 @@ if (!empty($testvfp)) { // ODBC
 if (!empty($testmysql)) { // MYSQL
 
 
-	$server = 'localhost';	
+	$server = 'localhost';
 	$user = 'root'; $password = ''; $database = 'northwind';
 	$db = ADONewConnection("mysqlt://$user:$password@$server/$database?persist");
 	print "<h1>Connecting $db->databaseType...</h1>";
@@ -293,7 +293,7 @@ if (!empty($testmysqli)) { // MYSQL
 
 	$db = ADONewConnection('mysqli');
 	print "<h1>Connecting $db->databaseType...</h1>";
-	$server = 'localhost';	
+	$server = 'localhost';
 	if ($db->PConnect($server, "root", "", "northwind")) {
 		//$db->debug=1;$db->Execute('drop table ADOXYZ');
 		testdb($db,
@@ -308,8 +308,9 @@ if (!empty($testmysqlodbc)) { // MYSQL
 	$db = ADONewConnection('odbc');
 	$db->hasTransactions = false;
 	print "<h1>Connecting $db->databaseType...</h1>";
-	if ($_SERVER['HTTP_HOST'] == 'localhost') $server = 'localhost';
-	else $server = "mangrove";
+	/*if ($_SERVER['HTTP_HOST'] == 'localhost') $server = 'localhost';
+	else $server = "mangrove";*/
+	$server = 'localhost';
 	if ($db->PConnect('mysql', "root", ""))
 		testdb($db,
 		"create table ADOXYZ (id int, firstname char(24), lastname char(24), created date) type=innodb");
@@ -319,7 +320,8 @@ if (!empty($testmysqlodbc)) { // MYSQL
 if (!empty($testproxy)){
 	$db = ADONewConnection('proxy');
 	print "<h1>Connecting $db->databaseType...</h1>";
-	if ($_SERVER['HTTP_HOST'] == 'localhost') $server = 'localhost';
+	//if ($_SERVER['HTTP_HOST'] == 'localhost') $server = 'localhost';
+	$server = 'localhost';
 
 	if ($db->PConnect('http://localhost/php/phplens/adodb/server.php'))
 		testdb($db,

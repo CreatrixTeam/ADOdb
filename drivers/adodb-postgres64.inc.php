@@ -257,8 +257,8 @@ class ADODB_postgres64 extends ADOConnection{
 		if (is_bool($s)) return $s ? 'true' : 'false';
 
 		if (!$magic_quotes) {
-			if (ADODB_PHPVER >= 0x5200 && $this->_connectionID) {
-				return  "'".pg_escape_string($this->_connectionID,$s)."'";
+			if (PHP_VERSION >= 0x5200 && $this->_connectionID) {
+				return  "'" . pg_escape_string($this->_connectionID, $s) . "'";
 			}
 			return  "'".pg_escape_string($s)."'";
 		}
@@ -363,9 +363,8 @@ class ADODB_postgres64 extends ADOConnection{
 	 */
 	public function BlobEncode($blob)
 	{
-		if (ADODB_PHPVER >= 0x5200) return pg_escape_bytea($this->_connectionID, $blob);
+		if (PHP_VERSION >= 0x5200) return pg_escape_bytea($this->_connectionID, $blob);
 		return pg_escape_bytea($blob);
-		// note that there is a pg_escape_bytea function only for php 4.2.0 or later
 	}
 
 	// assumes bytea for blob, and varchar for clob
@@ -777,15 +776,23 @@ class ADODB_postgres64 extends ADOConnection{
 	/*	Returns: the last error message from previous database operation	*/
 	public function ErrorMsg()
 	{
-		if ($this->_errorMsg !== false) return $this->_errorMsg;
+		if ($this->_errorMsg !== false) {
+			return $this->_errorMsg;
+		}
+		
 		if (!empty($this->_resultid)) {
 			$this->_errorMsg = @pg_result_error($this->_resultid);
-			if ($this->_errorMsg) return $this->_errorMsg;
+			if ($this->_errorMsg) {
+				return $this->_errorMsg;
+			}
 		}
 
 		if (!empty($this->_connectionID)) {
 			$this->_errorMsg = @pg_last_error($this->_connectionID);
-		} else $this->_errorMsg = $this->_errconnect();
+		} else {
+			$this->_errorMsg = $this->_errconnect();
+		}
+
 		return $this->_errorMsg;
 	}
 

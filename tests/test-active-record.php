@@ -6,7 +6,6 @@
 	// uncomment the following if you want to test exceptions
 	if (@$_GET['except']) {
 		include('../adodb-exceptions.inc.php');
-		echo "<h3>Exceptions included</h3>";
 	}
 
 	$db = NewADOConnection('mysql://root@localhost/northwind?persist');
