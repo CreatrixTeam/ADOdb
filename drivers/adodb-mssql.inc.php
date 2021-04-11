@@ -612,7 +612,7 @@ order by constraint_name, referenced_table_name, keyno";
 			ADOConnection::outp( "{$prefix}Parameter(\$stmt, \$php_var='$var', \$name='$name', \$maxLen=$maxLen, \$type=$ztype);");
 		}
 		/*
-			See http://phplens.com/lens/lensforum/msgs.php?id=7231
+			See PHPLens Issue No: 7231
 
 			RETVAL is HARD CODED into php_mssql extension:
 			The return value (a long integer value) is treated like a special OUTPUT parameter,
@@ -786,7 +786,7 @@ class ADORecordset_mssql extends ADORecordSet {
 
 	public  $databaseType = "mssql";
 	public  $canSeek = true;
-	public  $hasFetchAssoc; // see http://phplens.com/lens/lensforum/msgs.php?id=6083
+	public  $hasFetchAssoc; // see http://phplens.com/lens/lensforum/msgs.php?id=6083 [https://web.archive.org/web/20050305101411/http://phplens.com:80/lens/lensforum/msgs.php?id=6083]
 	// _mths works only in non-localised system
 
 	public function __construct($id,$mode=false)

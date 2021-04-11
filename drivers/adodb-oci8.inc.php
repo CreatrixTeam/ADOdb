@@ -830,7 +830,7 @@ class ADODB_oci8 extends ADOConnection {
 			$element0 = reset($inputarr);
 			$array2d =  $this->bulkBind && is_array($element0) && !is_object(reset($element0));
 
-			# see http://phplens.com/lens/lensforum/msgs.php?id=18786
+			# see PHPLens Issue No: 18786
 			if ($array2d || !$this->_bindInputArray) {
 
 				# is_object check because oci8 descriptors can be passed in
