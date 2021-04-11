@@ -164,7 +164,7 @@ function _adodb_replace(&$zthis, $table, $fieldArray, $keyCol, $autoQuote, $has_
 		if ($rs) {
 			if ($zthis->poorAffectedRows) {
 				// The Select count(*) wipes out any errors that the update would have returned.
-				// PHPLens Issue No: 5696
+				// PHPLens Issue No: 5696 [https://web.archive.org/web/20050324153555/http://phplens.com:80/lens/lensforum/msgs.php?id=5696]
 				if ($zthis->ErrorNo()<>0) return 0;
 
 				// affected_rows == 0 if update field values identical to old values
@@ -417,7 +417,7 @@ function _adodb_getcount(&$zthis, $sql,$inputarr=false,$secs2cache=0)
 		}
 		// fix by alexander zhukov, alex#unipack.ru, because count(*) and 'order by' fails
 		// with mssql, access and postgresql. Also a good speedup optimization - skips sorting!
-		// also see PHPLens Issue No: 12752
+		// also see PHPLens Issue No: 12752 [https://web.archive.org/web/20120314062716/http://phplens.com/lens/lensforum/msgs.php?id=12752]
 		$rewritesql = adodb_strip_order_by($rewritesql);
 	}
 

@@ -483,7 +483,7 @@ class ADODB_mysql extends ADOConnection {
 		$nrows = (int) $nrows;
 		$offset = (int) $offset;
 		$offsetStr =($offset>=0) ? ((integer)$offset)."," : '';
-		// jason judge, see PHPLens Issue No: 9220
+		// jason judge, see PHPLens Issue No: 9220 [https://web.archive.org/web/20051217185255/http://phplens.com:80/lens/lensforum/msgs.php?id=9220]
 		if ($nrows < 0) $nrows = '18446744073709551615';
 
 		if ($secs)

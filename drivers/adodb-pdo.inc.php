@@ -130,11 +130,11 @@ class ADODB_pdo extends ADOConnection {
 		* ones
 		*/
 		if ($persist) {
-			$this->pdoParameters[\PDO::ATTR_PERSISTENT] = true;
+			$this->pdoParameters[PDO::ATTR_PERSISTENT] = true;
 		} 
 		
 		try {
-			$this->_connectionID = new \PDO($argDSN, $argUsername, $argPassword, $this->pdoParameters);
+			$this->_connectionID = new PDO($argDSN, $argUsername, $argPassword, $this->pdoParameters);
 		} catch (Exception $e) {
 			$this->_connectionID = false;
 			$this->_errorno = -1;

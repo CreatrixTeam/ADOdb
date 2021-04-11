@@ -96,6 +96,7 @@ https://github.com/ADOdb/ADOdb/issues
 
 You may also find legacy issues in
 
+- the old [ADOdb forums](http://phplens.com/lens/lensforum/topics.php?id=4 [https://web.archive.org/web/20160413160222/http://phplens.com/lens/lensforum/topics.php?id=4]) on phplens.com [https://web.archive.org/web/20160121015226/http://www.phplens.com/]
 - the [SourceForge tickets section](http://sourceforge.net/p/adodb/_list/tickets)
 
 However, please note that they are not actively monitored and should
