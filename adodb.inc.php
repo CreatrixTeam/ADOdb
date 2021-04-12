@@ -5748,8 +5748,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 					$fakedsn = $cFakedsn;
 					
 				}
-				$dsna = @parse_url($fakedsn);
+				
+				$dsna = parse_url($fakedsn);
 			}
+			
 			if (!$dsna) {
 				return false;
 			}
@@ -5775,6 +5777,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			if (!$db) {
 				return false;
 			}
+			
 			$dsna['host'] = isset($dsna['host']) ? rawurldecode($dsna['host']) : '';
 			$dsna['user'] = isset($dsna['user']) ? rawurldecode($dsna['user']) : '';
 			$dsna['pass'] = isset($dsna['pass']) ? rawurldecode($dsna['pass']) : '';
@@ -5787,7 +5790,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				*/
 				$dsna = str_replace('\035','#',$dsna);
 			}
-			
+
 			if (isset($dsna['query'])) {
 				$opt1 = explode('&',$dsna['query']);
 				foreach($opt1 as $k => $v) {
@@ -5797,6 +5800,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			} else {
 				$opt = array();
 			}
+
 		}
 	/*
 	 *  phptype: Database backend used in PHP (mysql, odbc etc.)
