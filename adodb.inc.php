@@ -2,7 +2,7 @@
 /*
  * Set tabs to 4 for best viewing.
  *
- * Latest version is available at http://adodb.org/
+ * Latest version is available at https://adodb.org/
  *
  * This is the main include file for ADOdb.
  * Database specific drivers are stored in the adodb/drivers/adodb-*.inc.php
@@ -14,7 +14,7 @@
 /**
 	\mainpage
 
-	@version   v5.21.0-dev  ??-???-2016
+	@version   v5.21.0-beta.1  20-Dec-2020
 	@copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
 	@copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
 
@@ -72,7 +72,7 @@ if (!defined('_ADODB_LAYER')) {
 	/*********************************************************
 	* Controls $ADODB_FORCE_TYPE mode. Default is ADODB_FORCE_VALUE (3).
 	* Used in GetUpdateSql and GetInsertSql functions. Thx to Niko, nuko#mbnet.fi
-	* @link http://adodb.org/dokuwiki/doku.php?id=v5:reference:adodb_force_type
+	* @link https://adodb.org/dokuwiki/doku.php?id=v5:reference:adodb_force_type
 	*
 	* 0 = ignore empty fields. All empty fields in array are ignored.
 	* 1 = force null. All empty, php null and string 'null' fields are
@@ -207,7 +207,7 @@ if (!defined('_ADODB_LAYER')) {
 		/**
 		 * ADODB version as a string.
 		 */
-		$ADODB_vers = 'v5.21.0-dev  ??-???-2016';
+		$ADODB_vers = 'v5.21.0-beta.1  20-Dec-2020';
 
 		/**
 		 * Determines whether recordset->RecordCount() is used.
