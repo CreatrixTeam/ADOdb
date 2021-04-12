@@ -3291,14 +3291,14 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @param bool [$magic_quotes]
 	 * @return string|array
 	 */
-	public function addq($s,$magic_quotes=false) {
+	public function addq($s, $magic_quotes=false) {
 		if (!$magic_quotes) {
 			if ($this->replaceQuote[0] == '\\') {
 				// only since php 4.0.5
 				$s = str_replace(array('\\',"\0"),array('\\\\',"\\\0"),$s);
 				//$s = str_replace("\0","\\\0", str_replace('\\','\\\\',$s));
 			}
-			return  str_replace("'",$this->replaceQuote,$s);
+			return  str_replace("'", $this->replaceQuote, $s);
 		}
 
 		// undo magic quotes for "
@@ -3325,14 +3325,14 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *
 	 * @return string Quoted string to be sent back to database
 	 */
-	public function qstr($s,$magic_quotes=false) {
+	public function qstr($s, $magic_quotes=false) {
 		if (!$magic_quotes) {
 			if ($this->replaceQuote[0] == '\\'){
 				// only since php 4.0.5
 				$s = str_replace(array('\\',"\0"),array('\\\\',"\\\0"),$s);
 				//$s = str_replace("\0","\\\0", str_replace('\\','\\\\',$s));
 			}
-			return  "'".str_replace("'",$this->replaceQuote,$s)."'";
+			return  "'".str_replace("'", $this->replaceQuote, $s)."'";
 		}
 
 		// undo magic quotes for "
