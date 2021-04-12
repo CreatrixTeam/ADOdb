@@ -155,8 +155,8 @@ Older changelogs:
 - Path disclosure problem in mysqli fixed. Thx Andy.
 - Fixed typo in session_schema2.xml.
 - Changed INT in oci8 to return correct precision in $fld->max_length, MetaColumns(). Thx Eloy Lafuente Plaza.
-- Patched postgres64 _connect to handle serverinfo(). see PHPLens Issue No: 15887.
-- Added pdo fix for null columns. See PHPLens Issue No: 15889
+- Patched postgres64 _connect to handle serverinfo(). see PHPLens Issue No: 15887 [https://web.archive.org/web/20061021130947/http://phplens.com/lens/lensforum/msgs.php?id=15887].
+- Added pdo fix for null columns. See PHPLens Issue No: 15889 [https://web.archive.org/web/20061016134603/http://phplens.com/lens/lensforum/msgs.php?id=15889]
 - For stored procedures, missing connection id now passed into mssql_query(). Thx Ecsy (ecsy#freemail.hu).
 
 ## 4.92a - 30 Aug 2006
@@ -260,7 +260,7 @@ Older changelogs:
 - Fixed GetInsertSQL() to support oci8po.
 - Fixed qstr() issue with postgresql with \0 in strings.
 - Fixed some datadict driver loading issues in _adodb_getdriver().
-- Added register shutdown function session_write_close in adodb-session.inc.php for PHP 5 compat. See PHPLens Issue No: 14200.
+- Added register shutdown function session_write_close in adodb-session.inc.php for PHP 5 compat. See PHPLens Issue No: 14200 [https://web.archive.org/web/20060427180442/http://phplens.com:80/lens/lensforum/msgs.php?id=14200].
 
 ## 4.70 - 6 Jan 2006
 
@@ -514,7 +514,7 @@ Older changelogs:
 - MetaTables() for mysql, $showschema parameter was not backward compatible with older versions of adodb. Fixed.
 - Changed mysql GetOne() to work with mysql 3.23 when using with non-select stmts (e.g. SHOW TABLES).
 - Changed TRIG_ prefix to a variable in datadict-oci8.inc.php. Thx to Luca.Gioppo#csi.it.
-- New to adodb-time code. We allow you to define your own daylights savings function, adodb_daylight_sv for pre-1970 dates. If the function is defined (somewhere in an include), then you can correct for daylights savings.
+- New to adodb-time code. We allow you to define your own daylights savings function, adodb_daylight_sv for pre-1970 dates. If the function is defined (somewhere in an include), then you can correct for daylights savings. See http://phplens.com/phpeverywhere/node/view/16#daylightsavings [https://web.archive.org/web/20120203111222/http://phplens.com/phpeverywhere/node/view/16] for more info.
 - New sqlitepo driver. This is because assoc mode does not work like other drivers in sqlite. Namely, when selecting (joining) multiple tables, in assoc mode the table names are included in the assoc keys in the "sqlite" driver. In "sqlitepo" driver, the table names are stripped from the returned column names. When this results in a conflict, the first field get preference. Contributed by Herman Kuiper herman#ozuzo.net
 - Added $forcenull parameter to GetInsertSQL/GetUpdateSQL. Idea by Marco Aurelio Silva.
 - More XHTML changes for GetMenu. By Jeremy Evans.

@@ -399,6 +399,21 @@ class ADODB_mysql extends ADOConnection {
 		}
 
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
+		//BEGIN: MYSQL_V8
+		/*
+		* Return assoc array where key is column name, value is column type
+		*    [1] => int unsigned
+		*/
+		
+		$SQL = "SELECT column_name, column_type 
+				  FROM information_schema.columns 
+				 WHERE table_schema='{$this->databaseName}' 
+				   AND table_name='$table'";
+		
+		$schemaArray = $this->getAssoc($SQL);
+		$schemaArray = array_change_key_case($schemaArray,CASE_LOWER);
+		//END: MYSQL_V8
+
 		$rs = $this->Execute(sprintf($this->metaColumnsSQL,$table));
 
 		if ($schema) {
@@ -417,6 +432,14 @@ class ADODB_mysql extends ADOConnection {
 			$fld = new ADOFieldObject();
 			$fld->name = $rs->fields[0];
 			$type = $rs->fields[1];
+
+			//BEGIN: MYSQL_V8
+			/*
+			* Type from information_schema returns
+			* the same format in V8 mysql as V5
+			*/
+			$type = $schemaArray[strtolower($fld->name)];
+			//END: MYSQL_V8
 
 			// split type into type(length):
 			$fld->scale = null;

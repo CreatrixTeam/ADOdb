@@ -65,6 +65,13 @@ COPYRIGHT
 jackbbs, which includes adodb_mktime, adodb_get_gmt_diff, adodb_is_leap_year
 and originally found at http://www.php.net/manual/en/function.mktime.php
 
+=============================================================================
+
+BUG REPORTS
+
+These used to be posted to the ADOdb forums at
+
+	http://phplens.com/lens/lensforum/topics.php?id=4 [https://web.archive.org/web/20150319005103/http://phplens.com/lens/lensforum/topics.php?id=4]
 
 =============================================================================
 
@@ -340,7 +347,7 @@ January!!!), changed adodb_get_gmt_diff() to ignore daylight savings.
 
 - 9 Aug 2003 0.10
 Fixed bug with dates after 2038.
-See PHPLens Issue No: 6980
+See PHPLens Issue No: 6980 [https://web.archive.org/web/20160810151729/http://phplens.com/lens/lensforum/msgs.php?id=6980]
 
 - 1 July 2003 0.09
 Added support for Q (Quarter).

@@ -271,7 +271,7 @@ Please use version 5.20.12 or later.
 - adodb: Release Recordset when raising exception. See Github #143
 - adodb: Added new setConnectionParameter() method, currently implemented in mssqlnative driver only. See Github #158.
 - adodb-lib: Optimize query pagination, thanks to Mike Benoit. See Github #110
-- memcache: use include_once() to avoid issues with PHPUnit. See PHPLens Issue No: 19489
+- memcache: use include_once() to avoid issues with PHPUnit. See PHPLens Issue No: 19489 [https://web.archive.org/web/20150419100429/http://phplens.com/lens/lensforum/msgs.php?id=19489]
 - mssql_n: Allow use of prepared statements with driver. See Github #22
 - mssqlnative: Use ADOConnection::outp instead of error_log. See Github #12
 - mssqlnative: fix failure on Insert_ID() if the insert statement contains a semicolon in a value string, thanks to sketule. See Github #96
@@ -292,7 +292,7 @@ Please use version 5.20.12 or later.
 - postgres: Fix AlterColumnSQL when updating multiple columns, thanks to Jouni Ahto. See Github #72
 - postgres: Fix support for HHVM 3.6, thanks to Mike Benoit. See Github #87
 - postgres: Noblob optimization, thanks to Mike Benoit. See Github #112
-- postgres7: fix system warning in MetaColumns() with schema. See PHPLens Issue No: 19481
+- postgres7: fix system warning in MetaColumns() with schema. See PHPLens Issue No: 19481 [https://web.archive.org/web/20150419100346/http://phplens.com/lens/lensforum/msgs.php?id=19481]
 - sqlite3: ServerInfo() now returns driver's version
 - sqlite3: Fix wrong connection parameter in _connect(), thanks to diogotoscano. See Github #51
 - sqlite3: Fix FetchField, thanks to diogotoscano. See Github #53
@@ -310,16 +310,16 @@ It causes recordsets to return empty strings (no data) when using some database 
 The problem has been reported on MSSQL, Interbase and Foxpro, but possibly affects
 other database types as well; all drivers derived from the above are also impacted.
 
-- adodb: GetRowAssoc will return null as required. See PHPLens Issue No: 19289
-- adodb: Fix GetRowAssoc bug introduced in 5.17, causing function to return data from previous fetch for NULL fields. See PHPLens Issue No: 17539
+- adodb: GetRowAssoc will return null as required. See PHPLens Issue No: 19289 [https://web.archive.org/web/20150418163727/http://phplens.com/lens/lensforum/msgs.php?id=19289]
+- adodb: Fix GetRowAssoc bug introduced in 5.17, causing function to return data from previous fetch for NULL fields. See PHPLens Issue No: 17539 [https://web.archive.org/web/20150419095524/http://phplens.com/lens/lensforum/msgs.php?id=17539]
 - adodb: GetAssoc will return a zero-based array when 2nd column is null. See https://sourceforge.net/p/adodb/bugs/130/
 - adodb: Execute no longer ignores single parameters evaluating to false. See https://sourceforge.net/p/adodb/patches/32/
-- adodb: Fix LIMIT 1 clause in subquery gets stripped off. See PHPLens Issue No: 17813
+- adodb: Fix LIMIT 1 clause in subquery gets stripped off. See PHPLens Issue No: 17813 [https://web.archive.org/web/20150419100249/http://phplens.com/lens/lensforum/msgs.php?id=17813]
 - adodb-lib: Fix columns quoting bug. See https://sourceforge.net/p/adodb/bugs/127/
 - Added new ADODB_ASSOC_CASE_* constants. Thx to Damien Regad.
 - sessions: changed lob handling to detect all variations of oci8 driver.
-- ads: clear fields before fetching. See PHPLens Issue No: 17539
-- mssqlnative: fixed many FetchField compat issues. See PHPLens Issue No: 18464. Also date format changed to remove timezone.
+- ads: clear fields before fetching. See PHPLens Issue No: 17539 [https://web.archive.org/web/20150419095524/http://phplens.com/lens/lensforum/msgs.php?id=17539]
+- mssqlnative: fixed many FetchField compat issues. See PHPLens Issue No: 18464 [https://web.archive.org/web/20150419100352/http://phplens.com/lens/lensforum/msgs.php?id=18464]. Also date format changed to remove timezone.
 - mssqlnative: Numerous fixes and improvements by Mark Newnham
     - Driver supports SQL Server 2005, 2008 and 2012
     - Bigint data types mapped to I8 instead of I
@@ -327,24 +327,24 @@ other database types as well; all drivers derived from the above are also impact
     - On SQL Server 2012, makes use of new CREATE SEQUENCE statement
     - FetchField caches metadata at initialization to improve performance
     - etc.
-- mssqlnative: Fix Insert ID on prepared statement, thanks to Mike Parks. See PHPLens Issue No: 19079
+- mssqlnative: Fix Insert ID on prepared statement, thanks to Mike Parks. See PHPLens Issue No: 19079 [https://web.archive.org/web/20150419100339/http://phplens.com/lens/lensforum/msgs.php?id=19079]
 - mssql: timestamp format changed to `Y-m-d\TH:i:s` (ISO 8601) to make them independent from DATEFORMAT setting, as recommended on
   [Microsoft TechNet](http://technet.microsoft.com/en-us/library/ms180878%28v=sql.105%29.aspx#StringLiteralDateandTimeFormats).
-- mysql/mysqli: Fix ability for MetaTables to filter by table name, broken since 5.15. See PHPLens Issue No: 19359
+- mysql/mysqli: Fix ability for MetaTables to filter by table name, broken since 5.15. See PHPLens Issue No: 19359 [https://web.archive.org/web/20130618022528/http://phplens.com/lens/lensforum/msgs.php?id=19359]
 - odbc: Fixed MetaTables and MetaPrimaryKeys definitions in odbc driver to match adoconnection class.
-- odbc: clear fields before fetching. See PHPLens Issue No: 17539
+- odbc: clear fields before fetching. See PHPLens Issue No: 17539 [https://web.archive.org/web/20150419095524/http://phplens.com/lens/lensforum/msgs.php?id=17539]
 - oci8: GetRowAssoc now works in ADODB_FETCH_ASSOC fetch mode
 - oci8: MetaType and MetaForeignKeys argument count are now strict-standards compliant
 - oci8: Added trailing `;` on trigger creation for sequence fields, prevents occurrence of ORA-24344
 - oci8quercus: new oci8 driver with support for quercus jdbc data types.
-- pdo: Fixed concat recursion bug in 5.3. See PHPLens Issue No: 19285
+- pdo: Fixed concat recursion bug in 5.3. See PHPLens Issue No: 19285 [https://web.archive.org/web/20140728174853/http://phplens.com/lens/lensforum/msgs.php?id=19285]
 - pgsql: Default driver (postgres/pgsql) is now postgres8
 - pgsql: Fix output of BLOB (bytea) columns with PostgreSQL >= 9.0
 - pgsql: Fix handling of DEFAULT NULL columns in AlterColumnSQL
 - pgsql: Fix mapping of error message to ADOdb error codes
 - pgsql: Reset parameter number in Param() method when $name == false
 - postgres8: New class/type with correct behavior for _insertid(). See Github #8
-- postgres9: Fixed assoc problem. See PHPLens Issue No: 19296
+- postgres9: Fixed assoc problem. See PHPLens Issue No: 19296 [https://web.archive.org/web/20140419082112/http://phplens.com/lens/lensforum/msgs.php?id=19296]
 - sybase: Removed redundant sybase_connect() call in _connect(). See Github #3
 - sybase: Allow connection on custom port. See Github #9
 - sybase: Fix null values returned with ASSOC fetch mode. See Github #10
@@ -376,12 +376,12 @@ other database types as well; all drivers derived from the above are also impact
 
 ## 5.16 - 26 March 2012
 
-- mysqli: extra mysqli_next_result() in close() removed. See PHPLens Issue No: 19100
-- datadict-oci8: minor typo in create sequence trigger fixed. See PHPLens Issue No: 18879.
+- mysqli: extra mysqli_next_result() in close() removed. See PHPLens Issue No: 19100 [https://web.archive.org/web/20120529074710/http://phplens.com/lens/lensforum/msgs.php?id=19100]
+- datadict-oci8: minor typo in create sequence trigger fixed. See PHPLens Issue No: 18879 [https://web.archive.org/web/20141008064049/http://phplens.com/lens/lensforum/msgs.php?id=18879].
 - security: safe date parsing changes. Does not impact security, these are code optimisations. Thx Saithis.
 - postgres, oci8, oci8po, db2oci: Param() function parameters inconsistent with base class. $type='C' missing. Fixed.
 - active-record: locked bug fixed. PHPLens Issue:19073
-- mysql, mysqli and informix: added MetaProcedures. Metaprocedures allows to retrieve an array list of all procedures in database. PHPLens Issue No: 18414
+- mysql, mysqli and informix: added MetaProcedures. Metaprocedures allows to retrieve an array list of all procedures in database. PHPLens Issue No: 18414 [https://web.archive.org/web/20120314040940/http://phplens.com/lens/lensforum/msgs.php?id=18414]
 - Postgres7: added support for serial data type in MetaColumns().
 
 ## 5.15 - 19 Jan 2012
@@ -437,13 +437,13 @@ other database types as well; all drivers derived from the above are also impact
 - ado5: Fixed ado5 exceptions to only display errors when $this->debug=true;
 - Added DSN support to sessions2.inc.php.
 - adodb-lib.inc.php. Fixed issue with _adodb_getcount() not using $secs2cache parameter.
-- adodb active record. Fixed caching bug. See PHPLens Issue No: 18288.
+- adodb active record. Fixed caching bug. See PHPLens Issue No: 18288 [https://web.archive.org/web/20130617121540/http://phplens.com/lens/lensforum/msgs.php?id=18288].
 - db2: fixed ServerInfo().
 - adodb_date: Added support for format 'e' for TZ as in adodb_date('e')
 - Active Record: If you have a field which is a string field (with numbers in) and you add preceding 0's to it the adodb library does not pick up the fact that the field has changed because of the way php's == works (dodgily). The end result is that it never gets updated into the database - fix by Matthew Forrester (MediaEquals). [matthew.forrester#mediaequals.com]
-- Fixes RowLock() and MetaIndexes() inconsistencies. See PHPLens Issue No: 18236
-- Active record support for postgrseql boolean. See PHPLens Issue No: 18246
-- By default, Execute 2D array is disabled for security reasons. Set $conn->bulkBind = true to enable. See PHPLens Issue No: 18270. Note this breaks backward compat.
+- Fixes RowLock() and MetaIndexes() inconsistencies. See PHPLens Issue No: 18236 [https://web.archive.org/web/20091231031054/http://phplens.com/lens/lensforum/msgs.php?id=18236]
+- Active record support for postgrseql boolean. See PHPLens Issue No: 18246 [https://web.archive.org/web/20091231031411/http://phplens.com/lens/lensforum/msgs.php?id=18246]
+- By default, Execute 2D array is disabled for security reasons. Set $conn->bulkBind = true to enable. See PHPLens Issue No: 18270 [https://web.archive.org/web/20111016145155/http://phplens.com/lens/lensforum/msgs.php?id=18270]. Note this breaks backward compat.
 - MSSQL: fixes for 5.2 compat. PHPLens Issue No: 18325
 - Changed Version() to return a string instead of a float so it correctly returns 5.10 instead of 5.1.
 
