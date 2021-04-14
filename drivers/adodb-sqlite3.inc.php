@@ -30,8 +30,6 @@ class ADODB_sqlite3 extends ADOConnection {
 	public  $hasAffectedRows = true; 	/// supports affected rows for update/delete?
 	public  $hasGenID = true;
 	public  $metaTablesSQL = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name";
-	public  $sysDate = "adodb_date('Y-m-d')";
-	public  $sysTimeStamp = "adodb_date('Y-m-d H:i:s')";
 	public  $fmtTimeStamp = "'Y-m-d H:i:s'";
 
 	public function ServerInfo()
@@ -196,24 +194,6 @@ class ADODB_sqlite3 extends ADOConnection {
 	public function ErrorNo()
 	{
 		return $this->_connectionID->lastErrorCode(); //**tochange??
-	}
-
-	public function SQLDate($fmt, $col=false)
-	{
-		/*
-		* In order to map the values correctly, we must ensure the proper
-		* casing for certain fields
-		* Y must be UC, because y is a 2 digit year
-		* d must be LC, because D is 3 char day
-		* A must be UC  because a is non-portable am
-		* Q must be UC  because q means nothing
-		*/
-		$fromChars = array('y','D','a','q');
-		$toChars   = array('Y','d','A','Q');
-		$fmt       = str_replace($fromChars,$toChars,$fmt);
-
-		$fmt = $this->qstr($fmt);
-		return ($col) ? "adodb_date2($fmt,$col)" : "adodb_date($fmt)";
 	}
 
 	protected function _createFunctions()

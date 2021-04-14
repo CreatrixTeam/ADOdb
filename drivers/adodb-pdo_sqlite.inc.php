@@ -24,8 +24,6 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	public  $databaseType    = "pdo_sqlite";
 	protected  $dsnType 		 = 'sqlite'; 
 	public  $metaTablesSQL   = "SELECT name FROM sqlite_master WHERE type='table'";
-	public  $sysDate         = 'current_date';
-	public  $sysTimeStamp    = 'current_timestamp';
 	public  $replaceQuote    = "''";
 	public  $hasGenID        = true;
 	public  $random='abs(random())';
@@ -43,6 +41,12 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		$arr['encoding']    = $enc;
 
 		return $arr;
+	}
+
+	protected function event_pdoConnectionEstablished()
+	{
+		@$this->_connectionID->sqliteCreateFunction($this->_connectionID, 'adodb_date', 'adodb_date', 1);
+		@$this->_connectionID->sqliteCreateFunction($this->_connectionID, 'adodb_date2', 'adodb_date2', 2);
 	}
 
 	public function SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false,$secs2cache=0)
@@ -295,11 +299,10 @@ class  ADORecordSet_pdo_sqlite extends ADORecordSet_pdo {
 	{
 		$vReturn = NULL;
 
-		if(($this->_datadict === NULL) && ($this->connection))
+		if($this->_datadict === NULL)
 			{$this->_datadict = NewDataDictionary($this->connection);}
 
-		if(($this->_datadict !== NULL) &&
-				(floatval($this->_dataDict->GetServerInfo("version")) > 2))
+		if(floatval($this->_dataDict->GetServerInfo("version")) > 2)
 			{$vReturn = $this->pdo_sqlite_MetaType($t, $len, $fieldobj);}
 		else
 			{$vReturn = parent::MetaType($t, $len, $fieldobj);}

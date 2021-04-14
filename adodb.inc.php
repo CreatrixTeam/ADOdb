@@ -507,6 +507,7 @@ if (!defined('_ADODB_LAYER')) {
 	protected  $_affected = false;
 	protected  $_logsql = false;
 	protected  $_transmode = ''; // transaction mode
+	public  $datetime = false;	// MetaType('DATE') returns 'D' (datetime==false) or 'T' (datetime == true)
 	protected  $_dataDict = '';  //ADODB_DataDict instance. Is to be used to eventually remove all SQL statement generation, but not execution, from the drivers.
 
 
@@ -1396,9 +1397,7 @@ if (!defined('_ADODB_LAYER')) {
 		}
 
 		// return real recordset from select statement
-		$rsclass = $this->rsPrefix.$this->databaseType;
-		$rs = new $rsclass($this->_queryID,$this->fetchMode);
-		$rs->connection = $this; // Pablo suggestion
+		$rs = $this->newADORecordSet($this->_queryID, $this->fetchMode);
 		$rs->Init();
 		if (is_array($sql)) {
 			$rs->sql = $sql[0];
@@ -1821,7 +1820,7 @@ if (!defined('_ADODB_LAYER')) {
 	public function SerializableRS(&$rs) {
 		$rs->SwitchToBufferMode();
 		$ignore = false;
-		$rs->connection = $ignore;
+		//$rs->connection = $ignore;
 
 		return $rs;
 	}
@@ -2611,9 +2610,7 @@ if (!defined('_ADODB_LAYER')) {
 	public function MetaType($t,$len=-1,$fieldobj=false) {
 
 		if (empty($this->_metars)) {
-			$rsclass = $this->rsPrefix.$this->databaseType;
-			$this->_metars = new $rsclass(false,$this->fetchMode);
-			$this->_metars->connection = $this;
+			$this->_metars = $this->newADORecordSet(false,$this->fetchMode);
 		}
 		return $this->_metars->MetaType($t,$len,$fieldobj);
 	}
@@ -3567,6 +3564,19 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 
 	public function BuildTableName($pTableName, $pSchemaName = NULL)
 		{return ($pSchemaName ? ($pSchemaName.".".$pTableName) : $pTableName);}
+
+	/*
+		Code should call this function for creating ADORecordSets.
+	*/
+	public function newADORecordSet($queryID, $mode=false)
+	{
+		$vADORecordSetClassName = $this->rsPrefix.$this->databaseType;
+		$vADORecordSet = new $vADORecordSetClassName($this->_queryID,$this->fetchMode);
+
+		$vADORecordSet->connection = $this; // Pablo suggestion
+		
+		return $vADORecordSet;
+	}
 } // end class ADOConnection
 
 
@@ -3778,7 +3788,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	public  $bind = false;		/// associates normalized associative keys to the entries of $fields which may or may not be keyed associatively. Note: Must be set to false whenever $fields is changed.
 	protected $fromBindKeysToColumnNames; /// associates the keys of bind, which are normalized, to the original column names. Invalid if $bind is false.
 	public  $fetchMode;			/// default fetch mode. Valid values are ADODB_FETCH_NUM, ADODB_FETCH_ASSOC and ADODB_FETCH_BOTH only;do not confuse with ADOConnection::fetchMode.
-	public  $connection = false; /// the parent connection
+	public  $connection = false; /// the parent connection. Must always be set.
 
 	/**
 	 *	private variables
@@ -3796,7 +3806,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	protected  $_atLastPage = false;	/** Added by Iván Oliva to implement recordset pagination */
 	protected  $_lastPageNo = -1;
 	protected  $_maxRecordCount = 0;
-	public  $datetime = false;
 	
 
 	//BUFFERED MODE

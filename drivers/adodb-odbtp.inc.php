@@ -22,7 +22,7 @@ class ADODB_odbtp extends ADOConnection{
 	public  $fmtDate = "'Y-m-d'";
 	public  $fmtTimeStamp = "'Y-m-d, h:i:sA'";
 	public  $replaceQuote = "''"; // string to use to replace quotes
-	public  $odbc_driver = 0;
+	public  $odbc_driver = 0; //odbtp driver specific. Refer to ODB_ATTR_DRIVER online for possible values.
 	public  $hasAffectedRows = true;
 	public  $hasInsertID = false;
 	public  $hasGenID = true;
@@ -31,7 +31,7 @@ class ADODB_odbtp extends ADOConnection{
 	protected  $_genSeqSQL = "create table %s (seq_name char(30) not null unique , seq_value integer not null)";
 	protected  $_dropSeqSQL = "delete from adodb_seq where seq_name = '%s'";
 	protected  $_bindInputArray = false;
-	protected  $_useUnicodeSQL = false;
+	public  $_useUnicodeSQL = false; //odbtp driver specific.
 	protected  $_canPrepareSP = false;
 	protected  $_dontPoolDBC = true;
 
@@ -170,6 +170,8 @@ class ADODB_odbtp extends ADOConnection{
 	//if uid & pwd can be separate
     protected function _connect($HostOrInterface, $UserOrDSN='', $argPassword='', $argDatabase='')
 	{
+		$vOldDatabaseType = $this->databaseType;
+
 		if ($argPassword && stripos($UserOrDSN,'DRIVER=') !== false) {
 			$this->_connectionID = odbtp_connect($HostOrInterface,$UserOrDSN.';PWD='.$argPassword);
 		} else
@@ -256,7 +258,11 @@ class ADODB_odbtp extends ADOConnection{
 				$this->identitySQL = 'select SCOPE_IDENTITY()';
 				break;
 			default:
+				//ODB_DRIVER_UNKNOWN
+				//ODB_DRIVER_DB2
+				//ODB_DRIVER_MYSQL
 				$this->databaseType = 'odbtp';
+				$this->_dataDict = null;
 				if( @odbtp_get_attr(ODB_ATTR_TXNCAPABLE, $this->_connectionID) )
 					$this->hasTransactions = true;
 				else
@@ -267,9 +273,17 @@ class ADODB_odbtp extends ADOConnection{
 		if ($this->_useUnicodeSQL )
 			@odbtp_set_attr(ODB_ATTR_UNICODESQL, TRUE, $this->_connectionID);
 
-		$this->_dataDict = NewDataDictionary($this);
+		if($vOldDatabaseType !== $this->databaseType)
+			{$this->_dataDict = NewDataDictionary($this);}
 
-        return true;
+		if($this->databaseType === 'odbtp';)
+		{
+			$this->Close();
+			
+			return false;
+		}
+		else
+			{return true;}
 	}
 
 	protected function _pconnect($HostOrInterface, $UserOrDSN='', $argPassword='', $argDatabase='')
@@ -640,6 +654,7 @@ class ADODB_odbtp extends ADOConnection{
 		$this->_connectionID = false;
 		return $ret;
 	}
+
 }
 
 class ADORecordSet_odbtp extends ADORecordSet {

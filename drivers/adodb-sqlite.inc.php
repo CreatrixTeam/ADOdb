@@ -30,8 +30,6 @@ class ADODB_sqlite extends ADOConnection {
 	public  $hasAffectedRows = true; 	/// supports affected rows for update/delete?
 	public  $hasGenID = true;
 	public  $metaTablesSQL = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name";
-	public  $sysDate = "adodb_date('Y-m-d')";
-	public  $sysTimeStamp = "adodb_date('Y-m-d H:i:s')";
 	public  $fmtTimeStamp = "'Y-m-d H:i:s'";
 
 	public function ServerInfo()
@@ -144,12 +142,6 @@ class ADODB_sqlite extends ADOConnection {
 	public function ErrorNo()
 	{
 		return $this->_errorNo;
-	}
-
-	public function SQLDate($fmt, $col=false)
-	{
-		$fmt = $this->qstr($fmt);
-		return ($col) ? "adodb_date2($fmt,$col)" : "adodb_date($fmt)";
 	}
 
 

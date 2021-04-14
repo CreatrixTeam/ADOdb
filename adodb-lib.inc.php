@@ -831,9 +831,7 @@ static $cacheCols;
 		//we need an object for the recordSet
 		//because we have to call MetaType.
 		//php can't do a $rsclass::MetaType()
-		$rsclass = $zthis->rsPrefix.$zthis->databaseType;
-		$recordSet = new $rsclass(-1,$zthis->GetFetchMode());
-		$recordSet->connection = $zthis;
+		$recordSet = $zthis->newADORecordSet(-1,$zthis->GetFetchMode());
 
 		if (is_string($cacheRS) && $cacheRS == $rs) {
 			$columns = $cacheCols;

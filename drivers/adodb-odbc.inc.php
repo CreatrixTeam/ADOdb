@@ -222,7 +222,7 @@ class ADODB_odbc extends ADOConnection {
 			$this->SetFetchMode2($savem);
 			return false;
 		}
-		$rs = new ADORecordSet_odbc($qid, $this->GetFetchMode());
+		$rs = $this->newADORecordSet($qid, $this->GetFetchMode());
 		$this->SetFetchMode2($savem);
 
 		if (!$rs) return false;
@@ -245,7 +245,7 @@ class ADODB_odbc extends ADOConnection {
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 		$qid = odbc_tables($this->_connectionID);
 
-		$rs = new ADORecordSet_odbc($qid, $this->GetFetchMode());
+		$rs = $this->newADORecordSet($qid, $this->GetFetchMode());
 
 		$this->SetFetchMode2($savem);
 		if (!$rs) {
@@ -393,7 +393,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 		}
 		if (empty($qid)) return $false;
 
-		$rs = new ADORecordSet_odbc($qid, $this->GetFetchMode());
+		$rs = $this->newADORecordSet($qid, $this->GetFetchMode());
 		$this->SetFetchMode2($savem);
 
 		if (!$rs) return $false;

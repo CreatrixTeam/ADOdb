@@ -25,11 +25,26 @@ class ADODB2_sqlite extends ADODB_DataDict {
 	public  $dropIndex = 'DROP INDEX IF EXISTS %s';
 	public  $renameTable = 'ALTER TABLE %s RENAME TO %s';
 	public  $sql_concatenateOperator = '||';
+	public  $sql_sysDate = 'current_date';
+	public  $sql_sysTimeStamp = 'current_timestamp';
 	public  $nameQuote = '`';
 
 	public $blobAllowsDefaultValue = true;
 	public $blobAllowsNotNull      = true;
     
+	protected function _event_connectionSet($pADOConnection)
+	{
+		if(($pADOConnection->databaseType === "sqlite") ||
+				($pADOConnection->databaseType === "sqlite3"))
+		{
+			$sql_sysDate = "adodb_date('Y-m-d')";
+			$sql_sysTimeStamp = "adodb_date('Y-m-d H:i:s')";
+
+			$pADOConnection->sysDate = $this->sql_sysDate;
+			$pADOConnection->sysTimeStamp = $this->sql_sysTimeStamp;
+		}
+	}
+
 	public function ActualType($meta)
 	{
 		switch(strtoupper($meta)) {
@@ -218,6 +233,40 @@ class ADODB2_sqlite extends ADODB_DataDict {
 		}
 		$aSql[] = 'COMMIT';
 		return $aSql;
+	}
+
+	protected function _FormatDateSQL($fmt, $pParsedColumnName=false)
+	{
+		$vColumn = ($pParsedColumnName ? $pParsedColumnName['name'] : "");
+		
+		if($pADOConnection->databaseType === "sqlite")
+		{
+			$fmt = $this->connection->qstr($fmt);
+
+			return array(($pParsedColumnName) ? "adodb_date2($vFromat,$vColumn)" : 
+					"adodb_date($vFromat)");
+		}
+		else if($pADOConnection->databaseType === "sqlite3")
+		{
+			/*
+			* In order to map the values correctly, we must ensure the proper
+			* casing for certain fields
+			* Y must be UC, because y is a 2 digit year
+			* d must be LC, because D is 3 char day
+			* A must be UC  because a is non-portable am
+			* Q must be UC  because q means nothing
+			*/
+			$fromChars = array('y','D','a','q');
+			$toChars   = array('Y','d','A','Q');
+			$fmt       = str_replace($fromChars,$toChars,$fmt);
+
+			$fmt = $this->connection->qstr($fmt);
+
+			return array(($pParsedColumnName) ? "adodb_date2($fmt,$vColumn)" : 
+					"adodb_date($fmt)");
+		}
+		else
+			{return ADODB_DataDict::_FormatDateSQL($fmt, $pParsedColumnName);}
 	}
 
 	protected function _CreateSequenceSQL($pParsedSequenceName, $pStartID = 1)

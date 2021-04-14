@@ -80,7 +80,7 @@ class ADODB_pdo extends ADOConnection {
 	protected  $_errorno = false;
 
 	protected  $dsnType = '';
-	public  $stmt = false;
+	public  $_stmt = false; //PDO driver specific
 	
 	/*
 	* Describe parameters passed directly to the PDO driver

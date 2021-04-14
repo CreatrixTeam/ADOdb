@@ -407,7 +407,7 @@ class ADODB_ads extends ADOConnection {
 			return $false;
 		}
 
-		$rs = new ADORecordSet_ads($qid, $this->GetFetchMode());
+		$rs = $this->newADORecordSet($qid, $this->GetFetchMode());
 		$this->SetFetchMode2($savem);
 
 		if (!$rs) {

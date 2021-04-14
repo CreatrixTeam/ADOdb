@@ -103,11 +103,12 @@ class ADODB_postgres64 extends ADOConnection{
 	public  $autoRollback = true; // apparently pgsql does not autorollback properly before php 4.3.4
 							// http://bugs.php.net/bug.php?id=25404
 
-	public  $uniqueIisR = true;
+	public  $uniqueIisR = true; //Postgres64 driver specific.
 	protected  $_bindInputArray = false; // requires postgresql 7.3+ and ability to modify database
 	public  $disableBlobs = false; // set to true to disable blob checking, resulting in 2-5% improvement in performance.
 
 	protected  $_pnum = 0;
+	public $noBlobs = false; //Postgres64 driver specific.
 
 	// The last (fmtTimeStamp is not entirely correct:
 	// PostgreSQL also has support for time zones,
@@ -664,7 +665,7 @@ class ADODB_postgres64 extends ADOConnection{
 		# PHP does not handle 'hex' properly ('x74657374' is returned as 't657374')
 		# https://bugs.php.net/bug.php?id=59831 states this is in fact not a bug,
 		# so we manually set bytea_output
-		if (!empty($this->connection->noBlobs) && version_compare($info['version'], '9.0', '>=')) {
+		if (!empty($this->noBlobs) && version_compare($info['version'], '9.0', '>=')) {
 			$version = pg_version($this->connectionID);
 			if (version_compare($info['client'], '9.2', '<')) {
 				$this->Execute('set bytea_output=escape');

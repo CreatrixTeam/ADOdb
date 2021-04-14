@@ -58,7 +58,7 @@ class ADODB_oci8 extends ADOConnection {
 	public  $dataProvider = 'oci8';
 	public  $replaceQuote = "''"; // string to use to replace quotes
 	public  $metaDatabasesSQL = "SELECT USERNAME FROM ALL_USERS WHERE USERNAME NOT IN ('SYS','SYSTEM','DBSNMP','OUTLN') ORDER BY 1";
-	protected  $_stmt;
+	public  $_stmt; //oci8 driver specific
 	protected  $_commit = OCI_COMMIT_ON_SUCCESS;
 	protected  $_initdate = true; // init date to YYYY-MM-DD
 	public  $metaTablesSQL = "select table_name,table_type from cat where table_type in ('TABLE','VIEW') and table_name not like 'BIN\$%'"; // bin$ tables are recycle bin tables
@@ -85,7 +85,6 @@ class ADODB_oci8 extends ADOConnection {
 	public  $NLS_DATE_FORMAT = 'YYYY-MM-DD';  // To include time, use 'RRRR-MM-DD HH24:MI:SS'
 	public  $dateformat = 'YYYY-MM-DD'; // DBDate format
 	public  $useDBDateFormatForTextInput=false;
-	public  $datetime = false; // MetaType('DATE') returns 'D' (datetime==false) or 'T' (datetime == true)
 	protected  $_refLOBs = array();
 
 	// public  $ansiOuter = true; // if oracle9

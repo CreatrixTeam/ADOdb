@@ -504,7 +504,7 @@ class ADODB_firebird extends ADOConnection {
 
 	// old blobdecode function
 	// still used to auto-decode all blob's
-	protected function _BlobDecode_old( $blob )
+	public function _BlobDecode_old( $blob )
 	{
 		$blobid = fbird_blob_open($this->_connectionID, $blob );
 		$realblob = fbird_blob_get( $blobid,$this->maxblobsize); // 2nd param is max size of blob -- Kevin Boillet <kevinboillet@yahoo.fr>
