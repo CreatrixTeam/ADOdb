@@ -37,7 +37,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 			$pADOConnection->sysDate = $this->sql_sysDate;
 		}
 	}
-	public function MetaType($t, $len=-1, $fieldobj=false)
+	/*public function MetaType($t, $len=-1, $fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -82,7 +82,7 @@ class ADODB2_oci8 extends ADODB_DataDict {
 		default:
 			return ADODB_DEFAULT_METATYPE;
 		}
-	}
+	}*/
 
  	public function ActualType($meta)
 	{

@@ -394,26 +394,6 @@ class ADODB_sqlite3 extends ADOConnection {
 		return $x;
 	}
 
-}
-
-/*--------------------------------------------------------------------------------------
-		Class Name: Recordset
---------------------------------------------------------------------------------------*/
-
-class ADORecordset_sqlite3 extends ADORecordSet {
-
-	public  $databaseType = "sqlite3";
-	public  $bind = false;
-
-	protected function _FetchField($fieldOffset = -1)
-	{
-		$fld = new ADOFieldObject;
-		$fld->name = $this->_queryID->columnName($fieldOffset);
-		$fld->type = 'VARCHAR';
-		$fld->max_length = -1;
-		return $fld;
-	}
-
 	function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		
@@ -480,6 +460,26 @@ class ADORecordset_sqlite3 extends ADORecordSet {
 						  'NUMERIC'=>'N');
 		
 		return $subclass[$subt];
+	}
+
+}
+
+/*--------------------------------------------------------------------------------------
+		Class Name: Recordset
+--------------------------------------------------------------------------------------*/
+
+class ADORecordset_sqlite3 extends ADORecordSet {
+
+	public  $databaseType = "sqlite3";
+	public  $bind = false;
+
+	protected function _FetchField($fieldOffset = -1)
+	{
+		$fld = new ADOFieldObject;
+		$fld->name = $this->_queryID->columnName($fieldOffset);
+		$fld->type = 'VARCHAR';
+		$fld->max_length = -1;
+		return $fld;
 	}
 
 	protected function _initrs()

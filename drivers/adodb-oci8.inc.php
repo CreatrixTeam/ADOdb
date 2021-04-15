@@ -1407,6 +1407,63 @@ SELECT /*+ RULE */ distinct b.column_name
 		}
 	}
 
+	/**
+	 * not the fastest implementation - quick and dirty - jlim
+	 * for best performance, use the actual $rs->MetaType().
+	 *
+	 * @param	mixed	$t
+	 * @param	int		$len		[optional] Length of blobsize
+	 * @param	bool	$fieldobj	[optional][discarded]
+	 * @return	str					The metatype of the field
+	 */
+	public function MetaType($t, $len=-1, $fieldobj=false)
+	{
+		if (is_object($t)) {
+			$fieldobj = $t;
+			$t = $fieldobj->type;
+			$len = $fieldobj->max_length;
+		}
+
+		switch (strtoupper($t)) {
+		case 'VARCHAR':
+		case 'VARCHAR2':
+		case 'CHAR':
+		case 'VARBINARY':
+		case 'BINARY':
+		case 'NCHAR':
+		case 'NVARCHAR':
+		case 'NVARCHAR2':
+			if ($len <= $this->blobSize) {
+				return 'C';
+			}
+
+		case 'NCLOB':
+		case 'LONG':
+		case 'LONG VARCHAR':
+		case 'CLOB':
+		return 'X';
+
+		case 'LONG RAW':
+		case 'LONG VARBINARY':
+		case 'BLOB':
+			return 'B';
+
+		case 'DATE':
+			return  ($this->datetime) ? 'T' : 'D';
+
+
+		case 'TIMESTAMP': return 'T';
+
+		case 'INT':
+		case 'SMALLINT':
+		case 'INTEGER':
+			return 'I';
+
+		default:
+			return ADODB_DEFAULT_METATYPE;
+		}
+	}
+
 }
 
 /*--------------------------------------------------------------------------------------
@@ -1545,63 +1602,6 @@ class ADORecordset_oci8 extends ADORecordSet {
 		if (is_resource($this->_queryID))
 		   @oci_free_statement($this->_queryID);
 		$this->_queryID = false;
-	}
-
-	/**
-	 * not the fastest implementation - quick and dirty - jlim
-	 * for best performance, use the actual $rs->MetaType().
-	 *
-	 * @param	mixed	$t
-	 * @param	int		$len		[optional] Length of blobsize
-	 * @param	bool	$fieldobj	[optional][discarded]
-	 * @return	str					The metatype of the field
-	 */
-	public function MetaType($t, $len=-1, $fieldobj=false)
-	{
-		if (is_object($t)) {
-			$fieldobj = $t;
-			$t = $fieldobj->type;
-			$len = $fieldobj->max_length;
-		}
-
-		switch (strtoupper($t)) {
-		case 'VARCHAR':
-		case 'VARCHAR2':
-		case 'CHAR':
-		case 'VARBINARY':
-		case 'BINARY':
-		case 'NCHAR':
-		case 'NVARCHAR':
-		case 'NVARCHAR2':
-			if ($len <= $this->blobSize) {
-				return 'C';
-			}
-
-		case 'NCLOB':
-		case 'LONG':
-		case 'LONG VARCHAR':
-		case 'CLOB':
-		return 'X';
-
-		case 'LONG RAW':
-		case 'LONG VARBINARY':
-		case 'BLOB':
-			return 'B';
-
-		case 'DATE':
-			return  ($this->connection->datetime) ? 'T' : 'D';
-
-
-		case 'TIMESTAMP': return 'T';
-
-		case 'INT':
-		case 'SMALLINT':
-		case 'INTEGER':
-			return 'I';
-
-		default:
-			return ADODB_DEFAULT_METATYPE;
-		}
 	}
 
 	protected function oci8_getDriverFetchAndOthersMode()

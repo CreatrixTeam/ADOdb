@@ -235,7 +235,7 @@ if (!defined('_ADODB_LAYER')) {
 	class ADOFieldObject {
 		public  $name = '';
 		public  $max_length=0;
-		public  $type=""; //a value understandable by ADORecordSet::MetaType()
+		public  $type=""; //a value understandable by ADOConnection::MetaType(), which is driver specific
 
 		//Temporary method untill drivers explicitly and correctly create the ADOFieldObject objects.
 		public function FillFromObject($pObject)
@@ -509,6 +509,9 @@ if (!defined('_ADODB_LAYER')) {
 	protected  $_transmode = ''; // transaction mode
 	public  $datetime = false;	// MetaType('DATE') returns 'D' (datetime==false) or 'T' (datetime == true)
 	protected  $_dataDict = '';  //ADODB_DataDict instance. Is to be used to eventually remove all SQL statement generation, but not execution, from the drivers.
+	public  $blobSize = 100;	/// Moved from ADORecordSet
+								/// any varchar/char field this size or greater is treated as a blob
+								/// in other words, we use a text area for editing.
 
 
 	/**
@@ -2605,14 +2608,188 @@ if (!defined('_ADODB_LAYER')) {
 		return $this->UpdateBlob($table,$column,$val,$where,'CLOB');
 	}
 
-	// not the fastest implementation - quick and dirty - jlim
-	// for best performance, use the actual $rs->MetaType().
+	/**
+	 * Get the metatype of the column. This is used for formatting. This is because
+	 * many databases use different names for the same type, so we transform the original
+	 * type to our standardised version which uses 1 character codes:
+	 *
+	 * @param t  is the type passed in. Normally is ADOFieldObject->type.
+	 * @param len is the maximum length of that field. This is because we treat character
+	 *	fields bigger than a certain size as a 'B' (blob).
+	 * @param fieldobj is the field object returned by the database driver. Can hold
+	 *	additional info (eg. primary_key for mysql).
+	 *
+	 * @return the general type of the data:
+	 *	C for character < 250 chars
+	 *	X for teXt (>= 250 chars)
+	 *	B for Binary
+	 *	N for numeric or floating point
+	 *	D for date
+	 *	T for timestamp
+	 *	L for logical/Boolean
+	 *	I for integer
+	 *	R for autoincrement counter/integer
+	 *
+	 *
+	*/
 	public function MetaType($t,$len=-1,$fieldobj=false) {
 
-		if (empty($this->_metars)) {
-			$this->_metars = $this->newADORecordSet(false,$this->fetchMode);
+		if (is_object($t)) {
+			$fieldobj = $t;
+			$t = $fieldobj->type;
+			$len = $fieldobj->max_length;
 		}
-		return $this->_metars->MetaType($t,$len,$fieldobj);
+
+
+		// changed in 2.32 to hashing instead of switch stmt for speed...
+		static $typeMap = array(
+			'VARCHAR' => 'C',
+			'VARCHAR2' => 'C',
+			'CHAR' => 'C',
+			'C' => 'C',
+			'STRING' => 'C',
+			'NCHAR' => 'C',
+			'NVARCHAR' => 'C',
+			'VARYING' => 'C',
+			'BPCHAR' => 'C',
+			'CHARACTER' => 'C',
+			'INTERVAL' => 'C',  # Postgres
+			'MACADDR' => 'C', # postgres
+			'VAR_STRING' => 'C', # mysql
+			##
+			'LONGCHAR' => 'X',
+			'TEXT' => 'X',
+			'NTEXT' => 'X',
+			'M' => 'X',
+			'X' => 'X',
+			'CLOB' => 'X',
+			'NCLOB' => 'X',
+			'LVARCHAR' => 'X',
+			##
+			'BLOB' => 'B',
+			'IMAGE' => 'B',
+			'BINARY' => 'B',
+			'VARBINARY' => 'B',
+			'LONGBINARY' => 'B',
+			'B' => 'B',
+			##
+			'YEAR' => 'D', // mysql
+			'DATE' => 'D',
+			'D' => 'D',
+			##
+			'UNIQUEIDENTIFIER' => 'C', # MS SQL Server
+			##
+			'SMALLDATETIME' => 'T',
+			'TIME' => 'T',
+			'TIMESTAMP' => 'T',
+			'DATETIME' => 'T',
+			'DATETIME2' => 'T',
+			'TIMESTAMPTZ' => 'T',
+			'T' => 'T',
+			'TIMESTAMP WITHOUT TIME ZONE' => 'T', // postgresql
+			##
+			'BOOL' => 'L',
+			'BOOLEAN' => 'L',
+			'BIT' => 'L',
+			'L' => 'L',
+			##
+			'COUNTER' => 'R',
+			'R' => 'R',
+			'SERIAL' => 'R', // ifx
+			'INT IDENTITY' => 'R',
+			##
+			'INT' => 'I',
+			'INT2' => 'I',
+			'INT4' => 'I',
+			'INT8' => 'I',
+			'INTEGER' => 'I',
+			'INTEGER UNSIGNED' => 'I',
+			'SHORT' => 'I',
+			'TINYINT' => 'I',
+			'SMALLINT' => 'I',
+			'I' => 'I',
+			##
+			'LONG' => 'N', // interbase is numeric, oci8 is blob
+			'BIGINT' => 'N', // this is bigger than PHP 32-bit integers
+			'DECIMAL' => 'N',
+			'DEC' => 'N',
+			'REAL' => 'N',
+			'DOUBLE' => 'N',
+			'DOUBLE PRECISION' => 'N',
+			'SMALLFLOAT' => 'N',
+			'FLOAT' => 'N',
+			'NUMBER' => 'N',
+			'NUM' => 'N',
+			'NUMERIC' => 'N',
+			'MONEY' => 'N',
+
+			## informix 9.2
+			'SQLINT' => 'I',
+			'SQLSERIAL' => 'I',
+			'SQLSMINT' => 'I',
+			'SQLSMFLOAT' => 'N',
+			'SQLFLOAT' => 'N',
+			'SQLMONEY' => 'N',
+			'SQLDECIMAL' => 'N',
+			'SQLDATE' => 'D',
+			'SQLVCHAR' => 'C',
+			'SQLCHAR' => 'C',
+			'SQLDTIME' => 'T',
+			'SQLINTERVAL' => 'N',
+			'SQLBYTES' => 'B',
+			'SQLTEXT' => 'X',
+			## informix 10
+			"SQLINT8" => 'I8',
+			"SQLSERIAL8" => 'I8',
+			"SQLNCHAR" => 'C',
+			"SQLNVCHAR" => 'C',
+			"SQLLVARCHAR" => 'X',
+			"SQLBOOL" => 'L'
+		);
+
+
+		$tmap = false;
+		$t = strtoupper($t);
+		$tmap = (isset($typeMap[$t])) ? $typeMap[$t] : ADODB_DEFAULT_METATYPE;
+		switch ($tmap) {
+			case 'C':
+				// is the char field is too long, return as text field...
+				if ($this->blobSize >= 0) {
+					if ($len > $this->blobSize) {
+						return 'X';
+					}
+				} else if ($len > 250) {
+					return 'X';
+				}
+				return 'C';
+
+			case 'I':
+				if (!empty($fieldobj->primary_key)) {
+					return 'R';
+				}
+				return 'I';
+
+			case false:
+				return 'N';
+
+			case 'B':
+				if (isset($fieldobj->binary)) {
+					return ($fieldobj->binary) ? 'B' : 'X';
+				}
+				return 'B';
+
+			case 'D':
+				if (!empty($this->datetime) {
+					return 'T';
+				}
+				return 'D';
+
+			default:
+				if ($t == 'LONG' && $this->dataProvider == 'oci8') {
+					return 'B';
+				}
+				return $tmap;
+		}
 	}
 
 
@@ -3568,10 +3745,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	/*
 		Code should call this function for creating ADORecordSets.
 	*/
-	public function newADORecordSet($queryID, $mode=false)
+	public function newADORecordSet($pQueryID, $pFetchMode = false)
 	{
 		$vADORecordSetClassName = $this->rsPrefix.$this->databaseType;
-		$vADORecordSet = new $vADORecordSetClassName($this->_queryID,$this->fetchMode);
+		$vADORecordSet = new $vADORecordSetClassName($pQueryID, $pFetchMode);
 
 		$vADORecordSet->connection = $this; // Pablo suggestion
 		
@@ -3774,8 +3951,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	public  $dataProvider = "native";
 	/** @var bool|array  */
 	public  $fields = false;	/// holds the current row data. Note: When accessing fields using associative keys, use Fields() instead.
-	public  $blobSize = 100;	/// any varchar/char field this size or greater is treated as a blob
-							/// in other words, we use a text area for editing.
 	public  $canSeek = false;	/// indicates that seek is supported
 	public  $sql;				/// sql text
 	public  $EOF = false;		/// Indicates that the current record position is after the last record in a Recordset object.
@@ -4960,186 +5135,11 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 	/**
-	 * Get the metatype of the column. This is used for formatting. This is because
-	 * many databases use different names for the same type, so we transform the original
-	 * type to our standardised version which uses 1 character codes:
-	 *
-	 * @param t  is the type passed in. Normally is ADOFieldObject->type.
-	 * @param len is the maximum length of that field. This is because we treat character
-	 *	fields bigger than a certain size as a 'B' (blob).
-	 * @param fieldobj is the field object returned by the database driver. Can hold
-	 *	additional info (eg. primary_key for mysql).
-	 *
-	 * @return the general type of the data:
-	 *	C for character < 250 chars
-	 *	X for teXt (>= 250 chars)
-	 *	B for Binary
-	 *	N for numeric or floating point
-	 *	D for date
-	 *	T for timestamp
-	 *	L for logical/Boolean
-	 *	I for integer
-	 *	R for autoincrement counter/integer
-	 *
+	 * Refer To ADOConnection::MetaType()
 	 *
 	*/
-	public function MetaType($t,$len=-1,$fieldobj=false) {
-		if (is_object($t)) {
-			$fieldobj = $t;
-			$t = $fieldobj->type;
-			$len = $fieldobj->max_length;
-		}
-
-
-		// changed in 2.32 to hashing instead of switch stmt for speed...
-		static $typeMap = array(
-			'VARCHAR' => 'C',
-			'VARCHAR2' => 'C',
-			'CHAR' => 'C',
-			'C' => 'C',
-			'STRING' => 'C',
-			'NCHAR' => 'C',
-			'NVARCHAR' => 'C',
-			'VARYING' => 'C',
-			'BPCHAR' => 'C',
-			'CHARACTER' => 'C',
-			'INTERVAL' => 'C',  # Postgres
-			'MACADDR' => 'C', # postgres
-			'VAR_STRING' => 'C', # mysql
-			##
-			'LONGCHAR' => 'X',
-			'TEXT' => 'X',
-			'NTEXT' => 'X',
-			'M' => 'X',
-			'X' => 'X',
-			'CLOB' => 'X',
-			'NCLOB' => 'X',
-			'LVARCHAR' => 'X',
-			##
-			'BLOB' => 'B',
-			'IMAGE' => 'B',
-			'BINARY' => 'B',
-			'VARBINARY' => 'B',
-			'LONGBINARY' => 'B',
-			'B' => 'B',
-			##
-			'YEAR' => 'D', // mysql
-			'DATE' => 'D',
-			'D' => 'D',
-			##
-			'UNIQUEIDENTIFIER' => 'C', # MS SQL Server
-			##
-			'SMALLDATETIME' => 'T',
-			'TIME' => 'T',
-			'TIMESTAMP' => 'T',
-			'DATETIME' => 'T',
-			'DATETIME2' => 'T',
-			'TIMESTAMPTZ' => 'T',
-			'T' => 'T',
-			'TIMESTAMP WITHOUT TIME ZONE' => 'T', // postgresql
-			##
-			'BOOL' => 'L',
-			'BOOLEAN' => 'L',
-			'BIT' => 'L',
-			'L' => 'L',
-			##
-			'COUNTER' => 'R',
-			'R' => 'R',
-			'SERIAL' => 'R', // ifx
-			'INT IDENTITY' => 'R',
-			##
-			'INT' => 'I',
-			'INT2' => 'I',
-			'INT4' => 'I',
-			'INT8' => 'I',
-			'INTEGER' => 'I',
-			'INTEGER UNSIGNED' => 'I',
-			'SHORT' => 'I',
-			'TINYINT' => 'I',
-			'SMALLINT' => 'I',
-			'I' => 'I',
-			##
-			'LONG' => 'N', // interbase is numeric, oci8 is blob
-			'BIGINT' => 'N', // this is bigger than PHP 32-bit integers
-			'DECIMAL' => 'N',
-			'DEC' => 'N',
-			'REAL' => 'N',
-			'DOUBLE' => 'N',
-			'DOUBLE PRECISION' => 'N',
-			'SMALLFLOAT' => 'N',
-			'FLOAT' => 'N',
-			'NUMBER' => 'N',
-			'NUM' => 'N',
-			'NUMERIC' => 'N',
-			'MONEY' => 'N',
-
-			## informix 9.2
-			'SQLINT' => 'I',
-			'SQLSERIAL' => 'I',
-			'SQLSMINT' => 'I',
-			'SQLSMFLOAT' => 'N',
-			'SQLFLOAT' => 'N',
-			'SQLMONEY' => 'N',
-			'SQLDECIMAL' => 'N',
-			'SQLDATE' => 'D',
-			'SQLVCHAR' => 'C',
-			'SQLCHAR' => 'C',
-			'SQLDTIME' => 'T',
-			'SQLINTERVAL' => 'N',
-			'SQLBYTES' => 'B',
-			'SQLTEXT' => 'X',
-			## informix 10
-			"SQLINT8" => 'I8',
-			"SQLSERIAL8" => 'I8',
-			"SQLNCHAR" => 'C',
-			"SQLNVCHAR" => 'C',
-			"SQLLVARCHAR" => 'X',
-			"SQLBOOL" => 'L'
-		);
-
-
-		$tmap = false;
-		$t = strtoupper($t);
-		$tmap = (isset($typeMap[$t])) ? $typeMap[$t] : ADODB_DEFAULT_METATYPE;
-		switch ($tmap) {
-			case 'C':
-				// is the char field is too long, return as text field...
-				if ($this->blobSize >= 0) {
-					if ($len > $this->blobSize) {
-						return 'X';
-					}
-				} else if ($len > 250) {
-					return 'X';
-				}
-				return 'C';
-
-			case 'I':
-				if (!empty($fieldobj->primary_key)) {
-					return 'R';
-				}
-				return 'I';
-
-			case false:
-				return 'N';
-
-			case 'B':
-				if (isset($fieldobj->binary)) {
-					return ($fieldobj->binary) ? 'B' : 'X';
-				}
-				return 'B';
-
-			case 'D':
-				if (!empty($this->connection) && !empty($this->connection->datetime)) {
-					return 'T';
-				}
-				return 'D';
-
-			default:
-				if ($t == 'LONG' && $this->dataProvider == 'oci8') {
-					return 'B';
-				}
-				return $tmap;
-		}
+	public final function MetaType($t,$len=-1,$fieldobj=false) {
+		return $this->connection->MetaType($t, $len, $fieldobj);
 	}
 
 	protected function _close() {}
@@ -5288,8 +5288,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *		pDataArray["columnNames"]: An array containing the corresponding column
 	 *				names of the data. The field is ignored if $pADOFieldObjects is set, and is mandatory otherwise
 	 *		pDataArray["columnTypes"]: An array containing the corresponding types of the data. The types are
-	 *				defined with values understandable by ADORecordSet::MetaType().The field is ignored if $pADOFieldObjects
-	 *				is set, and is mandatory otherwise
+	 *				defined with values understandable by ADORecordSet::connection::MetaType().The field is ignored if 
+	 *				$pADOFieldObjects is set, and is mandatory otherwise
 	 *		pDataArray["columnMaxLength"]: (optional) An array containing the corresponding column max length. The field is 
 	 *		ignored if $pADOFieldObjects is set.
 	 *		pDataArray["recordSets"]: (mandatory) A numerically indexed array of arrays, where each array contains a
@@ -6024,6 +6024,9 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 				break;
 			case 'sybase_ase':
 				$drivername = 'sybase';
+				break;
+			case 'fbsql':
+				$drivername = 'frontbase';
 				break;
 			default:
 				$drivername = 'generic';

@@ -836,6 +836,69 @@ class ADODB_postgres64 extends ADOConnection{
 		return 1000000000; // should be 1 Gb?
 	}
 
+	public function MetaType($t,$len=-1,$fieldobj=false)
+	{
+		if (is_object($t)) {
+			$fieldobj = $t;
+			$t = $fieldobj->type;
+			$len = $fieldobj->max_length;
+		}
+		switch (strtoupper($t)) {
+				case 'MONEY': // stupid, postgres expects money to be a string
+				case 'INTERVAL':
+				case 'CHAR':
+				case 'CHARACTER':
+				case 'VARCHAR':
+				case 'NAME':
+				case 'BPCHAR':
+				case '_VARCHAR':
+				case 'CIDR':
+				case 'INET':
+				case 'MACADDR':
+					if ($len <= $this->blobSize) return 'C';
+
+				case 'TEXT':
+					return 'X';
+
+				case 'IMAGE': // user defined type
+				case 'BLOB': // user defined type
+				case 'BIT':	// This is a bit string, not a single bit, so don't return 'L'
+				case 'VARBIT':
+				case 'BYTEA':
+					return 'B';
+
+				case 'BOOL':
+				case 'BOOLEAN':
+					return 'L';
+
+				case 'DATE':
+					return 'D';
+
+
+				case 'TIMESTAMP WITHOUT TIME ZONE':
+				case 'TIME':
+				case 'DATETIME':
+				case 'TIMESTAMP':
+				case 'TIMESTAMPTZ':
+					return 'T';
+
+				case 'SMALLINT':
+				case 'BIGINT':
+				case 'INTEGER':
+				case 'INT8':
+				case 'INT4':
+				case 'INT2':
+					if (isset($fieldobj) &&
+				empty($fieldobj->primary_key) && (!$this->uniqueIisR || empty($fieldobj->unique))) return 'I';
+
+				case 'OID':
+				case 'SERIAL':
+					return 'R';
+
+				default:
+					return ADODB_DEFAULT_METATYPE;
+			}
+	}
 
 }
 
@@ -950,70 +1013,6 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 	protected function _close()
 	{
 		return @pg_free_result($this->_queryID);
-	}
-
-	public function MetaType($t,$len=-1,$fieldobj=false)
-	{
-		if (is_object($t)) {
-			$fieldobj = $t;
-			$t = $fieldobj->type;
-			$len = $fieldobj->max_length;
-		}
-		switch (strtoupper($t)) {
-				case 'MONEY': // stupid, postgres expects money to be a string
-				case 'INTERVAL':
-				case 'CHAR':
-				case 'CHARACTER':
-				case 'VARCHAR':
-				case 'NAME':
-				case 'BPCHAR':
-				case '_VARCHAR':
-				case 'CIDR':
-				case 'INET':
-				case 'MACADDR':
-					if ($len <= $this->blobSize) return 'C';
-
-				case 'TEXT':
-					return 'X';
-
-				case 'IMAGE': // user defined type
-				case 'BLOB': // user defined type
-				case 'BIT':	// This is a bit string, not a single bit, so don't return 'L'
-				case 'VARBIT':
-				case 'BYTEA':
-					return 'B';
-
-				case 'BOOL':
-				case 'BOOLEAN':
-					return 'L';
-
-				case 'DATE':
-					return 'D';
-
-
-				case 'TIMESTAMP WITHOUT TIME ZONE':
-				case 'TIME':
-				case 'DATETIME':
-				case 'TIMESTAMP':
-				case 'TIMESTAMPTZ':
-					return 'T';
-
-				case 'SMALLINT':
-				case 'BIGINT':
-				case 'INTEGER':
-				case 'INT8':
-				case 'INT4':
-				case 'INT2':
-					if (isset($fieldobj) &&
-				empty($fieldobj->primary_key) && (!$this->connection->uniqueIisR || empty($fieldobj->unique))) return 'I';
-
-				case 'OID':
-				case 'SERIAL':
-					return 'R';
-
-				default:
-					return ADODB_DEFAULT_METATYPE;
-			}
 	}
 
 	protected function postgres64_getDriverFetchMode()

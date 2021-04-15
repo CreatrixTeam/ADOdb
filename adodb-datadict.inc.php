@@ -178,11 +178,9 @@ class ADODB_DataDict {
 	public  $schema = false;
 	public  $serverInfo = array();//DEPRECATED; Use GetServerInfo() instead;
 	public  $autoIncrement = false;
-	public  $dataProvider = null;
-	public  $databaseType = null;
+	public  $dataProvider = null; //Copied from the ADOConnection instance
+	public  $databaseType = null; //Copied from the ADOConnection instance
 	public  $invalidResizeTypes4 = array('CLOB','BLOB','TEXT','DATE','TIME'); // for changetablesql
-	public  $blobSize = 100; 	/// any varchar/char field this size or greater is treated as a blob
-							/// in other words, we use a text area for editing.
 	public	$nameQuote = '"';	/// string to use to quote identifiers
 	public  $sql_concatenateOperator = '+'; /// default concat operator -- change to || for Oracle/Interbase
 	public  $sql_sysDate = false; /// name of function that returns the current date
@@ -237,119 +235,8 @@ class ADODB_DataDict {
 		return $this->connection->MetaIndexes($table, $primary, $owner);
 	}
 
-	public function MetaType($t,$len=-1,$fieldobj=false)
-	{
-		static $typeMap = array(
-		'VARCHAR' => 'C',
-		'VARCHAR2' => 'C',
-		'CHAR' => 'C',
-		'C' => 'C',
-		'STRING' => 'C',
-		'NCHAR' => 'C',
-		'NVARCHAR' => 'C',
-		'VARYING' => 'C',
-		'BPCHAR' => 'C',
-		'CHARACTER' => 'C',
-		'INTERVAL' => 'C',  # Postgres
-		'MACADDR' => 'C', # postgres
-		'VAR_STRING' => 'C', # mysql
-		##
-		'LONGCHAR' => 'X',
-		'TEXT' => 'X',
-		'NTEXT' => 'X',
-		'M' => 'X',
-		'X' => 'X',
-		'CLOB' => 'X',
-		'NCLOB' => 'X',
-		'LVARCHAR' => 'X',
-		##
-		'BLOB' => 'B',
-		'IMAGE' => 'B',
-		'BINARY' => 'B',
-		'VARBINARY' => 'B',
-		'LONGBINARY' => 'B',
-		'B' => 'B',
-		##
-		'YEAR' => 'D', // mysql
-		'DATE' => 'D',
-		'D' => 'D',
-		##
-		'UNIQUEIDENTIFIER' => 'C', # MS SQL Server
-		##
-		'TIME' => 'T',
-		'TIMESTAMP' => 'T',
-		'DATETIME' => 'T',
-		'TIMESTAMPTZ' => 'T',
-		'SMALLDATETIME' => 'T',
-		'T' => 'T',
-		'TIMESTAMP WITHOUT TIME ZONE' => 'T', // postgresql
-		##
-		'BOOL' => 'L',
-		'BOOLEAN' => 'L',
-		'BIT' => 'L',
-		'L' => 'L',
-		##
-		'COUNTER' => 'R',
-		'R' => 'R',
-		'SERIAL' => 'R', // ifx
-		'INT IDENTITY' => 'R',
-		##
-		'INT' => 'I',
-		'INT2' => 'I',
-		'INT4' => 'I',
-		'INT8' => 'I',
-		'INTEGER' => 'I',
-		'INTEGER UNSIGNED' => 'I',
-		'SHORT' => 'I',
-		'TINYINT' => 'I',
-		'SMALLINT' => 'I',
-		'I' => 'I',
-		##
-		'LONG' => 'N', // interbase is numeric, oci8 is blob
-		'BIGINT' => 'N', // this is bigger than PHP 32-bit integers
-		'DECIMAL' => 'N',
-		'DEC' => 'N',
-		'REAL' => 'N',
-		'DOUBLE' => 'N',
-		'DOUBLE PRECISION' => 'N',
-		'SMALLFLOAT' => 'N',
-		'FLOAT' => 'N',
-		'NUMBER' => 'N',
-		'NUM' => 'N',
-		'NUMERIC' => 'N',
-		'MONEY' => 'N',
-
-		## informix 9.2
-		'SQLINT' => 'I',
-		'SQLSERIAL' => 'I',
-		'SQLSMINT' => 'I',
-		'SQLSMFLOAT' => 'N',
-		'SQLFLOAT' => 'N',
-		'SQLMONEY' => 'N',
-		'SQLDECIMAL' => 'N',
-		'SQLDATE' => 'D',
-		'SQLVCHAR' => 'C',
-		'SQLCHAR' => 'C',
-		'SQLDTIME' => 'T',
-		'SQLINTERVAL' => 'N',
-		'SQLBYTES' => 'B',
-		'SQLTEXT' => 'X',
-		 ## informix 10
-		"SQLINT8" => 'I8',
-		"SQLSERIAL8" => 'I8',
-		"SQLNCHAR" => 'C',
-		"SQLNVCHAR" => 'C',
-		"SQLLVARCHAR" => 'X',
-		"SQLBOOL" => 'L'
-		);
-
-		if (!$this->connection->IsConnected()) {
-			$t = strtoupper($t);
-			if (isset($typeMap[$t])) return $typeMap[$t];
-			return ADODB_DEFAULT_METATYPE;
-		}
-		return $this->connection->MetaType($t,$len,$fieldobj);
-	}
+	public final function MetaType($t,$len=-1,$fieldobj=false)
+		{return $this->connection->MetaType($t,$len,$fieldobj);}
 
 	public function NameQuote($name = NULL,$allowBrackets=false)
 	{

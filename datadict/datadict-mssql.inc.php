@@ -75,7 +75,7 @@ class ADODB2_mssql extends ADODB_DataDict {
 			$pADOConnection->concat_operator = $this->sql_concatenateOperator;
 		}
 	}
-	public function MetaType($t,$len=-1,$fieldobj=false)
+	/*public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -97,7 +97,7 @@ class ADODB2_mssql extends ADODB_DataDict {
 			case 'FLOAT': return 'F';
 			default: return parent::MetaType($t,$len,$fieldobj);
 		}
-	}
+	}*/
 
 	public function ActualType($meta)
 	{

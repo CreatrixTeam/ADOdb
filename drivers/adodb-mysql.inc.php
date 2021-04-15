@@ -620,6 +620,59 @@ class ADODB_mysql extends ADOConnection {
 		return $foreign_keys;
 	}
 
+	public function MetaType($t,$len=-1,$fieldobj=false)
+	{
+		if (is_object($t)) {
+			$fieldobj = $t;
+			$t = $fieldobj->type;
+			$len = $fieldobj->max_length;
+		}
+
+		$len = -1; // mysql max_length is not accurate
+		switch (strtoupper($t)) {
+		case 'STRING':
+		case 'CHAR':
+		case 'VARCHAR':
+		case 'TINYBLOB':
+		case 'TINYTEXT':
+		case 'ENUM':
+		case 'SET':
+			if ($len <= $this->blobSize) return 'C';
+
+		case 'TEXT':
+		case 'LONGTEXT':
+		case 'MEDIUMTEXT':
+			return 'X';
+
+		// php_mysql extension always returns 'blob' even if 'text'
+		// so we have to check whether binary...
+		case 'IMAGE':
+		case 'LONGBLOB':
+		case 'BLOB':
+		case 'MEDIUMBLOB':
+		case 'BINARY':
+			return !empty($fieldobj->binary) ? 'B' : 'X';
+
+		case 'YEAR':
+		case 'DATE': return 'D';
+
+		case 'TIME':
+		case 'DATETIME':
+		case 'TIMESTAMP': return 'T';
+
+		case 'INT':
+		case 'INTEGER':
+		case 'BIGINT':
+		case 'TINYINT':
+		case 'MEDIUMINT':
+		case 'SMALLINT':
+
+			if (!empty($fieldobj->primary_key)) return 'R';
+			else return 'I';
+
+		default: return ADODB_DEFAULT_METATYPE;
+		}
+	}
 
 }
 
@@ -700,60 +753,6 @@ class ADORecordSet_mysql extends ADORecordSet{
 	protected function _close() {
 		@mysql_free_result($this->_queryID);
 		$this->_queryID = false;
-	}
-
-	public function MetaType($t,$len=-1,$fieldobj=false)
-	{
-		if (is_object($t)) {
-			$fieldobj = $t;
-			$t = $fieldobj->type;
-			$len = $fieldobj->max_length;
-		}
-
-		$len = -1; // mysql max_length is not accurate
-		switch (strtoupper($t)) {
-		case 'STRING':
-		case 'CHAR':
-		case 'VARCHAR':
-		case 'TINYBLOB':
-		case 'TINYTEXT':
-		case 'ENUM':
-		case 'SET':
-			if ($len <= $this->blobSize) return 'C';
-
-		case 'TEXT':
-		case 'LONGTEXT':
-		case 'MEDIUMTEXT':
-			return 'X';
-
-		// php_mysql extension always returns 'blob' even if 'text'
-		// so we have to check whether binary...
-		case 'IMAGE':
-		case 'LONGBLOB':
-		case 'BLOB':
-		case 'MEDIUMBLOB':
-		case 'BINARY':
-			return !empty($fieldobj->binary) ? 'B' : 'X';
-
-		case 'YEAR':
-		case 'DATE': return 'D';
-
-		case 'TIME':
-		case 'DATETIME':
-		case 'TIMESTAMP': return 'T';
-
-		case 'INT':
-		case 'INTEGER':
-		case 'BIGINT':
-		case 'TINYINT':
-		case 'MEDIUMINT':
-		case 'SMALLINT':
-
-			if (!empty($fieldobj->primary_key)) return 'R';
-			else return 'I';
-
-		default: return ADODB_DEFAULT_METATYPE;
-		}
 	}
 
 	protected function mysql_getDriverFetchMode()

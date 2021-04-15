@@ -339,3 +339,8 @@ class ADORecordSet_pdo_firebird extends ADORecordSet_pdo
 	public $databaseType = "pdo_firebird";
 }
 
+/**
+ * Class ADORecordSet_array_pdo_firebird
+ */
+class ADORecordSet_array_pdo_firebird extends ADORecordSet_array_pdo
+	{}

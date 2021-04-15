@@ -55,7 +55,7 @@ class ADODB2_sapdb extends ADODB_DataDict {
 		}
 	}
 
-	public function MetaType($t,$len=-1,$fieldobj=false)
+	/*public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -83,7 +83,7 @@ class ADODB2_sapdb extends ADODB_DataDict {
 		if ($fieldobj->auto_increment) $type = 'R';
 
 		return $type;
-	}
+	}*/
 
 	// return string must begin with space
 	protected function _CreateSuffix($fname,&$ftype,$fnotnull,$fdefault,$fautoinc,$fconstraint,$funsigned)

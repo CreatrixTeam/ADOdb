@@ -239,14 +239,14 @@ class ADODB2_sqlite extends ADODB_DataDict {
 	{
 		$vColumn = ($pParsedColumnName ? $pParsedColumnName['name'] : "");
 		
-		if($pADOConnection->databaseType === "sqlite")
+		if($this->databaseType === "sqlite")
 		{
 			$fmt = $this->connection->qstr($fmt);
 
 			return array(($pParsedColumnName) ? "adodb_date2($vFromat,$vColumn)" : 
 					"adodb_date($vFromat)");
 		}
-		else if($pADOConnection->databaseType === "sqlite3")
+		else if($this->databaseType === "sqlite3")
 		{
 			/*
 			* In order to map the values correctly, we must ensure the proper

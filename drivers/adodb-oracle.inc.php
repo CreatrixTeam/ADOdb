@@ -201,7 +201,41 @@ class ADODB_oracle extends ADOConnection {
 			return @ora_logoff($this->_connectionID);
 		}
 
+	public function MetaType($t, $len = -1, $fieldobj = false)
+	{
+		if (is_object($t)) {
+			$fieldobj = $t;
+			$t = $fieldobj->type;
+			$len = $fieldobj->max_length;
+		}
 
+		switch (strtoupper($t)) {
+		case 'VARCHAR':
+		case 'VARCHAR2':
+		case 'CHAR':
+		case 'VARBINARY':
+		case 'BINARY':
+				if ($len <= $this->blobSize) return 'C';
+		case 'LONG':
+		case 'LONG VARCHAR':
+		case 'CLOB':
+		return 'X';
+		case 'LONG RAW':
+		case 'LONG VARBINARY':
+		case 'BLOB':
+				return 'B';
+
+		case 'DATE': return 'D';
+
+		//case 'T': return 'T';
+
+		case 'BIT': return 'L';
+		case 'INT':
+		case 'SMALLINT':
+		case 'INTEGER': return 'I';
+		default: return parent::MetaType($t, $len, $fieldobj);
+		}
+	}
 
 }
 
@@ -262,39 +296,4 @@ class ADORecordset_oracle extends ADORecordSet {
 		   return @ora_close($this->_queryID);
    }
 
-	public function MetaType($t, $len = -1, $fieldobj = false)
-	{
-		if (is_object($t)) {
-			$fieldobj = $t;
-			$t = $fieldobj->type;
-			$len = $fieldobj->max_length;
-		}
-
-		switch (strtoupper($t)) {
-		case 'VARCHAR':
-		case 'VARCHAR2':
-		case 'CHAR':
-		case 'VARBINARY':
-		case 'BINARY':
-				if ($len <= $this->blobSize) return 'C';
-		case 'LONG':
-		case 'LONG VARCHAR':
-		case 'CLOB':
-		return 'X';
-		case 'LONG RAW':
-		case 'LONG VARBINARY':
-		case 'BLOB':
-				return 'B';
-
-		case 'DATE': return 'D';
-
-		//case 'T': return 'T';
-
-		case 'BIT': return 'L';
-		case 'INT':
-		case 'SMALLINT':
-		case 'INTEGER': return 'I';
-		default: return parent::MetaType($t, $len, $fieldobj);
-		}
-	}
 }

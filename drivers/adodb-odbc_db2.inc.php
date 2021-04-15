@@ -232,13 +232,6 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 		return $rs;
 	}
 
-};
-
-
-class  ADORecordSet_odbc_db2 extends ADORecordSet_odbc {
-
-	public  $databaseType = "odbc_db2";
-
 	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
@@ -292,6 +285,12 @@ class  ADORecordSet_odbc_db2 extends ADORecordSet_odbc {
 		default: return ADODB_DEFAULT_METATYPE;
 		}
 	}
+};
+
+
+class  ADORecordSet_odbc_db2 extends ADORecordSet_odbc {
+
+	public  $databaseType = "odbc_db2";
 }
 
 } //define

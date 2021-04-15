@@ -625,6 +625,38 @@ class ADODB_firebird extends ADOConnection {
 		return $rs;
 	}
 
+	public function MetaType($t,$len=-1,$fieldobj=false)
+	{
+		if (is_object($t)) {
+			$fieldobj = $t;
+			$t = $fieldobj->type;
+			$len = $fieldobj->max_length;
+		}
+		switch (strtoupper($t)) {
+		case 'CHAR':
+			return 'C';
+
+		case 'TEXT':
+		case 'VARCHAR':
+		case 'VARYING':
+		if ($len <= $this->blobSize) return 'C';
+			return 'X';
+		case 'BLOB':
+			return 'B';
+
+		case 'TIMESTAMP':
+		case 'DATE': return 'D';
+		case 'TIME': return 'T';
+				//case 'T': return 'T';
+
+				//case 'L': return 'L';
+		case 'INT':
+		case 'SHORT':
+		case 'INTEGER': return 'I';
+		default: return ADODB_DEFAULT_METATYPE;
+		}
+	}
+
 }
 
 /*--------------------------------------------------------------------------------------
@@ -731,36 +763,5 @@ class  ADORecordset_firebird extends ADORecordSet
 			return @fbird_free_result($this->_queryID);
 	}
 
-	public function MetaType($t,$len=-1,$fieldobj=false)
-	{
-		if (is_object($t)) {
-			$fieldobj = $t;
-			$t = $fieldobj->type;
-			$len = $fieldobj->max_length;
-		}
-		switch (strtoupper($t)) {
-		case 'CHAR':
-			return 'C';
-
-		case 'TEXT':
-		case 'VARCHAR':
-		case 'VARYING':
-		if ($len <= $this->blobSize) return 'C';
-			return 'X';
-		case 'BLOB':
-			return 'B';
-
-		case 'TIMESTAMP':
-		case 'DATE': return 'D';
-		case 'TIME': return 'T';
-				//case 'T': return 'T';
-
-				//case 'L': return 'L';
-		case 'INT':
-		case 'SHORT':
-		case 'INTEGER': return 'I';
-		default: return ADODB_DEFAULT_METATYPE;
-		}
-	}
 
 }

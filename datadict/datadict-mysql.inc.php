@@ -29,7 +29,7 @@ class ADODB2_mysql extends ADODB_DataDict {
 
 	public $blobAllowsNotNull = true;
 	
-	public function MetaType($t,$len=-1,$fieldobj=false)
+	/*public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		
 		if (is_object($t)) {
@@ -82,7 +82,7 @@ class ADODB2_mysql extends ADODB_DataDict {
 		case 'BIGINT':  return $is_serial ? 'R' : 'I8';
 		default: return ADODB_DEFAULT_METATYPE;
 		}
-	}
+	}*/
 
 	public function ActualType($meta)
 	{

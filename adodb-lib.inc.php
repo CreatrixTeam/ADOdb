@@ -669,7 +669,7 @@ function _adodb_getupdatesql(&$zthis, &$rs, $arrFields, $forceUpdate=false, $mag
 
 				// Based on the datatype of the field
 				// Format the value properly for the database
-				$type = $rs->metaType($field->type);
+				$type = $rs->MetaType($field->type);
 
 				if ($type == 'null') {
 					$type = 'C';

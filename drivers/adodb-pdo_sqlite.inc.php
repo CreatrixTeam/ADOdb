@@ -288,19 +288,10 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 	{
 		return ADODB_STRINGMAX_NOLIMIT;
 	}
- }
-
-class  ADORecordSet_pdo_sqlite extends ADORecordSet_pdo {
-
-	public  $databaseType = 'pdo_sqlite';
-	protected $_datadict = NULL;
 	
 	public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		$vReturn = NULL;
-
-		if($this->_datadict === NULL)
-			{$this->_datadict = NewDataDictionary($this->connection);}
 
 		if(floatval($this->_dataDict->GetServerInfo("version")) > 2)
 			{$vReturn = $this->pdo_sqlite_MetaType($t, $len, $fieldobj);}
@@ -378,4 +369,9 @@ class  ADORecordSet_pdo_sqlite extends ADORecordSet_pdo {
 		
 		return $subclass[$subt];
 	}
+ }
+
+class  ADORecordSet_pdo_sqlite extends ADORecordSet_pdo {
+
+	public  $databaseType = 'pdo_sqlite';
 }

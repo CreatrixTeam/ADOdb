@@ -155,6 +155,50 @@ class ADODB_fbsql extends ADOConnection {
 		return @fbsql_close($this->_connectionID);
 	}
 
+	public function MetaType($t,$len=-1,$fieldobj=false)
+	{
+		if (is_object($t)) {
+			$fieldobj = $t;
+			$t = $fieldobj->type;
+			$len = $fieldobj->max_length;
+		}
+		$len = -1; // fbsql max_length is not accurate
+		switch (strtoupper($t)) {
+		case 'CHARACTER':
+		case 'CHARACTER VARYING':
+		case 'BLOB':
+		case 'CLOB':
+		case 'BIT':
+		case 'BIT VARYING':
+			if ($len <= $this->blobSize) return 'C';
+
+		// so we have to check whether binary...
+		case 'IMAGE':
+		case 'LONGBLOB':
+		case 'BLOB':
+		case 'MEDIUMBLOB':
+			return !empty($fieldobj->binary) ? 'B' : 'X';
+
+		case 'DATE': return 'D';
+
+		case 'TIME':
+		case 'TIME WITH TIME ZONE':
+		case 'TIMESTAMP':
+		case 'TIMESTAMP WITH TIME ZONE': return 'T';
+
+		case 'PRIMARY_KEY':
+			return 'R';
+		case 'INTEGER':
+		case 'SMALLINT':
+		case 'BOOLEAN':
+
+			if (!empty($fieldobj->primary_key)) return 'R';
+			else return 'I';
+
+		default: return ADODB_DEFAULT_METATYPE;
+		}
+	}
+
 }
 
 /*--------------------------------------------------------------------------------------
@@ -213,50 +257,6 @@ class ADORecordSet_fbsql extends ADORecordSet{
 
 	protected function _close() {
 		return @fbsql_free_result($this->_queryID);
-	}
-
-	public function MetaType($t,$len=-1,$fieldobj=false)
-	{
-		if (is_object($t)) {
-			$fieldobj = $t;
-			$t = $fieldobj->type;
-			$len = $fieldobj->max_length;
-		}
-		$len = -1; // fbsql max_length is not accurate
-		switch (strtoupper($t)) {
-		case 'CHARACTER':
-		case 'CHARACTER VARYING':
-		case 'BLOB':
-		case 'CLOB':
-		case 'BIT':
-		case 'BIT VARYING':
-			if ($len <= $this->blobSize) return 'C';
-
-		// so we have to check whether binary...
-		case 'IMAGE':
-		case 'LONGBLOB':
-		case 'BLOB':
-		case 'MEDIUMBLOB':
-			return !empty($fieldobj->binary) ? 'B' : 'X';
-
-		case 'DATE': return 'D';
-
-		case 'TIME':
-		case 'TIME WITH TIME ZONE':
-		case 'TIMESTAMP':
-		case 'TIMESTAMP WITH TIME ZONE': return 'T';
-
-		case 'PRIMARY_KEY':
-			return 'R';
-		case 'INTEGER':
-		case 'SMALLINT':
-		case 'BOOLEAN':
-
-			if (!empty($fieldobj->primary_key)) return 'R';
-			else return 'I';
-
-		default: return ADODB_DEFAULT_METATYPE;
-		}
 	}
 
 	protected function fbsql_getDriverFetchMode()

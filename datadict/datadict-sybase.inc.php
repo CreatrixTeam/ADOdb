@@ -22,7 +22,7 @@ class ADODB2_sybase extends ADODB_DataDict {
 	public  $sql_sysDate = 'GetDate()';
 	public  $sql_sysTimeStamp = 'GetDate()';
 
-	public function MetaType($t,$len=-1,$fieldobj=false)
+	/*public function MetaType($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -44,7 +44,7 @@ class ADODB2_sybase extends ADODB_DataDict {
 		case 'FLOAT': return 'F';
 		default: return parent::MetaType($t,$len,$fieldobj);
 		}
-	}
+	}*/
 
 	public function ActualType($meta)
 	{

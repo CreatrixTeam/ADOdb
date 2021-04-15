@@ -363,151 +363,89 @@ class ADODB_ado extends ADOConnection {
 		return true;
 	}
 
+	/*
+		OLEDB types
 
-}
+		 enum DBTYPEENUM
+		{	DBTYPE_EMPTY	= 0,
+		DBTYPE_NULL	= 1,
+		DBTYPE_I2	= 2,
+		DBTYPE_I4	= 3,
+		DBTYPE_R4	= 4,
+		DBTYPE_R8	= 5,
+		DBTYPE_CY	= 6,
+		DBTYPE_DATE	= 7,
+		DBTYPE_BSTR	= 8,
+		DBTYPE_IDISPATCH	= 9,
+		DBTYPE_ERROR	= 10,
+		DBTYPE_BOOL	= 11,
+		DBTYPE_VARIANT	= 12,
+		DBTYPE_IUNKNOWN	= 13,
+		DBTYPE_DECIMAL	= 14,
+		DBTYPE_UI1	= 17,
+		DBTYPE_ARRAY	= 0x2000,
+		DBTYPE_BYREF	= 0x4000,
+		DBTYPE_I1	= 16,
+		DBTYPE_UI2	= 18,
+		DBTYPE_UI4	= 19,
+		DBTYPE_I8	= 20,
+		DBTYPE_UI8	= 21,
+		DBTYPE_GUID	= 72,
+		DBTYPE_VECTOR	= 0x1000,
+		DBTYPE_RESERVED	= 0x8000,
+		DBTYPE_BYTES	= 128,
+		DBTYPE_STR	= 129,
+		DBTYPE_WSTR	= 130,
+		DBTYPE_NUMERIC	= 131,
+		DBTYPE_UDT	= 132,
+		DBTYPE_DBDATE	= 133,
+		DBTYPE_DBTIME	= 134,
+		DBTYPE_DBTIMESTAMP	= 135
 
-/*--------------------------------------------------------------------------------------
-	 Class Name: Recordset
---------------------------------------------------------------------------------------*/
+		ADO Types
 
-class ADORecordSet_ado extends ADORecordSet {
-
-	public  $databaseType = "ado";
-	public  $dataProvider = "ado";
-	protected  $_tarr = false; // caches the types
-	protected  $_flds; // and field objects
-	public  $canSeek = true;
-  	public  $hideErrors = true;
-
-	// returns the field object
-	protected function _FetchField($fieldOffset = -1) {
-		$off=$fieldOffset+1; // offsets begin at 1
-
-		$o= new ADOFieldObject();
-		$rs = $this->_queryID;
-		if (!$rs) return false;
-
-		$f = $rs->Fields($fieldOffset);
-		$o->name = $f->Name;
-		$t = $f->Type;
-		$o->type = $this->MetaType($t);
-		$o->max_length = $f->DefinedSize;
-		$o->ado_type = $t;
-
-
-		//print "off=$off name=$o->name type=$o->type len=$o->max_length<br>";
-		return $o;
-	}
-
-	protected function _initrs()
-	{
-		$rs = $this->_queryID;
-
-		try {
-			$this->_numOfRows = $rs->RecordCount;
-		} catch (Exception $e) {
-			$this->_numOfRows = -1;
-		}
-		$f = $rs->Fields;
-		$this->_numOfFields = $f->Count;
-	}
-
-
-	 // should only be used to move forward as we normally use forward-only cursors
-	protected function _seek($row)
-	{
-	   $rs = $this->_queryID;
-		// absoluteposition doesn't work -- my maths is wrong ?
-		//	$rs->AbsolutePosition->$row-2;
-		//	return true;
-		if ($this->_currentRow > $row) return false;
-		@$rs->Move((integer)$row - $this->_currentRow-1); //adBookmarkFirst
-		return true;
-	}
-
-/*
-	OLEDB types
-
-	 enum DBTYPEENUM
-	{	DBTYPE_EMPTY	= 0,
-	DBTYPE_NULL	= 1,
-	DBTYPE_I2	= 2,
-	DBTYPE_I4	= 3,
-	DBTYPE_R4	= 4,
-	DBTYPE_R8	= 5,
-	DBTYPE_CY	= 6,
-	DBTYPE_DATE	= 7,
-	DBTYPE_BSTR	= 8,
-	DBTYPE_IDISPATCH	= 9,
-	DBTYPE_ERROR	= 10,
-	DBTYPE_BOOL	= 11,
-	DBTYPE_VARIANT	= 12,
-	DBTYPE_IUNKNOWN	= 13,
-	DBTYPE_DECIMAL	= 14,
-	DBTYPE_UI1	= 17,
-	DBTYPE_ARRAY	= 0x2000,
-	DBTYPE_BYREF	= 0x4000,
-	DBTYPE_I1	= 16,
-	DBTYPE_UI2	= 18,
-	DBTYPE_UI4	= 19,
-	DBTYPE_I8	= 20,
-	DBTYPE_UI8	= 21,
-	DBTYPE_GUID	= 72,
-	DBTYPE_VECTOR	= 0x1000,
-	DBTYPE_RESERVED	= 0x8000,
-	DBTYPE_BYTES	= 128,
-	DBTYPE_STR	= 129,
-	DBTYPE_WSTR	= 130,
-	DBTYPE_NUMERIC	= 131,
-	DBTYPE_UDT	= 132,
-	DBTYPE_DBDATE	= 133,
-	DBTYPE_DBTIME	= 134,
-	DBTYPE_DBTIMESTAMP	= 135
-
-	ADO Types
-
-   	adEmpty	= 0,
-	adTinyInt	= 16,
-	adSmallInt	= 2,
-	adInteger	= 3,
-	adBigInt	= 20,
-	adUnsignedTinyInt	= 17,
-	adUnsignedSmallInt	= 18,
-	adUnsignedInt	= 19,
-	adUnsignedBigInt	= 21,
-	adSingle	= 4,
-	adDouble	= 5,
-	adCurrency	= 6,
-	adDecimal	= 14,
-	adNumeric	= 131,
-	adBoolean	= 11,
-	adError	= 10,
-	adUserDefined	= 132,
-	adVariant	= 12,
-	adIDispatch	= 9,
-	adIUnknown	= 13,
-	adGUID	= 72,
-	adDate	= 7,
-	adDBDate	= 133,
-	adDBTime	= 134,
-	adDBTimeStamp	= 135,
-	adBSTR	= 8,
-	adChar	= 129,
-	adVarChar	= 200,
-	adLongVarChar	= 201,
-	adWChar	= 130,
-	adVarWChar	= 202,
-	adLongVarWChar	= 203,
-	adBinary	= 128,
-	adVarBinary	= 204,
-	adLongVarBinary	= 205,
-	adChapter	= 136,
-	adFileTime	= 64,
-	adDBFileTime	= 137,
-	adPropVariant	= 138,
-	adVarNumeric	= 139
-*/
-	public function MetaType($t,$len=-1,$fieldobj=false)
+		adEmpty	= 0,
+		adTinyInt	= 16,
+		adSmallInt	= 2,
+		adInteger	= 3,
+		adBigInt	= 20,
+		adUnsignedTinyInt	= 17,
+		adUnsignedSmallInt	= 18,
+		adUnsignedInt	= 19,
+		adUnsignedBigInt	= 21,
+		adSingle	= 4,
+		adDouble	= 5,
+		adCurrency	= 6,
+		adDecimal	= 14,
+		adNumeric	= 131,
+		adBoolean	= 11,
+		adError	= 10,
+		adUserDefined	= 132,
+		adVariant	= 12,
+		adIDispatch	= 9,
+		adIUnknown	= 13,
+		adGUID	= 72,
+		adDate	= 7,
+		adDBDate	= 133,
+		adDBTime	= 134,
+		adDBTimeStamp	= 135,
+		adBSTR	= 8,
+		adChar	= 129,
+		adVarChar	= 200,
+		adLongVarChar	= 201,
+		adWChar	= 130,
+		adVarWChar	= 202,
+		adLongVarWChar	= 203,
+		adBinary	= 128,
+		adVarBinary	= 204,
+		adLongVarBinary	= 205,
+		adChapter	= 136,
+		adFileTime	= 64,
+		adDBFileTime	= 137,
+		adPropVariant	= 138,
+		adVarNumeric	= 139
+	*/
+	public function ADO5Types($t,$len=-1,$fieldobj=false)
 	{
 		if (is_object($t)) {
 			$fieldobj = $t;
@@ -556,6 +494,67 @@ class ADORecordSet_ado extends ADORecordSet {
 			return 'I';
 		default: return ADODB_DEFAULT_METATYPE;
 		}
+	}
+
+}
+
+/*--------------------------------------------------------------------------------------
+	 Class Name: Recordset
+--------------------------------------------------------------------------------------*/
+
+class ADORecordSet_ado extends ADORecordSet {
+
+	public  $databaseType = "ado";
+	public  $dataProvider = "ado";
+	protected  $_tarr = false; // caches the types
+	protected  $_flds; // and field objects
+	public  $canSeek = true;
+  	public  $hideErrors = true;
+
+	// returns the field object
+	protected function _FetchField($fieldOffset = -1) {
+		$off=$fieldOffset+1; // offsets begin at 1
+
+		$o= new ADOFieldObject();
+		$rs = $this->_queryID;
+		if (!$rs) return false;
+
+		$f = $rs->Fields($fieldOffset);
+		$o->name = $f->Name;
+		$t = $f->Type;
+		$o->type = $this->connection->ADO5Types($t);
+		$o->max_length = $f->DefinedSize;
+		$o->ado_type = $t;
+
+
+		//print "off=$off name=$o->name type=$o->type len=$o->max_length<br>";
+		return $o;
+	}
+
+	protected function _initrs()
+	{
+		$rs = $this->_queryID;
+
+		try {
+			$this->_numOfRows = $rs->RecordCount;
+		} catch (Exception $e) {
+			$this->_numOfRows = -1;
+		}
+		$f = $rs->Fields;
+		$this->_numOfFields = $f->Count;
+	}
+
+
+	 // should only be used to move forward as we normally use forward-only cursors
+	protected function _seek($row)
+	{
+	   $rs = $this->_queryID;
+		// absoluteposition doesn't work -- my maths is wrong ?
+		//	$rs->AbsolutePosition->$row-2;
+		//	return true;
+		if ($this->_currentRow > $row) return false;
+		@$rs->Move((integer)$row - $this->_currentRow-1); //adBookmarkFirst
+		return true;
 	}
 
 	// time stamp not supported yet
