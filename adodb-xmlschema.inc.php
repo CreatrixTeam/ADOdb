@@ -1947,6 +1947,20 @@ class adoSchema {
 	}
 
 	/**
+	* WARNING (APRIL-2021): 
+	*	This function is ill defined. Avoid using it. 
+	*	To be well defined, the following necessary, but insufficient, conditions must be met
+	*			if I am not wrong:
+	*		- ADODB_DataDict::ActualType(x) != ADODB_DataDict::ActualType(y) FOR ALL x != y
+	*		- Given
+	*						y = ADODB_DataDict::ActualType(x)
+	*						z = ADOFieldObject::type of a database table column created using y
+	*				The following must hold true:
+	*						ADODB_DataDict::ActualType(ADOConnection::MetaType(z)) == x
+	*	The above conditions assume a simpler requirement that the following function is only
+	*			valid if the database was originally created using ADOdb Schema.
+	*
+	*
 	* Extracts an XML schema from an existing database.
 	*
 	* Call this method to create an XML schema string from an existing database.

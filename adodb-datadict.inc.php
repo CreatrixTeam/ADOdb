@@ -324,6 +324,10 @@ class ADODB_DataDict {
 		I:  Integer
 		F:  Floating point number
 		N:  Numeric or decimal number
+
+		NOTE (APRIL-2021): It is desirable for the following condition to hold:
+						ADODB_DataDict::ActualType(x) != ADODB_DataDict::ActualType(y) FOR ALL x != y
+				Refer to adoSchema::ExtractSchema()
 	*/
 
 	public function ActualType($meta)

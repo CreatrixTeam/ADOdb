@@ -33,7 +33,7 @@ $ACCEPTIP = '127.0.0.1';
 /*
  * Connection parameters
  */
-$driver = 'mysqli';
+$driver = ((version_compare(PHP_VERSION, '7.0.0') >= 0) ? 'mysqli' : 'mysql');
 $host = 'localhost'; // DSN for odbc
 $uid = 'root';
 $pwd = 'garbase-it-is';

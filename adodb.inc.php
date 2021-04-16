@@ -2613,6 +2613,17 @@ if (!defined('_ADODB_LAYER')) {
 	 * many databases use different names for the same type, so we transform the original
 	 * type to our standardised version which uses 1 character codes:
 	 *
+	 * NOTE (APRIL-2021): This function's primary purpose, and hence what defines it, is 
+	 *		tranforming the value from ADOFieldObject::type to the internal ADOdb standard
+	 *		type names as defined in the specification of dbTable::addField(). This function
+	 *		may tranform different inputs to the same output making its operation non
+	 *		invertible.
+	 *		It might be desirable for the following condition to be met:
+	 *						ADOConnection::MetaType(ADODB_DataDict::ActualType(x)) == x
+	 *				but the following does not need to hold true:
+	 *						ADODB_DataDict::ActualType(ADOConnection::MetaType(x)) == x
+	 *
+	 *
 	 * @param t  is the type passed in. Normally is ADOFieldObject->type.
 	 * @param len is the maximum length of that field. This is because we treat character
 	 *	fields bigger than a certain size as a 'B' (blob).
