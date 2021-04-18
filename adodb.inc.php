@@ -231,6 +231,17 @@ if (!defined('_ADODB_LAYER')) {
 	//==============================================================================================
 	/**
 	 * Helper class for FetchFields -- holds info on a column
+	 *
+	 * NOTE (APRIL-2021): PHP drivers, or old drivers at least, tend to produce very similar objects from their
+	 *		functions that give field information, but they might differ slightly on those fields. It appears
+	 *		that the following class aimed to give an interface normalizing those objects by the drivers. 
+	 *		Data fields defined by this class were fields guaranteed to be provided by all drivers. However
+	 *		drivers should still create an ADOFieldObject instance rather than return the raw objects. 
+	 *		Furthermore ADOdb drivers might artificially create those objects, rather than recieve them from 
+	 *		the PHP drivers, which happens when they choose to get their field information through other means
+	 *		rather than through the PHP driver functions. This usually happens in 
+	 *		ADOConnection::MetaColumns() implementations.
+	 *
 	 */
 	class ADOFieldObject {
 		public  $name = '';
@@ -2618,10 +2629,6 @@ if (!defined('_ADODB_LAYER')) {
 	 *		type names as defined in the specification of dbTable::addField(). This function
 	 *		may tranform different inputs to the same output making its operation non
 	 *		invertible.
-	 *		It might be desirable for the following condition to be met:
-	 *						ADOConnection::MetaType(ADODB_DataDict::ActualType(x)) == x
-	 *				but the following does not need to hold true:
-	 *						ADODB_DataDict::ActualType(ADOConnection::MetaType(x)) == x
 	 *
 	 *
 	 * @param t  is the type passed in. Normally is ADOFieldObject->type.

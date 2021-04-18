@@ -496,6 +496,8 @@ class ADODB_ado extends ADOConnection {
 		}
 	}
 
+	public function MetaType($t,$len=-1,$fieldobj=false)
+		{return $t;}
 }
 
 /*--------------------------------------------------------------------------------------

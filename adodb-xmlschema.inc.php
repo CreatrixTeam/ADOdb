@@ -1955,9 +1955,13 @@ class adoSchema {
 	*		- Given
 	*						y = ADODB_DataDict::ActualType(x)
 	*						z = ADOFieldObject::type of a database table column created using y
+	*								(Note: The operation that gives z is generally performed by 
+	*								ADOConnection::MetaColumns(), or by ADORecordset::FetchField())
 	*				The following must hold true:
-	*						ADODB_DataDict::ActualType(ADOConnection::MetaType(z)) == x
-	*	The above conditions assume a simpler requirement that the following function is only
+	*						ADOConnection::MetaType(z) == x
+	*	The first condition above assumes that no other factor affects the value of z beside the
+	*			output of ADODB_DataDict::ActualType()
+	*	Together, the above conditions assume a simpler requirement that the following function is only
 	*			valid if the database was originally created using ADOdb Schema.
 	*
 	*
