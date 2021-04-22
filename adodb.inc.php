@@ -1279,9 +1279,12 @@ if (!defined('_ADODB_LAYER')) {
 			unset($element0);
 
 			if (!is_array($sql) && !$this->_bindInputArray) {
+				/*
 				// @TODO this would consider a '?' within a string as a parameter...
 				$sqlarr = explode('?',$sql);
 				$nparams = sizeof($sqlarr)-1;
+				*/
+				$tEmulatePrepareStatement = null;
 
 				if (!$array_2d) {
 					// When not Bind Bulk - convert to array of arguments list
@@ -1298,10 +1301,13 @@ if (!defined('_ADODB_LAYER')) {
 					}
 					unset($countElements);
 				}
+
+				$tEmulatePrepareStatement = $this->Execute__EmulatePrepare($sql);
+				
 				// Make sure the number of parameters provided in the input
 				// array matches what the query expects
 				$element0 = reset($inputarr);
-				if ($nparams != count($element0)) {
+				if ((/*$nparams*/$tEmulatePrepareStatement[0] != count($element0)) && ($tEmulatePrepareStatement[0] !== -1)) {
 					$this->outp_throw(
 						"Input array has " . count($element0) .
 						" params, does not match query: '" . htmlspecialchars($sql) . "'",
@@ -1314,6 +1320,7 @@ if (!defined('_ADODB_LAYER')) {
 				unset($element0);
 
 				foreach($inputarr as $arr) {
+					/*
 					$sql = ''; $i = 0;
 					foreach ($arr as $v) {
 						$sql .= $sqlarr[$i];
@@ -1352,8 +1359,9 @@ if (!defined('_ADODB_LAYER')) {
 					} else if ($i != sizeof($sqlarr)) {
 						$this->outp_throw( "Input array does not match ?: ".htmlspecialchars($sql),'Execute');
 					}
+					*/
 
-					$ret = $this->_Execute($sql);
+					$ret = $this->_Execute($this->Execute__BuildSqlFromEmulatePrepareStatement($tEmulatePrepareStatement, $arr)); //$this->_Execute($sql);
 					if (!$ret) {
 						return $ret;
 					}
@@ -1384,6 +1392,130 @@ if (!defined('_ADODB_LAYER')) {
 
 		return $ret;
 	}
+
+	/**
+	 * Emulates preparing a statement. This function must be treated as a subroutine of 
+	 *			ADOConnection::Execute(), and hence must never be called from any where else.
+	 *
+	 * It is very likely possible, and correct, to use ADOConnection::Prepare() to emulate prepared,
+	 *			statements and that this function and 
+	 *			ADOConnection::Execute__BuildSqlFromEmulatePrepareStatement() are
+	 *			redundant, this function was introduced to retain backward compatibility, and not to take
+	 *			the experience of those who worked on this project in the past lightly. In other words, I
+	 *			saw what suggests a valid reason for defferentiating between the native and emulated
+	 *			prepare approaches, but I could be wrong.
+	 *			THIS MECHANISM MIGHT BE REMOVED IN THE FUTURE, but for the time being, notice
+	 * 			the differences between the two approaches of emulating prepared statements:
+	 *		- Emulating through ADOConnection::Prepare() would allow any placeholder format in the sql
+	 *				string. Emulating through the mechanism below does not. This is per specification,
+	 *				as introduced with the pertaining work. Sub drivers overriding this function must 
+	 *				explicitly adhere to that (currently, the driver "adodb-oci8.inc.php" violates this). 
+	 *				However, it is recommended that emulating through ADOConnection::Prepare(), when done, 
+	 *				is to fill a gap in the older versions of native drivers, and thus should use the same 
+	 *				format newer versions of said driver use for the placeholders.
+	 *		- Unlike emulating through ADOConnection::Prepare(), emulating through the mechanism below
+	 *				guarantees ADOConnection::_Execute() and the implicit ADOConnection::_query() when called
+	 *				to always recieve the sql as a string, not as an array, ready to execute.
+	 *		- Emulating through the following mechanism is likely to be tame, less prone to errors. Contrast
+	 *				with ADOConnection::Prepare(), which is a public function.
+	 *
+	 *		To see the confusion yourself that this mechanism has caused, refer to the drivers "adodb-oci8.inc.php"
+	 *				and "adodb-oci8po.inc.php". Some of the pertaining code is commented out, but not removed.
+	 *
+	 * IMPORTANT: It is strongly discouraged that drivers overwrite this function, and it was only introduced
+	 *			for backward compatibilty. Drivers that do overwrite this function must follow, or allow following
+	 *			the sql placeholder format as defined in this php file.
+	 *
+	 * WARNING: This mechanism is not unlikely to be removed in the future. Consider emulating through 
+	 *			ADOConnection::Prepare() instead.
+	 * 
+	 *
+	 * Note: This function has a different return specification from ADOConnection::Prepare()
+	 *
+	 *
+	 * @param string	$pSqlString	    SQL string to prepare the statement from.
+	 *
+	 * @return array					The returned array has the following format:
+	 *											1st element: number of bound variables. If set to -1,
+	 *													the number is unknown.
+	 *											2nd and up:  these are ADOdb driver dependent.
+	 *									A reference to this returned array will be passed later to
+	 *									Execute__BuildSqlFromEmulatePrepareStatement() for efficiency. Hence,
+	 *									the returned array can hold dynamic runtime data for efficient
+	 *									processing of bulk binds.
+	 */
+	protected function Execute__EmulatePrepare($pSqlString)
+	{
+		// @TODO this would consider a '?' within a string as a parameter...
+		$sqlarr = explode('?',$pSqlString);
+		$nparams = sizeof($sqlarr)-1;
+		
+		return array($nparams, $sqlarr);
+	}
+
+	/**
+	 * Builds the sql string from an emulated prepared statement that is returned from 
+	 *			ADOConnection::Execute__EmulatePrepare(). This function must be treated as a subroutine of 
+	 *			ADOConnection::Execute(), and hence must never be called from any where else.
+	 *
+	 *
+	 * WARNING: This mechanism is not unlikely to be removed in the future. Consider emulating through 
+	 *			ADOConnection::Prepare() instead.
+	 * 
+	 * For more information see ADOConnection::Execute__EmulatePrepare()
+	 *
+	 *
+	 *
+	 * @param array	 $pEmulatePrepareStatement	    Emulate prepared statement. See the return of
+	 *												ADOConnection::Execute__EmulatePrepare() for more
+	 *												information.
+	 *
+	 * @return string								The ready to execute sql string.
+	 */
+	protected function Execute__BuildSqlFromEmulatePrepareStatement(&$pEmulatePrepareStatement, $inputarr)
+	{
+		$sql = ''; $i = 0;
+		foreach ($inputarr as $v) {
+			$sql .= $pEmulatePrepareStatement[1][$i];
+			// from Ron Baldwin <ron.baldwin#sourceprose.com>
+			// Only quote string types
+			$typ = gettype($v);
+			if ($typ == 'string') {
+				//New memory copy of input created here -mikefedyk
+				$sql .= $this->qstr($v);
+			} else if ($typ == 'double') {
+				$sql .= str_replace(',','.',$v); // locales fix so 1.1 does not get converted to 1,1
+			} else if ($typ == 'boolean') {
+				$sql .= $v ? $this->true : $this->false;
+			} else if ($typ == 'object') {
+				if (method_exists($v, '__toString')) {
+					$sql .= $this->qstr($v->__toString());
+				} else {
+					$sql .= $this->qstr((string) $v);
+				}
+			} else if ($v === null) {
+				$sql .= 'NULL';
+			} else {
+				$sql .= $v;
+			}
+			$i += 1;
+
+			if ($i == $nparams) {
+				break;
+			}
+		} // while
+		if (isset($pEmulatePrepareStatement[1][$i])) {
+			$sql .= $pEmulatePrepareStatement[1][$i];
+			if ($i+1 != sizeof($pEmulatePrepareStatement[1])) {
+				$this->outp_throw( "Input Array does not match ?: ".htmlspecialchars($sql),'Execute');
+			}
+		} else if ($i != sizeof($pEmulatePrepareStatement[1])) {
+			$this->outp_throw( "Input array does not match ?: ".htmlspecialchars($sql),'Execute');
+		}
+		
+		return $sql;
+	}
+	
 
 	protected function _Execute($sql,$inputarr=false) {
 		// ExecuteCursor() may send non-string queries (such as arrays),
@@ -2828,7 +2960,7 @@ if (!defined('_ADODB_LAYER')) {
 				return 'B';
 
 			case 'D':
-				if (!empty($this->datetime) {
+				if (!empty($this->datetime)) {
 					return 'T';
 				}
 				return 'D';

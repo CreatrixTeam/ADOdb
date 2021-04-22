@@ -86,6 +86,7 @@ class ADODB_oci8 extends ADOConnection {
 	public  $dateformat = 'YYYY-MM-DD'; // DBDate format
 	public  $useDBDateFormatForTextInput=false;
 	protected  $_refLOBs = array();
+	protected  $gOci8_isToRevertToAdodbPlaceHolderFormatWhenEmulatingBinding = false;
 
 	// public  $ansiOuter = true; // if oracle9
 
@@ -812,6 +813,7 @@ class ADODB_oci8 extends ADOConnection {
 	 * @param [inputarr]	holds the input data to bind to. Null elements will be set to null.
 	 * @return 		RecordSet or false
 	 */
+	/*
 	public function Execute($sql,$inputarr=false)
 	{
 		if ($this->fnExecute) {
@@ -827,9 +829,15 @@ class ADODB_oci8 extends ADOConnection {
 			}
 
 			$element0 = reset($inputarr);
+			# is_object check because oci8 descriptors can be passed in
 			$array2d =  $this->bulkBind && is_array($element0) && !is_object(reset($element0));
 
+			//remove extra memory copy of input -mikefedyk
+			unset($element0);
+
 			# see PHPLens Issue No: 18786
+			//NOTE: when reference to 18786 above was added, the condition below was changed from
+			//			(!$this->_bindInputArray) to ($this->_bindInputArray || $this->bulkBind)			
 			if ($array2d || !$this->_bindInputArray) {
 
 				# is_object check because oci8 descriptors can be passed in
@@ -895,6 +903,60 @@ class ADODB_oci8 extends ADOConnection {
 		}
 
 		return $ret;
+	}
+	*/
+
+	protected function Execute__EmulatePrepare($pSqlString)
+	{
+		if($this->gOci8_isToRevertToAdodbPlaceHolderFormatWhenEmulatingBinding)
+			{return ADOConnection::Execute__EmulatePrepare($pSqlString);}
+
+		return array(-1, explode(':', $pSqlString));
+	}
+
+	protected function Execute__BuildSqlFromEmulatePrepareStatement(&$pEmulatePrepareStatement, $inputarr)
+	{
+		if($this->gOci8_isToRevertToAdodbPlaceHolderFormatWhenEmulatingBinding)
+			{return ADOConnection::Execute__BuildSqlFromEmulatePrepareStatement($pEmulatePrepareStatement, $inputarr);}
+
+		$sql = '';
+		$lastnomatch = -2;
+		#var_dump($pEmulatePrepareStatement[1]);echo "<hr>";var_dump($inputarr);echo"<hr>";
+		foreach($pEmulatePrepareStatement[1] as $k => $str) {
+			if ($k == 0) {
+				$sql = $str;
+				continue;
+			}
+			// we need $lastnomatch because of the following datetime,
+			// eg. '10:10:01', which causes code to think that there is bind param :10 and :1
+			$ok = preg_match('/^([0-9]*)/', $str, $arr);
+
+			if (!$ok) {
+				$sql .= $str;
+			} else {
+				$at = $arr[1];
+				if (isset($inputarr[$at]) || is_null($inputarr[$at])) {
+					if ((strlen($at) == strlen($str) && $k < sizeof($arr)-1)) {
+						$sql .= ':'.$str;
+						$lastnomatch = $k;
+					} else if ($lastnomatch == $k-1) {
+						$sql .= ':'.$str;
+					} else {
+						if (is_null($inputarr[$at])) {
+							$sql .= 'null';
+						}
+						else {
+							$sql .= $this->qstr($inputarr[$at]);
+						}
+						$sql .= substr($str, strlen($at));
+					}
+				} else {
+					$sql .= ':'.$str;
+				}
+			}
+		}
+
+		return $sql;
 	}
 
 	/*
@@ -1148,7 +1210,7 @@ class ADODB_oci8 extends ADOConnection {
 			@oci_set_prefetch($stmt,ADODB_PREFETCH_ROWS);
 		}
 
-		if (is_array($inputarr)) {
+		if (is_array($inputarr) && $this->$_bindInputArray) {
 			foreach($inputarr as $k => $v) {
 				if (is_array($v)) {
 					// suggested by g.giunta@libero.

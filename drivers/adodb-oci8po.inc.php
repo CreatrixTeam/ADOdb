@@ -29,6 +29,7 @@ class ADODB_oci8po extends ADODB_oci8 {
 	public  $dataProvider = 'oci8';
 	public  $metaColumnsSQL = "select lower(cname),coltype,width, SCALE, PRECISION, NULLS, DEFAULTVAL from col where tname='%s' order by colno"; //changed by smondino@users.sourceforge. net
 	public  $metaTablesSQL = "select lower(table_name),table_type from cat where table_type in ('TABLE','VIEW')";
+	protected $gOci8_isToRevertToAdodbPlaceHolderFormatWhenEmulatingBinding = true;
 
 	public function __construct()
 	{
@@ -51,11 +52,6 @@ class ADODB_oci8po extends ADODB_oci8 {
 			$sql .=  ':'.($i-1) . $sqlarr[$i];
 		}
 		return ADODB_oci8::Prepare($sql,$cursor);
-	}
-
-	public function Execute($sql,$inputarr=false)
-	{
-		return ADOConnection::Execute($sql,$inputarr);
 	}
 
 	/**

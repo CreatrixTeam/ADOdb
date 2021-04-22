@@ -118,7 +118,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		
 		$SQL = "SELECT column_name, column_type 
 				  FROM information_schema.columns 
-				 WHERE table_schema='{$this->databaseName}' 
+				 WHERE table_schema='{$this->database}' 
 				   AND table_name='$table'";
 		
 		$schemaArray = $this->getAssoc($SQL);
