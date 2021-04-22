@@ -99,6 +99,7 @@ class ADODB_postgres7 extends ADODB_postgres64 {
 	{
 		parent::__construct();
 		$this->_bindInputArray = PHP_VERSION >= 5.1;
+		$this->gPostgres64__canOverrideBindInputArray = $this->_bindInputArray;
 	}
 
 
@@ -233,7 +234,7 @@ class ADODB_postgres7 extends ADODB_postgres64 {
 		return $a;
 	}
 
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		if (! $this->_bindInputArray) {
 			// We don't have native support for parameterized queries, so let's emulate it at the parent

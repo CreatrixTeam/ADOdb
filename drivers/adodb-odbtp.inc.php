@@ -31,6 +31,7 @@ class ADODB_odbtp extends ADOConnection{
 	protected  $_genSeqSQL = "create table %s (seq_name char(30) not null unique , seq_value integer not null)";
 	protected  $_dropSeqSQL = "delete from adodb_seq where seq_name = '%s'";
 	protected  $_bindInputArray = false;
+	protected  $gOdbtp__CanOverrideBindInputArray = false;
 	public  $_useUnicodeSQL = false; //odbtp driver specific.
 	protected  $_canPrepareSP = false;
 	protected  $_dontPoolDBC = true;
@@ -213,6 +214,7 @@ class ADODB_odbtp extends ADOConnection{
 				$this->hasInsertID = true;
 				$this->hasTransactions = true;
 				$this->_bindInputArray = true;
+				$this->gOdbtp__CanOverrideBindInputArray = true;
 				$this->_canSelectDb = true;
 				$this->substr = "substring";
 				$this->length = 'len';
@@ -246,6 +248,7 @@ class ADODB_odbtp extends ADOConnection{
 				$this->fmtTimeStamp = "'Y-m-d h:i:sA'";
 				$this->hasTransactions = true;
 				$this->_bindInputArray = true;
+				$this->gOdbtp__CanOverrideBindInputArray = true;
 				break;
 			case 'sybase':
 				$this->databaseType = 'odbtp_sybase';
@@ -599,7 +602,7 @@ class ADODB_odbtp extends ADOConnection{
 		return " CASE WHEN $field is null THEN $ifNull ELSE $field END ";
 	}
 
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		$last_php_error = $this->resetLastError();
 		$this->_errorMsg = false;
@@ -655,6 +658,17 @@ class ADODB_odbtp extends ADOConnection{
 		return $ret;
 	}
 
+	public function odbtp_setIsToEnableNativeSqlParameterBinding($pIsToEnableNativeSqlParameterBinding)
+	{
+		if(!$this->gOdbtp__CanOverrideBindInputArray)
+			{return ($this->_bindInputArray === ($pIsToEnableNativeSqlParameterBinding ? true : false));}
+		else
+		{
+			$this->_bindInputArray = ($pIsToEnableNativeSqlParameterBinding ? true : false);
+		
+			return true;
+		}
+	}
 }
 
 class ADORecordSet_odbtp extends ADORecordSet {

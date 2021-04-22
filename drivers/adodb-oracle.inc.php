@@ -157,7 +157,7 @@ class ADODB_oracle extends ADOConnection {
 			if ($this->_connectionID === false) return false;
 			if ($this->autoCommit) ora_commiton($this->_connectionID);
 			if ($this->_initdate) {
-				$rs = $this->_query("ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD'");
+				$rs = $this->Execute("ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD'");
 				if ($rs) ora_close($rs);
 			}
 
@@ -173,7 +173,7 @@ class ADODB_oracle extends ADOConnection {
 
 
 		// returns query ID if successful, otherwise false
-		public function _query($sql,$inputarr=false)
+		protected function _query($sql,$inputarr=false)
 		{
             // <G. Giunta 2003/03/03/> Reset error messages before executing
             $this->_errorMsg = false;

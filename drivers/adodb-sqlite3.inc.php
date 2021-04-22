@@ -223,7 +223,7 @@ class ADODB_sqlite3 extends ADOConnection {
 	}
 
 	// returns query ID if successful, otherwise false
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		$rez = $this->_connectionID->query($sql);
 		if ($rez === false) {

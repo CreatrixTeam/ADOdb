@@ -55,7 +55,7 @@ if (!defined('ADODB_SYBASE_SQLANYWHERE')){
  define('ADODB_SYBASE_SQLANYWHERE',1);
 
  class ADODB_sqlanywhere extends ADODB_odbc {
-  	public  $databaseType = "sqlanywhere";
+  	public  $databaseType = "odbc_sqlanywhere";
 	public  $hasInsertID = true;
 
 	public function __construct()

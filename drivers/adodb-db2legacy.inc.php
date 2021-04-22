@@ -42,8 +42,6 @@ class ADODB_db2legacy extends ADOConnection {
 
 	public  $binmode = DB2_BINARY;
 
-	public  $useFetchArray = false; // setting this to true will make array elements in FETCH_ASSOC mode case-sensitive
-								// breaking backward-compat
 	protected  $_bindInputArray = false;
 	protected  $_autocommit = true;
 	protected  $_haserrorfunctions = true;
@@ -551,7 +549,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	}
 
 	/* returns queryID or false */
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		$last_php_error = $this->resetLastError();
 		$this->_errorMsg = '';
@@ -652,7 +650,6 @@ class ADORecordSet_db2legacy extends ADORecordSet {
 	public  $bind = false;
 	public  $databaseType = "db2legacy";
 	public  $dataProvider = "db2";
-	public  $useFetchArray;
 
 	// returns the field object
 	protected function _FetchField($offset = -1)

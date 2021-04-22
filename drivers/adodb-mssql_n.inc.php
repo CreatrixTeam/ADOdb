@@ -54,7 +54,7 @@ include_once(ADODB_DIR.'/drivers/adodb-mssql.inc.php');
 class ADODB_mssql_n extends ADODB_mssql {
 	public  $databaseType = "mssql_n";
 
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
         $sql = $this->_appendN($sql);
 		return ADODB_mssql::_query($sql,$inputarr);

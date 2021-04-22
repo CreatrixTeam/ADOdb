@@ -42,6 +42,9 @@ class ADODB_oci8po extends ADODB_oci8 {
 
 	public function Prepare($sql,$cursor=false)
 	{
+		if(!$this->_bindInputArray) 
+			{return $sql;} // no binding
+
 		$sqlarr = explode('?',$sql);
 		$sql = $sqlarr[0];
 		for ($i = 1, $max = sizeof($sqlarr); $i < $max; $i++) {
@@ -71,7 +74,7 @@ class ADODB_oci8po extends ADODB_oci8 {
 	}
 
 	// emulate handling of parameters ? ?, replacing with :bind0 :bind1
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		if (is_array($inputarr)) {
 			$i = 0;

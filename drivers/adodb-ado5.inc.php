@@ -231,7 +231,7 @@ class ADODB_ado extends ADOConnection {
 	}
 
 	/* returns queryID or false */
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		try { // In PHP5, all COM errors are exceptions, so to maintain old behaviour...
 

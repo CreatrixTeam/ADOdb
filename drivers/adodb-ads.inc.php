@@ -54,10 +54,10 @@ class ADODB_ads extends ADOConnection {
 	public  $dataProvider = "ads";
 	public  $hasAffectedRows = true;
 	public  $binmode = ODBC_BINMODE_RETURN;
-	public  $useFetchArray = false; // setting this to true will make array elements in FETCH_ASSOC mode case-sensitive
-						// breaking backward-compat
+	/*public  $useFetchArray = false; // setting this to true will make array elements in FETCH_ASSOC mode case-sensitive
+						// breaking backward-compat*/
 	//public  $longreadlen = 8000; // default number of chars to return for a Blob/Long field
-	protected  $_bindInputArray = false;
+	protected  $_bindInputArray = false;	//NOTE (APRL-2021): the implementation of _query() suggest that this may be set to true by subclasses.
 	public  $curmode = SQL_CUR_USE_DRIVER; // See sqlext.h, SQL_CUR_DEFAULT == SQL_CUR_USE_DRIVER == 2L
 	protected  $_autocommit = true;
 	protected  $_haserrorfunctions = true;
@@ -513,7 +513,7 @@ class ADODB_ads extends ADOConnection {
 	}
 
 	/* returns queryID or false */
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		$last_php_error = $this->resetLastError();
 		$this->_errorMsg = '';

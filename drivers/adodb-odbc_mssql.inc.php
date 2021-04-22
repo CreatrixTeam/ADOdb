@@ -219,7 +219,7 @@ order by constraint_name, referenced_table_name, keyno";
         return $indexes;
 	}
 
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		if (is_string($sql)) $sql = str_replace('||','+',$sql);
 		return ADODB_odbc::_query($sql,$inputarr);

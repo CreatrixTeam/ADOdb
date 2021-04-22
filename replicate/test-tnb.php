@@ -145,7 +145,7 @@ function MergeDataJohnTest($rep, $table, $pkey)
 $DB = ADONewConnection('odbtp');
 #$ok = $DB->Connect('localhost','root','','northwind');
 $ok = $DB->Connect('192.168.0.1','DRIVER={SQL Server};SERVER=(local);UID=sa;PWD=natsoft;DATABASE=OIR;','','');
-$DB->_bindInputArray = false;
+$DB->odbtp_setIsToEnableNativeSqlParameterBinding(false);
 
 $DB2 = ADONewConnection('oci8');
 $ok2 = $DB2->Connect('192.168.0.2','tnb','natsoft','RAPTOR','');

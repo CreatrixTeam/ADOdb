@@ -905,6 +905,9 @@ class ADODB_oci8 extends ADOConnection {
 	{
 	static $BINDNUM = 0;
 
+		if(!$this->_bindInputArray) 
+			{return $sql;} // no binding
+
 		$stmt = oci_parse($this->_connectionID,$sql);
 
 		if (!$stmt) {

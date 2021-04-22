@@ -337,6 +337,9 @@ class ADODB_pdo extends ADOConnection {
 
 	public function Prepare($sql)
 	{
+		if(!$this->_bindInputArray) 
+			{return $sql;} // no binding
+
 		$this->_stmt = $this->_connectionID->prepare($sql);
 		if ($this->_stmt) {
 			return array($sql,$this->_stmt);
@@ -356,7 +359,7 @@ class ADODB_pdo extends ADOConnection {
 	}
 
 	/* returns queryID or false */
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		$ok = false;
 		if (is_array($sql)) {

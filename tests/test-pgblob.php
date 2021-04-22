@@ -44,13 +44,13 @@ adodb_pr($db->ServerInfo());
 echo "<h4>Testing PREPARE/EXECUTE PLAN</h4>";
 
 
-$db->_bindInputArray = true; // requires postgresql 7.3+ and ability to modify database
+$db->postgres64_setIsToEnableNativeSqlParameterBinding(true); // requires postgresql 7.3+ and ability to modify database
 $t = getmicrotime();
 doloop();
 echo '<p>',$MAX,' times, with plan=',getmicrotime() - $t,'</p>';
 
 
-$db->_bindInputArray = false;
+$db->postgres64_setIsToEnableNativeSqlParameterBinding(false);
 $t = getmicrotime();
 doloop();
 echo '<p>',$MAX,' times, no plan=',getmicrotime() - $t,'</p>';

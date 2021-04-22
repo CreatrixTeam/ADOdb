@@ -179,7 +179,7 @@ class ADODB_text extends ADOConnection {
 	// with the only difference being the order by.
 	//You can filter by using $eval and each clause is stored in $arr .eg. $arr[1] == 'name'
 	// also supports SELECT [DISTINCT] COL FROM ... -- only 1 col supported
-	public function _query($sql,$input_arr,$eval=false)
+	protected function _query($sql,$input_arr,$eval=false)
 	{
 		if ($this->_origarray === false) return false;
 

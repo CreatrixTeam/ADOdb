@@ -407,6 +407,9 @@ class ADODB_mssqlnative extends ADOConnection {
 
 	public function Prepare($sql)
 	{
+		if(!$this->_bindInputArray) 
+			{return $sql;} // no binding
+
 		return $sql; // prepare does not work properly with bind parameters as bind parameters are managed by sqlsrv_prepare!
 	}
 
@@ -459,7 +462,7 @@ class ADODB_mssqlnative extends ADOConnection {
 	}
 
 	// returns query ID if successful, otherwise false
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		$this->_errorMsg = false;
 

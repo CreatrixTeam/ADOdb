@@ -117,7 +117,7 @@ class ADODB_pdo_dblib extends ADODB_pdo
 		return $rs;
 	}
 
-	function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		if (is_array($sql)) {
 			$stmt = $sql[1];

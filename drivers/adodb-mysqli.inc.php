@@ -821,6 +821,9 @@ class ADODB_mysqli extends ADOConnection {
 	 */
 	public function Prepare($sql)
 	{
+		if(!$this->_bindInputArray) 
+			{return $sql;} // no binding
+
 		return $sql;
 		$stmt = $this->_connectionID->prepare($sql);
 		if (!$stmt) {
@@ -838,7 +841,7 @@ class ADODB_mysqli extends ADOConnection {
 	 *
 	 * @return bool|mysqli_result
 	 */
-	public function _query($sql, $inputarr)
+	protected function _query($sql, $inputarr)
 	{
 		global $ADODB_COUNTRECS;
 		// Move to the next recordset, or return false if there is none. In a stored proc

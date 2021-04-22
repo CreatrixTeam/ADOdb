@@ -1140,7 +1140,7 @@ function _adodb_debug_execute(&$zthis, $sql, $inputarr)
 			ADOConnection::outp("-----<hr>\n($dbt): ".$sqlTxt." $ss\n-----<hr>\n",false);
 	}
 
-	$qID = $zthis->_query($sql,$inputarr);
+	$qID = $zthis->callQueryFromAdodbDebugExecute($sql,$inputarr);
 
 	/*
 		Alexios Fakios notes that ErrorMsg() must be called before ErrorNo() for mssql

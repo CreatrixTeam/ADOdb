@@ -517,7 +517,7 @@ class ADODB_mysql extends ADOConnection {
 	}
 
 	// returns queryID or false
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 
 	return mysql_query($sql,$this->_connectionID);

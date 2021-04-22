@@ -177,7 +177,7 @@ class ADODB_db2oci extends ADODB_db2 {
 
 	protected function _Execute($sql, $inputarr=false	)
 	{
-		if ($inputarr) list($sql,$inputarr) = _colonparser($sql, $inputarr);
+		if ($inputarr && !is_array($sql)) list($sql,$inputarr) = _colonparser($sql, $inputarr);
 		return parent::_Execute($sql, $inputarr);
 	}
 };

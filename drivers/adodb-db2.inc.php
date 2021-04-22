@@ -46,11 +46,6 @@ class ADODB_db2 extends ADOConnection {
 
 	public $binmode = DB2_BINARY;
 
-	/*
-	* setting this to true will make array elements in FETCH_ASSOC 
-	* mode case-sensitive breaking backward-compat
-	*/
-	public $useFetchArray = false; 
 	protected $_bindInputArray = true;
 	protected $_autocommit = true;
 	protected $_lastAffectedRows = 0;
@@ -1455,7 +1450,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	* 
 	* @return mixed				either the queryID or false
 	*/
-	public function _query(&$sql,$inputarr=false)
+	protected function _query(&$sql,$inputarr=false)
 	{
         
         GLOBAL $php_errormsg;
@@ -1627,7 +1622,6 @@ class ADORecordSet_db2 extends ADORecordSet {
 	public $bind = false;
 	public $databaseType = "db2";
 	public $dataProvider = "db2";
-	public $useFetchArray;
 
 
 

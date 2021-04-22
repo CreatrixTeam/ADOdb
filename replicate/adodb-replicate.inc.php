@@ -101,11 +101,11 @@ class ADODB_Replicate {
 	{
 
 		if (strpos($connSrc->databaseType,'odbtp') !== false) {
-			$connSrc->_bindInputArray = false;  # bug in odbtp, binding fails
+			$connSrc->odbtp_setIsToEnableNativeSqlParameterBinding(false);  # bug in odbtp, binding fails
 		}
 
 		if (strpos($connDest->databaseType,'odbtp') !== false) {
-			$connDest->_bindInputArray = false;  # bug in odbtp, binding fails
+			$connDest->odbtp_setIsToEnableNativeSqlParameterBinding(false);  # bug in odbtp, binding fails
 		}
 
 		$this->connSrc = $connSrc;

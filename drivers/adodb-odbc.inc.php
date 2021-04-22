@@ -28,8 +28,8 @@ class ADODB_odbc extends ADOConnection {
 	public  $dataProvider = "odbc";
 	public  $hasAffectedRows = true;
 	public  $binmode = ODBC_BINMODE_RETURN;
-	public  $useFetchArray = false; // setting this to true will make array elements in FETCH_ASSOC mode case-sensitive
-								// breaking backward-compat
+	/*public  $useFetchArray = false; // setting this to true will make array elements in FETCH_ASSOC mode case-sensitive
+								// breaking backward-compat*/
 	//public  $longreadlen = 8000; // default number of chars to return for a Blob/Long field
 	protected  $_bindInputArray = false;
 	public  $curmode = SQL_CUR_USE_DRIVER; // See sqlext.h, SQL_CUR_DEFAULT == SQL_CUR_USE_DRIVER == 2L
@@ -475,7 +475,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 	}
 
 	/* returns queryID or false */
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		$last_php_error = $this->resetLastError();
 		$this->_errorMsg = '';
@@ -580,7 +580,7 @@ class ADORecordSet_odbc extends ADORecordSet {
 	public  $bind = false;
 	public  $databaseType = "odbc";
 	public  $dataProvider = "odbc";
-	public  $useFetchArray;
+	//public  $useFetchArray;
 	public  $_has_stupid_odbc_fetch_api_change;
 
 	public function __construct($id,$mode=false)

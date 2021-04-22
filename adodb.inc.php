@@ -514,6 +514,10 @@ if (!defined('_ADODB_LAYER')) {
 
 	protected  $_isPersistentConnection = false;	/// A boolean variable to state whether its a persistent connection or normal connection.	*/
 	protected  $_bindInputArray = false; /// set to true if ADOConnection.Execute() permits binding of array parameters.
+										 /// WARNING: If you set this to true for your driver, make sure
+										 /// 	you read the comments of ADOConnection::Execute() in 
+										 /// 	this PHP file carefully. This also relates to the implicit
+										 /// 	function ADOConnection::_query()
 	protected  $_evalAll = false;
 	protected  $_affected = false;
 	protected  $_logsql = false;
@@ -874,8 +878,13 @@ if (!defined('_ADODB_LAYER')) {
 	 *
 	 * @param string $sql SQL to send to database
 	 *
-	 * @return mixed|false The prepared statement, or the original sql if the
-	 *                     database does not support prepare.
+	 * @return array|string|false The prepared statement, or the original sql if the
+	 *                     database does not support prepare or false for non recoverable erros.
+	 *					   If an array is returned:
+	 *								1st element: original sql string
+	 *								2nd and up:  these are driver dependent, however it is 
+	 *										recommended that the 2nd element be the prepared statement 
+	 *										from the driver (its type would be driver dependent).
 	 */
 	public function Prepare($sql) {
 		return $sql;
@@ -1235,8 +1244,15 @@ if (!defined('_ADODB_LAYER')) {
 	/**
 	 * Execute SQL
 	 *
+	 * IMPORTANT: Base drivers that set ADOConnection::_bindInputArray to true must ensure that
+	 *			their implementation of the implicit function ADOConnection::_query($sql, $inputarr),
+	 *			accept $sql to be a string and to be an array per the specification of the return of
+	 *			ADOConnection::Prepare(). The same applies to ADOConnection::_Execute($sql, $inputarr)
+	 *
+	 *
 	 * @param string|array	$sql   SQL statement to execute, or possibly an array
-	 *                             holding prepared statement ($sql[0] will hold sql text)
+	 *                             holding prepared statement ($sql[0] will hold sql text. See the 
+	 *							   specification of the return of ADOConnection::Prepare())
 	 * @param array|false $inputarr holds the input data to bind to.
 	 *                             Null elements will be set to null.
 	 *
@@ -1342,7 +1358,7 @@ if (!defined('_ADODB_LAYER')) {
 						return $ret;
 					}
 				}
-			} else {
+			} else if($this->_bindInputArray){
 				if ($array_2d) {
 					if (is_string($sql)) {
 						$stmt = $this->Prepare($sql);
@@ -1360,6 +1376,8 @@ if (!defined('_ADODB_LAYER')) {
 					$ret = $this->_Execute($sql,$inputarr);
 				}
 			}
+			else
+				{$this->outp_throw("Driver does not support binding", 'Execute');}
 		} else {
 			$ret = $this->_Execute($sql,false);
 		}
@@ -1429,6 +1447,19 @@ if (!defined('_ADODB_LAYER')) {
 			}
 		}
 		return $rs;
+	}
+
+	/*
+		This function is temporary and will be removed once the architecture error
+		in ::_adodb_debug_execute() and its siblings is fixed.
+		WARNING: Do not use outside of ADOdb's own code.
+	*/
+	public function callQueryFromAdodbDebugExecute($pSql, $pInputArray = false)
+	{
+		$tBackTrace = debug_backtrace();
+
+		if($tBackTrace[1]['function'] === "_adodb_debug_execute")
+			{return $this->_query($pSql, $pInputArray);}
 	}
 
 	public function CreateSequence($seqname='adodbseq',$startID=1) {
@@ -5967,6 +5998,8 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 						{return "oci8";}
 					elseif($tTemp === "mssql2012")
 						{return "mssql";}
+					elseif($tTemp === "sqlanywhere")
+						{return "generic";}
 					return $tTemp;
 				}
 			case 'ado'  :

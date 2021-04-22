@@ -271,6 +271,9 @@ class ADODB_firebird extends ADOConnection {
 
 	public function Prepare($sql)
 	{
+		if(!$this->_bindInputArray) 
+			{return $sql;} // no binding
+
 		$stmt = fbird_prepare($this->_connectionID,$sql);
 		if (!$stmt) return false;
 		return array($sql,$stmt);
@@ -278,7 +281,7 @@ class ADODB_firebird extends ADOConnection {
 
 	   // returns query ID if successful, otherwise false
 	   // there have been reports of problems with nested queries - the code is probably not re-entrant?
-	public function _query($sql,$iarr=false)
+	protected function _query($sql,$iarr=false)
 	{
 		if ( !$this->isConnected() ) return false;
 		if (!$this->autoCommit && $this->_transactionID) {

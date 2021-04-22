@@ -105,6 +105,7 @@ class ADODB_postgres64 extends ADOConnection{
 
 	public  $uniqueIisR = true; //Postgres64 driver specific.
 	protected  $_bindInputArray = false; // requires postgresql 7.3+ and ability to modify database
+	protected  $gPostgres64__canOverrideBindInputArray = false;
 	public  $disableBlobs = false; // set to true to disable blob checking, resulting in 2-5% improvement in performance.
 
 	protected  $_pnum = 0;
@@ -692,7 +693,7 @@ class ADODB_postgres64 extends ADOConnection{
 
 
 	// returns queryID or false
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		$this->_pnum = 0;
 		$this->_errorMsg = false;
@@ -900,6 +901,17 @@ class ADODB_postgres64 extends ADOConnection{
 			}
 	}
 
+	public function postgres64_setIsToEnableNativeSqlParameterBinding($pIsToEnableNativeSqlParameterBinding)
+	{
+		if(!$this->gPostgres64__canOverrideBindInputArray)
+			{return ($this->_bindInputArray === ($pIsToEnableNativeSqlParameterBinding ? true : false));}
+		else
+		{
+			$this->_bindInputArray = ($pIsToEnableNativeSqlParameterBinding ? true : false);
+		
+			return true;
+		}
+	}
 }
 
 /*--------------------------------------------------------------------------------------

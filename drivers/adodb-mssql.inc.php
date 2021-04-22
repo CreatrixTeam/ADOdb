@@ -534,6 +534,9 @@ order by constraint_name, referenced_table_name, keyno";
 
 	public function Prepare($sql)
 	{
+		if(!$this->_bindInputArray) 
+			{return $sql;} // no binding
+
 		$sqlarr = explode('?',$sql);
 		if (sizeof($sqlarr) <= 1) return $sql;
 		$sql2 = $sqlarr[0];
@@ -648,7 +651,7 @@ order by constraint_name, referenced_table_name, keyno";
 	}
 
 	// returns query ID if successful, otherwise false
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		$this->_errorMsg = false;
 		if (is_array($inputarr)) {

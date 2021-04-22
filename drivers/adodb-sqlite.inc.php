@@ -189,7 +189,7 @@ class ADODB_sqlite extends ADOConnection {
 	}
 
 	// returns query ID if successful, otherwise false
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		$rez = sqlite_query($sql,$this->_connectionID);
 		if (!$rez) {

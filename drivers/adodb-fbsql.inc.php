@@ -131,7 +131,7 @@ class ADODB_fbsql extends ADOConnection {
 
 
 	// returns queryID or false
-	public function _query($sql,$inputarr=false)
+	protected function _query($sql,$inputarr=false)
 	{
 		return fbsql_query("$sql;",$this->_connectionID);
 	}
