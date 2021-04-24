@@ -1024,7 +1024,12 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 
 	protected function _close()
 	{
-		return @pg_free_result($this->_queryID);
+		if (!is_resource($this->_queryID)
+			|| get_resource_type($this->_queryID) != 'pgsql result'
+		) {
+			return true;
+		}
+		return pg_free_result($this->_queryID);
 	}
 
 	protected function postgres64_getDriverFetchMode()

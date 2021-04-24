@@ -600,16 +600,25 @@ class ADODB_DataDict {
 				case '0':
 				case 'NAME': 	$fname = $v; break;
 				case '1':
-				case 'TYPE': 	$ty = $v; $ftype = $this->ActualType(strtoupper($v)); break;
+				case 'TYPE': 	
+					
+					$ty = $v; 
+					$ftype = $this->ActualType(strtoupper($v)); 
+					break;
 
 				case 'SIZE':
-								$dotat = strpos($v,'.'); if ($dotat === false) $dotat = strpos($v,',');
-								if ($dotat === false) $fsize = $v;
-								else {
-									$fsize = substr($v,0,$dotat);
-									$fprec = substr($v,$dotat+1);
-								}
-								break;
+					$dotat = strpos($v,'.'); 
+					if ($dotat === false) 
+						$dotat = strpos($v,',');
+					if ($dotat === false) 
+						$fsize = $v;
+					else {
+						
+						$fsize = substr($v,0,$dotat);
+						$fprec = substr($v,$dotat+1);
+					
+					}
+					break;
 				case 'UNSIGNED': $funsigned = true; break;
 				case 'AUTOINCREMENT':
 				case 'AUTO':	$fautoinc = true; $fnotnull = true; break;

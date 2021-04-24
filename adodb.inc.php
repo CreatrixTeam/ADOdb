@@ -461,17 +461,46 @@ if (!defined('_ADODB_LAYER')) {
 	public  $hasTransactions = true;	/// has transactions
 	//--
 	public  $genID = 0;					/// sequence id used by GenID();
-	/** @var falsy|callable  */
-	public  $raiseErrorFn = false;		/// error function to call
+
+	/** @var falsy|callable Error function to call */
+	public  $raiseErrorFn = false;
+
 	public  $isoDates = false;			/// accepts dates in ISO format
 	public  $cacheSecs = 3600;			/// cache for 1 hour
 
-	// memcache
-	public  $memCache = false; /// should we use memCache instead of caching in files
-	public  $memCacheHost; /// memCache host
-	public  $memCachePort = 11211; /// memCache port
-	public  $memCacheCompress = false; /// Use 'true' to store the item compressed (uses zlib, not supported w/memcached library)
+	/*****************************************
+	* memcached server options
+	******************************************/
+	/*
+	* Should we use memCache instead of caching in files
+	*/
+	public $memCache = false; 
+	/*
+	* A string, array of hosts or array of memcache connection
+	* options (see adodb.org)
+	*/
+	public $memCacheHost; 
+	
+	/* 
+	* Default port, may be ignored if connection object array
+	* is set
+	*/
+	public $memCachePort = 11211;
+	
+	/*
+	* Use 'true' to store the item compressed 
+	* uses zlib, Direct option for memcache, else
+	* For memcached, use the memcacheOptions feature
+	*/
+	public $memCacheCompress = false; 
 
+	/*
+	* If using mecached, an array of options
+	* @link https://www.php.net/manual/en/memcached.constants.php
+	*/
+	public $memCacheOptions = array();
+	
+	
 	public  $sysDate = false; /// name of function that returns the current date. NOTE: Copied from ADODB_DataDict::$sql_sysDate during set up of data dictionary.
 	public  $sysTimeStamp = false; /// name of function that returns the current timestamp. NOTE: Copied from ADODB_DataDict::$sql_sysTimeStamp during set up of data dictionary.
 	public  $arrayClass = 'ADORecordSet_array'; /// name of class used to generate array recordsets, which are pre-downloaded recordsets
@@ -486,10 +515,13 @@ if (!defined('_ADODB_LAYER')) {
 	public  $ansiOuter = false; /// whether ansi outer join syntax supported
 	public  $autoRollback = false; // autoRollback on PConnect().
 	public  $poorAffectedRows = false; // affectedRows not working or unreliable
-	/** @var false|callable  */
+
+	/** @var false|callable Execute function to call */
 	public  $fnExecute = false;
-	/** @var false|callable  */
+
+	/** @var false|callable Cache execution function to call */
 	public  $fnCacheExecute = false;
+
 	public  $blobEncodeType = false; // false=not required, 'I'=encode to integer, 'C'=encode to char
 	public  $rsPrefix = "ADORecordSet_";
 
@@ -1500,7 +1532,7 @@ if (!defined('_ADODB_LAYER')) {
 			}
 			$i += 1;
 
-			if ($i == $nparams) {
+			if ($i == $pEmulatePrepareStatement[0]) {
 				break;
 			}
 		} // while
@@ -2021,7 +2053,8 @@ if (!defined('_ADODB_LAYER')) {
 	*/
 	public final function &_rs2rs(&$rs,$nrows=-1,$offset=-1,$close=true) {
 		if (! $rs) {
-			return false;
+			$ret = false;
+			return $ret;
 		}
 		$dbtype = $rs->databaseType;
 		if (!$dbtype) {
@@ -2220,16 +2253,6 @@ if (!defined('_ADODB_LAYER')) {
 			$rv = false;
 
 		return $rv;
-	}
-
-	public function Transpose(&$rs,$addfieldnames=true) {
-		$vReturn = $rs->SwitchToBufferMode();
-		if (!$vReturn) {
-			return false;
-		}
-
-		$rs->_transpose($addfieldnames);
-		return $rs;
 	}
 
 	/*
@@ -5551,39 +5574,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		return $this->InitializeBufferWith($vDataArray, $pADOFieldObjects);
 	}
 	
-	public function Transpose($addfieldnames=true) {
-		global $ADODB_INCLUDED_LIB;
-		$vTypes = true;
-
-		$this->SwitchToBufferMode();
-
-		if (empty($ADODB_INCLUDED_LIB)) {
-			include(ADODB_DIR.'/adodb-lib.inc.php');
-		}
-		$hdr = true;
-
-		$fobjs = $addfieldnames ? $this->_fieldobjects : false;
-		adodb_transpose($this->_array, $newarr, $hdr, $fobjs);
-		//adodb_pr($newarr);
-
-		$this->_array = $newarr;
-
-		adodb_probetypes($newarr,$vTypes);
-
-		$this->_fieldobjects = array();
-
-		foreach($hdr as $k => $name) {
-			$f = new ADOFieldObject();
-			$f->name = $name;
-			$f->type = $vTypes[$k];
-			$f->max_length = -1;
-			$this->_fieldobjects[] = $f;
-		}
-		$this->fields = reset($this->_array);
-
-		$this->_initrs();
-
-	}
 } // end class ADORecordSet
 
 	//==============================================================================================
@@ -5622,38 +5612,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			parent::__construct($fakeid, $mode); // fake queryID.
 		}
 
-		/*public function _transpose($addfieldnames=true) {
-			global $ADODB_INCLUDED_LIB;
-
-			if (empty($ADODB_INCLUDED_LIB)) {
-				include_once(ADODB_DIR.'/adodb-lib.inc.php');
-			}
-			$hdr = true;
-
-			$fobjs = $addfieldnames ? $this->_fieldobjects : false;
-			adodb_transpose($this->_array, $newarr, $hdr, $fobjs);
-			//adodb_pr($newarr);
-
-			$this->_skiprow1 = false;
-			$this->_array = $newarr;
-			$this->_colnames = $hdr;
-
-			adodb_probetypes($newarr,$this->_types);
-
-			$this->_fieldobjects = array();
-
-			foreach($hdr as $k => $name) {
-				$f = new ADOFieldObject();
-				$f->name = $name;
-				$f->type = $this->_types[$k];
-				$f->max_length = -1;
-				$this->_fieldobjects[] = $f;
-			}
-			$this->fields = reset($this->_array);
-
-			$this->_initrs();
-
-		}*/
 
 		/**
 		 * Setup the array.

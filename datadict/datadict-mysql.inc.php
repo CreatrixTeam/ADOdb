@@ -80,7 +80,9 @@ class ADODB2_mysql extends ADODB_DataDict {
 		case 'SMALLINT': return $is_serial ? 'R' : 'I2';
 		case 'MEDIUMINT': return $is_serial ? 'R' : 'I4';
 		case 'BIGINT':  return $is_serial ? 'R' : 'I8';
-		default: return ADODB_DEFAULT_METATYPE;
+		default: 
+			
+			return ADODB_DEFAULT_METATYPE;
 		}
 	}*/
 
@@ -110,7 +112,9 @@ class ADODB2_mysql extends ADODB_DataDict {
 
 		case 'F': return 'DOUBLE';
 		case 'N': return 'NUMERIC';
+			
 		default:
+			
 			return $meta;
 		}
 	}

@@ -37,18 +37,19 @@ class ADODB2_access extends ADODB_DataDict {
 		case 'B': return 'BINARY';
 
 		case 'TS':
-		case 'D': return 'DATETIME';
+		case 'D': 
+		return 'DATETIME';
 		case 'T': return 'DATETIME';
 
-		case 'L': return 'BYTE';
-		case 'I': return 'INTEGER';
+		case 'L':  return 'BYTE';
+		case 'I':  return 'INTEGER';
 		case 'I1': return 'BYTE';
 		case 'I2': return 'SMALLINT';
 		case 'I4': return 'INTEGER';
 		case 'I8': return 'INTEGER';
 
-		case 'F': return 'DOUBLE';
-		case 'N': return 'NUMERIC';
+		case 'F':  return 'DOUBLE';
+		case 'N':  return 'NUMERIC';
 		default:
 			return $meta;
 		}

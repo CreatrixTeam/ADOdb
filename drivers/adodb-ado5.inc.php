@@ -453,7 +453,8 @@ class ADODB_ado extends ADOConnection {
 			$len = $fieldobj->max_length;
 		}
 
-		if (!is_numeric($t)) return $t;
+		if (!is_numeric($t)) 
+			return $t;
 
 		switch ($t) {
 		case 0:
