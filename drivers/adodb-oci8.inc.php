@@ -416,11 +416,13 @@ class ADODB_oci8 extends ADOConnection {
 			$primary_key = $row[1]; //constraint_name
 		}
 
+		/*
 		if ($primary==TRUE && $primary_key=='') {
 			$this->SetFetchMode2($savem);
 
 			return false; //There is no primary key
 		}
+		*/
 
 		$rs = $this->Execute(sprintf("SELECT ALL_INDEXES.INDEX_NAME, ALL_INDEXES.UNIQUENESS, ALL_IND_COLUMNS.COLUMN_POSITION, ALL_IND_COLUMNS.COLUMN_NAME FROM ALL_INDEXES,ALL_IND_COLUMNS WHERE UPPER(ALL_INDEXES.TABLE_NAME)='%s' AND ALL_IND_COLUMNS.INDEX_NAME=ALL_INDEXES.INDEX_NAME",$table));
 
@@ -435,7 +437,7 @@ class ADODB_oci8 extends ADOConnection {
 		// parse index data into array
 
 		while ($row = $rs->FetchRow()) {
-			if ($primary && $row[0] != $primary_key) {
+			if (($primary != true) && ($row[0] == $primary_key)) {
 				continue;
 			}
 			if (!isset($indexes[$row[0]])) {

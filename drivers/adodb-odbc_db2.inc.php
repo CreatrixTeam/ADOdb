@@ -190,8 +190,8 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 		// get index details
 		$table = strtoupper($table);
 		$SQL="SELECT NAME, UNIQUERULE, COLNAMES FROM SYSIBM.SYSINDEXES WHERE UPPER(TBNAME)='$table'";
-        if ($primary)
-			$SQL.= " AND UNIQUERULE='P'";
+        /*if ($primary)
+			$SQL.= " AND UNIQUERULE='P'";*/
 		$rs = $this->Execute($SQL);
         if (!is_object($rs)) {
 			$this->SetFetchMode2($savem);
@@ -201,6 +201,9 @@ class ADODB_odbc_db2 extends ADODB_odbc {
 		$indexes = array ();
         // parse index data into array
         while ($row = $rs->FetchRow()) {
+			if(!$primary && ($row[1] == 'P'))
+				{continue;}
+
 			$indexes[$row[0]] = array(
 			   'unique' => ($row[1] == 'U' || $row[1] == 'P'),
 			   'columns' => array()

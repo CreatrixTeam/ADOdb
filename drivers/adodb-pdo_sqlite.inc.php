@@ -231,8 +231,38 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		$table = $pParsedTableName['table']['name'];
 		$savem = $this->SetFetchMode2(ADODB_FETCH_NUM);
 
-		$SQL=sprintf("SELECT name,sql FROM sqlite_master WHERE type='index' AND LOWER(tbl_name)='%s'", strtolower($table));
+		
+		$pragmaData = array();
+		
+		/*
+		* If we want the primary key, we must extract
+		* it from the table statement, and the pragma
+		*/
+		if ($primary)
+		{
+			$sql = sprintf('PRAGMA table_info([%s]);',
+						   strtolower($table)
+						   );
+			$pragmaData = $this->GetAll($sql);
+		}
+		
+		/*
+		* Exclude the empty entry for the primary index
+		*	Note: This also removes the implicitly created indices.
+		*	Note: A lack of index does not mean a lack of primary key.
+		*/
+		$sqlite = "SELECT name,sql
+					 FROM sqlite_master 
+					WHERE type='index' 
+					  AND sql IS NOT NULL
+					  AND LOWER(tbl_name)='%s'";
+		
+		$SQL = sprintf($sqlite,
+				     strtolower($table)
+					 );
+		
 		$rs = $this->Execute($SQL);
+		
 		if (!is_object($rs)) {
 			$this->SetFetchMode2($savem);
 
@@ -240,10 +270,10 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 		}
 
 		$indexes = array ();
-		while ($row = $rs->FetchRow()) {
-			if ($primary && preg_match("/primary/i",$row[1]) == 0) {
-				continue;
-			}
+		
+		while ($row = $rs->FetchRow()) 
+		{
+			
 			//IGNORE AUTOMATICALLY CREATED INDICES
 			if (empty($row[1]))
 				{continue;}
@@ -264,6 +294,39 @@ class ADODB_pdo_sqlite extends ADODB_pdo {
 
 		$this->SetFetchMode2($savem);
 
+		
+		/*
+		* If we want primary, add it here
+		*/
+		if ($primary){
+			
+			/*
+			* Check the previously retrieved pragma to search
+			* with a closure
+			*/
+
+			$pkIndexData = array('unique'=>1,'columns'=>array());
+			
+			foreach($pkIndexData as $key => $value){
+				
+				/*
+				* As we iterate the elements check for pk index and sort
+				*/
+				if ($value[5] > 0)
+				{
+					$pkIndexData['columns'][$value[5]] = strtolower($value[1]);
+					ksort($pkIndexData['columns']);
+				}
+			}
+
+			/*
+			* If we found no columns, there is no
+			* primary index
+			*/
+			if (count($pkIndexData['columns']) > 0)
+				$indexes['PRIMARY'] = $pkIndexData;
+		}
+		
 		return $indexes;
 	}
  

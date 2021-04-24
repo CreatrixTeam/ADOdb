@@ -583,7 +583,7 @@ class ADODB_odbtp extends ADOConnection{
 
 		$indexes = array();
 		while ($row = $rs->FetchRow()) {
-			if ($primary && !$row[5]) continue;
+			if (!$primary && $row[5]) continue;
 
             $indexes[$row[0]]['unique'] = $row[6];
             $indexes[$row[0]]['columns'][] = $row[1];

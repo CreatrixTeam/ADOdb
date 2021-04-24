@@ -3348,6 +3348,10 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *				PRIMARY KEYS. (ROUGHLY 1/3 OF DRIVERS)
 	 *		NOTE THAT THIS PARAMETER IS ADDRESSED BY ABOUT 39 OF THE DRIVERS AT THE TIME OF THIS COMMENT (MARCH-2021).
 	 *
+	 *		UPDATE (APRIL-2021): AS OF THIS DATE, ALL DRIVERS INTERPRET primary SUCH AS 
+	 *				A VALUE OF TRUE WILL GET ALL INDICES INCLUDING PRIMARY KEYS, OTHERWISE
+	 *				ALL INDICES EXCLUDING PRIMARY KEYS.
+	 *
 	 * @return array of indexes on current table. Each element represents an index, and is itself an associative array.
 	 *
 	 * Array(

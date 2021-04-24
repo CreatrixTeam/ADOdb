@@ -304,11 +304,13 @@ class ADODB_sqlite3 extends ADOConnection {
 			$sql = sprintf('PRAGMA table_info([%s]);',
 						   strtolower($table)
 						   );
-			$pragmaData = $this->getAll($sql);
+			$pragmaData = $this->GetAll($sql);
 		}
 		
 		/*
 		* Exclude the empty entry for the primary index
+		*	Note: This also removes the implicitly created indices.
+		*	Note: A lack of index does not mean a lack of primary key.			
 		*/
 		$sqlite = "SELECT name,sql
 					 FROM sqlite_master 
@@ -320,7 +322,7 @@ class ADODB_sqlite3 extends ADOConnection {
 				     strtolower($table)
 					 );
 		
-		$rs = $this->execute($SQL);
+		$rs = $this->Execute($SQL);
 		
 		if (!is_object($rs)) {
 			$this->SetFetchMode2($savem);
@@ -366,7 +368,7 @@ class ADODB_sqlite3 extends ADOConnection {
 
 			$pkIndexData = array('unique'=>1,'columns'=>array());
 			
-			$pkCallBack = function ($value, $key) use (&$pkIndexData) {
+			foreach($pkIndexData as $key => $value){
 				
 				/*
 				* As we iterate the elements check for pk index and sort
@@ -376,9 +378,7 @@ class ADODB_sqlite3 extends ADOConnection {
 					$pkIndexData['columns'][$value[5]] = strtolower($value[1]);
 					ksort($pkIndexData['columns']);
 				}
-			};
-			
-			array_walk($pragmaData,$pkCallBack);
+			}
 
 			/*
 			* If we found no columns, there is no

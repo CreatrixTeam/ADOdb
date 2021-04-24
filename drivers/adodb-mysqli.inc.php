@@ -60,7 +60,7 @@ class ADODB_mysqli extends ADOConnection {
 	public  $substr = "substring";
 	public  $port = 3306; //Default to 3306 to fix HHVM bug
 	public  $socket = ''; //Default to empty string to fix HHVM bug
-	protected  $_bindInputArray = false;
+	protected  $_bindInputArray = true;
 	public  $optionFlags = array(array(MYSQLI_READ_DEFAULT_GROUP,0));
 	public  $arrayClass = 'ADORecordSet_array_mysqli';
 	public  $multiQuery = false;
@@ -69,6 +69,8 @@ class ADODB_mysqli extends ADOConnection {
 	public $ssl_ca = null;		//ADODB_mysqli specific
 	public $ssl_capath = null;	//ADODB_mysqli specific
 	public $ssl_cipher = null;	//ADODB_mysqli specific
+	private $gMysqli_isMysqlndExtensionUsedAndReliable = false;
+	private $gMysqli_numberOfAffectedRows = -2;
 
 	/**
 	 * Tells the insert_id method how to obtain the last value, depending on whether
@@ -78,9 +80,15 @@ class ADODB_mysqli extends ADOConnection {
 	{
 		// if(!extension_loaded("mysqli"))
 		//trigger_error("You must have the mysqli extension installed.", E_USER_ERROR);
+
+		$this->gMysqli_isMysqlndExtensionUsedAndReliable = ((PHP_VERSION >= 5.3) && 
+				function_exists('mysqli_get_client_stats'));	//NOTE THIS SHOULD BE AVAILABLE IN PHP V5.3 BUT 
+																//		UNSURE ABOUT ITS RELIABILITY
+
+		//IMPORTANT: Code must continue to check for $gMysqli_isMysqlndExtensionUsedAndReliable
+		//		because the class is not final
+		$this->_bindInputArray = ($this->_bindInputArray && $this->gMysqli_isMysqlndExtensionUsedAndReliable);
 	}
-	private $usingBoundVariables = false;
-	private $statementAffectedRows = -1;
 
 	/**
 	 * Sets the isolation level of a transaction.
@@ -396,9 +404,9 @@ class ADODB_mysqli extends ADOConnection {
 	 */
 	protected function _affectedrows()
 	{
-		if ($this->usingBoundVariables)
-			return $this->statementAffectedRows;
-		
+		if($this->_bindInputArray && $this->gMysqli_isMysqlndExtensionUsedAndReliable)
+			{return $this->gMysqli_numberOfAffectedRows;}//FOR EASIER MERGING WITH OFFICIAL FORK
+
 		$result =  @mysqli_affected_rows($this->_connectionID);
 		if ($result == -1) {
 			if ($this->debug) ADOConnection::outp("mysqli_affected_rows() failed : "  . $this->ErrorMsg());
@@ -818,7 +826,6 @@ class ADODB_mysqli extends ADOConnection {
 
 	/**
 	 * Prepares an SQL statement and returns a handle to use.
-	 * This is not used by bound parameters anymore
 	 *
 	 * @link https://adodb.org/dokuwiki/doku.php?id=v5:reference:connection:prepare
 	 * @todo update this function to handle prepared statements correctly
@@ -832,6 +839,19 @@ class ADODB_mysqli extends ADOConnection {
 		if(!$this->_bindInputArray) 
 			{return $sql;} // no binding
 
+		if($this->gMysqli_isMysqlndExtensionUsedAndReliable)
+		{
+			$tPreparedStatement = $this->_connectionID->prepare($sql);
+
+			if(!$tPreparedStatement)
+				{return $sql;}
+			else
+				{return array($sql, $tPreparedStatement);}
+		}
+		else
+			{return $sql;}
+
+		/*
 		return $sql;
 		$stmt = $this->_connectionID->prepare($sql);
 		if (!$stmt) {
@@ -839,92 +859,21 @@ class ADODB_mysqli extends ADOConnection {
 			return $sql;
 		}
 		return array($sql,$stmt);
+		*/
 	}
 
 	/**
-	 * Execute SQL
+	 * Return the query id.
 	 *
-	 * @param string     $sql      SQL statement to execute, or possibly an array
-	 *                             holding prepared statement ($sql[0] will hold sql text)
-	 * @param array|bool $inputarr holds the input data to bind to.
-	 *                             Null elements will be set to null.
+	 * @param string|array $sql
+	 * @param array $inputarr
 	 *
-	 * @return ADORecordSet|bool
+	 * @return bool|mysqli_result
 	 */
-	public function execute($sql, $inputarr = false) {
-		
-		if ($this->fnExecute) {
-			$fn = $this->fnExecute;
-			$ret = $fn($this,$sql,$inputarr);
-			if (isset($ret)) {
-				return $ret;
-			}
-		}
-		
-		if ($inputarr === false) {
-			return $this->_execute($sql,false);
-		}
-		
-		if (!is_array($inputarr)) {
-			$inputarr = array($inputarr);
-		}
-
-		if (!is_array($sql)) {
-			
-			
-
-			$typeString = '';
-			$typeArray  = array(''); //placeholder for type list
-
-			foreach ($inputarr as $v) 
-			{
-				$typeArray[] = $v;
-				if (is_integer($v) || is_bool($v))
-					$typeString .= 'i';
-				
-				else if (is_float($v))
-					$typeString .= 'd';
-					
-				else if(is_object($v))
-					/*
-					* Assume a blob
-					*/
-					$typeString .= 'b';
-			
-				else
-					$typeString .= 's';
-				
-			} 
-				
-			/*
-			* Place the field type list at the front of the
-			* parameter array. This is the mysql specific
-			* format
-			*/
-			$typeArray[0] = $typeString;
-		
-			$ret = $this->_execute($sql,$typeArray);
-			if (!$ret) {
-				return $ret;
-			}
-			
-		} else {
-			$ret = $this->_execute($sql,$inputarr);
-		}
-		return $ret;
-	}
-	 
-	/** 
-	* Return the query id.
-	*
-	* @param string|array $sql
-	* @param array $inputarr
-	*
-	* @return bool|mysqli_result
-	*/
 	protected function _query($sql, $inputarr)
 	{
 		global $ADODB_COUNTRECS;
+
 		// Move to the next recordset, or return false if there is none. In a stored proc
 		// call, mysqli_next_result returns true for the last "recordset", but mysqli_store_result
 		// returns false. I think this is because the last "recordset" is actually just the
@@ -932,6 +881,7 @@ class ADODB_mysqli extends ADOConnection {
 		// Commented out for reasons of performance. You should retrieve every recordset yourself.
 		//	if (!mysqli_next_result($this->connection->_connectionID))	return false;
 
+		/*
 		if (is_array($sql)) {
 
 			// Prepare() not supported because mysqli_stmt_execute does not return a recordset, but
@@ -950,91 +900,61 @@ class ADODB_mysqli extends ADOConnection {
 			$ret = mysqli_stmt_execute($stmt);
 			return $ret;
 		}
-		else if (is_string($sql) && is_array($inputarr))
+		*/
+
+		$vArrayOfRefrences = null;
+		$vSql = $sql;
+
+		if(is_array($inputarr))
 		{
-			/*
-			* This is support for true prepared queries
-			* with bound parameters
-			*
-			* set prepared statement flags
-			*/
-			$this->usePreparedStatement = true;
-			$this->usingBoundVariables = true;
+			$tInputArray  = array("");
+			$tIsSuccess = false;
+			$tReturn = false;
 
-			/*
-			* Prepare the statement with the placeholders, 
-			* prepare will fail if the statement is invalid
-			* so we trap and error if necessary. Note that we
-			* are calling MySQL prepare here, not ADOdb
-			*/
-			$stmt = $this->_connectionID->prepare($sql);
-			if ($stmt === false)
+			$vSql = (is_array($sql) ? $sql : $this->Prepare($sql));
+
+			foreach($inputarr as $tElement) 
 			{
-				$this->outp_throw(
-					"SQL Statement failed on preparation: " . htmlspecialchars($sql) . "'",
-					'Execute'
-				);
-				return false;
+				$tInputArray[] = $tElement;
+
+				if (is_integer($tElement) || is_bool($tElement))
+					{$tInputArray[0] .= 'i';}
+				else if (is_float($tElement))
+					{$tInputArray[0] .= 'd';}
+				else if(is_object($tElement))
+					{$tInputArray[0] .= 'b';} //"Assume a blob". REFER TO OFFICIAL FORK
+				else
+					{$tInputArray[0] .= 's';}
 			}
-			/* 
-			* Make sure the number of parameters provided in the input
-			* array matches what the query expects. We must discount
-			* the first parameter which contains the data types in 
-			* our inbound parameters
-			*/
-			$nparams = $stmt->param_count;
-			
-			if ($nparams  != count($inputarr) - 1) {
-				$this->outp_throw(
-					"Input array has " . count($inputarr) .
-					" params, does not match query: '" . htmlspecialchars($sql) . "'",
-					'Execute'
-				);
-				return false;
-			}
-			
-			/*
-			* Must pass references into call_user_func_array
-			*/
-			$paramsByReference = array();
-            foreach($inputarr as $key => $value)
-                $paramsByReference[$key] = &$inputarr[$key];
-						
-			/*
-			* Bind the params
-			*/
-			call_user_func_array(array($stmt, 'bind_param'), $paramsByReference);
-			
-			/*
-			* Execute
-			*/
-			$ret = mysqli_stmt_execute($stmt);
-			
-			/*
-			* Did we throw an error?
-			*/
-			if ($ret == false)
-				return false;
+
+			$vArrayOfRefrences = array();
+
+			foreach($tInputArray as $tKey => $tValue)
+				{$vArrayOfRefrences[$tKey] = &$tInputArray[$tKey];}
 				
-			/*
-			* Is the statement a non-select
-			*/
-			if ($stmt->affected_rows > -1)
-			{
-				$this->statementAffectedRows = $stmt->affected_rows;
-				return true;
-			}
-			/*
-			* Turn the statement into a result set
-			*/
-			$result = $stmt->get_result();
-			/*
-			* Return the object for the select
-			*/
-			return $result;
-			
+			call_user_func_array(array($vSql[1], 'bind_param'), $vArrayOfRefrences);
 		}
+		
+		if(is_array($vSql))
+		{
+			if(mysqli_stmt_execute($vSql[1]) != false)
+			{
+				$this->gMysqli_numberOfAffectedRows = $vSql[1]->affected_rows;
 
+				if($this->gMysqli_numberOfAffectedRows > -1)
+					{$tReturn = true;}
+				else
+				{
+					$tReturn = $vSql[1]->get_result();
+					
+					if($tReturn === false)
+						{$tReturn = true;}
+				}
+			}
+
+			return $tReturn;
+		}
+		
 		/*
 		if (!$mysql_res =  mysqli_query($this->_connectionID, $sql, ($ADODB_COUNTRECS) ? MYSQLI_STORE_RESULT : MYSQLI_USE_RESULT)) {
 			if ($this->debug) ADOConnection::outp("Query: " . $sql . " failed. " . $this->ErrorMsg());
@@ -1047,13 +967,23 @@ class ADODB_mysqli extends ADOConnection {
 		if ($this->multiQuery) {
 			$rs = mysqli_multi_query($this->_connectionID, $sql.';');
 			if ($rs) {
+				$this->gMysqli_numberOfAffectedRows = (($this->_bindInputArray && 
+						$this->gMysqli_isMysqlndExtensionUsedAndReliable) ? 
+						@mysqli_affected_rows($this->_connectionID) : -2);
 				$rs = ($ADODB_COUNTRECS) ? @mysqli_store_result( $this->_connectionID ) : @mysqli_use_result( $this->_connectionID );
 				return $rs ? $rs : true; // mysqli_more_results( $this->_connectionID )
 			}
 		} else {
 			$rs = mysqli_query($this->_connectionID, $sql, $ADODB_COUNTRECS ? MYSQLI_STORE_RESULT : MYSQLI_USE_RESULT);
 
-			if ($rs) return $rs;
+			if ($rs) 
+			{
+				$this->gMysqli_numberOfAffectedRows = (($this->_bindInputArray && 
+						$this->gMysqli_isMysqlndExtensionUsedAndReliable) ? 
+						@mysqli_affected_rows($this->_connectionID) : -2);
+
+				return $rs;
+			}
 		}
 
 		if($this->debug)
