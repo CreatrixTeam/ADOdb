@@ -1453,15 +1453,26 @@ SELECT /*+ RULE */ distinct b.column_name
 	 *
 	 * @noinspection PhpUnusedParameterInspection
 	 */
-	function qStr($s, $magic_quotes=false)
+	public function qstr($s, $magic_quotes=false)
 	{
 		if ($this->noNullStrings && strlen($s) == 0) {
 			$s = ' ';
 		}
-		if ($this->replaceQuote[0] == '\\'){
-			$s = str_replace('\\','\\\\',$s);
+		if (!$magic_quotes) {
+			if ($this->replaceQuote[0] == '\\'){
+				$s = str_replace('\\','\\\\',$s);
+			}
+			return  "'".str_replace("'",$this->replaceQuote,$s)."'";
 		}
-		return  "'" . str_replace("'", $this->replaceQuote, $s) . "'";
+
+		// undo magic quotes for " unless sybase is on
+		if (!ini_get('magic_quotes_sybase')) {
+			$s = str_replace('\\"','"',$s);
+			$s = str_replace('\\\\','\\',$s);
+			return "'".str_replace("\\'",$this->replaceQuote,$s)."'";
+		} else {
+			return "'".$s."'";
+		}
 	}
 
 	/**

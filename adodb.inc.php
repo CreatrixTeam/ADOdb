@@ -941,19 +941,31 @@ if (!defined('_ADODB_LAYER')) {
 	}
 
 	/**
-	 * PEAR DB Compat - alias for qStr.
+	 * PEAR DB Compat
 	 * @param $s
 	 * @return string
 	 */
-	function Quote($s) {
-		return $this->qstr($s);
+	public function Quote($s) {
+		return $this->qstr($s,false);
+	}
+
+	/**
+	 * Requested by "Karsten Dambekalns" <k.dambekalns@fishfarm.de>
+	 *
+	 * @return string
+	 */
+	public function QMagic($s) {
+		// PHP7.4 spits deprecated notice, PHP8 removed magic_* stuff
+		return $this->qstr($s, 
+				/*version_compare(PHP_VERSION, '7.4.0', '<') &&*/ function_exists('get_magic_quotes_gpc') && 
+				@get_magic_quotes_gpc());
 	}
 
 	public function q(&$s) {
 		//if (!empty($this->qNull && $s == 'null') {
 		//	return $s;
 		//}
-		$s = $this->qstr($s);
+		$s = $this->qstr($s,false);
 	}
 
 	/**
@@ -2540,6 +2552,10 @@ if (!defined('_ADODB_LAYER')) {
 		if (!$rs) {
 			// no cached rs found
 			if ($this->debug) {
+				// PHP7.4 spits deprecated notice, PHP8 removed magic_* stuff
+				if (/*version_compare(PHP_VERSION, '7.4.0', '<') &&*/ function_exists('get_magic_quotes_runtime') && @get_magic_quotes_runtime() && !$this->memCache) {
+					ADOConnection::outp("Please disable magic_quotes_runtime - it corrupts cache files :(");
+				}
 				if ($this->debug !== -1) {
 					ADOConnection::outp( " $md5file cache failure: $err (this is a notice and not an error)");
 				}
@@ -2624,14 +2640,14 @@ if (!defined('_ADODB_LAYER')) {
 	 * @param string $mode
 	 * @param false $where
 	 * @param bool $forceUpdate  If true, perform update even if the data has not changed.
-	 * @param bool $magic_quotes This param is not used since 5.21.0.
-	 *                           It remains for backwards compatibility.
+	 * @param bool $magic_quotes This param remains effective in this fork 
+	 *                           for backward compatibility
 	 *
 	 * @return bool
 	 *
 	 * @noinspection PhpUnusedParameterInspection
 	 */
-	function AutoExecute($table, $fields_values, $mode = 'INSERT', $where = false, $forceUpdate = true, $magic_quotes = false) {
+	public function AutoExecute($table, $fields_values, $mode = 'INSERT', $where = false, $forceUpdate = true, $magic_quotes = false) {
 		if (empty($fields_values)) {
 			$this->outp_throw('AutoExecute: Empty fields array', 'AutoExecute');
 			return false;
@@ -2656,11 +2672,11 @@ if (!defined('_ADODB_LAYER')) {
 		switch($mode) {
 			case 'UPDATE':
 			case DB_AUTOQUERY_UPDATE:
-				$sql = $this->GetUpdateSQL($rs, $fields_values, $forceUpdate);
+				$sql = $this->GetUpdateSQL($rs, $fields_values, $forceUpdate, $magic_quotes);
 				break;
 			case 'INSERT':
 			case DB_AUTOQUERY_INSERT:
-				$sql = $this->GetInsertSQL($rs, $fields_values);
+				$sql = $this->GetInsertSQL($rs, $fields_values, $magic_quotes);
 				break;
 			default:
 				$this->outp_throw("AutoExecute: Unknown mode=$mode", 'AutoExecute');
@@ -2684,15 +2700,15 @@ if (!defined('_ADODB_LAYER')) {
 	 * @param $rs
 	 * @param $arrFields
 	 * @param bool $forceUpdate
-	 * @param bool $magic_quotes This param is not used since 5.21.0.
-	 *                           It remains for backwards compatibility.
+	 * @param bool $magic_quotes This param remains effective in this fork 
+	 *                           for backward compatibility
 	 * @param null $force
 	 *
 	 * @return false|string
 	 *
 	 * @noinspection PhpUnusedParameterInspection
 	 */
-	function GetUpdateSQL(&$rs, $arrFields, $forceUpdate=false, $magic_quotes=false, $force=null) {
+	public function GetUpdateSQL(&$rs, $arrFields, $forceUpdate=false, $magic_quotes=false, $force=null) {
 		global $ADODB_INCLUDED_LIB;
 
 		// ********************************************************
@@ -2707,7 +2723,7 @@ if (!defined('_ADODB_LAYER')) {
 		if (empty($ADODB_INCLUDED_LIB)) {
 			include_once(ADODB_DIR.'/adodb-lib.inc.php');
 		}
-		return _adodb_getupdatesql($this, $rs, $arrFields, $forceUpdate, $force);
+		return _adodb_getupdatesql($this, $rs, $arrFields, $forceUpdate, $magic_quotes, $force);
 	}
 
 	/**
@@ -2721,15 +2737,15 @@ if (!defined('_ADODB_LAYER')) {
 	 *
 	 * @param $rs
 	 * @param $arrFields
-	 * @param bool $magic_quotes This param is not used since 5.21.0.
-	 *                           It remains for backwards compatibility.
+	 * @param bool $magic_quotes This param remains effective in this fork 
+	 *                           for backward compatibility
 	 * @param null $force
 	 *
 	 * @return false|string
 	 *
 	 * @noinspection PhpUnusedParameterInspection
 	 */
-	function GetInsertSQL(&$rs, $arrFields, $magic_quotes=false, $force=null) {
+	public function GetInsertSQL(&$rs, $arrFields, $magic_quotes=false, $force=null) {
 		global $ADODB_INCLUDED_LIB;
 		if (!isset($force)) {
 			global $ADODB_FORCE_TYPE;
@@ -2738,7 +2754,7 @@ if (!defined('_ADODB_LAYER')) {
 		if (empty($ADODB_INCLUDED_LIB)) {
 			include_once(ADODB_DIR.'/adodb-lib.inc.php');
 		}
-		return _adodb_getinsertsql($this, $rs, $arrFields, $force);
+		return _adodb_getinsertsql($this, $rs, $arrFields, $magic_quotes, $force);
 	}
 
 
@@ -3685,7 +3701,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 	/**
-	 * Alias for addQ()
+	 * Alias for addq()
 	 * @param string $s
 	 * @param bool [$magic_quotes]
 	 * @return string|array
@@ -3694,29 +3710,64 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @noinspection PhpUnusedParameterInspection
 	 */
 	public function escape($s,$magic_quotes=false) {
-		return $this->addQ($s);
+		return $this->addq($s,$magic_quotes);
 	}
 
 	/**
 	 * Quotes a string, without prefixing nor appending quotes.
 	 *
 	 * @param string $s            The string to quote
-	 * @param bool   $magic_quotes This param is not used since 5.21.0.
-	 *                             It remains for backwards compatibility.
+	 * @param bool   $magic_quotes This param remains effective in this fork 
+	 *   	                       for backward compatibility
 	 *
 	 * @return string Quoted string
 	 *
 	 * @noinspection PhpUnusedParameterInspection
 	 */
-	function addQ($s, $magic_quotes=false) {
-		if ($this->replaceQuote[0] == '\\') {
-			$s = str_replace(
-				array('\\', "\0"),
-				array('\\\\', "\\\0"),
-				$s
-			);
+	public function addq($s, $magic_quotes=false) {
+		if (!$magic_quotes) {
+			if ($this->replaceQuote[0] == '\\') {
+				// only since php 4.0.5
+				$s = str_replace(array('\\',"\0"),array('\\\\',"\\\0"),$s);
+				//$s = str_replace("\0","\\\0", str_replace('\\','\\\\',$s));
+			}
+			return  str_replace("'", $this->replaceQuote, $s);
 		}
-		return str_replace("'", $this->replaceQuote, $s);
+
+		// undo magic quotes for "
+		$s = str_replace('\\"','"',$s);
+
+		if ($this->replaceQuote == "\\'" || @ini_get('magic_quotes_sybase')) {
+			// ' already quoted, no need to change anything
+			return $s;
+		} else {
+			// change \' to '' for sybase/mssql
+			$s = str_replace('\\\\','\\',$s);
+			return str_replace("\\'",$this->replaceQuote,$s);
+		}
+		
+		/*
+		THE FOLLOWING IS THE OLD CODE FOR qstr FROM THE "adodb-mssql.inc.php"
+		DRIVER. NOTICE THE DIFFERENCE  IN THE TREATMENT OF WHAT TO DO WHEN 
+		magic_quotes_sybase IS SET.
+		if (!$magic_quotes) {
+			return  "'".str_replace("'",$this->replaceQuote,$s)."'";
+		}
+
+		// undo magic quotes for " unless sybase is on
+		$sybase = ini_get('magic_quotes_sybase');
+		if (!$sybase) {
+			$s = str_replace('\\"','"',$s);
+			if ($this->replaceQuote == "\\'")  // ' already quoted, no need to change anything
+				return "'$s'";
+			else {// change \' to '' for sybase/mssql
+				$s = str_replace('\\\\','\\',$s);
+				return "'".str_replace("\\'",$this->replaceQuote,$s)."'";
+			}
+		} else {
+			return "'".$s."'";
+		}
+		*/
 	}
 
 	/**
@@ -3726,15 +3777,18 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @link https://adodb.org/dokuwiki/doku.php?id=v5:reference:connection:qstr
 	 *
 	 * @param string $s            The string to quote
-	 * @param bool   $magic_quotes This param is not used since 5.21.0.
-	 *                             It remains for backwards compatibility.
+	 * @param bool   $magic_quotes If $s is GET/POST var, set to get_magic_quotes_gpc().
+	 *                             This undoes the stupidity of magic quotes for GPC.
+	 *							   Ex: $db->qstr("Don't bother",magic_quotes_runtime());
+	 *							   This param remains effective in this fork 
+	 *   	                       for backward compatibility
 	 *
 	 * @return string Quoted string to be sent back to database
 	 *
 	 * @noinspection PhpUnusedParameterInspection
 	 */
-	function qStr($s, $magic_quotes=false) {
-		return  "'" . $this->addQ($s) . "'";
+	public function qstr($s, $magic_quotes=false) {
+		return  "'" . $this->addq($s, $magic_quotes) . "'";
 	}
 
 

@@ -81,9 +81,9 @@ class  ADODB_ado_mssql extends ADODB_ado {
 		$this->Execute("SET TRANSACTION ".$transaction_mode);
 	}
 
-	function qStr($s, $magic_quotes=false)
+	public function qstr($s,$magic_quotes=false)
 	{
-		$s = ADOConnection::qStr($s);
+		$s = ADOConnection::qstr($s, $magic_quotes);
 		return str_replace("\0", "\\\\000", $s);
 	}
 

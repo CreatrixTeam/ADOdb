@@ -431,12 +431,18 @@ class ADODB_pdo extends ADOConnection {
 	 *
 	 * @return string Quoted string
 	 */
-	function qStr($s, $magic_quotes = false)
+	public function qstr($s, $magic_quotes = false)
 	{
-		if ($this->_connectionID) {
-			return $this->_connectionID->quote($s);
+		if (!$magic_quotes) {
+			if ($this->_connectionID) {
+				return $this->_connectionID->quote($s);
+			}
+			return "'" . str_replace("'", $this->replaceQuote, $s) . "'";
 		}
-		return "'" . str_replace("'", $this->replaceQuote, $s) . "'";
+
+		// undo magic quotes for "
+		$s = str_replace('\\"', '"', $s);
+		return "'$s'";
 	}
 
 }

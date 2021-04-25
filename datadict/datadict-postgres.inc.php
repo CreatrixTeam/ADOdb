@@ -570,13 +570,11 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 		return $ftype;
 	}
 	
+	/* THE FOLLOWING FUNCTION FROM THE MAIN FORK REQUIRES FURTHER ANALYSIS BEFORE ADOPTION. 
+			THE FUNCTION APPEARS BASED ON AN OLD MERGE REQUEST MADE BY THIS FORK
 	function ChangeTableSQL($tablename, $flds, $tableoptions = false, $dropOldFlds=false){
-		global $ADODB_FETCH_MODE;
 		parent::ChangeTableSQL($tablename, $flds);
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
-		if ($this->connection->fetchMode !== false) 
-			$savem = $this->connection->SetFetchMode(false);
+		$save = $this->connection->SetFetchMode2(ADODB_FETCH_ASSOC);
 		
 		// check table exists
 		$save_handler = $this->connection->raiseErrorFn;
@@ -584,9 +582,7 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 		$cols = $this->MetaColumns($tablename);
 		$this->connection->raiseErrorFn = $save_handler;
 		
-		if (isset($savem)) 
-			$this->connection->SetFetchMode($savem);
-		$ADODB_FETCH_MODE = $save;
+		$this->connection->SetFetchMode2($save);
 		
 		$sqlResult=array();
 		if ( empty($cols)) {
@@ -613,6 +609,7 @@ CREATE [ UNIQUE ] INDEX index_name ON table
 		}
 		return $sqlResult;
 	}
+	*/
 	public function ChangeTableSQL($pTableName, $pTableFields, $pTableOptions = false, 
 			$pIsToDropOldFields = false)
 	{

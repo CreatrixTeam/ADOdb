@@ -265,17 +265,22 @@ class ADODB_postgres64 extends ADOConnection{
 	 *
 	 * @return string Quoted string
 	 */
-	function qStr($s, $magic_quotes=false)
+	public function qstr($s, $magic_quotes=false)
 	{
 		if (is_bool($s)) {
 			return $s ? 'true' : 'false';
 		}
 
-		if ($this->_connectionID) {
-			return "'" . pg_escape_string($this->_connectionID, $s) . "'";
-		} else {
-			return "'" . pg_escape_string($s) . "'";
+		if (!$magic_quotes) {
+			if (PHP_VERSION >= 0x5200 && $this->_connectionID) {
+				return  "'" . pg_escape_string($this->_connectionID, $s) . "'";
+			}
+			return  "'".pg_escape_string($s)."'";
 		}
+
+		// undo magic quotes for "
+		$s = str_replace('\\"','"',$s);
+		return "'$s'";
 	}
 
 	/*

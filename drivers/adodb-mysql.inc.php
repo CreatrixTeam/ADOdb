@@ -246,20 +246,27 @@ class ADODB_mysql extends ADOConnection {
 	 *
 	 * @return string Quoted string
 	 */
-	function qStr($s, $magic_quotes=false)
+	public function qstr($s, $magic_quotes=false)
 	{
 		if (is_null($s)) {
 			return 'NULL';
 		}
 
-		if (is_resource($this->_connectionID)) {
-			return "'" . mysql_real_escape_string($s, $this->_connectionID) . "'";
+		if (!$magic_quotes) {
+
+			if (is_resource($this->_connectionID)) {
+				return "'" . mysql_real_escape_string($s, $this->_connectionID) . "'";
+			}
+
+			if ($this->replaceQuote[0] == '\\'){
+				$s = str_replace(array('\\',"\0"), array('\\\\',"\\\0"),$s);
+			}
+			return "'".str_replace("'", $this->replaceQuote, $s)."'";
 		}
 
-		if ($this->replaceQuote[0] == '\\') {
-			$s = str_replace(array('\\', "\0"), array('\\\\', "\\\0"), $s);
-		}
-		return "'" . str_replace("'", $this->replaceQuote, $s) . "'";
+		// undo magic quotes for "
+		$s = str_replace('\\"','"',$s);
+		return "'$s'";
 	}
 
 	protected function _insertid()

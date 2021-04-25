@@ -128,24 +128,6 @@ class ADODB_mssql extends ADOConnection {
 
 
 
-	/**
-	 * Correctly quotes a string so that all strings are escaped.
-	 * We prefix and append to the string single-quotes.
-	 * An example is  $db->qstr("Don't bother");
-	 *
-	 * @param string $s            The string to quote
-	 * @param bool   $magic_quotes This param is not used since 5.21.0.
-	 *                             It remains for backwards compatibility.
-	 *
-	 * @return string Quoted string to be sent back to database
-	 *
-	 * @noinspection PhpUnusedParameterInspection
-	 */
-	function qStr($s, $magic_quotes=false)
-	{
-		return  "'" . str_replace("'", $this->replaceQuote, $s) . "'";
-	}
-
 	protected function _affectedrows()
 	{
 		return $this->GetOne('select @@rowcount');
