@@ -3716,6 +3716,18 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	/**
 	 * Quotes a string, without prefixing nor appending quotes.
 	 *
+	 * WARNING: Use of this function is discouraged. Consider using 
+	 *			ADOConnection::qstr() instead if you wish to quote strings inside
+	 *			SQL.
+	 *			The following is not true for all drivers / database engines:
+	 *					ADOConnection::qstr(X) === "'".ADOConnection::addq(X)."'"
+	 *			Nor can the following be made true for all drivers / database engines:
+	 *					ADOConnection::qstr(X) === QUOTE . ADOConnection::addq(X) . QUOTE
+	 *			regardless of the value of QUOTE.
+	 *			No driver currently overrides this function (APR-2021). As of
+	 *			APR-2021, this function	is final.
+	 *		
+	 *
 	 * @param string $s            The string to quote
 	 * @param bool   $magic_quotes This param remains effective in this fork 
 	 *   	                       for backward compatibility
@@ -3724,7 +3736,7 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 *
 	 * @noinspection PhpUnusedParameterInspection
 	 */
-	public function addq($s, $magic_quotes=false) {
+	public final function addq($s, $magic_quotes=false) {
 		if (!$magic_quotes) {
 			if ($this->replaceQuote[0] == '\\') {
 				// only since php 4.0.5
@@ -3734,40 +3746,22 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 			return  str_replace("'", $this->replaceQuote, $s);
 		}
 
-		// undo magic quotes for "
-		$s = str_replace('\\"','"',$s);
-
-		if ($this->replaceQuote == "\\'" || @ini_get('magic_quotes_sybase')) {
-			// ' already quoted, no need to change anything
-			return $s;
-		} else {
-			// change \' to '' for sybase/mssql
-			$s = str_replace('\\\\','\\',$s);
-			return str_replace("\\'",$this->replaceQuote,$s);
-		}
-		
-		/*
-		THE FOLLOWING IS THE OLD CODE FOR qstr FROM THE "adodb-mssql.inc.php"
-		DRIVER. NOTICE THE DIFFERENCE  IN THE TREATMENT OF WHAT TO DO WHEN 
-		magic_quotes_sybase IS SET.
-		if (!$magic_quotes) {
-			return  "'".str_replace("'",$this->replaceQuote,$s)."'";
-		}
-
-		// undo magic quotes for " unless sybase is on
-		$sybase = ini_get('magic_quotes_sybase');
-		if (!$sybase) {
+		if(@ini_get('magic_quotes_sybase'))
+			{return $s;}
+		else
+		{
+			// undo magic quotes for "
 			$s = str_replace('\\"','"',$s);
-			if ($this->replaceQuote == "\\'")  // ' already quoted, no need to change anything
-				return "'$s'";
-			else {// change \' to '' for sybase/mssql
+
+			if ($this->replaceQuote == "\\'") {
+				// ' already quoted, no need to change anything
+				return $s;
+			} else {
+				// change \' to '' for sybase/mssql
 				$s = str_replace('\\\\','\\',$s);
-				return "'".str_replace("\\'",$this->replaceQuote,$s)."'";
+				return str_replace("\\'",$this->replaceQuote,$s);
 			}
-		} else {
-			return "'".$s."'";
 		}
-		*/
 	}
 
 	/**
@@ -3788,7 +3782,31 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @noinspection PhpUnusedParameterInspection
 	 */
 	public function qstr($s, $magic_quotes=false) {
-		return  "'" . $this->addq($s, $magic_quotes) . "'";
+		if (!$magic_quotes) {
+			if ($this->replaceQuote[0] == '\\') {
+				// only since php 4.0.5
+				$s = str_replace(array('\\',"\0"),array('\\\\',"\\\0"),$s);
+				//$s = str_replace("\0","\\\0", str_replace('\\','\\\\',$s));
+			}
+			return  "'".str_replace("'", $this->replaceQuote, $s)."'";
+		}
+
+		if(@ini_get('magic_quotes_sybase'))
+			{return "'".$s."'";}
+		else
+		{
+			// undo magic quotes for "
+			$s = str_replace('\\"','"',$s);
+
+			if ($this->replaceQuote == "\\'") {
+				// ' already quoted, no need to change anything
+				return "'$s'";
+			} else {
+				// change \' to '' for sybase/mssql
+				$s = str_replace('\\\\','\\',$s);
+				return "'".str_replace("\\'",$this->replaceQuote,$s)."'";
+			}
+		}
 	}
 
 
